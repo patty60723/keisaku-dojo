@@ -127,6 +127,7 @@ body {
 @keyframes breathe { 0%,100%{transform:scale(1,1)} 50%{transform:scale(1.015,1.04)} }
 #sitter.ouch #sitterBody { animation: ouch .5s ease-out; }
 @keyframes ouch { 0%{transform:scale(1.08,.86)} 40%{transform:scale(.96,1.06)} 100%{transform:scale(1,1)} }
+#sitter:not(.standing) .feet{display:none}
 .face{display:none}
 #sitter[data-face="calm"] .f-calm, #sitter[data-face="ouch"] .f-ouch, #sitter[data-face="happy"] .f-happy, #sitter[data-face="peek"] .f-peek { display:inline; }
 .bump{display:none} #sitter[data-face="ouch"] .bump{display:inline}
@@ -555,9 +556,15 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
       </g>
 
       <!-- sitter: a mochi on a zafu -->
-      <g id="sitter" data-face="calm" transform="translate(200 240)">
+      <g id="sitter" class="standing" data-face="peek" transform="translate(200 240)">
         <rect class="f-mat" x="-48" y="-5" width="96" height="11" rx="3"/>
         <ellipse class="f-cushion" cx="0" cy="-8" rx="36" ry="10" stroke="#2a2622" stroke-width="1.3"/>
+        <!-- the mochi stands beside the cushion while checking in, and hops on to sit -->
+        <g id="mochi" transform="translate(-66 14)">
+        <g class="feet">
+          <ellipse class="f-mochi" cx="-11" cy="-10" rx="8" ry="4" stroke="#2a2622" stroke-width="1.3"/>
+          <ellipse class="f-mochi" cx="11" cy="-10" rx="8" ry="4" stroke="#2a2622" stroke-width="1.3"/>
+        </g>
         <g id="sitterBody">
           <path class="f-mochi" d="M-31 -14 C-34 -40 -20 -68 0 -68 C20 -68 34 -40 31 -14 C22 -9 -22 -9 -31 -14 Z" stroke="#2a2622" stroke-width="1.6"/>
           <ellipse class="f-mochi" cx="0" cy="-20" rx="8" ry="4.5" stroke="#2a2622" stroke-width="1.2"/>
@@ -578,6 +585,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
             <path class="s-ink" d="M-2 -35 h4" stroke-width="1.5"/>
           </g>
           <path class="bump f-mochi" d="M10 -66 q8 -10 15 -2" stroke="#2a2622" stroke-width="1.4"/>
+        </g>
         </g>
       </g>
     </svg>
@@ -656,7 +664,8 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   const toastEl = $('#toast'), clockEl = $('#clock'), statusEl = $('#status');
   const mainBtn = $('#mainBtn'), askBtn = $('#askBtn');
   const PIVOT = '12 -38';
-  const STRIKE_X = 272, SITTER_X = 200, TEA_X = 326, HOST_X = 132;
+  const SITTER_X = 200, TEA_X = 326, HOST_X = 72;
+  const STAND = { x: -66, y: 14 };            // where the mochi stands (relative to the cushion) while checking in
   const DEFAULT_CFG = { task: '專注', focusMin: 25, rounds: 4, breakMin: 5 };
   const MAX_PRESETS = 3;
 
@@ -762,6 +771,24 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     toastEl.hidden = !$('#dialog').hidden;
   }
 
+  /* ---------- the mochi: standing while checking in, seated while sitting ---------- */
+  const mochiEl = $('#mochi');
+  let standing = true;
+  const mochiX = () => SITTER_X + (standing ? STAND.x : 0);
+  const restFace = () => standing ? (P.phase === 'break' ? 'happy' : 'peek') : 'calm';
+  const placeMochi = (x, y) => mochiEl.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+  async function hop(toSit) {
+    if (standing !== toSit) return;              // already there
+    const [fx, fy, tx, ty] = toSit ? [STAND.x, STAND.y, 0, 0] : [0, 0, STAND.x, STAND.y];
+    sitterEl.classList.add('standing');          // feet show while in the air
+    await tween(0, 1, reduceMotion ? 1 : 620, t => placeMochi(fx + (tx - fx) * t, fy + (ty - fy) * t - Math.sin(Math.PI * t) * 24), easeInOut);
+    standing = !toSit;
+    sitterEl.classList.toggle('standing', standing);
+    sitterEl.classList.remove('ouch'); void sitterEl.getBoundingClientRect(); sitterEl.classList.add('ouch');   // little squash on landing
+    setTimeout(() => sitterEl.classList.remove('ouch'), 500);
+  }
+  const sitDown = () => hop(true), standUp = () => hop(false);
+
   /* ---------- the monk does one thing at a time ---------- */
   const queue = []; let busy = false;
   function enqueue(fn) { queue.push(fn); pump(); }
@@ -797,7 +824,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
 
   async function strike({ reason, counted }) {
     M.mode = 'task'; M.ty = 222;
-    await walkTo(STRIKE_X, 150);
+    await walkTo(mochiX() + 72, 150);
     M.face = -1;
     monkEl.dataset.mood = counted ? 'stern' : 'calm';
     bubble(counted ? '喝!' : '請。'); await sleep(420);
@@ -818,15 +845,15 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     slap(); buzz(80);
     const wrap = $('#stageWrap');
     wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake');
-    const pow = $('#pow'); pow.classList.remove('go'); void pow.offsetWidth; pow.classList.add('go');
+    const pow = $('#pow'); pow.style.left = (mochiX() + 24) / 4 + '%'; pow.classList.remove('go'); void pow.offsetWidth; pow.classList.add('go');
     sitterEl.dataset.face = 'ouch';
     sitterEl.classList.remove('ouch'); void sitterEl.getBoundingClientRect(); sitterEl.classList.add('ouch');
-    setTimeout(() => { if (sitterEl.dataset.face === 'ouch') sitterEl.dataset.face = P.phase === 'break' ? 'happy' : 'calm'; sitterEl.classList.remove('ouch'); }, 1300);
+    setTimeout(() => { if (sitterEl.dataset.face === 'ouch') sitterEl.dataset.face = restFace(); sitterEl.classList.remove('ouch'); }, 1300);
     const stars = $('#stars');
     for (let i = 0; i < 6; i++) {
       const s = document.createElement('span'); s.className = 'star'; s.textContent = '✦';
       const a = Math.PI * 2 * i / 6 + Math.random() * .5;
-      s.style.left = '55%'; s.style.top = '64%';
+      s.style.left = (mochiX() + 22) / 4 + '%'; s.style.top = (standing ? 61 : 64) + '%';
       s.style.setProperty('--dx', Math.cos(a) * 46 + 'px'); s.style.setProperty('--dy', Math.sin(a) * 34 + 'px');
       stars.appendChild(s); setTimeout(() => s.remove(), 750);
     }
@@ -916,7 +943,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
 
   async function onboarding(again = false) {
     P.phase = 'idle'; renderAll();
-    sitterEl.dataset.face = 'calm';
+    sitterEl.dataset.face = 'peek';
     const lastCfg = store.get('keisaku-last-v1', null);
     const visits = store.get('keisaku-visits-v1', 0);
     if (!again) store.set('keisaku-visits-v1', visits + 1);
@@ -1042,7 +1069,9 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
       hostAway = false; settleMonk();
       prefix = delays >= 3 ? '回來了。' : '';
     }
-    await ask('那麼,止靜。', [], { timeout: 900 });
+    sitterEl.dataset.face = 'happy';
+    await Promise.all([ask('那麼,止靜。', [], { timeout: 900 }), sitDown()]);
+    sitterEl.dataset.face = 'calm';
     closeDialog();
     beginSettle();
   }
@@ -1215,7 +1244,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     P.end = Date.now() + cfg.breakMin * 60000;
     Mo.base = null; Mo.picked = false;
     letSleep();
-    sitterEl.dataset.face = 'happy';
+    sitterEl.dataset.face = 'happy'; standUp();
     setStatus('休息', '');
     setMain('跳過休息');
     toast(`放禪。這炷被打 ${P.roundHits} 下,休息 ${cfg.breakMin} 分鐘,手機可以用了。`);
@@ -1226,7 +1255,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     bells(2); buzz([120, 80, 120]);
     P.round++;
     P.phase = 'ready';
-    sitterEl.dataset.face = 'calm';
+    sitterEl.dataset.face = 'peek';
     setStatus('該回座了', 'on');
     setMain(null);
     renderRounds(); tick();
@@ -1237,7 +1266,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     clearTimeout(P.settleTimer);
     const hadFocus = P.focusTotal > 0 || P.hits > 0;
     P.phase = 'idle'; P.round = 1;
-    letSleep(); Mo.base = null; Mo.picked = false;
+    letSleep(); Mo.base = null; Mo.picked = false; standUp();
     setMain(null); setStatus('報到中', '');
     renderSense('開始後檢查平衡儀', false);
     renderRounds(); settleMonk();
