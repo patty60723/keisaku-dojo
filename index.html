@@ -340,6 +340,66 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
 .help b { font-weight: 700; }
 .install { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px dashed var(--line); }
 .install p { margin: 0; font-size: .88rem; color: var(--muted); }
+
+/* ---------- 坐禪帳 (journal) ---------- */
+.top-btns { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.journal {
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 18px;
+  padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 10px;
+}
+.journal h2 { margin: 0; font-family: var(--f-display); font-size: 1.15rem; letter-spacing: .08em; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.streak { font-family: var(--f-body); font-size: .85rem; letter-spacing: .04em; color: var(--shu); font-weight: 700; }
+.month-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.month-nav b { font-family: var(--f-display); font-size: 1.05rem; }
+.month-nav button {
+  font: inherit; font-size: 1.2rem; line-height: 1; width: 36px; height: 32px; border-radius: 10px; cursor: pointer;
+  border: 1.5px solid var(--line); background: transparent; color: var(--ink);
+}
+.month-nav button:disabled { opacity: .35; cursor: default; }
+.month-sum { margin: -4px 0 0; color: var(--muted); font-size: .85rem; text-align: center; }
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.cal .dow { text-align: center; font-size: .78rem; color: var(--muted); }
+.cal .cell {
+  aspect-ratio: 1; position: relative; border: 0; padding: 0; margin: 0; border-radius: 8px; max-width: 100%;
+  background: transparent; color: inherit; cursor: pointer; font: inherit;
+}
+.cal .cell:disabled { cursor: default; }
+.cal .cell .d {
+  position: absolute; left: 4px; top: 2px; z-index: 1;
+  font-family: var(--f-num); font-weight: 500; font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums;
+}
+.cal .cell.future .d { opacity: .45; }
+.cal .cell svg { position: absolute; inset: 14% 0 0 14%; width: 86%; height: 86%; pointer-events: none; }
+.cal .cell.today { outline: 1.5px solid var(--accent); outline-offset: -1.5px; }
+.cal .cell.sel { background: color-mix(in srgb, var(--accent) 13%, transparent); }
+.cal-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .78rem; color: var(--muted); }
+.cal-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.cal-legend svg { width: 22px; height: 22px; }
+.day-detail {
+  display: grid; grid-template-columns: 64px 1fr; gap: 4px 12px; align-items: center;
+  border-top: 1px dashed var(--line); padding-top: 10px; min-height: 76px;
+}
+.day-detail .big { grid-row: span 3; width: 64px; height: 64px; }
+.day-detail .big svg { width: 100%; height: 100%; }
+.day-detail h3 { margin: 0; font-family: var(--f-display); font-size: 1rem; }
+.day-detail ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; font-size: .9rem; min-width: 0; }
+.day-detail .empty { color: var(--muted); font-size: .9rem; margin: 0; }
+.backup { border-top: 1px dashed var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.backup h3 { margin: 0; font-size: .95rem; }
+.backup p { margin: 0; font-size: .85rem; color: var(--muted); }
+.backup-btns { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.small-btn {
+  font: inherit; font-size: .9rem; cursor: pointer; border-radius: 10px; padding: 6px 10px;
+  border: 1.5px solid var(--accent); color: var(--accent); background: transparent;
+}
+.small-btn.primary { background: var(--accent); color: var(--on-accent); }
+.paste-box { display: flex; flex-direction: column; gap: 6px; }
+.paste-box textarea {
+  font: inherit; font-size: .85rem; width: 100%; min-width: 0; resize: vertical; border-radius: 10px; padding: 8px;
+  border: 1.5px solid var(--line); background: var(--bg); color: var(--ink);
+}
+.confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.confirm p { flex: 1 1 180px; color: var(--ink); }
 </style>
 </head>
 <body>
@@ -347,10 +407,50 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   <header class="top">
     <div class="top-row">
       <h1>警策道場<small>番茄鐘・不准滑手機</small></h1>
-      <button type="button" class="help-btn" id="helpBtn" aria-expanded="false" aria-controls="help">說明</button>
+      <div class="top-btns">
+        <button type="button" class="help-btn" id="journalBtn" aria-expanded="false" aria-controls="journal">坐禪帳</button>
+        <button type="button" class="help-btn" id="helpBtn" aria-expanded="false" aria-controls="help">說明</button>
+      </div>
     </div>
     <p>跟住持報到、把手機放好就開始坐禪。坐禪中一拿起手機或切出畫面,就會被警策「啪」一下。</p>
   </header>
+
+  <section class="journal" id="journal" aria-label="坐禪帳" hidden>
+    <div class="help-head">
+      <h2>坐禪帳<span class="streak" id="streak"></span></h2>
+      <button type="button" class="dlg-skip" id="journalClose">收起</button>
+    </div>
+    <div class="month-nav">
+      <button type="button" id="prevMonth" aria-label="上個月">‹</button>
+      <b id="monthTitle"></b>
+      <button type="button" id="nextMonth" aria-label="下個月">›</button>
+    </div>
+    <p class="month-sum" id="monthSum"></p>
+    <div class="cal" id="cal"></div>
+    <div class="cal-legend" id="calLegend"></div>
+    <div class="day-detail" id="dayDetail" aria-live="polite"></div>
+    <div class="backup">
+      <h3>備份</h3>
+      <p>紀錄只存在這台裝置的瀏覽器裡。換手機或清除瀏覽器資料前,先匯出備份。</p>
+      <div class="backup-btns">
+        <button type="button" class="small-btn" id="exportBtn">匯出備份檔</button>
+        <button type="button" class="small-btn" id="importBtn">匯入備份檔</button>
+        <button type="button" class="small-btn" id="copyBtn">複製備份文字</button>
+        <button type="button" class="small-btn" id="pasteBtn">貼上備份文字</button>
+      </div>
+      <input type="file" id="importFile" accept=".json,application/json,text/plain" hidden>
+      <div class="paste-box" id="pasteBox" hidden>
+        <textarea id="pasteText" rows="3" placeholder="把備份文字貼在這裡"></textarea>
+        <button type="button" class="small-btn" id="pasteGo">讀取這段文字</button>
+      </div>
+      <div class="confirm" id="importConfirm" hidden>
+        <p id="importMsg"></p>
+        <button type="button" class="small-btn primary" id="importYes">匯入</button>
+        <button type="button" class="small-btn" id="importNo">取消</button>
+      </div>
+      <p id="backupStatus" aria-live="polite"></p>
+    </div>
+  </section>
 
   <section class="help" id="help" aria-label="道場的規矩" hidden>
     <div class="help-head">
@@ -533,6 +633,18 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
       <div><dt>今日被打</dt><dd class="hitnum" id="stTodayHits">0<small>下</small></dd></div>
     </dl>
   </section>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <!-- rough, uneven ink like a real hanko impression -->
+      <filter id="ink" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6" result="d"/>
+        <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="1" seed="8" result="s"/>
+        <feColorMatrix in="s" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.1 1.55" result="mask"/>
+        <feComposite in="d" in2="mask" operator="in"/>
+      </filter>
+    </defs>
+  </svg>
 </main>
 
 <script>
@@ -808,8 +920,10 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     const lastCfg = store.get('keisaku-last-v1', null);
     const visits = store.get('keisaku-visits-v1', 0);
     if (!again) store.set('keisaku-visits-v1', visits + 1);
+    const { streak, gap } = streakInfo(dayMap(readLog()));
+    const hello = streak >= 2 ? `施主已經連續來了 ${streak} 天。` : gap != null && gap >= 3 ? '好幾天沒見了,歡迎回來。' : '施主又來了。';
     const greet = again ? '施主還要再坐一輪嗎?今日想做的事是什麼?'
-      : visits ? '施主又來了。今日想做的事是什麼?'
+      : visits ? hello + '今日想做的事是什麼?'
       : '歡迎來到警策道場。施主,今日想做的事是什麼?';
     try {
       let firstLine = null;
@@ -990,18 +1104,19 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   // idle (dialogue) → settle → focus → break → ready (dialogue) → settle → focus … → last focus → result → idle
   const P = { phase: 'idle', round: 1, end: 0, start: 0, hits: 0, roundHits: 0, asks: 0, focusTotal: 0,
               hiddenAt: 0, confirmEnd: 0, todayMin: 0, todayHits: 0, settleTimer: 0 };
-  const today = () => new Date().toDateString();
   function loadToday() {
-    const log = store.get('keisaku-log-v1', []).filter(e => e.d === today());
+    const log = readLog().filter(e => e.d === dayKey());
     P.todayMin = log.reduce((a, e) => a + e.min, 0);
     P.todayHits = log.reduce((a, e) => a + e.hits, 0);
   }
-  function saveRound(min) {
+  // full: the round ran to the end (only full rounds earn a stamp)
+  function saveRound(min, full) {
     if (min <= 0 && P.roundHits === 0) return;
-    const log = store.get('keisaku-log-v1', []).filter(e => Date.now() - e.t < 30 * 864e5);
-    log.push({ t: Date.now(), d: today(), task: cfg.task, min, hits: P.roundHits });
-    store.set('keisaku-log-v1', log);
+    const log = readLog();
+    log.push({ t: Date.now(), d: dayKey(), task: cfg.task, min, hits: P.roundHits, full });
+    writeLog(log);
     P.todayMin += min;
+    askPersist();
   }
   function applyCfg() { store.set('keisaku-last-v1', cfg); renderAll(); }
   function renderStats() {
@@ -1093,7 +1208,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
 
   function endFocus() {
     P.focusTotal += cfg.focusMin;
-    saveRound(cfg.focusMin); renderStats();
+    saveRound(cfg.focusMin, true); renderStats();
     bell(0, .26); buzz([200, 120, 200]);
     if (P.round >= cfg.rounds) { finishCycle(false); return; }
     P.phase = 'break';
@@ -1133,7 +1248,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   function quitEarly() {
     if (P.phase === 'focus') {
       const min = Math.floor((Date.now() - P.start) / 60000);
-      P.focusTotal += min; saveRound(min); renderStats();
+      P.focusTotal += min; saveRound(min, false); renderStats();
     }
     finishCycle(true);
   }
@@ -1227,9 +1342,212 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   }
 
   const helpBtn = $('#helpBtn'), helpBox = $('#help');
-  const showHelp = on => { helpBox.hidden = !on; helpBtn.setAttribute('aria-expanded', String(on)); };
+  function showHelp(on) {
+    if (on && !journalBox.hidden) showJournal(false);
+    helpBox.hidden = !on; helpBtn.setAttribute('aria-expanded', String(on));
+  }
   helpBtn.addEventListener('click', () => showHelp(helpBox.hidden));
   $('#helpClose').addEventListener('click', () => { showHelp(false); helpBtn.focus(); });
+
+  /* ---------- 坐禪帳: log, stamps, calendar, backup ---------- */
+  const LOG_KEY = 'keisaku-log-v2';
+  const pad2 = n => String(n).padStart(2, '0');
+  const dayKey = (t = Date.now()) => { const d = new Date(t); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
+  const validEntry = e => e && typeof e.t === 'number' && /^\d{4}-\d{2}-\d{2}$/.test(e.d) && typeof e.min === 'number' && typeof e.hits === 'number';
+  function readLog() {
+    let log = store.get(LOG_KEY, null);
+    if (!Array.isArray(log)) {
+      // v1 kept 30 days with toDateString() dates and no "full" flag
+      log = store.get('keisaku-log-v1', []).filter(e => e && typeof e.t === 'number')
+        .map(e => ({ t: e.t, d: dayKey(e.t), task: e.task || '專注', min: e.min || 0, hits: e.hits || 0, full: (e.min || 0) >= 15 }));
+      store.set(LOG_KEY, log);
+    }
+    return log;
+  }
+  const writeLog = log => store.set(LOG_KEY, log.sort((a, b) => a.t - b.t));
+  function askPersist() {
+    if (store.get('keisaku-persist-asked', false)) return;
+    store.set('keisaku-persist-asked', true);
+    try { navigator.storage && navigator.storage.persist && navigator.storage.persist().catch(() => {}); } catch {}
+  }
+
+  function dayMap(log) {
+    const m = new Map();
+    for (const e of log) {
+      let a = m.get(e.d);
+      if (!a) { a = { min: 0, hits: 0, full: 0, tasks: new Map() }; m.set(e.d, a); }
+      a.min += e.min; a.hits += e.hits; if (e.full) a.full++;
+      const t = a.tasks.get(e.task) || { rounds: 0, partial: 0, min: 0, hits: 0 };
+      if (e.full) t.rounds++; else t.partial++;
+      t.min += e.min; t.hits += e.hits;
+      a.tasks.set(e.task, t);
+    }
+    return m;
+  }
+  function stampKind(a) {
+    if (!a) return null;
+    if (!a.full) return a.min > 0 || a.hits > 0 ? 'dot' : null;
+    if (!a.hits) return 'still';
+    return a.min >= 75 ? 'full' : a.min >= 25 ? 'mid' : 'light';
+  }
+  function streakInfo(m) {
+    const sat = k => (m.get(k)?.full || 0) > 0;
+    const d = new Date(); d.setHours(12, 0, 0, 0);
+    if (!sat(dayKey(d))) d.setDate(d.getDate() - 1);          // today not done yet still keeps the streak
+    let streak = 0;
+    while (sat(dayKey(d))) { streak++; d.setDate(d.getDate() - 1); }
+    let lastDay = null;
+    for (const [k, a] of m) if (a.full && (!lastDay || k > lastDay)) lastDay = k;
+    const gap = lastDay ? Math.round((new Date(dayKey() + 'T12:00') - new Date(lastDay + 'T12:00')) / 864e5) : null;
+    return { streak, gap };
+  }
+
+  // stamps (design G): 坐 seals by minutes, gassho seal for 75+ min, square 不動 for a clean day
+  const OPACITY = { light: .45, mid: .75, full: 1 };
+  // each day gets its own slightly crooked, slightly off-centre impression (stable for that date)
+  const jitter = key => {
+    let h = 2166136261;
+    for (const c of key) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
+    return { a: (h % 15) - 7, x: ((h >>> 5) % 9) - 4, y: ((h >>> 11) % 9) - 4 };
+  };
+  const HANDS = '<g transform="translate(50 52) scale(.74) translate(-50 -50)">' +
+    '<path d="M34 62 L66 62 L74 84 L26 84 Z" fill="var(--shu)"/><path d="M50 64 L44 85 L56 85 Z" fill="var(--surface)"/>' +
+    '<path d="M50 14 C41 16 36.5 27 36 40 L35.5 62 L64.5 62 L64 40 C63.5 27 59 16 50 14 Z" fill="var(--shu)"/>' +
+    '<path d="M50 19 L50 60 M43 24 L43 38 M57 24 L57 38" stroke="var(--surface)" stroke-width="2.4" stroke-linecap="round"/>' +
+    '<ellipse cx="36.5" cy="47" rx="5.5" ry="11" transform="rotate(-10 36.5 47)" fill="var(--shu)" stroke="var(--surface)" stroke-width="2.4"/>' +
+    '<ellipse cx="63.5" cy="47" rx="5.5" ry="11" transform="rotate(10 63.5 47)" fill="var(--shu)" stroke="var(--surface)" stroke-width="2.4"/></g>';
+  function stampSvg(kind, key) {
+    if (!kind) return '';
+    if (kind === 'dot') { const j = jitter(key); return `<svg viewBox="0 0 100 100"><circle cx="${50 + j.x * 2}" cy="${56 + j.y}" r="7" fill="var(--shu)" opacity=".4"/></svg>`; }
+    const j = jitter(key);
+    if (kind === 'still') {
+      return `<svg viewBox="0 0 100 100"><g filter="url(#ink)" transform="translate(${j.x} ${j.y}) rotate(${j.a - 3} 50 54)"><rect x="17" y="20" width="66" height="66" rx="7" fill="var(--shu)"/>` +
+        '<text x="50" y="49" text-anchor="middle" class="scroll-char" font-size="26" fill="#fff7ef">不</text><text x="50" y="77" text-anchor="middle" class="scroll-char" font-size="26" fill="#fff7ef">動</text></g></svg>';
+    }
+    const rings = kind === 'full'
+      ? '<circle cx="50" cy="52" r="36" fill="none" stroke="var(--shu)" stroke-width="5"/><circle cx="50" cy="52" r="28" fill="none" stroke="var(--shu)" stroke-width="2"/>'
+      : '<circle cx="50" cy="52" r="34" fill="none" stroke="var(--shu)" stroke-width="5"/>';
+    const inner = kind === 'full' ? HANDS : '<text x="50" y="65" text-anchor="middle" class="scroll-char" font-size="34" fill="var(--shu)">坐</text>';
+    return `<svg viewBox="0 0 100 100"><g filter="url(#ink)" opacity="${OPACITY[kind]}" transform="translate(${j.x} ${j.y}) rotate(${j.a} 50 52)">${rings}${inner}</g></svg>`;
+  }
+  const KIND_LABEL = { light: '未滿 25 分', mid: '25–74 分', full: '75 分以上', still: '坐滿、0 下', dot: '沒坐滿一炷' };
+
+  const J = { y: 0, m: 0, sel: '' };          // shown month (m: 0-11) and selected day
+  const journalBtn = $('#journalBtn'), journalBox = $('#journal');
+  function renderJournal() {
+    const log = readLog(), m = dayMap(log), todayK = dayKey();
+    const { streak } = streakInfo(m);
+    $('#streak').textContent = streak >= 1 ? `連續 ${streak} 日` : '';
+    $('#monthTitle').textContent = `${J.y} 年 ${J.m + 1} 月`;
+    const now = new Date();
+    $('#nextMonth').disabled = J.y > now.getFullYear() || (J.y === now.getFullYear() && J.m >= now.getMonth());
+    const prefix = `${J.y}-${pad2(J.m + 1)}-`;
+    let days = 0, mins = 0, hits = 0;
+    for (const [k, a] of m) if (k.startsWith(prefix)) { if (a.full) days++; mins += a.min; hits += a.hits; }
+    $('#monthSum').textContent = `本月坐禪 ${days} 日・共 ${mins} 分・被打 ${hits} 下`;
+
+    const cal = $('#cal'); cal.replaceChildren();
+    '日一二三四五六'.split('').forEach(w => cal.appendChild(Object.assign(document.createElement('div'), { className: 'dow', textContent: w })));
+    const first = new Date(J.y, J.m, 1).getDay(), count = new Date(J.y, J.m + 1, 0).getDate();
+    for (let i = 0; i < first; i++) cal.appendChild(document.createElement('div'));
+    for (let d = 1; d <= count; d++) {
+      const key = prefix + pad2(d), a = m.get(key), kind = stampKind(a);
+      const b = document.createElement('button'); b.type = 'button';
+      b.className = 'cell' + (key === todayK ? ' today' : '') + (key === J.sel ? ' sel' : '') + (key > todayK ? ' future' : '');
+      b.disabled = key > todayK;
+      b.setAttribute('aria-label', `${J.m + 1} 月 ${d} 日` + (a ? `,坐 ${a.min} 分,被打 ${a.hits} 下` : ''));
+      b.innerHTML = `<span class="d">${d}</span>` + stampSvg(kind, key);
+      b.addEventListener('click', () => { J.sel = key; renderJournal(); });
+      cal.appendChild(b);
+    }
+    $('#calLegend').innerHTML = ['light', 'mid', 'full', 'still', 'dot']
+      .map(k => `<span>${stampSvg(k, 'legend')}${KIND_LABEL[k]}</span>`).join('');
+    renderDay(m);
+  }
+  function renderDay(m) {
+    const box = $('#dayDetail'), key = J.sel, a = m.get(key);
+    const dt = new Date(key + 'T12:00');
+    const title = `${dt.getMonth() + 1} 月 ${dt.getDate()} 日(${'日一二三四五六'[dt.getDay()]})`;
+    if (!a) {
+      box.innerHTML = `<div class="big"></div><h3></h3><p class="empty"></p>`;
+      box.querySelector('h3').textContent = title;
+      box.querySelector('.empty').textContent = key === dayKey() ? '今天還沒有坐禪。' : '這天沒有來坐禪。';
+      return;
+    }
+    box.innerHTML = `<div class="big">${stampSvg(stampKind(a), key)}</div><h3></h3><ul></ul>`;
+    box.querySelector('h3').textContent = `${title}・共 ${a.min} 分・被打 ${a.hits} 下`;
+    const ul = box.querySelector('ul');
+    for (const [task, t] of a.tasks) {
+      const li = document.createElement('li');
+      li.textContent = `${task} ${t.rounds} 炷・${t.min} 分・被打 ${t.hits} 下` + (t.partial ? `(另有 ${t.partial} 次沒坐完)` : '');
+      ul.appendChild(li);
+    }
+  }
+  function showJournal(on) {
+    if (on) { showHelp(false); const n = new Date(); J.y = n.getFullYear(); J.m = n.getMonth(); J.sel = dayKey(); renderJournal(); }
+    journalBox.hidden = !on; journalBtn.setAttribute('aria-expanded', String(on));
+  }
+  journalBtn.addEventListener('click', () => showJournal(journalBox.hidden));
+  $('#journalClose').addEventListener('click', () => { showJournal(false); journalBtn.focus(); });
+  $('#prevMonth').addEventListener('click', () => { if (--J.m < 0) { J.m = 11; J.y--; } renderJournal(); });
+  $('#nextMonth').addEventListener('click', () => { if (++J.m > 11) { J.m = 0; J.y++; } renderJournal(); });
+
+  // backup: a JSON file, or the same JSON as text for phones that can't save files easily
+  const backupStatus = t => { $('#backupStatus').textContent = t; };
+  const backupText = () => JSON.stringify({ app: 'keisaku-dojo', version: 2, exported: new Date().toISOString(),
+    log: readLog(), presets: store.get('keisaku-presets-v1', []) });
+  $('#exportBtn').addEventListener('click', () => {
+    try {
+      const url = URL.createObjectURL(new Blob([backupText()], { type: 'application/json' }));
+      const a = Object.assign(document.createElement('a'), { href: url, download: `keisaku-backup-${dayKey()}.json` });
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      backupStatus(`已匯出 ${readLog().length} 筆紀錄。`);
+    } catch { backupStatus('這裡沒辦法存檔,請改用「複製備份文字」。'); }
+  });
+  $('#copyBtn').addEventListener('click', () => {
+    const text = backupText();
+    const fallback = () => {
+      $('#pasteBox').hidden = false; const ta = $('#pasteText'); ta.value = text; ta.select();
+      backupStatus('沒辦法自動複製,文字已經選取好了,請手動複製。');
+    };
+    try { navigator.clipboard.writeText(text).then(() => backupStatus('已複製備份文字,可以貼到記事本保存。'), fallback); } catch { fallback(); }
+  });
+  $('#importBtn').addEventListener('click', () => $('#importFile').click());
+  $('#importFile').addEventListener('change', e => {
+    const f = e.target.files && e.target.files[0]; e.target.value = '';
+    if (!f) return;
+    f.text().then(prepareImport, () => backupStatus('讀不到這個檔案。'));
+  });
+  $('#pasteBtn').addEventListener('click', () => { $('#pasteBox').hidden = false; $('#pasteText').value = ''; $('#pasteText').focus(); });
+  $('#pasteGo').addEventListener('click', () => prepareImport($('#pasteText').value));
+  let pendingImport = null;
+  function prepareImport(text) {
+    let data;
+    try { data = JSON.parse(text); } catch { backupStatus('這不是警策道場的備份,讀不出來。'); return; }
+    const incoming = (Array.isArray(data) ? data : data && data.log || []).filter(validEntry);
+    if (!incoming.length) { backupStatus('備份裡沒有任何紀錄。'); return; }
+    const have = new Set(readLog().map(e => e.t + '|' + e.d));
+    const fresh = incoming.filter(e => !have.has(e.t + '|' + e.d));
+    pendingImport = { fresh, presets: Array.isArray(data.presets) ? data.presets : [] };
+    $('#importMsg').textContent = fresh.length
+      ? `備份裡有 ${incoming.length} 筆紀錄,其中 ${fresh.length} 筆是新的。要匯入嗎?`
+      : `備份裡的 ${incoming.length} 筆紀錄都已經在了,不用匯入。`;
+    $('#importYes').hidden = !fresh.length;
+    $('#importConfirm').hidden = false; backupStatus('');
+  }
+  $('#importNo').addEventListener('click', () => { pendingImport = null; $('#importConfirm').hidden = true; });
+  $('#importYes').addEventListener('click', () => {
+    if (!pendingImport) return;
+    const { fresh, presets } = pendingImport; pendingImport = null;
+    writeLog(readLog().concat(fresh.map(e => ({ t: e.t, d: e.d, task: String(e.task || '專注').slice(0, 12), min: e.min, hits: e.hits, full: !!e.full }))));
+    if (presets.length && !store.get('keisaku-presets-v1', []).length) store.set('keisaku-presets-v1', presets.filter(p => p && p.task).slice(0, MAX_PRESETS));
+    $('#importConfirm').hidden = true; $('#pasteBox').hidden = true;
+    loadToday(); renderStats(); renderJournal();
+    backupStatus(`匯入了 ${fresh.length} 筆紀錄。`);
+    askPersist();
+  });
+
   $('#closeResult').addEventListener('click', () => { $('#result').hidden = true; onboarding(true); });
 
   cfg = { ...(store.get('keisaku-last-v1', null) || DEFAULT_CFG) };
