@@ -991,11 +991,13 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
   }
 
   /* rain: many drops, mostly tiny, landing on different things */
+  // each drop is a tiny resonant click (a ringing band of noise), not a pitched sweep — sweeps sound like birds
   const RAIN_ON = {
-    leaf(a, l, p)   { const f = rnd(1500, 3200); blip(a, f, f * rnd(1.4, 1.8), .02, .008 + l * .07, .045, p); },
-    puddle(a, l, p) { const f = rnd(420, 900); blip(a, f, f * rnd(1.6, 2), .06, .01 + l * .09, .14, p, .3); burst(a, 'bandpass', 3200, 1.5, .004 + l * .03, .02, p); },
-    wood(a, l, p)   { burst(a, 'lowpass', 1300, 1, .01 + l * .1, .03, p, .15); blip(a, rnd(170, 260), 120, .03, .01 + l * .06, .05, p, .1); },
-    gutter(a, l, p) { const f = rnd(2200, 3300); blip(a, f, f * .995, .2, .004 + l * .03, .35, p, .4); blip(a, f * 2.41, f * 2.4, .2, .002 + l * .012, .2, p, .4); }
+    leaf(a, l, p)   { burst(a, 'bandpass', rnd(2400, 5200), rnd(4, 9), .01 + l * .16, rnd(.008, .018), p, .2); },
+    puddle(a, l, p) { burst(a, 'bandpass', rnd(700, 1400), rnd(6, 12), .012 + l * .2, rnd(.025, .045), p, .3);
+                      burst(a, 'highpass', 4000, .7, .003 + l * .04, .012, p, .2); },
+    wood(a, l, p)   { burst(a, 'bandpass', rnd(350, 650), rnd(2, 4), .012 + l * .2, rnd(.02, .035), p, .15); },
+    gutter(a, l, p) { burst(a, 'bandpass', rnd(2600, 3600), 40, .006 + l * .1, .12, p, .4); }
   };
   /* forest birds: each resident bird has its own song, pitch and place */
   function song(a, b) {
@@ -1064,16 +1066,20 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     layer('white', 'bandpass', rnd(3000, 4200), .9, peak * .1, .06, rnd(.6, 1));     // spray
     layer('brown', 'lowpass', 170, .7, peak * .9, .07, rnd(.8, 1.2));                 // the thud
   }
-  /* frogs: a throaty croak made of quick pulses through a vocal-ish band */
+  /* frogs: a call is a fast train of little resonant pulses, heard as "guk-guk" */
   function croak(a, f, pan, when, far) {
-    const o = a.createOscillator(), am = a.createOscillator(), amg = gainOf(a, .5), v = a.createGain(), bp = filt(a, 'bandpass', f * 4.5, 2.2);
-    const dur = rnd(.14, .32);
-    o.type = 'sawtooth'; o.frequency.setValueAtTime(f, when); o.frequency.linearRampToValueAtTime(f * rnd(.88, .96), when + dur);
-    am.frequency.value = rnd(26, 40); am.connect(amg).connect(v.gain);
-    v.gain.setValueAtTime(0, when); v.gain.linearRampToValueAtTime(far ? .02 : .045, when + .02);
-    v.gain.setValueAtTime(far ? .02 : .045, when + dur * .7); v.gain.linearRampToValueAtTime(0, when + dur);
-    o.connect(bp).connect(v); place(a, v, pan, far ? .6 : .35);
-    o.start(when); am.start(when); o.stop(when + dur + .02); am.stop(when + dur + .02);
+    const bus = gainOf(a, far ? .45 : 1); place(a, bus, pan, far ? .6 : .3);
+    const rate = rnd(55, 85), n = Math.floor(rnd(9, 18)), vol = .05;
+    for (let k = 0; k < n; k++) {
+      const t = when + k / rate, env = Math.sin(Math.PI * (k + .5) / n);       // swell and fade over the call
+      [[f, 1], [f * 2.3, .45]].forEach(([ff, g]) => {
+        const o = a.createOscillator(), v = a.createGain();
+        o.frequency.value = ff * (1 - k / n * .06);                             // pitch sags a little
+        v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(vol * g * env, t + .0015);
+        v.gain.exponentialRampToValueAtTime(.0001, t + .011);
+        o.connect(v).connect(bus); o.start(t); o.stop(t + .014);
+      });
+    }
   }
   function startAmbient(kind) {
     stopAmbient(0);
@@ -1149,11 +1155,11 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
       };
       later(crickets, rnd(2000, 12000));
       const frogs = () => {
-        const pair = [[rnd(120, 160), rnd(-.8, -.2), Math.random() < .5], [rnd(170, 230), rnd(.2, .8), Math.random() < .5]];
+        const pair = [[rnd(520, 700), rnd(-.8, -.2), Math.random() < .5], [rnd(760, 980), rnd(.2, .8), Math.random() < .5]];
         let s = 0;
         for (let i = 0, n = 4 + Math.floor(Math.random() * 7); i < n; i++) {
           const [f, p, far] = pick(pair), twice = Math.random() < .35;
-          later(() => { const t = a.currentTime + .02; croak(a, f, p, t, far); if (twice) croak(a, f, p, t + rnd(.25, .4), far); }, s * 1000);
+          later(() => { const t = a.currentTime + .02; croak(a, f, p, t, far); if (twice) croak(a, f, p, t + rnd(.3, .45), far); }, s * 1000);
           s += rnd(.6, 2.2);
         }
         later(frogs, (s + rnd(25, 70)) * 1000);
@@ -1162,17 +1168,28 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
       const leaves = () => { rustle(a); later(leaves, rnd(6000, 20000)); };
       later(leaves, rnd(3000, 9000));
     } else if (kind === 'chimes') {
-      let idx = Math.floor(Math.random() * TUBES.length);
-      const nextTube = () => { idx = Math.min(TUBES.length - 1, Math.max(0, idx + pick([-2, -1, -1, 1, 1, 2, 3, -3]))); return TUBES[idx]; };
+      let lastTube = -1;
+      // one knock: two or three different tubes ring almost together, or rolled a little apart
+      const knock = (t, vel, pan) => {
+        const pool = [...TUBES.keys()].filter(k => k !== lastTube).sort(() => Math.random() - .5);
+        const group = pool.slice(0, Math.random() < .45 ? 2 : 3);
+        const rolled = Math.random() < .35;
+        group.forEach((k, i) => {
+          const off = i === 0 ? 0 : rolled ? rnd(.07, .2) * i : rnd(.004, .035) * i;
+          tube(a, TUBES[k], t + off, vel * rnd(.7, 1), pan + rnd(-.12, .12));
+        });
+        lastTube = group[group.length - 1];
+      };
       const breeze = () => {
         const gust = Math.random() < .2, pan = rnd(-.3, .3);
         let t = a.currentTime + .05;
-        if (gust) {        // a gust: the striker swings hard and runs across several tubes
-          for (let i = 0, n = 4 + Math.floor(Math.random() * 5); i < n; i++) { tube(a, nextTube(), t, rnd(.45, 1), pan + rnd(-.1, .1)); t += rnd(.07, .3); }
-        } else {           // mostly a soft touch: two to four quiet notes
-          for (let i = 0, n = 2 + Math.floor(Math.random() * 3); i < n; i++) { tube(a, nextTube(), t, rnd(.1, .32), pan + rnd(-.1, .1)); t += rnd(.35, 1.5); }
+        if (gust) {        // a gust: several knocks in quick succession, louder
+          for (let i = 0, n = 3 + Math.floor(Math.random() * 3); i < n; i++) { knock(t, rnd(.5, 1), pan); t += rnd(.22, .55); }
+        } else {           // mostly a single soft knock, sometimes a second one after a moment
+          knock(t, rnd(.12, .35), pan);
+          if (Math.random() < .4) knock(t + rnd(.8, 2), rnd(.1, .28), pan);
         }
-        later(breeze, gust ? rnd(4000, 8000) : rnd(5000, 14000));
+        later(breeze, gust ? rnd(5000, 9000) : rnd(4500, 13000));
       };
       later(breeze, 800);
     }
