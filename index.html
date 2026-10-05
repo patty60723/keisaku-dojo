@@ -503,6 +503,9 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
 .small-btn:disabled { opacity: .4; cursor: default; }
 .small-btn[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
 .amb-note { margin: 0; font-size: .8rem; color: var(--muted); }
+.amb-music { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; cursor: pointer; margin-top: 6px; }
+.amb-music input { accent-color: var(--accent); width: 1rem; height: 1rem; transform: translateY(2px); }
+.amb-music small { color: var(--muted); font-size: .8rem; flex-basis: 100%; padding-left: 1.6rem; }
 </style>
 </head>
 <body>
@@ -592,6 +595,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
         <label><input type="radio" name="ambient" value="chimes"><span>風鈴</span></label>
         <label><input type="radio" name="ambient" value="noise"><span>白噪音</span></label>
       </div>
+      <label class="amb-music" for="ambMusic"><input type="checkbox" id="ambMusic"> 加上輕柔的和音 <small>幾個慢慢換的和弦,偶爾一兩聲高音;可以單獨播,也可以疊在上面的聲音上</small></label>
       <div class="amb-row">
         <label for="ambVol" class="amb-vol">音量 <input type="range" id="ambVol" min="5" max="100" value="45"></label>
         <button type="button" class="small-btn" id="ambPreview" aria-pressed="false">試聽</button>
@@ -1011,6 +1015,79 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     setTimeout(() => out.disconnect(), (fade + .3) * 1000);
   }
   const ambientChoice = () => (document.querySelector('input[name="ambient"]:checked') || {}).value || 'none';
+
+  /* ---------- soft chords: a few slow, sustained voicings with an occasional high bell ---------- */
+  const Mus = { out: null, bus: null, nodes: [], timers: [], playing: false, chord: 0 };
+  const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+  // open voicings around D major pentatonic: Dadd9, G(add9-ish), Bm7 shell, Asus2, Em7 shell
+  const CHORDS = [[50, 57, 64], [43, 50, 57, 66], [47, 54, 62], [45, 52, 59], [40, 47, 55, 62]];
+  const BELLS = [74, 76, 78, 81, 83, 86];
+  function hallReverb(a) {
+    if (hallReverb.ctx === a) return hallReverb.ir;
+    const len = Math.floor(a.sampleRate * 3.4), buf = a.createBuffer(2, len, a.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = buf.getChannelData(ch);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.8);
+    }
+    hallReverb.ctx = a; hallReverb.ir = buf; return buf;
+  }
+  function padNote(a, midi, when, dur) {
+    const env = a.createGain(), lp = filt(a, 'lowpass', 1100, .5);
+    env.gain.setValueAtTime(0, when);
+    env.gain.linearRampToValueAtTime(.13, when + 2.6);            // slow swell in
+    env.gain.setTargetAtTime(0, when + dur, 1.6);                   // and a long fade out
+    lp.connect(env).connect(Mus.bus);
+    [['sine', 0, 1], ['triangle', 5, .35], ['sine', -4, .5]].forEach(([type, cents, g]) => {
+      const o = a.createOscillator(), og = gainOf(a, g);
+      o.type = type; o.frequency.value = mtof(midi); o.detune.value = cents;
+      o.connect(og).connect(lp); o.start(when); o.stop(when + dur + 9);
+    });
+  }
+  function bellNote(a, midi, when) {
+    [[1, .11, 3.6], [2.01, .025, 1.6]].forEach(([m, g, d]) => {
+      const o = a.createOscillator(), v = a.createGain();
+      o.frequency.value = mtof(midi) * m;
+      v.gain.setValueAtTime(0, when); v.gain.linearRampToValueAtTime(g, when + .03);
+      v.gain.exponentialRampToValueAtTime(.0001, when + d);
+      o.connect(v).connect(Mus.bus); o.start(when); o.stop(when + d + .1);
+    });
+  }
+  function startMusic() {
+    stopMusic(0);
+    const a = audio(); if (!a) return;
+    Mus.playing = true;
+    Mus.out = a.createGain(); Mus.out.gain.value = 0; Mus.out.connect(a.destination);
+    Mus.out.gain.setTargetAtTime(ambientVolume(), a.currentTime, 1.5);
+    Mus.bus = a.createGain();
+    const dry = gainOf(a, .55), wet = gainOf(a, .6), verb = a.createConvolver();
+    verb.buffer = hallReverb(a);
+    Mus.bus.connect(dry).connect(Mus.out);
+    Mus.bus.connect(verb).connect(wet).connect(Mus.out);
+    const step = () => {
+      if (!Mus.playing) return;
+      const len = 9 + Math.random() * 3, t = a.currentTime + .1;
+      CHORDS[Mus.chord].forEach((n, i) => padNote(a, n, t + i * .35, len));
+      // now and then, one or two quiet high notes over the chord
+      const bells = Math.random() < .6 ? 1 + Math.floor(Math.random() * 2) : 0;
+      for (let i = 0; i < bells; i++) bellNote(a, BELLS[Math.floor(Math.random() * BELLS.length)], t + 2 + Math.random() * (len - 3));
+      // drift to a neighbouring chord most of the time
+      Mus.chord = Math.random() < .7 ? (Mus.chord + 1) % CHORDS.length : Math.floor(Math.random() * CHORDS.length);
+      Mus.timers.push(setTimeout(step, len * 1000));
+    };
+    step();
+  }
+  function stopMusic(fade = 1.5) {
+    Mus.playing = false;
+    Mus.timers.forEach(clearTimeout); Mus.timers = [];
+    const out = Mus.out; Mus.out = null; Mus.bus = null;
+    if (!out) return;
+    const a = audio();
+    if (fade > 0) out.gain.setTargetAtTime(0, a.currentTime, fade / 4); else out.gain.value = 0;
+    setTimeout(() => out.disconnect(), (fade + .4) * 1000);
+  }
+  const musicOn = () => $('#ambMusic').checked;
+  function startBackground() { startAmbient(ambientChoice()); if (musicOn()) startMusic(); else stopMusic(1); }
+  function stopBackground(fade = 1.5) { stopAmbient(fade); stopMusic(fade); }
 
   /* ---------- monk motion ---------- */
   const M = { holding: false, x: 60, y: 215, ty: 215, tx: 60, speed: 28, face: 1, stick: 10, wait: 1.5, walkT: 0, mode: 'patrol', arrive: null };
@@ -1544,12 +1621,12 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     setMain('出堂・結束');
     renderRounds();
     bells(3);
-    Amb.timers.push(setTimeout(() => { if (P.phase === 'focus') startAmbient(ambientChoice()); }, 3800));
+    Amb.timers.push(setTimeout(() => { if (P.phase === 'focus') startBackground(); }, 3800));
     toast(P.round === 1 ? '止靜。住持開始巡堂了。' : `第 ${P.round} 炷,止靜。`);
   }
 
   function endFocus() {
-    stopAmbient(2.5);
+    stopBackground(2.5);
     P.focusTotal += cfg.focusMin;
     saveRound(cfg.focusMin, true); renderStats();
     bell(0, .26); buzz([200, 120, 200]);
@@ -1578,7 +1655,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
   }
 
   function finishCycle(early) {
-    stopAmbient(2);
+    stopBackground(2);
     clearTimeout(P.settleTimer);
     const hadFocus = P.focusTotal > 0 || P.hits > 0;
     P.phase = 'idle'; P.round = 1;
@@ -1728,7 +1805,8 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
   if (typeof opts.sound === 'boolean') $('#optSound').checked = opts.sound;
   const themeNow = () => (document.querySelector('input[name="theme"]:checked') || {}).value || 'system';
   const saveOpts = () => store.set('keisaku-opts-v1', { motion: $('#optMotion').checked, sound: $('#optSound').checked, theme: themeNow(),
-    ambient: ambientChoice(), ambVol: +$('#ambVol').value });
+    ambient: ambientChoice(), ambVol: +$('#ambVol').value, music: musicOn() });
+  if (typeof opts.music === 'boolean') $('#ambMusic').checked = opts.music;
   if (AMBIENT_LABEL[opts.ambient]) document.querySelector(`input[name="ambient"][value="${opts.ambient}"]`).checked = true;
   if (typeof opts.ambVol === 'number') $('#ambVol').value = opts.ambVol;
   const previewBtn = $('#ambPreview');
@@ -1737,18 +1815,29 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     previewing = on;
     previewBtn.textContent = on ? '停止試聽' : '試聽';
     previewBtn.setAttribute('aria-pressed', String(on));
-    if (on) startAmbient(ambientChoice());
-    else if (P.phase === 'focus') startAmbient(ambientChoice());   // back to what the sitting was playing
-    else stopAmbient(.8);
+    if (on || P.phase === 'focus') startBackground();   // when a sitting is on, go back to what it was playing
+    else stopBackground(.8);
   }
   previewBtn.addEventListener('click', () => setPreview(!previewing));
   document.querySelectorAll('input[name="ambient"]').forEach(r => r.addEventListener('change', () => {
     saveOpts();
-    previewBtn.disabled = ambientChoice() === 'none';
-    if (previewing || P.phase === 'focus') { if (ambientChoice() === 'none') { stopAmbient(.8); setPreview(false); } else startAmbient(ambientChoice()); }
+    syncPreviewBtn();
+    if (previewing || P.phase === 'focus') startAmbient(ambientChoice());
+    if (previewing && nothingChosen()) setPreview(false);
   }));
-  previewBtn.disabled = ambientChoice() === 'none';
-  $('#ambVol').addEventListener('input', () => { if (Amb.out) Amb.out.gain.setTargetAtTime(ambientVolume(), audio().currentTime, .1); });
+  $('#ambMusic').addEventListener('change', () => {
+    saveOpts(); syncPreviewBtn();
+    if (previewing || P.phase === 'focus') { if (musicOn()) startMusic(); else stopMusic(1.5); }
+    if (previewing && nothingChosen()) setPreview(false);
+  });
+  function nothingChosen() { return ambientChoice() === 'none' && !musicOn(); }
+  function syncPreviewBtn() { previewBtn.disabled = nothingChosen(); }
+  syncPreviewBtn();
+  $('#ambVol').addEventListener('input', () => {
+    const t = audio().currentTime;
+    if (Amb.out) Amb.out.gain.setTargetAtTime(ambientVolume(), t, .1);
+    if (Mus.out) Mus.out.gain.setTargetAtTime(ambientVolume(), t, .1);
+  });
   $('#ambVol').addEventListener('change', saveOpts);
   $('#settings').addEventListener('close', () => { if (previewing) setPreview(false); });
   ['optMotion', 'optSound'].forEach(id => $('#' + id).addEventListener('change', saveOpts));
