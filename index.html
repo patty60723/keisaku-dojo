@@ -535,20 +535,28 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
 
       <!-- monk (drawn behind the sitter; feet at 0,0, facing right) -->
       <g id="monk" data-mood="calm" transform="translate(90 215)">
-        <ellipse class="f-ink" cx="-8" cy="1" rx="6" ry="2.5"/>
-        <ellipse class="f-ink" cx="8" cy="1" rx="6" ry="2.5"/>
-        <path class="f-robe" d="M-20 0 L-15 -55 Q0 -62 15 -55 L20 0 Z" stroke="#2a2622" stroke-width="1.5"/>
+        <!-- drawn in a consistent three-quarter view facing right (flipped with scale(-1,1) to face left) -->
+        <ellipse class="f-ink" cx="-6" cy="1" rx="6" ry="2.5"/>
+        <ellipse class="f-ink" cx="9" cy="1" rx="6" ry="2.5"/>
+        <!-- far sleeve, mostly hidden behind the body -->
+        <path class="f-robe" d="M-9 -53 Q-18 -50 -20.5 -40 L-21.5 -32 Q-16 -29 -11 -32 Z" stroke="#2a2622" stroke-width="1.3" stroke-linejoin="round"/>
+        <path class="f-robe" d="M-17 0 L-13.5 -54 Q1 -61 15 -54 L20 0 Z" stroke="#2a2622" stroke-width="1.5" stroke-linejoin="round"/>
+        <!-- kimono collar, crossed toward the side he faces -->
+        <path d="M-5 -58 L6 -41 L12 -57" fill="#f3efe4" stroke="#2a2622" stroke-width="1.1" stroke-linejoin="round"/>
+        <path d="M-5 -58 L6 -41 M12 -57 L6 -41" stroke="#2a2622" stroke-width="2.6" opacity=".55" stroke-linecap="round"/>
+        <!-- rakusu hung from the neck -->
         <g class="rakusu">
-          <path d="M-6.5 -57.5 L-12 -43 M3.5 -57.5 L8 -43" stroke="var(--kesa)" stroke-width="2.2" stroke-linecap="round"/>
-          <circle cx="-10" cy="-48.5" r="1.7" fill="none" stroke="#e9dcc0" stroke-width="1"/>
-          <rect class="f-kesa" x="-14" y="-44" width="23" height="16" rx="1.2" stroke="#2a2622" stroke-width="1"/>
-          <rect x="-11.5" y="-41.5" width="18" height="11" rx=".6" fill="none" stroke="#2a2622" stroke-width=".7" opacity=".35"/>
+          <path d="M-4.5 -57 L-6.5 -43 M10.5 -56.5 L13 -43" stroke="var(--kesa)" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="-5.6" cy="-49" r="1.7" fill="none" stroke="#e9dcc0" stroke-width="1"/>
+          <rect class="f-kesa" x="-8" y="-44" width="22" height="15" rx="1.2" stroke="#2a2622" stroke-width="1"/>
+          <rect x="-5.6" y="-41.6" width="17.2" height="10.2" rx=".6" fill="none" stroke="#2a2622" stroke-width=".7" opacity=".35"/>
         </g>
         <g id="stick" transform="rotate(10 12 -38)">
           <rect class="f-stick" x="10.6" y="-90" width="2.8" height="58" rx="1.2" stroke="#2a2622" stroke-width=".8"/>
           <rect class="f-stick" x="9.2" y="-108" width="5.6" height="22" rx="1.8" stroke="#2a2622" stroke-width=".8"/>
         </g>
-        <path class="f-robe" d="M-5 -54 Q7 -55 12 -45 L15 -38 Q9 -34.5 2.5 -37 Q-3 -44 -5 -54 Z" stroke="#2a2622" stroke-width="1.3" stroke-linejoin="round"/>
+        <!-- near sleeve hangs in front; the hand comes out of its opening to hold the stick -->
+        <path class="f-robe" d="M7 -55 Q17 -53 19.5 -43 L20.5 -35 Q15 -31.5 9 -34.5 Q5.5 -45 7 -55 Z" stroke="#2a2622" stroke-width="1.3" stroke-linejoin="round"/>
         <circle class="f-skin" cx="12" cy="-38" r="4.2" stroke="#2a2622" stroke-width="1.1"/>
         <circle class="f-skin" cx="-13" cy="-72" r="3.4" stroke="#2a2622" stroke-width="1.1"/>
         <circle class="f-skin" cx="0" cy="-72" r="15" stroke="#2a2622" stroke-width="1.5"/>
