@@ -598,7 +598,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
       </div>
       <label class="amb-music" for="ambMusic"><input type="checkbox" id="ambMusic"> 加上輕柔的和音 <small>幾個慢慢換的和弦,偶爾一兩聲高音;可以單獨播,也可以疊在上面的聲音上</small></label>
       <div class="amb-row">
-        <label for="ambVol" class="amb-vol">音量 <input type="range" id="ambVol" min="5" max="100" value="35"></label>
+        <label for="ambVol" class="amb-vol">音量 <input type="range" id="ambVol" min="5" max="100" value="80"></label>
         <button type="button" class="small-btn" id="ambPreview" aria-pressed="false">試聽</button>
       </div>
       <p class="amb-note">止靜三鐘敲完才慢慢淡入,放禪時淡出;休息時不播。手機開了靜音模式可能會聽不到。</p>
@@ -920,10 +920,10 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
   /*SND-START*/
   // tunable knobs (the sound-lab page edits these live)
   const SND = {
-    rainBed: .04, dropGain: 2, dropGapMin: 8, dropGapMax: 70,
+    rainBed: .04, dropGain: 4.5, dropGapMin: 3, dropGapMax: 70,
     waveCrash: 1, waveBackMin: 7, waveBackMax: 11,
     leafVol: .03, frogVol: .04,
-    chimeRing: .5, chimeVerb: .28, gustChance: .22, gustKnocksMin: 3, gustKnocksMax: 9
+    chimeRing: .35, chimeVerb: .28, gustChance: .22, gustKnocksMin: 3, gustKnocksMax: 14, chimeOctave: 1
   };
   const AMBIENT_LABEL = { none: '不播放', rain: '雨聲', waves: '海浪', forest: '森林', chimes: '風鈴' };
   const noiseCache = {};
@@ -1038,13 +1038,27 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
       o.connect(v); place(a, v, pan, .45); o.start(t); o.stop(t + .02);
     }
   }
-  function rustle(a) {                      // a breath of wind through leaves, a second or three
-    const t = a.currentTime + .05, dur = rnd(.7, 1.8), s = a.createBufferSource(), g = a.createGain();
-    s.buffer = noiseBuffer(a, 'pink');
-    const pts = []; for (let i = 0; i <= 60; i++) { const env = Math.sin(Math.PI * i / 60); pts.push(.0001 + env * Math.pow(Math.random(), 2.6) * SND.leafVol); }
-    shape(g.gain, t, dur, pts);
-    s.connect(filt(a, 'bandpass', rnd(4000, 6500), .8)).connect(filt(a, 'highpass', 2500)).connect(g);
-    place(a, g, rnd(-.8, .8), .25); s.start(t, Math.random() * 3, dur + .05);
+  // a gust passing through the trees: a smooth swell of air, leaves rustling on top, moving across
+  function rustle(a) {
+    const t = a.currentTime + .05, dur = rnd(3, 6), from = Math.random() < .5 ? -.8 : .8;
+    const pan = a.createStereoPanner(); pan.pan.setValueAtTime(from, t); pan.pan.linearRampToValueAtTime(-from * rnd(.4, 1), t + dur);
+    pan.connect(Amb.out); pan.connect(gainOf(a, .25)).connect(Amb.verb);
+    const swell = x => Math.pow(Math.sin(Math.PI * x), 1.6);                      // 0..1 over the gust
+    // the air: a soft band of noise whose centre rises and falls with the gust
+    const air = a.createBufferSource(), abp = filt(a, 'bandpass', 700, .6), ag = a.createGain();
+    air.buffer = noiseBuffer(a, 'pink');
+    const N = 50, ga = [], fa = [];
+    for (let i = 0; i <= N; i++) { const e = swell(i / N); ga.push(.0001 + e * SND.leafVol * .9); fa.push(600 + e * rnd(900, 1500)); }
+    shape(ag.gain, t, dur, ga); shape(abp.frequency, t, dur, fa);
+    air.connect(abp).connect(ag).connect(pan); air.start(t, Math.random() * 3, dur + .05);
+    // the leaves: quick little flutters riding on the swell
+    const lv = a.createBufferSource(), lg = a.createGain();
+    lv.buffer = noiseBuffer(a, 'white');
+    const M = 140, gl = [];
+    for (let i = 0; i <= M; i++) { const e = swell(i / M); gl.push(.0001 + e * e * Math.pow(Math.random(), 2) * SND.leafVol * .7); }
+    shape(lg.gain, t, dur, gl);
+    lv.connect(filt(a, 'bandpass', rnd(4500, 6500), .7)).connect(filt(a, 'highpass', 3000)).connect(lg).connect(pan);
+    lv.start(t, Math.random() * 3, dur + .05);
   }
   /* tuned wind chime: aluminium tubes in a chord, long ring, rich partials */
   const TUBES = [1174.7, 1318.5, 1480, 1760, 1975.5, 2349.3];   // D6 E6 F#6 A6 B6 D7 — small, bright tubes
@@ -1127,7 +1141,10 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
       const wash = filt(a, 'bandpass', 1500, .6), wg = gainOf(a, 0);
       noiseSource(a, 'pink', wash, wg);
       const wave = () => {
-        const t = a.currentTime + .05, up = rnd(2.4, 4.5), back = rnd(SND.waveBackMin, SND.waveBackMax), T = up + back, N = 110, peak = rnd(.55, 1.1);
+        // the longer a wave builds, the more energy it carries: louder landing, more foam, longer backwash
+        const t = a.currentTime + .05, up = rnd(2.5, 6), energy = (up - 2.5) / 3.5;
+        const peak = (.45 + energy * .75) * rnd(.9, 1.1);
+        const back = rnd(SND.waveBackMin, SND.waveBackMax) * (.85 + energy * .35), T = up + back, N = 120;
         const bumps = [1, 2].map(() => [rnd(.9, 2.2), rnd(0, 6.3), rnd(.05, .14)]);
         const amp = [], cut = [], fizz = [];
         for (let i = 0; i < N; i++) {
@@ -1141,7 +1158,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
         const p = rnd(-.4, .4);
         pan.pan.setTargetAtTime(p, t, 2);
         shape(g.gain, t, T, amp); shape(lp.frequency, t, T, cut); shape(wg.gain, t, T, fizz);
-        if (SND.waveCrash > 0) crash(a, t + up - .05, peak * SND.waveCrash, p);
+        if (SND.waveCrash > 0) crash(a, t + up - .05, peak * (.6 + energy * .8) * SND.waveCrash, p);
         later(wave, (T + rnd(1.2, 4.5)) * 1000);
       };
       wave();
@@ -1174,7 +1191,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
         later(frogs, (s + rnd(25, 70)) * 1000);
       };
       later(frogs, rnd(8000, 25000));
-      const leaves = () => { rustle(a); later(leaves, rnd(6000, 20000)); };
+      const leaves = () => { rustle(a); later(leaves, rnd(9000, 26000)); };
       later(leaves, rnd(3000, 9000));
     } else if (kind === 'chimes') {
       let lastTube = -1;
@@ -1185,7 +1202,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
         const rolled = Math.random() < .35;
         group.forEach((k, i) => {
           const off = i === 0 ? 0 : rolled ? rnd(.07, .2) * i : rnd(.004, .035) * i;
-          tube(a, TUBES[k], t + off, vel * rnd(.7, 1), pan + rnd(-.12, .12));
+          tube(a, TUBES[k] * Math.pow(2, Math.round(SND.chimeOctave)), t + off, vel * rnd(.7, 1), pan + rnd(-.12, .12));
         });
         lastTube = group[group.length - 1];
       };
