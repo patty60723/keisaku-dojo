@@ -1042,19 +1042,20 @@ dialog.sheet::backdrop { background: rgba(20,24,22,.5); }
     P.phase = 'idle'; renderAll();
     sitterEl.dataset.face = 'peek';
     const lastCfg = store.get('keisaku-last-v1', null);
-    const visits = store.get('keisaku-visits-v1', 0);
-    if (!again) store.set('keisaku-visits-v1', visits + 1);
-    const { streak, gap } = streakInfo(dayMap(readLog()));
+    // "returning" means they have actually sat before, not just opened the page
+    const log = readLog(), hasSat = log.length > 0;
+    const rulesAsked = store.get('keisaku-rules-asked-v1', false);
+    const { streak, gap } = streakInfo(dayMap(log));
     const hello = streak >= 2 ? `施主已經連續來了 ${streak} 天。` : gap != null && gap >= 3 ? '好幾天沒見了,歡迎回來。' : '施主又來了。';
     const greet = again ? '施主還要再坐一輪嗎?今日想做的事是什麼?'
-      : visits ? hello + '今日想做的事是什麼?'
+      : hasSat ? hello + '今日想做的事是什麼?'
       : '歡迎來到警策道場。施主,今日想做的事是什麼?';
     try {
       let firstLine = null;
-      if (!visits && !again) {
+      if (!hasSat && !rulesAsked && !again) {
         const v = await ask('歡迎來到警策道場。施主是第一次來吧?要先聽聽道場的規矩嗎?', [
           { label: '請說明', value: 'help', primary: true }, { label: '略過說明', value: 'skip' }
-        ], { skippable: true });
+        ], { skippable: true }).finally(() => store.set('keisaku-rules-asked-v1', true));
         if (v === 'help') await explainRules();
         firstLine = '那麼,施主今日想做的事是什麼?';
       }
