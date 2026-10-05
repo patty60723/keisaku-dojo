@@ -551,10 +551,6 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
           <rect class="f-kesa" x="-8" y="-44" width="22" height="15" rx="1.2" stroke="#2a2622" stroke-width="1"/>
           <rect x="-5.6" y="-41.6" width="17.2" height="10.2" rx=".6" fill="none" stroke="#2a2622" stroke-width=".7" opacity=".35"/>
         </g>
-        <g id="stick" transform="rotate(10 12 -38)">
-          <rect class="f-stick" x="10.6" y="-90" width="2.8" height="58" rx="1.2" stroke="#2a2622" stroke-width=".8"/>
-          <rect class="f-stick" x="9.2" y="-108" width="5.6" height="22" rx="1.8" stroke="#2a2622" stroke-width=".8"/>
-        </g>
         <!-- near sleeve hangs in front; the hand comes out of its opening to hold the stick -->
         <path class="f-robe" d="M7 -55 Q17 -53 19.5 -43 L20.5 -35 Q15 -31.5 9 -34.5 Q5.5 -45 7 -55 Z" stroke="#2a2622" stroke-width="1.3" stroke-linejoin="round"/>
         <circle class="f-skin" cx="12" cy="-38" r="4.2" stroke="#2a2622" stroke-width="1.1"/>
@@ -568,6 +564,14 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
         <path class="m-mouth s-ink" d="M4 -66 q2.5 1.8 5 0" stroke-width="1.2" stroke-linecap="round"/>
         <path class="m-stern-mouth s-ink" d="M4 -65.5 h5" stroke-width="1.3" stroke-linecap="round"/>
         <path class="brow s-ink" d="M0 -79 l5 2.2 M13 -79 l-4.5 2.2" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+
+      <!-- the keisaku: its own layer that follows the monk; lifted above the mochi while he strikes -->
+      <g id="stickLayer" transform="translate(90 215)">
+          <g id="stick" transform="rotate(10 12 -38)">
+          <rect class="f-stick" x="10.6" y="-90" width="2.8" height="58" rx="1.2" stroke="#2a2622" stroke-width=".8"/>
+          <rect class="f-stick" x="9.2" y="-108" width="5.6" height="22" rx="1.8" stroke="#2a2622" stroke-width=".8"/>
+        </g>
       </g>
 
       <!-- sitter: a mochi on a zafu -->
@@ -682,7 +686,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
 (() => {
   const $ = s => document.querySelector(s);
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const monkEl = $('#monk'), stickEl = $('#stick'), sitterEl = $('#sitter');
+  const monkEl = $('#monk'), stickEl = $('#stick'), stickLayer = $('#stickLayer'), sitterEl = $('#sitter');
   const bubbleEl = $('#bubble'), bubbleText = $('#bubbleText');
   const toastEl = $('#toast'), clockEl = $('#clock'), statusEl = $('#status');
   const mainBtn = $('#mainBtn'), askBtn = $('#askBtn');
@@ -761,7 +765,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   }
   function walkTo(x, speed) { M.tx = x; M.speed = speed; return new Promise(r => { M.arrive = r; }); }
 
-  let last = performance.now();
+  let last = performance.now(), stickInFront = false;
   function frame(now) {
     const dt = Math.min(.05, (now - last) / 1000); last = now;
     const dx = M.tx - M.x, moving = Math.abs(dx) > .4;
@@ -775,7 +779,12 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     }
     M.y += (M.ty - M.y) * Math.min(1, dt * 6);
     const bob = moving && !reduceMotion ? -Math.abs(Math.sin(M.walkT * 7)) * 2.4 : 0;
-    monkEl.setAttribute('transform', `translate(${M.x.toFixed(2)} ${(M.y + bob).toFixed(2)}) scale(${M.face} 1)`);
+    const place = `translate(${M.x.toFixed(2)} ${(M.y + bob).toFixed(2)}) scale(${M.face} 1)`;
+    monkEl.setAttribute('transform', place);
+    stickLayer.setAttribute('transform', place);
+    // the stick is always above the monk; while he strikes it also goes above the mochi
+    const front = M.mode === 'task';
+    if (front !== stickInFront) { stickInFront = front; (front ? sitterEl : monkEl).after(stickLayer); }
     stickEl.setAttribute('transform', `rotate(${M.stick.toFixed(1)} ${PIVOT})`);
     if (!bubbleEl.hidden) placeBubble();
     requestAnimationFrame(frame);
