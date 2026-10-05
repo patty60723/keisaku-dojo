@@ -593,11 +593,11 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
         <label><input type="radio" name="ambient" value="stream"><span>溪流</span></label>
         <label><input type="radio" name="ambient" value="wind"><span>山風</span></label>
         <label><input type="radio" name="ambient" value="chimes"><span>風鈴</span></label>
-        <label><input type="radio" name="ambient" value="noise"><span>白噪音</span></label>
+        <label><input type="radio" name="ambient" value="noise"><span>柔和噪音</span></label>
       </div>
       <label class="amb-music" for="ambMusic"><input type="checkbox" id="ambMusic"> 加上輕柔的和音 <small>幾個慢慢換的和弦,偶爾一兩聲高音;可以單獨播,也可以疊在上面的聲音上</small></label>
       <div class="amb-row">
-        <label for="ambVol" class="amb-vol">音量 <input type="range" id="ambVol" min="5" max="100" value="45"></label>
+        <label for="ambVol" class="amb-vol">音量 <input type="range" id="ambVol" min="5" max="100" value="35"></label>
         <button type="button" class="small-btn" id="ambPreview" aria-pressed="false">試聽</button>
       </div>
       <p class="amb-note">止靜三鐘敲完才慢慢淡入,放禪時淡出;休息時不播。手機開了靜音模式可能會聽不到。</p>
@@ -916,7 +916,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
   const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
 
   /* ---------- background sounds (all synthesized, so they work offline) ---------- */
-  const AMBIENT_LABEL = { none: '不播放', rain: '雨聲', stream: '溪流', wind: '山風', chimes: '風鈴', noise: '白噪音' };
+  const AMBIENT_LABEL = { none: '不播放', rain: '雨聲', stream: '溪流', wind: '山風', chimes: '風鈴', noise: '柔和噪音' };
   const noiseCache = {};
   // a few seconds of white / pink / brown noise, looped
   function noiseBuffer(a, color) {
@@ -959,7 +959,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     [[1, .5, 2.6], [2.76, .12, 1.4], [5.4, .05, .8]].forEach(([m, g, d]) => {
       const o = a.createOscillator(), v = a.createGain();
       o.frequency.value = base * m; v.gain.setValueAtTime(0, when);
-      v.gain.linearRampToValueAtTime(g * .09, when + .005); v.gain.exponentialRampToValueAtTime(.0001, when + d);
+      v.gain.linearRampToValueAtTime(g * .12, when + .005); v.gain.exponentialRampToValueAtTime(.0001, when + d);
       o.connect(v).connect(Amb.out); o.start(when); o.stop(when + d + .05);
     });
   }
@@ -969,39 +969,49 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     Amb.kind = kind; Amb.playing = true;
     Amb.out = a.createGain(); Amb.out.gain.value = 0; Amb.out.connect(a.destination);
     Amb.out.gain.setTargetAtTime(ambientVolume(), a.currentTime, 1.2);       // slow fade-in
+    // sparse and dark on purpose: a quiet bed, with most of the character in separate events
     if (kind === 'rain') {
-      noiseSource(a, 'pink', filt(a, 'highpass', 500), filt(a, 'lowpass', 7000), gainOf(a, 1.35));
-      const patter = gainOf(a, .38); noiseSource(a, 'white', filt(a, 'bandpass', 3800, 1.2), patter);
-      lfo(a, .13, .12, patter.gain);
-      const drip = () => {               // a few heavier drops off the eaves
+      noiseSource(a, 'pink', filt(a, 'highpass', 300), filt(a, 'lowpass', 1800), gainOf(a, .65));
+      const drip = () => {               // single drops off the eaves, unevenly spaced
         if (!Amb.playing) return;
-        const t = a.currentTime + .02, s = a.createBufferSource(), g = a.createGain(), f = filt(a, 'bandpass', 900 + Math.random() * 1800, 4);
-        s.buffer = noiseBuffer(a, 'white'); g.gain.setValueAtTime(.5, t); g.gain.exponentialRampToValueAtTime(.001, t + .06);
-        s.connect(f).connect(g).connect(Amb.out); s.start(t, Math.random() * 3, .08);
-        Amb.timers.push(setTimeout(drip, 120 + Math.random() * 900));
+        const t = a.currentTime + .02, s = a.createBufferSource(), g = a.createGain(), f = filt(a, 'bandpass', 700 + Math.random() * 1300, 5);
+        s.buffer = noiseBuffer(a, 'white'); g.gain.setValueAtTime(.25 + Math.random() * .3, t); g.gain.exponentialRampToValueAtTime(.001, t + .09);
+        s.connect(f).connect(g).connect(Amb.out); s.start(t, Math.random() * 3, .1);
+        Amb.timers.push(setTimeout(drip, 350 + Math.random() * 2200));
       };
       drip();
     } else if (kind === 'stream') {
-      const bp = filt(a, 'bandpass', 900, .9); noiseSource(a, 'brown', bp, gainOf(a, 2.4));
-      lfo(a, .31, 260, bp.frequency); lfo(a, .73, 140, bp.frequency);
-      const hiss = filt(a, 'bandpass', 2600, 1.4), hg = gainOf(a, .18); noiseSource(a, 'pink', hiss, hg);
-      lfo(a, 1.7, .075, hg.gain);
+      const bp = filt(a, 'bandpass', 520, 1.1), g = gainOf(a, 1.1);
+      noiseSource(a, 'brown', bp, filt(a, 'lowpass', 1200), g);
+      lfo(a, .17, 140, bp.frequency); lfo(a, .41, 70, bp.frequency); lfo(a, .09, .35, g.gain);
     } else if (kind === 'wind' || kind === 'chimes') {
-      const lp = filt(a, 'lowpass', 420, 1.2), g = gainOf(a, kind === 'wind' ? .68 : .42);
+      // gusts: the level swings from near-silence up to a soft swell and back
+      const lp = filt(a, 'lowpass', 320, 1.1), g = gainOf(a, 0);
       noiseSource(a, 'brown', lp, g);
-      lfo(a, .06, 230, lp.frequency); lfo(a, .045, kind === 'wind' ? .3 : .18, g.gain);
+      lfo(a, .05, 160, lp.frequency);
+      const base = kind === 'wind' ? .7 : .2;
+      const gust = () => {
+        if (!Amb.playing) return;
+        const t = a.currentTime, up = 3 + Math.random() * 4, hold = 1 + Math.random() * 3, down = 4 + Math.random() * 4;
+        g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(g.gain.value, t);
+        g.gain.linearRampToValueAtTime(base * (.5 + Math.random() * .5), t + up);
+        g.gain.linearRampToValueAtTime(base * (.5 + Math.random() * .5), t + up + hold);
+        g.gain.linearRampToValueAtTime(base * .05, t + up + hold + down);
+        Amb.timers.push(setTimeout(gust, (up + hold + down + 2 + Math.random() * 6) * 1000));
+      };
+      gust();
       if (kind === 'chimes') {
         const ring = () => {
           if (!Amb.playing) return;
-          const t = a.currentTime + .05, n = 1 + Math.floor(Math.random() * 3);
-          for (let i = 0; i < n; i++) chime(a, t + i * (.18 + Math.random() * .25));
-          Amb.timers.push(setTimeout(ring, 6000 + Math.random() * 12000));
+          const t = a.currentTime + .05, n = 1 + Math.floor(Math.random() * 2);
+          for (let k = 0; k < n; k++) chime(a, t + k * (.25 + Math.random() * .35));
+          Amb.timers.push(setTimeout(ring, 8000 + Math.random() * 14000));
         };
-        Amb.timers.push(setTimeout(ring, 1500));
+        Amb.timers.push(setTimeout(ring, 2000));
       }
     } else if (kind === 'noise') {
-      noiseSource(a, 'pink', filt(a, 'lowpass', 2600), gainOf(a, .8));
-      noiseSource(a, 'brown', gainOf(a, .6));
+      // soft brown noise: no hiss, just a low, distant hush
+      noiseSource(a, 'brown', filt(a, 'lowpass', 650, .5), gainOf(a, .55));
     }
   }
   function stopAmbient(fade = 1.5) {
