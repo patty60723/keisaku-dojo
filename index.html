@@ -40,6 +40,7 @@
   --paper: #f5f1e4;
   --mount: #8c9a7a;
   --scroll-ink: #2a2622;
+  --scroll-paper: #f7f2e3;
   --mochi: #fffdf7;
   --blush: #f2a49a;
   --skin: #f0d0b0;
@@ -58,7 +59,7 @@
     --bg: #141816; --surface: #1d2320; --line: #323a36; --ink: #ebe6d8; --muted: #a39e8f;
     --accent: #a8bbe6; --on-accent: #141816; --shu: #ff6b4f;
     --wall: #1f2624; --wood: #2d211a; --wood-2: #4a3a2e; --tatami: #4a4831; --tatami-line: #5a5739; --heri: #1b2316;
-    --window: #263142; --moon-o: 1; --paper: #d8d2c0; --mount: #4d5a45; --scroll-ink: #2a2622;
+    --window: #263142; --moon-o: 1; --scroll-paper: #232925; --paper: #d8d2c0; --mount: #4d5a45; --scroll-ink: #2a2622;
     --mochi: #f3eee2; --blush: #e08d84; --skin: #e0bd9b; --robe: #3d4c70; --kesa: #85582f; --stick: #b88d55;
     --cushion: #8a699c; --mat: #2a2622;
     color-scheme: dark;
@@ -68,7 +69,7 @@
   --bg: #141816; --surface: #1d2320; --line: #323a36; --ink: #ebe6d8; --muted: #a39e8f;
   --accent: #a8bbe6; --on-accent: #141816; --shu: #ff6b4f;
   --wall: #1f2624; --wood: #2d211a; --wood-2: #4a3a2e; --tatami: #4a4831; --tatami-line: #5a5739; --heri: #1b2316;
-  --window: #263142; --moon-o: 1; --paper: #d8d2c0; --mount: #4d5a45; --scroll-ink: #2a2622;
+  --window: #263142; --moon-o: 1; --scroll-paper: #232925; --paper: #d8d2c0; --mount: #4d5a45; --scroll-ink: #2a2622;
   --mochi: #f3eee2; --blush: #e08d84; --skin: #e0bd9b; --robe: #3d4c70; --kesa: #85582f; --stick: #b88d55;
   --cushion: #8a699c; --mat: #2a2622;
   color-scheme: dark;
@@ -427,6 +428,47 @@ dialog.sheet::backdrop { background: rgba(20,24,22,.5); }
 @media (prefers-reduced-motion: reduce) { dialog.sheet[open] { animation: none; } }
 .top h1 { white-space: nowrap; font-size: clamp(1.55rem, 7.2vw, 2rem); }
 .top h1 small { white-space: normal; }
+
+/* ---------- 坐禪帳 as a handscroll: rollers part and the paper unrolls from the middle ---------- */
+dialog.sheet.scroll {
+  margin: auto; width: min(100% - 12px, 560px); max-height: none;
+  background: transparent; box-shadow: none; border-radius: 0; overflow: visible;
+}
+dialog.sheet.scroll[open] { animation: none; }
+.scroll > .scroll-wrap { position: relative; overflow: visible; padding: 0; }
+.scroll .journal {
+  margin-inline: 9px; max-height: 84dvh; overflow-y: auto; overscroll-behavior: contain;
+  background: var(--scroll-paper); color: var(--ink);
+  border-block: 7px solid var(--mount); border-radius: 0;
+  padding: 16px 20px calc(18px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 10px 40px rgba(0,0,0,.35);
+}
+.roller {
+  position: absolute; top: -6px; bottom: -6px; width: 18px; z-index: 2; border-radius: 9px;
+  background: linear-gradient(90deg, var(--wood) 0%, var(--wood-2) 45%, var(--wood) 100%);
+  box-shadow: 0 3px 8px rgba(0,0,0,.35);
+}
+.roller::before, .roller::after {   /* the turned knobs at each end */
+  content: ""; position: absolute; left: 3px; right: 3px; height: 12px; border-radius: 4px;
+  background: var(--kesa);
+}
+.roller::before { top: -9px; } .roller::after { bottom: -9px; }
+.roller.left { left: 0; } .roller.right { right: 0; }
+.scroll[open] .journal { animation: unroll .9s cubic-bezier(.45,.05,.3,1) both; }
+.scroll[open] .roller.left { animation: rollLeft .9s cubic-bezier(.45,.05,.3,1) both; }
+.scroll[open] .roller.right { animation: rollRight .9s cubic-bezier(.45,.05,.3,1) both; }
+.scroll.closing .journal { animation: rollUp .45s cubic-bezier(.5,0,.75,.4) both; }
+.scroll.closing .roller.left { animation: rollLeftBack .45s cubic-bezier(.5,0,.75,.4) both; }
+.scroll.closing .roller.right { animation: rollRightBack .45s cubic-bezier(.5,0,.75,.4) both; }
+@keyframes unroll { from { clip-path: inset(0 50% 0 50%); } to { clip-path: inset(0 0 0 0); } }
+@keyframes rollUp { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 50% 0 50%); } }
+@keyframes rollLeft { from { left: calc(50% - 18px); } to { left: 0; } }
+@keyframes rollRight { from { right: calc(50% - 18px); } to { right: 0; } }
+@keyframes rollLeftBack { from { left: 0; } to { left: calc(50% - 18px); } }
+@keyframes rollRightBack { from { right: 0; } to { right: calc(50% - 18px); } }
+@media (prefers-reduced-motion: reduce) {
+  .scroll[open] .journal, .scroll[open] .roller, .scroll.closing .journal, .scroll.closing .roller { animation: none; }
+}
 </style>
 </head>
 <body>
@@ -443,7 +485,10 @@ dialog.sheet::backdrop { background: rgba(20,24,22,.5); }
     <p>跟住持報到、把手機放好就開始坐禪。坐禪中一拿起手機或切出畫面,就會被警策「啪」一下。</p>
   </header>
 
-  <dialog class="sheet" id="journal" aria-labelledby="journalTitle">
+  <dialog class="sheet scroll" id="journal" aria-labelledby="journalTitle">
+   <div class="scroll-wrap">
+   <span class="roller left" aria-hidden="true"></span>
+   <span class="roller right" aria-hidden="true"></span>
    <div class="journal">
     <div class="help-head">
       <h2 id="journalTitle">坐禪帳<span class="streak" id="streak"></span></h2>
@@ -479,6 +524,7 @@ dialog.sheet::backdrop { background: rgba(20,24,22,.5); }
       </div>
       <p id="backupStatus" aria-live="polite"></p>
     </div>
+   </div>
    </div>
   </dialog>
 
@@ -1476,9 +1522,17 @@ dialog.sheet::backdrop { background: rgba(20,24,22,.5); }
     document.querySelectorAll('dialog.sheet[open]').forEach(x => x.close());
     if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
   }
+  // the 坐禪帳 scroll rolls itself back up before it closes
+  function closeSheet(d) {
+    if (!d.open || d.classList.contains('closing')) return;
+    if (!d.classList.contains('scroll') || reduceMotion) { d.close(); return; }
+    d.classList.add('closing');
+    setTimeout(() => { d.classList.remove('closing'); d.close(); }, 450);
+  }
   document.querySelectorAll('dialog.sheet').forEach(d => {
-    d.addEventListener('click', e => { if (e.target === d) d.close(); });     // tap the dimmed backdrop
-    d.querySelector('.sheet-close').addEventListener('click', () => d.close());
+    d.addEventListener('click', e => { if (e.target === d) closeSheet(d); });     // tap the dimmed backdrop
+    d.addEventListener('cancel', e => { e.preventDefault(); closeSheet(d); });   // Esc
+    d.querySelector('.sheet-close').addEventListener('click', () => closeSheet(d));
   });
   const helpBox = $('#help');
   $('#helpBtn').addEventListener('click', () => openSheet(helpBox));
