@@ -14,6 +14,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="警策道場">
 <title>警策道場</title>
+<script>
+/* apply a saved light/dark choice before first paint, so the page doesn't flash the other theme */
+try { const t = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).theme; if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Fredoka:wght@500;600&display=swap">
@@ -477,6 +481,17 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
 @keyframes backdropIn { from { opacity: 0; } }
 @keyframes backdropOut { to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { dialog.sheet[open]::backdrop, dialog.sheet.closing::backdrop { animation: none; } }
+
+/* ---------- appearance: system / light / dark ---------- */
+.theme-pick { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.theme-pick legend { padding: 0; margin-bottom: 6px; font-weight: 700; font-size: .95rem; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1.5px solid var(--accent); border-radius: 12px; overflow: hidden; }
+.seg label { position: relative; cursor: pointer; }
+.seg label + label { border-left: 1.5px solid var(--accent); }
+.seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.seg span { display: block; text-align: center; padding: 7px 4px; font-size: .92rem; color: var(--accent); }
+.seg input:checked + span { background: var(--accent); color: var(--on-accent); font-weight: 700; }
+.seg input:focus-visible + span { outline: 2.5px solid var(--accent); outline-offset: -5px; }
 </style>
 </head>
 <body>
@@ -548,6 +563,14 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
       <h2 id="settingsTitle">設定</h2>
       <button type="button" class="dlg-skip sheet-close" id="settingsClose">關閉</button>
     </div>
+    <fieldset class="theme-pick">
+      <legend>外觀</legend>
+      <div class="seg" role="radiogroup" aria-label="外觀">
+        <label><input type="radio" name="theme" id="themeSystem" value="system" checked><span>跟隨手機</span></label>
+        <label><input type="radio" name="theme" id="themeLight" value="light"><span>淺色</span></label>
+        <label><input type="radio" name="theme" id="themeDark" value="dark"><span>深色</span></label>
+      </div>
+    </fieldset>
     <div class="toggles">
       <label for="optMotion"><input type="checkbox" id="optMotion" checked> 用平衡儀偵測拿起手機 <small>手機平放或立在架上都可以,開始時會記住它的角度</small></label>
       <label for="optSound"><input type="checkbox" id="optSound" checked> 鐘聲與音效</label>
@@ -1572,8 +1595,22 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
   const opts = store.get('keisaku-opts-v1', {});
   if (typeof opts.motion === 'boolean') $('#optMotion').checked = opts.motion;
   if (typeof opts.sound === 'boolean') $('#optSound').checked = opts.sound;
-  ['optMotion', 'optSound'].forEach(id => $('#' + id).addEventListener('change', () =>
-    store.set('keisaku-opts-v1', { motion: $('#optMotion').checked, sound: $('#optSound').checked })));
+  const themeNow = () => (document.querySelector('input[name="theme"]:checked') || {}).value || 'system';
+  const saveOpts = () => store.set('keisaku-opts-v1', { motion: $('#optMotion').checked, sound: $('#optSound').checked, theme: themeNow() });
+  ['optMotion', 'optSound'].forEach(id => $('#' + id).addEventListener('change', saveOpts));
+
+  // appearance: follow the phone, or force light / dark (the tokens already handle [data-theme])
+  const themeMetas = [...document.querySelectorAll('meta[name="theme-color"]')].map(m => [m, m.content]);
+  function applyTheme(theme) {
+    if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    else delete document.documentElement.dataset.theme;
+    // keep the installed app's status bar in step with the chosen look
+    themeMetas.forEach(([m, original]) => { m.content = theme === 'light' ? '#e9ecdf' : theme === 'dark' ? '#141816' : original; });
+  }
+  const savedTheme = ['light', 'dark'].includes(opts.theme) ? opts.theme : 'system';
+  document.querySelector(`input[name="theme"][value="${savedTheme}"]`).checked = true;
+  applyTheme(savedTheme);
+  document.querySelectorAll('input[name="theme"]').forEach(r => r.addEventListener('change', () => { applyTheme(themeNow()); saveOpts(); }));
 
   /* ---------- 坐禪帳: log, stamps, calendar, backup ---------- */
   const LOG_KEY = 'keisaku-log-v2';
