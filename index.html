@@ -962,27 +962,57 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     const s = gainOf(a, wet); p.connect(s).connect(Amb.verb);
   }
   const rnd = (lo, hi) => lo + Math.random() * (hi - lo);
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
   const later = (fn, ms) => Amb.timers.push(setTimeout(() => { if (Amb.playing) fn(); }, ms));
-  function chime(a, when) {
-    const base = [1046, 1175, 1318, 1568, 1760][Math.floor(Math.random() * 5)], bus = gainOf(a, 1);
-    place(a, bus, rnd(-.5, .5), .5);
-    [[1, .5, 3.2], [2.76, .12, 1.6], [5.4, .05, .9]].forEach(([m, g, d]) => {
-      const o = a.createOscillator(), v = a.createGain();
-      o.frequency.value = base * m; v.gain.setValueAtTime(0, when);
-      v.gain.linearRampToValueAtTime(g * .14, when + .005); v.gain.exponentialRampToValueAtTime(.0001, when + d);
-      o.connect(v).connect(bus); o.start(when); o.stop(when + d + .05);
-    });
+  // schedule an irregular shape on a param as many short ramps (safe to cancel at any time)
+  function shape(param, t, dur, values) {
+    param.cancelScheduledValues(t); param.setValueAtTime(values[0], t);
+    const step = dur / (values.length - 1);
+    for (let i = 1; i < values.length; i++) param.linearRampToValueAtTime(values[i], t + i * step);
   }
-  // a raindrop: a tiny sine "plink" whose pitch jumps up as the bubble forms
-  function drop(a, heavy) {
-    const t = a.currentTime + .01, o = a.createOscillator(), v = a.createGain();
-    const f0 = heavy ? rnd(500, 850) : rnd(1300, 2900);
-    o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f0 * rnd(1.4, 1.9), t + (heavy ? .05 : .025));
-    v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(heavy ? rnd(.08, .13) : rnd(.025, .07), t + .003);
-    v.gain.exponentialRampToValueAtTime(.0001, t + (heavy ? .12 : .05));
-    o.connect(v); place(a, v, rnd(-.9, .9), .25); o.start(t); o.stop(t + .15);
+  // a smoothed random walk between lo and hi
+  function wander(n, lo, hi, smooth = .85) {
+    const out = []; let v = Math.random(), s = v;
+    for (let i = 0; i < n; i++) { v = Math.min(1, Math.max(0, v + (Math.random() - .5) * .4)); s = s * smooth + v * (1 - smooth); out.push(lo + (hi - lo) * s); }
+    return out;
   }
-  // birds: a few made-up songs built from pitch sweeps
+  // a short filtered noise hit
+  function burst(a, type, freq, q, vol, dur, pan, wet = .2, when = a.currentTime + .01) {
+    const s = a.createBufferSource(), f = filt(a, type, freq, q), g = a.createGain();
+    s.buffer = noiseBuffer(a, 'white');
+    g.gain.setValueAtTime(vol, when); g.gain.exponentialRampToValueAtTime(.0001, when + dur);
+    s.connect(f).connect(g); place(a, g, pan, wet); s.start(when, Math.random() * 3, dur + .02);
+  }
+  function blip(a, f0, f1, glide, vol, dur, pan, wet = .25, when = a.currentTime + .01, type = 'sine') {
+    const o = a.createOscillator(), v = a.createGain();
+    o.type = type; o.frequency.setValueAtTime(f0, when); o.frequency.exponentialRampToValueAtTime(f1, when + glide);
+    v.gain.setValueAtTime(0, when); v.gain.linearRampToValueAtTime(vol, when + .003); v.gain.exponentialRampToValueAtTime(.0001, when + dur);
+    o.connect(v); place(a, v, pan, wet); o.start(when); o.stop(when + dur + .02);
+  }
+
+  /* rain: many drops, mostly tiny, landing on different things */
+  const RAIN_ON = {
+    leaf(a, l, p)   { const f = rnd(1500, 3200); blip(a, f, f * rnd(1.4, 1.8), .02, .008 + l * .07, .045, p); },
+    puddle(a, l, p) { const f = rnd(420, 900); blip(a, f, f * rnd(1.6, 2), .06, .01 + l * .09, .14, p, .3); burst(a, 'bandpass', 3200, 1.5, .004 + l * .03, .02, p); },
+    wood(a, l, p)   { burst(a, 'lowpass', 1300, 1, .01 + l * .1, .03, p, .15); blip(a, rnd(170, 260), 120, .03, .01 + l * .06, .05, p, .1); },
+    gutter(a, l, p) { const f = rnd(2200, 3300); blip(a, f, f * .995, .2, .004 + l * .03, .35, p, .4); blip(a, f * 2.41, f * 2.4, .2, .002 + l * .012, .2, p, .4); }
+  };
+  /* forest birds: each resident bird has its own song, pitch and place */
+  function song(a, b) {
+    const bus = gainOf(a, b.far ? .4 : 1); place(a, bus, b.pan, b.far ? .7 : .3);
+    const k = b.pitch, v = .045; let t = a.currentTime + .05;
+    const n = (f1, f2, d, vol = v, vib = 0) => { tone(a, bus, t, f1 * k, f2 * k, d, vol, vib); };
+    switch (b.song) {
+      case 0: for (let i = 0, c = 2 + Math.floor(Math.random() * 3); i < c; i++) { n(3200, 4300, .07); t += rnd(.13, .2); } break;   // chip-chip
+      case 1: n(3300, 2250, rnd(.35, .5), v * .9, 18); break;                                                                       // falling whistle
+      case 2: n(3900, 3600, rnd(.5, .8), v * .6, 260); break;                                                                        // trill
+      case 3: n(700, 690, .28, v * 1.3); t += .42; n(575, 565, .36, v * 1.3); break;                                                 // soft two-note call
+      case 4: for (let i = 0, c = 6 + Math.floor(Math.random() * 5), f = 3000; i < c; i++) {                                         // warble
+                const g = f * pick([.84, .89, 1.12, 1.19, 1.26]); n(f, g, .07, v * rnd(.6, 1)); f = Math.min(4600, Math.max(2400, g)); t += rnd(.07, .11); } break;
+      case 5: n(2600, 3500, .16, v); t += .2; n(3400, 2500, .26, v); break;                                                         // tee-oo
+      default: for (let i = 0; i < 3; i++) { n(3800, 3700, .09, v * .8); t += .14; n(3100, 3000, .1, v * .8); t += .26; }            // see-saw
+    }
+  }
   function tone(a, bus, t, f1, f2, dur, vol, vib = 0) {
     const o = a.createOscillator(), v = a.createGain();
     o.frequency.setValueAtTime(f1, t); o.frequency.exponentialRampToValueAtTime(f2, t + dur);
@@ -991,20 +1021,34 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     v.gain.setValueAtTime(vol, t + dur * .6); v.gain.exponentialRampToValueAtTime(.0001, t + dur);
     o.connect(v).connect(bus); o.start(t); o.stop(t + dur + .02);
   }
-  function bird(a, song, pan, far) {
-    const bus = gainOf(a, far ? .45 : 1); place(a, bus, pan, far ? .7 : .35);
-    let t = a.currentTime + .05; const v = .05;
-    if (song === 0) {                 // chip-chip-chip
-      const n = 2 + Math.floor(Math.random() * 3), f = rnd(3000, 3800);
-      for (let i = 0; i < n; i++) { tone(a, bus, t, f, f * 1.35, .07, v); t += rnd(.13, .2); }
-    } else if (song === 1) {          // a falling whistle
-      const f = rnd(2900, 3500); tone(a, bus, t, f, f * .68, rnd(.35, .5), v * .9, 18);
-    } else if (song === 2) {          // a quick trill
-      const f = rnd(3600, 4300); tone(a, bus, t, f, f * .92, rnd(.5, .8), v * .7, 260);
-    } else {                          // a soft two-note call, further off
-      const f = rnd(620, 760); tone(a, bus, t, f, f * .98, .28, v * 1.4); tone(a, bus, t + .42, f * .82, f * .8, .36, v * 1.4);
+  function cricket(a, pan, when) {          // one chirp: 3-4 quick pulses of a high tone
+    for (let i = 0, c = 3 + (Math.random() < .5); i < c; i++) {
+      const o = a.createOscillator(), v = a.createGain(), t = when + i * .032;
+      o.frequency.value = 4500; v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(.012, t + .004); v.gain.linearRampToValueAtTime(0, t + .018);
+      o.connect(v); place(a, v, pan, .45); o.start(t); o.stop(t + .02);
     }
   }
+  function rustle(a) {                      // a breath of wind through leaves, a second or three
+    const t = a.currentTime + .05, dur = rnd(1, 3), s = a.createBufferSource(), g = a.createGain();
+    s.buffer = noiseBuffer(a, 'pink');
+    const pts = []; for (let i = 0; i <= 60; i++) { const env = Math.sin(Math.PI * i / 60); pts.push(.0001 + env * Math.pow(Math.random(), 2.2) * .09); }
+    shape(g.gain, t, dur, pts);
+    s.connect(filt(a, 'bandpass', rnd(2500, 4200), .7)).connect(filt(a, 'highpass', 1200)).connect(g);
+    place(a, g, rnd(-.8, .8), .25); s.start(t, Math.random() * 3, dur + .05);
+  }
+  /* tuned wind chime: aluminium tubes in a chord, long ring, rich partials */
+  const TUBES = [293.7, 370, 440, 493.9, 587.3, 659.3];      // D4 F#4 A4 B4 D5 E5
+  function tube(a, f, when, vel, pan) {
+    const bus = gainOf(a, 1); place(a, bus, pan, .55);
+    [[1, 1, 7], [1.0024, .45, 6], [2.756, .42, 2.8], [5.404, .2, 1.3], [8.933, .08, .6]].forEach(([m, g, d]) => {
+      const o = a.createOscillator(), v = a.createGain();
+      o.frequency.value = f * m * (1 + rnd(-.001, .001));
+      v.gain.setValueAtTime(0, when); v.gain.linearRampToValueAtTime(vel * g * .16, when + .003);
+      v.gain.exponentialRampToValueAtTime(.0001, when + d * (.6 + vel * .6));
+      o.connect(v).connect(bus); o.start(when); o.stop(when + d * 1.3 + .05);
+    });
+  }
+
   function startAmbient(kind) {
     stopAmbient(0);
     const a = audio(); if (!a || kind === 'none') return;
@@ -1013,46 +1057,84 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     Amb.out.gain.setTargetAtTime(ambientVolume(), a.currentTime, 1.2);       // slow fade-in
     Amb.verb = a.createConvolver(); Amb.verb.buffer = hallReverb(a);
     Amb.verb.connect(gainOf(a, .5)).connect(Amb.out);
-    // mostly quiet: a very low bed, and the sound itself made of separate events
     if (kind === 'rain') {
-      noiseSource(a, 'brown', filt(a, 'lowpass', 900, .5), gainOf(a, .18));
-      const fall = () => { drop(a, Math.random() < .12); later(fall, rnd(180, 1400)); };
+      noiseSource(a, 'brown', filt(a, 'lowpass', 800, .5), gainOf(a, .12));     // very distant
+      let intensity = .55;                                                      // the shower slowly comes and goes
+      const breathe = () => { intensity = Math.min(1, Math.max(.25, intensity + rnd(-.25, .25))); later(breathe, rnd(4000, 10000)); };
+      breathe();
+      const fall = () => {
+        const r = Math.random(), loud = Math.pow(Math.random(), 2.8);             // most drops are tiny, a few are big
+        const on = r < .5 ? 'leaf' : r < .74 ? 'puddle' : r < .96 ? 'wood' : 'gutter';
+        RAIN_ON[on](a, loud * (.6 + intensity * .7), rnd(-.9, .9));
+        later(fall, rnd(40, 300) / intensity);
+      };
       fall();
     } else if (kind === 'waves') {
-      // one wave at a time: it swells in, breaks, washes back, then a pause
-      const lp = filt(a, 'lowpass', 300, .4), g = gainOf(a, .02), pan = a.createStereoPanner();
+      // the sea never fully stops: a far-off surf that wanders on its own
+      const flp = filt(a, 'lowpass', 420, .4), fg = gainOf(a, .1);
+      noiseSource(a, 'brown', flp, fg);
+      const drift = () => {
+        const t = a.currentTime + .02, d = 10;
+        shape(fg.gain, t, d, wander(40, .05, .17)); shape(flp.frequency, t, d, wander(40, 280, 600));
+        later(drift, d * 1000);
+      };
+      drift();
+      // each wave: an uneven swell with a stumble or two, a break, and a fizzing backwash
+      const lp = filt(a, 'lowpass', 300, .4), g = gainOf(a, .001), pan = a.createStereoPanner();
       noiseSource(a, 'brown', lp, g, pan);
-      const wash = filt(a, 'bandpass', 1400, .6), wg = gainOf(a, 0);
+      const wash = filt(a, 'bandpass', 1500, .6), wg = gainOf(a, 0);
       noiseSource(a, 'pink', wash, wg);
       const wave = () => {
-        const t = a.currentTime, up = rnd(2.4, 3.6), hold = rnd(.3, .8), back = rnd(4.5, 7), peak = rnd(.65, 1.1);
-        pan.pan.setTargetAtTime(rnd(-.4, .4), t, 2);
-        for (const [p, from, top, end] of [[g.gain, null, peak, .02], [lp.frequency, null, rnd(1100, 1800), 300]]) {
-          p.cancelScheduledValues(t); p.setValueAtTime(p.value, t);
-          p.linearRampToValueAtTime(top, t + up); p.setValueAtTime(top, t + up + hold);
-          p.exponentialRampToValueAtTime(end, t + up + hold + back);
+        const t = a.currentTime + .05, up = rnd(2.2, 4.5), back = rnd(4.5, 8), T = up + back, N = 90, peak = rnd(.55, 1.1);
+        const bumps = [1, 2].map(() => [rnd(.9, 2.2), rnd(0, 6.3), rnd(.05, .14)]);
+        const amp = [], cut = [], fizz = [];
+        for (let i = 0; i < N; i++) {
+          const x = i / (N - 1) * T;
+          let e = x < up ? Math.pow(x / up, 1.7) : Math.exp(-(x - up) / (back / 2.6));
+          for (const [fr, ph, am] of bumps) e += am * Math.sin(fr * x + ph) * e;     // stumbles and secondary surges
+          e = Math.max(.002, e * (1 + (Math.random() - .5) * .12));
+          amp.push(e * peak); cut.push(260 + e * rnd(1100, 1700));
+          fizz.push(x < up * .85 ? 0 : Math.max(0, Math.exp(-(x - up) / (back / 2)) * peak * .09 * (.6 + Math.random() * .8)));
         }
-        wg.gain.cancelScheduledValues(t); wg.gain.setValueAtTime(0, t + up * .8);
-        wg.gain.linearRampToValueAtTime(peak * .08, t + up + hold); wg.gain.linearRampToValueAtTime(0, t + up + hold + back * .7);
-        later(wave, (up + hold + back + rnd(.5, 3.5)) * 1000);
+        pan.pan.setTargetAtTime(rnd(-.4, .4), t, 2);
+        shape(g.gain, t, T, amp); shape(lp.frequency, t, T, cut); shape(wg.gain, t, T, fizz);
+        later(wave, (T * rnd(.8, 1) + rnd(0, 2.5)) * 1000);
       };
       wave();
     } else if (kind === 'forest') {
-      noiseSource(a, 'brown', filt(a, 'lowpass', 500, .5), gainOf(a, .12));
-      const sing = () => {
-        const song = Math.floor(Math.random() * 4), pan = rnd(-.85, .85), far = song === 3 || Math.random() < .3;
-        bird(a, song, pan, far);
-        if (Math.random() < .35) later(() => bird(a, song, -pan * .8, !far), rnd(700, 1600));   // another bird answers
-        later(sing, rnd(2500, 9000));
+      noiseSource(a, 'brown', filt(a, 'lowpass', 450, .5), gainOf(a, .08));
+      // a handful of birds who live here, each singing in its own bouts
+      for (let i = 0; i < 5; i++) {
+        const b = { song: Math.floor(Math.random() * 7), pitch: rnd(.88, 1.12), pan: rnd(-.9, .9), far: Math.random() < .4 };
+        const bout = () => {
+          for (let k = 0, c = 1 + Math.floor(Math.random() * 4); k < c; k++) later(() => song(a, b), k * rnd(1400, 3200));
+          later(bout, rnd(9000, 32000));
+        };
+        later(bout, rnd(400, 14000));
+      }
+      // crickets come and go
+      const crickets = () => {
+        const pan = rnd(-.9, .9), len = rnd(6, 20), gap = rnd(.42, .6);
+        for (let s = 0; s < len; s += gap) later(() => cricket(a, pan, a.currentTime + .02), s * 1000);
+        later(crickets, (len + rnd(10, 30)) * 1000);
       };
-      later(sing, 900);
+      later(crickets, rnd(2000, 12000));
+      const leaves = () => { rustle(a); later(leaves, rnd(6000, 20000)); };
+      later(leaves, rnd(3000, 9000));
     } else if (kind === 'chimes') {
-      const ring = () => {
-        const t = a.currentTime + .05, n = 1 + Math.floor(Math.random() * 2);
-        for (let k = 0; k < n; k++) chime(a, t + k * rnd(.25, .6));
-        later(ring, rnd(7000, 18000));
+      let idx = Math.floor(Math.random() * TUBES.length);
+      const nextTube = () => { idx = Math.min(TUBES.length - 1, Math.max(0, idx + pick([-2, -1, -1, 1, 1, 2, 3, -3]))); return TUBES[idx]; };
+      const breeze = () => {
+        const gust = Math.random() < .2, pan = rnd(-.3, .3);
+        let t = a.currentTime + .05;
+        if (gust) {        // a gust: the striker swings hard and runs across several tubes
+          for (let i = 0, n = 4 + Math.floor(Math.random() * 5); i < n; i++) { tube(a, nextTube(), t, rnd(.45, 1), pan + rnd(-.1, .1)); t += rnd(.07, .3); }
+        } else {           // mostly a soft touch: two to four quiet notes
+          for (let i = 0, n = 2 + Math.floor(Math.random() * 3); i < n; i++) { tube(a, nextTube(), t, rnd(.1, .32), pan + rnd(-.1, .1)); t += rnd(.35, 1.5); }
+        }
+        later(breeze, gust ? rnd(4000, 8000) : rnd(5000, 14000));
       };
-      later(ring, 1200);
+      later(breeze, 800);
     }
   }
   function stopAmbient(fade = 1.5) {
