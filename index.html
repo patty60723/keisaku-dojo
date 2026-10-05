@@ -312,14 +312,53 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
 }
 .actions:has(#mainBtn[hidden]) { grid-template-columns: 1fr; }
 @media (prefers-reduced-motion: reduce) { .choice { animation: none; } }
+
+/* ---------- help ---------- */
+.top-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.help-btn {
+  flex: none; font: inherit; font-size: .9rem; font-weight: 700; letter-spacing: .08em; cursor: pointer;
+  border: 1.5px solid var(--accent); color: var(--accent); background: transparent;
+  border-radius: 999px; padding: 4px 14px; margin-top: 6px;
+}
+.help-btn[aria-expanded="true"] { background: var(--accent); color: var(--on-accent); }
+.help {
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 18px;
+  padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px;
+}
+.help-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.help h2 { margin: 0; font-family: var(--f-display); font-size: 1.15rem; letter-spacing: .08em; }
+.help ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; font-size: .93rem; color: var(--ink); }
+.help li::marker { color: var(--kesa); }
+.help b { font-weight: 700; }
 </style>
 </head>
 <body>
 <main class="app">
   <header class="top">
-    <h1>警策道場<small>番茄鐘・不准滑手機</small></h1>
+    <div class="top-row">
+      <h1>警策道場<small>番茄鐘・不准滑手機</small></h1>
+      <button type="button" class="help-btn" id="helpBtn" aria-expanded="false" aria-controls="help">說明</button>
+    </div>
     <p>跟住持報到、把手機放好就開始坐禪。坐禪中一拿起手機或切出畫面,就會被警策「啪」一下。</p>
   </header>
+
+  <section class="help" id="help" aria-label="道場的規矩" hidden>
+    <div class="help-head">
+      <h2>道場的規矩</h2>
+      <button type="button" class="dlg-skip" id="helpClose">收起</button>
+    </div>
+    <ul>
+      <li>開始前先跟住持報到:要做的事、每炷多久、坐幾炷、休息多久。可以存成常用,下次直接選。</li>
+      <li>按「準備好了」後,3 秒內把手機平放在桌上(螢幕朝上朝下都行),或立在手機架上。</li>
+      <li>坐禪中<b>拿起手機</b>,或<b>切到別的 App、分頁超過 2 秒</b>,住持就會用警策啪你一下。</li>
+      <li>拿起來的手機要放回原位才算回座;一直不放,每 20 秒再補一下。</li>
+      <li>每炷開始敲<b>止靜三鐘</b>,結束敲<b>放禪一鐘</b>,休息結束敲兩鐘叫你回座。</li>
+      <li>休息時住持去喝茶,手機隨便用。</li>
+      <li>坐禪中螢幕會保持亮著。手機朝下放也可以,靠鐘聲知道時間到了。</li>
+      <li>想提振精神時可以按「合掌請打」,自己請住持打一下,不算扣分。這是真正禪堂裡也有的規矩。</li>
+      <li>iPhone 第一次開始時,要允許存取「動作與方向」,住持才看得到你有沒有拿起手機。</li>
+    </ul>
+  </section>
 
   <section class="stage-wrap" id="stageWrap">
     <svg id="stage" viewBox="0 0 400 280" role="img" aria-label="禪堂裡,一顆麻糬坐在蒲團上打坐,一位小和尚拿著警策來回巡堂">
@@ -480,8 +519,6 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
       <div><dt>今日被打</dt><dd class="hitnum" id="stTodayHits">0<small>下</small></dd></div>
     </dl>
   </section>
-
-  <p class="note">每炷香開始敲<b>止靜三鐘</b>,結束敲<b>放禪一鐘</b>,休息結束敲兩鐘叫你回座。休息時住持去喝茶,手機隨便用。坐禪中螢幕會保持亮著,手機螢幕朝下放也可以,靠鐘聲知道時間到了。在真正的禪堂,想提振精神時也可以自己合掌,請巡香師父打一下。</p>
 </main>
 
 <script>
@@ -734,6 +771,23 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   const TASKS = ['讀書', '工作', '寫作'];
   let cfg = { ...DEFAULT_CFG };
 
+  const RULES = [
+    '坐禪的時候,手機放在桌上別碰。我會一直在堂裡巡。',
+    '拿起手機,或切到別的畫面超過兩秒,我就用這支警策啪你一下。',
+    '每炷香開始敲三聲鐘,結束敲一聲。手機朝下也聽得到。',
+    '休息時我去喝茶,手機隨你用。休息完敲兩聲,叫你回座。',
+    '想提振精神,也可以按「合掌請打」,自己請我打一下,不算扣分。'
+  ];
+  async function explainRules() {
+    for (let i = 0; i < RULES.length; i++) {
+      const v = await ask(RULES[i], [
+        { label: i < RULES.length - 1 ? '繼續' : '明白了', value: 'next', primary: true },
+        ...(i < RULES.length - 1 ? [{ label: '略過說明', value: 'skip' }] : [])
+      ], { skippable: true });
+      if (v === 'skip') return;
+    }
+  }
+
   async function onboarding(again = false) {
     P.phase = 'idle'; renderAll();
     sitterEl.dataset.face = 'calm';
@@ -744,6 +798,14 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
       : visits ? '施主又來了。今日想做的事是什麼?'
       : '歡迎來到警策道場。施主,今日想做的事是什麼?';
     try {
+      let firstLine = null;
+      if (!visits && !again) {
+        const v = await ask('歡迎來到警策道場。施主是第一次來吧?要先聽聽道場的規矩嗎?', [
+          { label: '請說明', value: 'help', primary: true }, { label: '略過說明', value: 'skip' }
+        ], { skippable: true });
+        if (v === 'help') await explainRules();
+        firstLine = '那麼,施主今日想做的事是什麼?';
+      }
       let next = 'new';
       for (;;) {
         const presets = store.get('keisaku-presets-v1', []);
@@ -753,8 +815,10 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
         presets.forEach(p => { if (!sameCfg(p, lastCfg)) opts.push({ label: '★ ' + p.task, sub: `${p.focusMin} 分 × ${p.rounds} 炷`, value: { use: p } }); });
         opts.push({ label: '新的安排', value: 'new' });
         if (presets.length) opts.push({ label: '整理常用', value: 'manage' });
+        opts.push({ label: '聽說明', value: 'help' });
         next = await ask(greet, opts, { skippable: true });
         if (next === 'manage') { await managePresets(); continue; }
+        if (next === 'help') { await explainRules(); continue; }
         break;
       }
       if (next !== 'new') {
@@ -762,7 +826,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
         applyCfg();
         return readyCheck(`好,一樣是「${cfg.task}」,${cfg.focusMin} 分 × ${cfg.rounds} 炷。`);
       }
-      await planNew(lastCfg || !presetsEmpty() ? '那麼,今日想做什麼呢?' : greet);
+      await planNew(firstLine || (lastCfg || !presetsEmpty() ? '那麼,今日想做什麼呢?' : greet));
     } catch (e) {
       if (e !== SKIP) throw e;
       cfg = { ...(lastCfg || DEFAULT_CFG) };
@@ -1129,6 +1193,10 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     if (busy) return;
     enqueue(() => strike({ reason: '啪!精神一振,謝謝師父。', counted: false }));
   });
+  const helpBtn = $('#helpBtn'), helpBox = $('#help');
+  const showHelp = on => { helpBox.hidden = !on; helpBtn.setAttribute('aria-expanded', String(on)); };
+  helpBtn.addEventListener('click', () => showHelp(helpBox.hidden));
+  $('#helpClose').addEventListener('click', () => { showHelp(false); helpBtn.focus(); });
   $('#closeResult').addEventListener('click', () => { $('#result').hidden = true; onboarding(true); });
 
   cfg = { ...(store.get('keisaku-last-v1', null) || DEFAULT_CFG) };
