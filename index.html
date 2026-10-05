@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#e9ecdf" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#141816" media="(prefers-color-scheme: dark)">
+<meta name="description" content="可愛的番茄鐘專注 App。拿起手機,住持就會拿警策「啪」你一下。">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="警策道場">
 <title>警策道場</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -75,7 +83,7 @@ body {
   font-size: 15px;
   line-height: 1.6;
   padding-inline: 16px;
-  padding-block: 20px 28px;
+  padding-block: calc(20px + env(safe-area-inset-top, 0px)) calc(28px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
 }
 *, *::before, *::after { box-sizing: border-box; }
@@ -330,6 +338,8 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
 .help ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; font-size: .93rem; color: var(--ink); }
 .help li::marker { color: var(--kesa); }
 .help b { font-weight: 700; }
+.install { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px dashed var(--line); }
+.install p { margin: 0; font-size: .88rem; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -358,6 +368,10 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
       <li>想提振精神時可以按「合掌請打」,自己請住持打一下,不算扣分。這是真正禪堂裡也有的規矩。</li>
       <li>iPhone 第一次開始時,要允許存取「動作與方向」,住持才看得到你有沒有拿起手機。</li>
     </ul>
+    <div class="install" id="installBox" hidden>
+      <button type="button" class="btn ghost" id="installBtn" hidden>把道場裝到主畫面</button>
+      <p id="iosTip" hidden>iPhone 要裝到主畫面:在 Safari 按下方的「分享」,再選「加入主畫面」。</p>
+    </div>
   </section>
 
   <section class="stage-wrap" id="stageWrap">
@@ -1193,6 +1207,25 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     if (busy) return;
     enqueue(() => strike({ reason: '啪!精神一振,謝謝師父。', counted: false }));
   });
+  // Install to home screen: Chrome/Android fire beforeinstallprompt; iOS Safari needs the share menu.
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  const inFrame = window.top !== window;
+  let installEvent = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault(); installEvent = e;
+    $('#installBox').hidden = false; $('#installBtn').hidden = false;
+  });
+  $('#installBtn').addEventListener('click', async () => {
+    if (!installEvent) return;
+    installEvent.prompt();
+    try { await installEvent.userChoice; } catch {}
+    installEvent = null; $('#installBtn').hidden = true; $('#installBox').hidden = $('#iosTip').hidden;
+  });
+  window.addEventListener('appinstalled', () => { $('#installBox').hidden = true; });
+  if (!standalone && !inFrame && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
+    $('#installBox').hidden = false; $('#iosTip').hidden = false;
+  }
+
   const helpBtn = $('#helpBtn'), helpBox = $('#help');
   const showHelp = on => { helpBox.hidden = !on; helpBtn.setAttribute('aria-expanded', String(on)); };
   helpBtn.addEventListener('click', () => showHelp(helpBox.hidden));
@@ -1204,6 +1237,11 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   requestAnimationFrame(frame);
   onboarding();
 })();
+</script>
+<script>
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
 </script>
 </body>
 </html>

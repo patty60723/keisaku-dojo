@@ -21,13 +21,30 @@
 
 ## 執行
 
-整個 App 只有一個 `index.html`,不用 build。
+不用 build,直接放上任何靜態主機就能用。
 
-- **電腦上試**:直接用瀏覽器打開 `index.html`(沒有平衡儀,會自動改用「離開畫面」偵測)。
-- **手機上用**:平衡儀(DeviceMotion)只在 HTTPS 下可用,最簡單是開 GitHub Pages:
+- **電腦上試**:用瀏覽器打開 `index.html`(沒有平衡儀,會自動改用「離開畫面」偵測)。
+  直接開檔案時不會啟用離線功能,要透過 `http://` 才會。
+- **手機上用**:平衡儀(DeviceMotion)和 PWA 都需要 HTTPS,最簡單是開 GitHub Pages:
   Settings → Pages → Source 選 `Deploy from a branch`,branch 選 `main` / `/ (root)`。
   免費帳號的 Pages 需要 repo 是 public。
-- iPhone 第一次按開始時,Safari 會問能不能存取「動作與方向」,要按允許。
+- iPhone 第一次按「準備好了」時,Safari 會問能不能存取「動作與方向」,要按允許。
+
+## 裝到主畫面(PWA)
+
+- **iPhone**:用 Safari 打開 → 下方「分享」→「加入主畫面」。
+- **Android / 電腦版 Chrome**:網址列的安裝圖示,或「說明」裡的「把道場裝到主畫面」按鈕。
+- 裝好後會以全螢幕 App 的方式開啟,第一次開過之後沒有網路也能用。
+
+PWA 相關檔案:
+
+| 檔案 | 用途 |
+|---|---|
+| `manifest.webmanifest` | App 名稱、圖示、全螢幕顯示 |
+| `sw.js` | 離線快取:頁面網路優先(有更新就拿新的),字型和圖示快取優先 |
+| `icons/` | `icon.svg` 是原稿,PNG 從它轉出來(192、512、iPhone 用的 180) |
+
+改了圖示或 manifest 之後,記得把 `sw.js` 裡的 `VERSION` 加一,舊的快取才會被清掉。
 
 ## 偵測原理
 

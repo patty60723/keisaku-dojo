@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#33456b"/>
+  <circle cx="256" cy="268" r="170" fill="#3d5280"/>
+  <!-- keisaku stick behind the mochi -->
+  <g transform="rotate(32 256 256)">
+    <rect x="248" y="70" width="16" height="250" rx="6" fill="#c69b62" stroke="#2a2622" stroke-width="5"/>
+    <rect x="240" y="60" width="32" height="96" rx="9" fill="#c69b62" stroke="#2a2622" stroke-width="5"/>
+  </g>
+  <!-- zafu -->
+  <ellipse cx="256" cy="372" rx="118" ry="30" fill="#6a4b78" stroke="#2a2622" stroke-width="6"/>
+  <!-- mochi -->
+  <path d="M152 352 C140 262 190 168 256 168 C322 168 372 262 360 352 C330 368 182 368 152 352 Z" fill="#fffdf7" stroke="#2a2622" stroke-width="7"/>
+  <path d="M206 272 q14 11 28 0 M278 272 q14 11 28 0" fill="none" stroke="#2a2622" stroke-width="7" stroke-linecap="round"/>
+  <ellipse cx="196" cy="300" rx="15" ry="9" fill="#f2a49a"/>
+  <ellipse cx="316" cy="300" rx="15" ry="9" fill="#f2a49a"/>
+  <path d="M248 304 q8 6 16 0" fill="none" stroke="#2a2622" stroke-width="6" stroke-linecap="round"/>
+  <!-- bump -->
+  <path d="M290 178 q22 -30 46 -6" fill="#fffdf7" stroke="#2a2622" stroke-width="6"/>
+</svg>
