@@ -403,6 +403,30 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
 }
 .confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--accent) 10%, transparent); }
 .confirm p { flex: 1 1 180px; color: var(--ink); }
+
+/* ---------- sheets (坐禪帳 / 說明 / 設定) ---------- */
+dialog.sheet {
+  border: 0; padding: 0; margin: auto auto 0; width: 100%; max-width: 540px; max-height: 88dvh;
+  border-radius: 20px 20px 0 0; background: var(--surface); color: var(--ink);
+  box-shadow: 0 -6px 30px rgba(0,0,0,.25); overflow: hidden;
+}
+dialog.sheet[open] { display: flex; flex-direction: column; animation: sheetUp .22s ease-out; }
+dialog.sheet::backdrop { background: rgba(20,24,22,.5); }
+.sheet > div {
+  overflow-y: auto; overscroll-behavior: contain; min-height: 0;
+  border: 0; border-radius: 0; background: transparent;
+  padding: 16px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+}
+.settings { display: flex; flex-direction: column; gap: 12px; }
+.settings h2 { margin: 0; font-family: var(--f-display); font-size: 1.15rem; letter-spacing: .08em; }
+.top-btns { flex-wrap: nowrap; gap: 5px; }
+.top-btns .help-btn { padding: 3px 10px; font-size: .85rem; letter-spacing: .04em; }
+.top h1 small { display: block; margin-left: 0; margin-top: 2px; }
+@keyframes sheetUp { from { transform: translateY(28px); opacity: .5; } }
+@media (min-width: 600px) { dialog.sheet { margin: auto; border-radius: 20px; } }
+@media (prefers-reduced-motion: reduce) { dialog.sheet[open] { animation: none; } }
+.top h1 { white-space: nowrap; font-size: clamp(1.55rem, 7.2vw, 2rem); }
+.top h1 small { white-space: normal; }
 </style>
 </head>
 <body>
@@ -411,17 +435,19 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     <div class="top-row">
       <h1>警策道場<small>番茄鐘・不准滑手機</small></h1>
       <div class="top-btns">
-        <button type="button" class="help-btn" id="journalBtn" aria-expanded="false" aria-controls="journal">坐禪帳</button>
-        <button type="button" class="help-btn" id="helpBtn" aria-expanded="false" aria-controls="help">說明</button>
+        <button type="button" class="help-btn" id="journalBtn" aria-haspopup="dialog">坐禪帳</button>
+        <button type="button" class="help-btn" id="helpBtn" aria-haspopup="dialog">說明</button>
+        <button type="button" class="help-btn" id="settingsBtn" aria-haspopup="dialog">設定</button>
       </div>
     </div>
     <p>跟住持報到、把手機放好就開始坐禪。坐禪中一拿起手機或切出畫面,就會被警策「啪」一下。</p>
   </header>
 
-  <section class="journal" id="journal" aria-label="坐禪帳" hidden>
+  <dialog class="sheet" id="journal" aria-labelledby="journalTitle">
+   <div class="journal">
     <div class="help-head">
-      <h2>坐禪帳<span class="streak" id="streak"></span></h2>
-      <button type="button" class="dlg-skip" id="journalClose">收起</button>
+      <h2 id="journalTitle">坐禪帳<span class="streak" id="streak"></span></h2>
+      <button type="button" class="dlg-skip sheet-close" id="journalClose">關閉</button>
     </div>
     <div class="month-nav">
       <button type="button" id="prevMonth" aria-label="上個月">‹</button>
@@ -453,12 +479,14 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
       </div>
       <p id="backupStatus" aria-live="polite"></p>
     </div>
-  </section>
+   </div>
+  </dialog>
 
-  <section class="help" id="help" aria-label="道場的規矩" hidden>
+  <dialog class="sheet" id="help" aria-labelledby="helpTitle">
+   <div class="help">
     <div class="help-head">
-      <h2>道場的規矩</h2>
-      <button type="button" class="dlg-skip" id="helpClose">收起</button>
+      <h2 id="helpTitle">道場的規矩</h2>
+      <button type="button" class="dlg-skip sheet-close" id="helpClose">關閉</button>
     </div>
     <ul>
       <li>開始前先跟住持報到:要做的事、每炷多久、坐幾炷、休息多久。可以存成常用,下次直接選。</li>
@@ -471,11 +499,25 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
       <li>想提振精神時可以按「合掌請打」,自己請住持打一下,不算扣分。這是真正禪堂裡也有的規矩。</li>
       <li>iPhone 第一次開始時,要允許存取「動作與方向」,住持才看得到你有沒有拿起手機。</li>
     </ul>
+   </div>
+  </dialog>
+
+  <dialog class="sheet" id="settings" aria-labelledby="settingsTitle">
+   <div class="settings">
+    <div class="help-head">
+      <h2 id="settingsTitle">設定</h2>
+      <button type="button" class="dlg-skip sheet-close" id="settingsClose">關閉</button>
+    </div>
+    <div class="toggles">
+      <label for="optMotion"><input type="checkbox" id="optMotion" checked> 用平衡儀偵測拿起手機 <small>手機平放或立在架上都可以,開始時會記住它的角度</small></label>
+      <label for="optSound"><input type="checkbox" id="optSound" checked> 鐘聲與音效</label>
+    </div>
     <div class="install" id="installBox" hidden>
       <button type="button" class="btn ghost" id="installBtn" hidden>把道場裝到主畫面</button>
       <p id="iosTip" hidden>iPhone 要裝到主畫面:在 Safari 按下方的「分享」,再選「加入主畫面」。</p>
     </div>
-  </section>
+   </div>
+  </dialog>
 
   <section class="stage-wrap" id="stageWrap">
     <svg id="stage" viewBox="0 0 400 280" role="img" aria-label="禪堂裡,一顆麻糬坐在蒲團上打坐,一位小和尚拿著警策來回巡堂">
@@ -663,10 +705,6 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
       <button type="button" class="btn ghost" id="askBtn">合掌請打</button>
     </div>
     <p class="sense" id="sense">偵測方式:<b id="senseMode">開始後檢查平衡儀</b></p>
-    <div class="toggles">
-      <label for="optMotion"><input type="checkbox" id="optMotion" checked> 用平衡儀偵測拿起手機 <small>手機平放或立在架上都可以,開始時會記住它的角度</small></label>
-      <label for="optSound"><input type="checkbox" id="optSound" checked> 鐘聲與音效</label>
-    </div>
     <dl class="stats">
       <div><dt>本輪被打</dt><dd class="hitnum" id="stHits">0<small>下</small></dd></div>
       <div><dt>自己請打</dt><dd id="stAsks">0<small>下</small></dd></div>
@@ -1432,13 +1470,24 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     $('#installBox').hidden = false; $('#iosTip').hidden = false;
   }
 
-  const helpBtn = $('#helpBtn'), helpBox = $('#help');
-  function showHelp(on) {
-    if (on && !journalBox.hidden) showJournal(false);
-    helpBox.hidden = !on; helpBtn.setAttribute('aria-expanded', String(on));
+  // 坐禪帳 / 說明 / 設定 open as sheets over the hall, so the timer and the monk keep going underneath
+  function openSheet(d) {
+    document.querySelectorAll('dialog.sheet[open]').forEach(x => x.close());
+    if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
   }
-  helpBtn.addEventListener('click', () => showHelp(helpBox.hidden));
-  $('#helpClose').addEventListener('click', () => { showHelp(false); helpBtn.focus(); });
+  document.querySelectorAll('dialog.sheet').forEach(d => {
+    d.addEventListener('click', e => { if (e.target === d) d.close(); });     // tap the dimmed backdrop
+    d.querySelector('.sheet-close').addEventListener('click', () => d.close());
+  });
+  const helpBox = $('#help');
+  $('#helpBtn').addEventListener('click', () => openSheet(helpBox));
+  $('#settingsBtn').addEventListener('click', () => openSheet($('#settings')));
+  // settings are remembered on this device
+  const opts = store.get('keisaku-opts-v1', {});
+  if (typeof opts.motion === 'boolean') $('#optMotion').checked = opts.motion;
+  if (typeof opts.sound === 'boolean') $('#optSound').checked = opts.sound;
+  ['optMotion', 'optSound'].forEach(id => $('#' + id).addEventListener('change', () =>
+    store.set('keisaku-opts-v1', { motion: $('#optMotion').checked, sound: $('#optSound').checked })));
 
   /* ---------- 坐禪帳: log, stamps, calendar, backup ---------- */
   const LOG_KEY = 'keisaku-log-v2';
@@ -1574,12 +1623,10 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
       ul.appendChild(li);
     }
   }
-  function showJournal(on) {
-    if (on) { showHelp(false); const n = new Date(); J.y = n.getFullYear(); J.m = n.getMonth(); J.sel = dayKey(); renderJournal(); }
-    journalBox.hidden = !on; journalBtn.setAttribute('aria-expanded', String(on));
-  }
-  journalBtn.addEventListener('click', () => showJournal(journalBox.hidden));
-  $('#journalClose').addEventListener('click', () => { showJournal(false); journalBtn.focus(); });
+  journalBtn.addEventListener('click', () => {
+    const n = new Date(); J.y = n.getFullYear(); J.m = n.getMonth(); J.sel = dayKey();
+    renderJournal(); openSheet(journalBox);
+  });
   $('#prevMonth').addEventListener('click', () => { if (--J.m < 0) { J.m = 11; J.y--; } renderJournal(); });
   $('#nextMonth').addEventListener('click', () => { if (++J.m > 11) { J.m = 0; J.y++; } renderJournal(); });
 
