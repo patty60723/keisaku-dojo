@@ -492,6 +492,17 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
 .seg span { display: block; text-align: center; padding: 7px 4px; font-size: .92rem; color: var(--accent); }
 .seg input:checked + span { background: var(--accent); color: var(--on-accent); font-weight: 700; }
 .seg input:focus-visible + span { outline: 2.5px solid var(--accent); outline-offset: -5px; }
+
+/* background sound picker: the segmented control wraps to two rows of three */
+.seg-3x2 { grid-template-columns: repeat(3, 1fr); }
+.seg-3x2 label + label { border-left: 0; }
+.seg-3x2 label { border-left: 1.5px solid var(--accent); border-top: 1.5px solid var(--accent); margin: -1.5px 0 0 -1.5px; }
+.amb-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.amb-vol { flex: 1; display: flex; align-items: center; gap: 8px; font-size: .9rem; min-width: 0; }
+.amb-vol input { flex: 1; min-width: 0; accent-color: var(--accent); }
+.small-btn:disabled { opacity: .4; cursor: default; }
+.small-btn[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.amb-note { margin: 0; font-size: .8rem; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -570,6 +581,22 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
         <label><input type="radio" name="theme" id="themeLight" value="light"><span>淺色</span></label>
         <label><input type="radio" name="theme" id="themeDark" value="dark"><span>深色</span></label>
       </div>
+    </fieldset>
+    <fieldset class="theme-pick">
+      <legend>坐禪時的背景聲音</legend>
+      <div class="seg seg-3x2" role="radiogroup" aria-label="坐禪時的背景聲音">
+        <label><input type="radio" name="ambient" value="none" checked><span>不播放</span></label>
+        <label><input type="radio" name="ambient" value="rain"><span>雨聲</span></label>
+        <label><input type="radio" name="ambient" value="stream"><span>溪流</span></label>
+        <label><input type="radio" name="ambient" value="wind"><span>山風</span></label>
+        <label><input type="radio" name="ambient" value="chimes"><span>風鈴</span></label>
+        <label><input type="radio" name="ambient" value="noise"><span>白噪音</span></label>
+      </div>
+      <div class="amb-row">
+        <label for="ambVol" class="amb-vol">音量 <input type="range" id="ambVol" min="5" max="100" value="45"></label>
+        <button type="button" class="small-btn" id="ambPreview" aria-pressed="false">試聽</button>
+      </div>
+      <p class="amb-note">止靜三鐘敲完才慢慢淡入,放禪時淡出;休息時不播。手機開了靜音模式可能會聽不到。</p>
     </fieldset>
     <div class="toggles">
       <label for="optMotion"><input type="checkbox" id="optMotion" checked> 用平衡儀偵測拿起手機 <small>手機平放或立在架上都可以,開始時會記住它的角度</small></label>
@@ -883,6 +910,107 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     o.connect(v).connect(a.destination); o.start(t); o.stop(t + .2);
   }
   const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
+
+  /* ---------- background sounds (all synthesized, so they work offline) ---------- */
+  const AMBIENT_LABEL = { none: '不播放', rain: '雨聲', stream: '溪流', wind: '山風', chimes: '風鈴', noise: '白噪音' };
+  const noiseCache = {};
+  // a few seconds of white / pink / brown noise, looped
+  function noiseBuffer(a, color) {
+    if (noiseCache[color]) return noiseCache[color];
+    const len = a.sampleRate * 4, buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, last = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      if (color === 'pink') {        // Paul Kellet's filter
+        b0 = .99886 * b0 + w * .0555179; b1 = .99332 * b1 + w * .0750759; b2 = .969 * b2 + w * .153852;
+        b3 = .8665 * b3 + w * .3104856; b4 = .55 * b4 + w * .5329522; b5 = -.7616 * b5 - w * .016898;
+        d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * .5362) * .11; b6 = w * .115926;
+      } else if (color === 'brown') {
+        last = (last + .02 * w) / 1.02; d[i] = last * 3.5;
+      } else d[i] = w * .5;
+    }
+    // cross-fade the seam so the loop doesn't click
+    const fade = Math.floor(a.sampleRate * .05);
+    for (let i = 0; i < fade; i++) { const k = i / fade; d[len - fade + i] = d[len - fade + i] * (1 - k) + d[i] * k; }
+    return (noiseCache[color] = buf);
+  }
+  const Amb = { out: null, nodes: [], timers: [], kind: 'none', playing: false };
+  const ambientVolume = () => +$('#ambVol').value / 100;
+  function lfo(a, rate, depth, param) {
+    const o = a.createOscillator(), g = a.createGain();
+    o.frequency.value = rate; g.gain.value = depth; o.connect(g).connect(param); o.start();
+    Amb.nodes.push(o);
+  }
+  function noiseSource(a, color, ...chain) {
+    const src = a.createBufferSource(); src.buffer = noiseBuffer(a, color); src.loop = true;
+    src.loopStart = Math.random() * 3;   // so layers don't line up
+    let n = src; for (const c of chain) n = n.connect(c);
+    n.connect(Amb.out); src.start(0, src.loopStart); Amb.nodes.push(src);
+    return src;
+  }
+  const filt = (a, type, freq, q = .7) => { const f = a.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q; return f; };
+  const gainOf = (a, v) => { const g = a.createGain(); g.gain.value = v; return g; };
+  function chime(a, when) {
+    const base = [1046, 1175, 1318, 1568, 1760][Math.floor(Math.random() * 5)];
+    [[1, .5, 2.6], [2.76, .12, 1.4], [5.4, .05, .8]].forEach(([m, g, d]) => {
+      const o = a.createOscillator(), v = a.createGain();
+      o.frequency.value = base * m; v.gain.setValueAtTime(0, when);
+      v.gain.linearRampToValueAtTime(g * .09, when + .005); v.gain.exponentialRampToValueAtTime(.0001, when + d);
+      o.connect(v).connect(Amb.out); o.start(when); o.stop(when + d + .05);
+    });
+  }
+  function startAmbient(kind) {
+    stopAmbient(0);
+    const a = audio(); if (!a || kind === 'none') return;
+    Amb.kind = kind; Amb.playing = true;
+    Amb.out = a.createGain(); Amb.out.gain.value = 0; Amb.out.connect(a.destination);
+    Amb.out.gain.setTargetAtTime(ambientVolume(), a.currentTime, 1.2);       // slow fade-in
+    if (kind === 'rain') {
+      noiseSource(a, 'pink', filt(a, 'highpass', 500), filt(a, 'lowpass', 7000), gainOf(a, 1.35));
+      const patter = gainOf(a, .38); noiseSource(a, 'white', filt(a, 'bandpass', 3800, 1.2), patter);
+      lfo(a, .13, .12, patter.gain);
+      const drip = () => {               // a few heavier drops off the eaves
+        if (!Amb.playing) return;
+        const t = a.currentTime + .02, s = a.createBufferSource(), g = a.createGain(), f = filt(a, 'bandpass', 900 + Math.random() * 1800, 4);
+        s.buffer = noiseBuffer(a, 'white'); g.gain.setValueAtTime(.5, t); g.gain.exponentialRampToValueAtTime(.001, t + .06);
+        s.connect(f).connect(g).connect(Amb.out); s.start(t, Math.random() * 3, .08);
+        Amb.timers.push(setTimeout(drip, 120 + Math.random() * 900));
+      };
+      drip();
+    } else if (kind === 'stream') {
+      const bp = filt(a, 'bandpass', 900, .9); noiseSource(a, 'brown', bp, gainOf(a, 2.4));
+      lfo(a, .31, 260, bp.frequency); lfo(a, .73, 140, bp.frequency);
+      const hiss = filt(a, 'bandpass', 2600, 1.4), hg = gainOf(a, .18); noiseSource(a, 'pink', hiss, hg);
+      lfo(a, 1.7, .075, hg.gain);
+    } else if (kind === 'wind' || kind === 'chimes') {
+      const lp = filt(a, 'lowpass', 420, 1.2), g = gainOf(a, kind === 'wind' ? .68 : .42);
+      noiseSource(a, 'brown', lp, g);
+      lfo(a, .06, 230, lp.frequency); lfo(a, .045, kind === 'wind' ? .3 : .18, g.gain);
+      if (kind === 'chimes') {
+        const ring = () => {
+          if (!Amb.playing) return;
+          const t = a.currentTime + .05, n = 1 + Math.floor(Math.random() * 3);
+          for (let i = 0; i < n; i++) chime(a, t + i * (.18 + Math.random() * .25));
+          Amb.timers.push(setTimeout(ring, 6000 + Math.random() * 12000));
+        };
+        Amb.timers.push(setTimeout(ring, 1500));
+      }
+    } else if (kind === 'noise') {
+      noiseSource(a, 'pink', filt(a, 'lowpass', 2600), gainOf(a, .8));
+      noiseSource(a, 'brown', gainOf(a, .6));
+    }
+  }
+  function stopAmbient(fade = 1.5) {
+    Amb.playing = false;
+    Amb.timers.forEach(clearTimeout); Amb.timers = [];
+    const out = Amb.out, nodes = Amb.nodes; Amb.out = null; Amb.nodes = [];
+    if (!out) return;
+    const a = audio(), stopAt = a.currentTime + fade;
+    if (fade > 0) out.gain.setTargetAtTime(0, a.currentTime, fade / 4); else out.gain.value = 0;
+    nodes.forEach(n => { try { n.stop(stopAt + .1); } catch {} });
+    setTimeout(() => out.disconnect(), (fade + .3) * 1000);
+  }
+  const ambientChoice = () => (document.querySelector('input[name="ambient"]:checked') || {}).value || 'none';
 
   /* ---------- monk motion ---------- */
   const M = { holding: false, x: 60, y: 215, ty: 215, tx: 60, speed: 28, face: 1, stick: 10, wait: 1.5, walkT: 0, mode: 'patrol', arrive: null };
@@ -1416,10 +1544,12 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     setMain('出堂・結束');
     renderRounds();
     bells(3);
+    Amb.timers.push(setTimeout(() => { if (P.phase === 'focus') startAmbient(ambientChoice()); }, 3800));
     toast(P.round === 1 ? '止靜。住持開始巡堂了。' : `第 ${P.round} 炷,止靜。`);
   }
 
   function endFocus() {
+    stopAmbient(2.5);
     P.focusTotal += cfg.focusMin;
     saveRound(cfg.focusMin, true); renderStats();
     bell(0, .26); buzz([200, 120, 200]);
@@ -1448,6 +1578,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
   }
 
   function finishCycle(early) {
+    stopAmbient(2);
     clearTimeout(P.settleTimer);
     const hadFocus = P.focusTotal > 0 || P.hits > 0;
     P.phase = 'idle'; P.round = 1;
@@ -1596,7 +1727,30 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
   if (typeof opts.motion === 'boolean') $('#optMotion').checked = opts.motion;
   if (typeof opts.sound === 'boolean') $('#optSound').checked = opts.sound;
   const themeNow = () => (document.querySelector('input[name="theme"]:checked') || {}).value || 'system';
-  const saveOpts = () => store.set('keisaku-opts-v1', { motion: $('#optMotion').checked, sound: $('#optSound').checked, theme: themeNow() });
+  const saveOpts = () => store.set('keisaku-opts-v1', { motion: $('#optMotion').checked, sound: $('#optSound').checked, theme: themeNow(),
+    ambient: ambientChoice(), ambVol: +$('#ambVol').value });
+  if (AMBIENT_LABEL[opts.ambient]) document.querySelector(`input[name="ambient"][value="${opts.ambient}"]`).checked = true;
+  if (typeof opts.ambVol === 'number') $('#ambVol').value = opts.ambVol;
+  const previewBtn = $('#ambPreview');
+  let previewing = false;
+  function setPreview(on) {
+    previewing = on;
+    previewBtn.textContent = on ? '停止試聽' : '試聽';
+    previewBtn.setAttribute('aria-pressed', String(on));
+    if (on) startAmbient(ambientChoice());
+    else if (P.phase === 'focus') startAmbient(ambientChoice());   // back to what the sitting was playing
+    else stopAmbient(.8);
+  }
+  previewBtn.addEventListener('click', () => setPreview(!previewing));
+  document.querySelectorAll('input[name="ambient"]').forEach(r => r.addEventListener('change', () => {
+    saveOpts();
+    previewBtn.disabled = ambientChoice() === 'none';
+    if (previewing || P.phase === 'focus') { if (ambientChoice() === 'none') { stopAmbient(.8); setPreview(false); } else startAmbient(ambientChoice()); }
+  }));
+  previewBtn.disabled = ambientChoice() === 'none';
+  $('#ambVol').addEventListener('input', () => { if (Amb.out) Amb.out.gain.setTargetAtTime(ambientVolume(), audio().currentTime, .1); });
+  $('#ambVol').addEventListener('change', saveOpts);
+  $('#settings').addEventListener('close', () => { if (previewing) setPreview(false); });
   ['optMotion', 'optSound'].forEach(id => $('#' + id).addEventListener('change', saveOpts));
 
   // appearance: follow the phone, or force light / dark (the tokens already handle [data-theme])
