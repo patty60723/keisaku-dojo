@@ -1,0 +1,912 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e9ecdf" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141816" media="(prefers-color-scheme: dark)">
+<title>警策道場</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Fredoka:wght@500;600&display=swap">
+<style>
+/* Layout: one narrow column — the zendō scene is the hero, the timer and controls sit under it like a meditation hall's notice board. */
+:root {
+  --bg: #e9ecdf;
+  --surface: #f8f9f1;
+  --line: #d3d6c2;
+  --ink: #2a2622;
+  --muted: #696557;
+  --accent: #33456b;      /* monk-robe indigo: buttons, focus */
+  --on-accent: #ffffff;
+  --shu: #cf3f28;         /* vermilion: only the strike and the seal */
+
+  --wall: #e3e6d2;
+  --wood: #5d4230;
+  --wood-2: #80604a;
+  --tatami: #d5cd93;
+  --tatami-line: #bdb476;
+  --heri: #3d4a2d;
+  --window: #f7f5e9;
+  --moon-o: 0;
+  --paper: #f5f1e4;
+  --mount: #8c9a7a;
+  --scroll-ink: #2a2622;
+  --mochi: #fffdf7;
+  --blush: #f2a49a;
+  --skin: #f0d0b0;
+  --robe: #33456b;
+  --kesa: #8a5d34;
+  --stick: #c69b62;
+  --cushion: #6a4b78;
+  --mat: #3f3a35;
+
+  --f-display: "LXGW WenKai TC", "Kaiti TC", "BiauKai", "STKaiti", serif;
+  --f-body: "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --f-num: "Fredoka", ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141816; --surface: #1d2320; --line: #323a36; --ink: #ebe6d8; --muted: #a39e8f;
+    --accent: #a8bbe6; --on-accent: #141816; --shu: #ff6b4f;
+    --wall: #1f2624; --wood: #2d211a; --wood-2: #4a3a2e; --tatami: #4a4831; --tatami-line: #5a5739; --heri: #1b2316;
+    --window: #263142; --moon-o: 1; --paper: #d8d2c0; --mount: #4d5a45; --scroll-ink: #2a2622;
+    --mochi: #f3eee2; --blush: #e08d84; --skin: #e0bd9b; --robe: #3d4c70; --kesa: #85582f; --stick: #b88d55;
+    --cushion: #8a699c; --mat: #2a2622;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141816; --surface: #1d2320; --line: #323a36; --ink: #ebe6d8; --muted: #a39e8f;
+  --accent: #a8bbe6; --on-accent: #141816; --shu: #ff6b4f;
+  --wall: #1f2624; --wood: #2d211a; --wood-2: #4a3a2e; --tatami: #4a4831; --tatami-line: #5a5739; --heri: #1b2316;
+  --window: #263142; --moon-o: 1; --paper: #d8d2c0; --mount: #4d5a45; --scroll-ink: #2a2622;
+  --mochi: #f3eee2; --blush: #e08d84; --skin: #e0bd9b; --robe: #3d4c70; --kesa: #85582f; --stick: #b88d55;
+  --cushion: #8a699c; --mat: #2a2622;
+  color-scheme: dark;
+}
+
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.6;
+  padding-inline: 16px;
+  padding-block: 20px 28px;
+  box-sizing: border-box;
+}
+*, *::before, *::after { box-sizing: border-box; }
+.app { max-width: 540px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+
+.top { display: flex; flex-direction: column; gap: 2px; }
+.top h1 {
+  font-family: var(--f-display); font-weight: 700; font-size: 2rem; line-height: 1.15;
+  margin: 0; letter-spacing: .08em; text-wrap: balance;
+}
+.top h1 small { font-size: .5em; font-weight: 400; color: var(--muted); letter-spacing: .04em; margin-left: .5em; }
+.top p { margin: 0; color: var(--muted); font-size: .95rem; text-wrap: pretty; }
+
+/* ---------- stage ---------- */
+.stage-wrap {
+  position: relative; border-radius: 18px; overflow: hidden;
+  border: 1.5px solid var(--line); background: var(--wall);
+  max-width: 100%;
+}
+#stage { display: block; width: 100%; height: auto; }
+.shake { animation: shake .38s cubic-bezier(.3,.7,.4,1); }
+@keyframes shake {
+  0%{transform:translate(0,0)} 15%{transform:translate(-6px,3px)} 30%{transform:translate(5px,-3px)}
+  45%{transform:translate(-4px,2px)} 60%{transform:translate(3px,-1px)} 80%{transform:translate(-1px,1px)} 100%{transform:translate(0,0)}
+}
+
+.f-wall{fill:var(--wall)} .f-wood{fill:var(--wood)} .f-wood2{fill:var(--wood-2)} .f-tatami{fill:var(--tatami)}
+.f-heri{fill:var(--heri)} .f-window{fill:var(--window)} .f-paper{fill:var(--paper)} .f-mount{fill:var(--mount)}
+.f-mochi{fill:var(--mochi)} .f-blush{fill:var(--blush)} .f-skin{fill:var(--skin)} .f-robe{fill:var(--robe)}
+.f-kesa{fill:var(--kesa)} .f-stick{fill:var(--stick)} .f-cushion{fill:var(--cushion)} .f-mat{fill:var(--mat)}
+.f-ink{fill:var(--ink)} .f-shu{fill:var(--shu)} .f-sink{fill:var(--scroll-ink)}
+.s-ink{stroke:#2a2622; fill:none} .s-wood{stroke:var(--wood); fill:none} .s-weave{stroke:var(--tatami-line)}
+.moon{fill:#fbf6df; opacity:var(--moon-o)}
+.scroll-char{font-family:var(--f-display); font-weight:700}
+.smoke{stroke:var(--muted); fill:none; opacity:.45; stroke-linecap:round; animation: smoke 5s ease-in-out infinite;}
+@keyframes smoke { 0%,100%{transform:translateX(0); opacity:.25} 50%{transform:translateX(2px); opacity:.55} }
+.ember{fill:var(--shu); animation: ember 2.4s ease-in-out infinite}
+@keyframes ember { 50%{opacity:.55} }
+
+#sitterBody { transform-box: fill-box; transform-origin: 50% 100%; animation: breathe 5s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{transform:scale(1,1)} 50%{transform:scale(1.015,1.04)} }
+#sitter.ouch #sitterBody { animation: ouch .5s ease-out; }
+@keyframes ouch { 0%{transform:scale(1.08,.86)} 40%{transform:scale(.96,1.06)} 100%{transform:scale(1,1)} }
+.face{display:none}
+#sitter[data-face="calm"] .f-calm, #sitter[data-face="ouch"] .f-ouch, #sitter[data-face="happy"] .f-happy, #sitter[data-face="peek"] .f-peek { display:inline; }
+.bump{display:none} #sitter[data-face="ouch"] .bump{display:inline}
+.brow{display:none} #monk[data-mood="stern"] .brow{display:inline}
+#monk[data-mood="stern"] .m-mouth{display:none}
+.m-stern-mouth{display:none} #monk[data-mood="stern"] .m-stern-mouth{display:inline}
+
+.bubble {
+  position: absolute; transform: translate(-50%, -100%);
+  background: var(--surface); color: var(--ink); border: 1.5px solid var(--ink);
+  border-radius: 14px; padding: 4px 10px; font-size: .95rem; line-height: 1.35;
+  white-space: nowrap; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  box-shadow: 0 2px 0 var(--ink);
+}
+.bubble::after {
+  content: ""; position: absolute; left: 50%; bottom: -7px; width: 10px; height: 10px;
+  background: var(--surface); border-right: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink);
+  transform: translateX(-50%) rotate(45deg);
+}
+.bubble button {
+  position: relative; overflow: hidden;
+  font: inherit; font-weight: 700; border: 0; border-radius: 999px; padding: 5px 14px;
+  background: var(--accent); color: var(--on-accent); cursor: pointer;
+}
+.bubble button::after {
+  content: ""; position: absolute; left: 0; bottom: 0; height: 3px; width: 100%;
+  background: var(--shu); transform-origin: left; animation: countdown 12s linear forwards;
+}
+@keyframes countdown { to { transform: scaleX(0); } }
+
+.pow {
+  position: absolute; left: 56%; top: 52%; transform: translate(-50%,-50%) scale(0) rotate(-12deg);
+  font-family: var(--f-display); font-weight: 700; font-size: clamp(2.2rem, 11vw, 3.6rem); line-height: 1;
+  color: var(--shu); -webkit-text-stroke: 2px var(--surface); paint-order: stroke fill;
+  pointer-events: none; opacity: 0;
+}
+.pow.go { animation: pow .75s cubic-bezier(.2,1.6,.4,1) forwards; }
+@keyframes pow {
+  0%{opacity:1; transform:translate(-50%,-50%) scale(.3) rotate(-12deg)}
+  25%{opacity:1; transform:translate(-50%,-62%) scale(1.15) rotate(-8deg)}
+  70%{opacity:1; transform:translate(-50%,-66%) scale(1) rotate(-8deg)}
+  100%{opacity:0; transform:translate(-50%,-80%) scale(.95) rotate(-8deg)}
+}
+.stars { position:absolute; inset:0; pointer-events:none; }
+.star { position:absolute; color: var(--shu); font-size: 1rem; animation: star .7s ease-out forwards; }
+@keyframes star { from{transform:translate(0,0) scale(1); opacity:1} to{transform:translate(var(--dx),var(--dy)) scale(.4); opacity:0} }
+
+.result {
+  position: absolute; inset: 0; display: grid; place-items: center; padding: 14px;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(3px);
+}
+.result-card {
+  background: var(--surface); border: 1.5px solid var(--ink); border-radius: 16px;
+  padding: 16px 18px; width: min(100%, 330px);
+  display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; align-items: center;
+  box-shadow: 0 3px 0 var(--ink);
+}
+.seal {
+  grid-row: span 3; width: 64px; height: 64px; border: 3px solid var(--shu); border-radius: 6px;
+  color: var(--shu); font-family: var(--f-display); font-weight: 700; font-size: 1.45rem; line-height: 1.05;
+  display: flex; align-items: center; justify-content: center; transform: rotate(-4deg);
+}
+.seal span { display: flex; flex-direction: column; align-items: center; line-height: 1.05; }
+.seal i { font-style: normal; }
+.result h2 { margin: 0; font-family: var(--f-display); font-size: 1.25rem; letter-spacing: .06em; }
+.result p { margin: 0; color: var(--muted); font-size: .92rem; }
+.result .koan { grid-column: 1 / -1; color: var(--ink); font-family: var(--f-display); font-size: 1.05rem; padding-top: 6px; border-top: 1px dashed var(--line); margin-top: 4px; }
+.result button { grid-column: 1 / -1; margin-top: 4px; }
+
+.toast { margin: -4px 0 0; min-height: 1.6em; text-align: center; color: var(--muted); font-size: .95rem; }
+.toast.hit { color: var(--shu); font-weight: 700; }
+
+/* ---------- panel ---------- */
+.panel {
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 18px;
+  padding: 16px; display: flex; flex-direction: column; gap: 14px;
+}
+.clock-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.clock { font-family: var(--f-num); font-weight: 600; font-size: clamp(2.6rem, 13vw, 3.4rem); line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+.pill {
+  font-size: .85rem; padding: 3px 12px; border-radius: 999px; border: 1.5px solid var(--line); color: var(--muted);
+  letter-spacing: .08em; white-space: nowrap;
+}
+.pill[data-state="on"] { border-color: var(--accent); color: var(--accent); }
+.pill[data-state="hit"] { border-color: var(--shu); color: var(--shu); }
+
+.chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.chip {
+  font: inherit; cursor: pointer; border: 1.5px solid var(--line); background: transparent; color: var(--ink);
+  border-radius: 12px; padding: 6px 4px; display: flex; flex-direction: column; align-items: center; line-height: 1.2;
+}
+.chip b { font-family: var(--f-num); font-weight: 600; font-size: 1.15rem; }
+.chip span { font-size: .78rem; color: var(--muted); }
+.chip[aria-checked="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.chip:disabled { opacity: .45; cursor: not-allowed; }
+
+.actions { display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px; }
+.btn {
+  font: inherit; font-weight: 700; font-size: 1.05rem; letter-spacing: .06em; cursor: pointer;
+  border-radius: 14px; padding: 11px 12px; border: 1.5px solid var(--accent);
+  transition: transform .08s ease;
+}
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--accent); color: var(--on-accent); }
+.btn.primary.warn { background: var(--shu); border-color: var(--shu); color: #fff; }
+.btn.ghost { background: transparent; color: var(--accent); }
+button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
+
+.toggles { display: flex; flex-direction: column; gap: 8px; }
+.toggles label { display: flex; align-items: baseline; gap: 8px; cursor: pointer; flex-wrap: wrap; }
+.toggles input { accent-color: var(--accent); width: 1rem; height: 1rem; transform: translateY(2px); }
+.toggles small { color: var(--muted); font-size: .82rem; }
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0; border-top: 1px dashed var(--line); padding-top: 12px; }
+.stats div { display: flex; flex-direction: column; gap: 0; min-width: 0; }
+.stats dt { font-size: .76rem; color: var(--muted); letter-spacing: .06em; }
+.stats dd { margin: 0; font-family: var(--f-num); font-weight: 600; font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+.stats dd small { font-family: var(--f-body); font-weight: 400; font-size: .75rem; color: var(--muted); margin-left: 2px; }
+.stats .hitnum { color: var(--shu); }
+
+.note { color: var(--muted); font-size: .85rem; text-align: left; padding-inline: 4px; text-wrap: pretty; }
+.note b { color: var(--ink); font-weight: 700; }
+
+@media (max-width: 420px) {
+  .stats { grid-template-columns: repeat(2, 1fr); row-gap: 10px; }
+  .top h1 small { display: block; margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #sitterBody, .smoke, .ember { animation: none; }
+  .shake { animation: none; }
+}
+
+/* ---------- pomodoro rounds & sensor line ---------- */
+.round-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.rounds { display: flex; gap: 10px; align-items: flex-end; }
+.rounds i {
+  display: block; width: 6px; height: 26px; border-radius: 3px; border: 1.5px solid var(--line);
+  position: relative;
+}
+.rounds i::before { /* the ember */
+  content: ""; position: absolute; left: 50%; top: -5px; width: 5px; height: 5px; border-radius: 50%;
+  transform: translateX(-50%); background: transparent;
+}
+.rounds i.done { background: var(--line); height: 8px; }
+.rounds i.now { border-color: var(--kesa); background: var(--kesa); }
+.rounds i.now::before { background: var(--shu); }
+.round-label { color: var(--muted); font-size: .9rem; }
+.round-label b { color: var(--ink); font-family: var(--f-num); font-weight: 600; }
+.sense { margin: 0; font-size: .85rem; color: var(--muted); display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
+.sense b { font-weight: 700; color: var(--ink); }
+.sense[data-ok="yes"] b { color: var(--accent); }
+.btn:disabled { opacity: .55; cursor: wait; }
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <h1>警策道場<small>番茄鐘・不准滑手機</small></h1>
+    <p>手機平放在桌上就開始坐禪。住持一直在巡堂,一拿起手機或切出畫面,就會被警策「啪」一下。</p>
+  </header>
+
+  <section class="stage-wrap" id="stageWrap">
+    <svg id="stage" viewBox="0 0 400 280" role="img" aria-label="禪堂裡,一顆麻糬坐在蒲團上打坐,一位小和尚拿著警策來回巡堂">
+      <defs>
+        <pattern id="weave" width="400" height="3" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="1.5" x2="400" y2="1.5" class="s-weave" stroke-width=".6"/>
+        </pattern>
+        <clipPath id="winClip"><circle cx="86" cy="98" r="33"/></clipPath>
+      </defs>
+
+      <!-- wall & woodwork -->
+      <rect class="f-wall" x="0" y="0" width="400" height="176"/>
+      <rect class="f-wood" x="0" y="0" width="400" height="15"/>
+      <rect class="f-wood2" x="0" y="34" width="400" height="7"/>
+      <rect class="f-wood" x="12" y="0" width="10" height="176"/>
+      <rect class="f-wood" x="378" y="0" width="10" height="176"/>
+
+      <!-- round window -->
+      <circle class="f-window" cx="86" cy="98" r="33"/>
+      <circle class="moon" cx="98" cy="86" r="9"/>
+      <g clip-path="url(#winClip)" class="s-wood" stroke-width="1.6">
+        <line x1="70" y1="60" x2="70" y2="140"/><line x1="86" y1="60" x2="86" y2="140"/><line x1="102" y1="60" x2="102" y2="140"/>
+        <line x1="50" y1="82" x2="120" y2="82"/><line x1="50" y1="98" x2="120" y2="98"/><line x1="50" y1="114" x2="120" y2="114"/>
+      </g>
+      <circle cx="86" cy="98" r="33" class="s-wood" stroke-width="5"/>
+
+      <!-- hanging scroll -->
+      <rect class="f-wood" x="176" y="46" width="48" height="4" rx="2"/>
+      <rect class="f-mount" x="180" y="50" width="40" height="92"/>
+      <rect class="f-paper" x="185" y="58" width="30" height="76"/>
+      <text class="scroll-char f-sink" x="200" y="92" font-size="22" text-anchor="middle" id="scrollChar">靜</text>
+      <rect class="f-shu" x="204" y="118" width="6" height="6" rx="1"/>
+      <rect class="f-wood" x="174" y="141" width="52" height="5" rx="2.5"/>
+
+      <!-- incense table (doubles as the timer) -->
+      <rect class="f-wood" x="312" y="152" width="52" height="5" rx="1"/>
+      <rect class="f-wood" x="316" y="157" width="4" height="17"/>
+      <rect class="f-wood" x="356" y="157" width="4" height="17"/>
+      <path class="f-wood2" d="M326 140 h24 q-1 12 -12 12 q-11 0 -12 -12 z"/>
+      <rect class="f-kesa" id="incense" x="337" y="96" width="2.2" height="44"/>
+      <circle class="ember" id="ember" cx="338.1" cy="96" r="1.8"/>
+      <path class="smoke" id="smoke" stroke-width="1.3" d="M338 92 q-5 -8 0 -16 q5 -8 0 -16 q-4 -6 1 -12"/>
+
+      <!-- tea for break time -->
+      <g id="tea" visibility="hidden">
+        <path class="f-paper" d="M352 143 h13 l-1.6 9 h-9.8 z" stroke="#2a2622" stroke-width="1"/>
+        <path class="smoke" stroke-width="1" d="M356 140 q-2 -4 0 -8 M361 140 q2 -4 0 -8"/>
+      </g>
+
+      <!-- floor -->
+      <rect x="0" y="176" width="400" height="104" class="f-tatami"/>
+      <rect x="0" y="176" width="400" height="104" fill="url(#weave)"/>
+      <rect class="f-wood" x="0" y="170" width="400" height="7"/>
+      <rect class="f-heri" x="0" y="230" width="400" height="3"/>
+      <rect class="f-heri" x="128" y="177" width="3" height="53"/>
+      <rect class="f-heri" x="272" y="233" width="3" height="47"/>
+
+      <!-- monk (drawn behind the sitter; feet at 0,0, facing right) -->
+      <g id="monk" data-mood="calm" transform="translate(90 215)">
+        <ellipse class="f-ink" cx="-8" cy="1" rx="6" ry="2.5"/>
+        <ellipse class="f-ink" cx="8" cy="1" rx="6" ry="2.5"/>
+        <path class="f-robe" d="M-20 0 L-15 -55 Q0 -62 15 -55 L20 0 Z" stroke="#2a2622" stroke-width="1.5"/>
+        <path class="f-kesa" d="M-13 -54 L15 -6 L19 -13 L-6 -57 Z"/>
+        <g id="stick" transform="rotate(10 12 -38)">
+          <rect class="f-stick" x="10.6" y="-90" width="2.8" height="58" rx="1.2" stroke="#2a2622" stroke-width=".8"/>
+          <rect class="f-stick" x="9.2" y="-108" width="5.6" height="22" rx="1.8" stroke="#2a2622" stroke-width=".8"/>
+        </g>
+        <path d="M0 -52 Q14 -48 12 -38" class="s-ink" stroke-width="8.5" stroke-linecap="round"/>
+        <path d="M0 -52 Q14 -48 12 -38" stroke="var(--robe)" fill="none" stroke-width="6" stroke-linecap="round"/>
+        <circle class="f-skin" cx="12" cy="-38" r="4.2" stroke="#2a2622" stroke-width="1.1"/>
+        <circle class="f-skin" cx="-13" cy="-72" r="3.4" stroke="#2a2622" stroke-width="1.1"/>
+        <circle class="f-skin" cx="0" cy="-72" r="15" stroke="#2a2622" stroke-width="1.5"/>
+        <path d="M-6 -84 q4 -2 8 0" class="s-ink" stroke-width=".8" opacity=".35"/>
+        <ellipse cx="3" cy="-73" rx="1.6" ry="2" fill="#2a2622"/>
+        <ellipse cx="10" cy="-73" rx="1.6" ry="2" fill="#2a2622"/>
+        <ellipse class="f-blush" cx="11" cy="-67" rx="3" ry="1.8" opacity=".75"/>
+        <path class="m-mouth s-ink" d="M4 -66 q2.5 1.8 5 0" stroke-width="1.2" stroke-linecap="round"/>
+        <path class="m-stern-mouth s-ink" d="M4 -65.5 h5" stroke-width="1.3" stroke-linecap="round"/>
+        <path class="brow s-ink" d="M0 -79 l5 2.2 M13 -79 l-4.5 2.2" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+
+      <!-- sitter: a mochi on a zafu -->
+      <g id="sitter" data-face="calm" transform="translate(200 240)">
+        <rect class="f-mat" x="-48" y="-5" width="96" height="11" rx="3"/>
+        <ellipse class="f-cushion" cx="0" cy="-8" rx="36" ry="10" stroke="#2a2622" stroke-width="1.3"/>
+        <g id="sitterBody">
+          <path class="f-mochi" d="M-31 -14 C-34 -40 -20 -68 0 -68 C20 -68 34 -40 31 -14 C22 -9 -22 -9 -31 -14 Z" stroke="#2a2622" stroke-width="1.6"/>
+          <ellipse class="f-mochi" cx="0" cy="-20" rx="8" ry="4.5" stroke="#2a2622" stroke-width="1.2"/>
+          <ellipse class="f-blush" cx="-17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/>
+          <ellipse class="f-blush" cx="17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/>
+          <g class="face f-calm s-ink" stroke-width="1.5" stroke-linecap="round">
+            <path d="M-13 -44 q4 3.2 8 0"/><path d="M5 -44 q4 3.2 8 0"/><path d="M-2 -35 q2 1.4 4 0"/>
+          </g>
+          <g class="face f-ouch s-ink" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M-14 -48 l7 3 l-7 3"/><path d="M14 -48 l-7 3 l7 3"/><path d="M-5 -34 q2.5 -2.4 5 0 q2.5 2.4 5 0"/>
+            <path d="M24 -48 q3 4 0 6 q-3 -2 0 -6" fill="#9ccbe8" stroke-width="1"/>
+          </g>
+          <g class="face f-happy s-ink" stroke-width="1.5" stroke-linecap="round">
+            <path d="M-13 -42 q4 -4 8 0"/><path d="M5 -42 q4 -4 8 0"/><path d="M-4 -36 q4 4 8 0"/>
+          </g>
+          <g class="face f-peek" stroke-linecap="round">
+            <circle cx="-9" cy="-43" r="2" fill="#2a2622"/><circle cx="9" cy="-43" r="2" fill="#2a2622"/>
+            <path class="s-ink" d="M-2 -35 h4" stroke-width="1.5"/>
+          </g>
+          <path class="bump f-mochi" d="M10 -66 q8 -10 15 -2" stroke="#2a2622" stroke-width="1.4"/>
+        </g>
+      </g>
+    </svg>
+    <div class="bubble" id="bubble" hidden><span id="bubbleText"></span></div>
+    <div class="pow" id="pow" aria-hidden="true">啪!</div>
+    <div class="stars" id="stars" aria-hidden="true"></div>
+
+    <div class="result" id="result" hidden>
+      <div class="result-card">
+        <div class="seal"><span id="seal"><i>不</i><i>動</i></span></div>
+        <h2 id="resultTitle">放禪</h2>
+        <p id="resultLine1"></p>
+        <p id="resultLine2"></p>
+        <p class="koan" id="koan"></p>
+        <button type="button" class="btn primary" id="closeResult">好</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="toast" id="toast" aria-live="polite">住持在巡堂中。按「合掌請打」可以先試試被打的感覺。</p>
+
+  <section class="panel" aria-label="計時與設定">
+    <div class="clock-row">
+      <div class="clock" id="clock">25:00</div>
+      <span class="pill" id="status">未入堂</span>
+    </div>
+    <div class="round-row">
+      <div class="rounds" id="rounds" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <span class="round-label" id="roundLabel">一輪 <b>4</b> 炷香,炷間休息 5 分,最後長休 15 分</span>
+    </div>
+    <div class="chips" role="radiogroup" aria-label="每炷香的專注時間" id="durations">
+      <button type="button" class="chip" role="radio" aria-checked="false" data-min="15" id="d15"><b>15</b><span>小坐</span></button>
+      <button type="button" class="chip" role="radio" aria-checked="true" data-min="25" id="d25"><b>25</b><span>番茄</span></button>
+      <button type="button" class="chip" role="radio" aria-checked="false" data-min="40" id="d40"><b>40</b><span>一炷香</span></button>
+      <button type="button" class="chip" role="radio" aria-checked="false" data-min="50" id="d50"><b>50</b><span>長坐</span></button>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn primary" id="mainBtn">入堂・開始</button>
+      <button type="button" class="btn ghost" id="askBtn">合掌請打</button>
+    </div>
+    <p class="sense" id="sense">偵測方式:<b id="senseMode">開始後檢查平衡儀</b></p>
+    <div class="toggles">
+      <label for="optMotion"><input type="checkbox" id="optMotion" checked> 用平衡儀偵測拿起手機 <small>手機平放或立在架上都可以,開始時會記住它的角度</small></label>
+      <label for="optSound"><input type="checkbox" id="optSound" checked> 鐘聲與音效</label>
+    </div>
+    <dl class="stats">
+      <div><dt>本輪被打</dt><dd class="hitnum" id="stHits">0<small>下</small></dd></div>
+      <div><dt>自己請打</dt><dd id="stAsks">0<small>下</small></dd></div>
+      <div><dt>今日坐禪</dt><dd id="stToday">0<small>分</small></dd></div>
+      <div><dt>今日被打</dt><dd class="hitnum" id="stTodayHits">0<small>下</small></dd></div>
+    </dl>
+  </section>
+
+  <p class="note">每炷香開始敲<b>止靜三鐘</b>,結束敲<b>放禪一鐘</b>,休息完敲兩鐘叫你回座。休息時間住持去喝茶,手機隨便用。坐禪中螢幕會保持亮著,手機螢幕朝下放也可以,靠鐘聲知道時間到了。在真正的禪堂,想提振精神時也可以自己合掌,請巡香師父打一下。</p>
+</main>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const monkEl = $('#monk'), stickEl = $('#stick'), sitterEl = $('#sitter');
+  const bubbleEl = $('#bubble'), bubbleText = $('#bubbleText');
+  const toastEl = $('#toast'), clockEl = $('#clock'), statusEl = $('#status');
+  const mainBtn = $('#mainBtn'), askBtn = $('#askBtn');
+  const PIVOT = '12 -38';
+  const STRIKE_X = 272, SITTER_X = 200, TEA_X = 326;
+  const ROUNDS = 4, SHORT_BREAK = 5, LONG_BREAK = 15;
+
+  /* ---------- helpers ---------- */
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const easeOut = t => 1 - Math.pow(1 - t, 3);
+  const easeInOut = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  function tween(from, to, ms, set, ease = t => t) {
+    return new Promise(res => {
+      const s = performance.now();
+      (function step(n) {
+        const t = Math.min(1, (n - s) / ms);
+        set(from + (to - from) * ease(t));
+        t < 1 ? requestAnimationFrame(step) : res();
+      })(s);
+    });
+  }
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
+
+  /* ---------- sound (synthesized with Web Audio) ---------- */
+  let ac = null;
+  const soundOn = () => $('#optSound').checked;
+  function audio() {
+    if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch { ac = null; } }
+    if (ac && ac.state === 'suspended') ac.resume();
+    return ac;
+  }
+  function bell(delay = 0, vol = .22) {
+    const a = audio(); if (!a || !soundOn()) return;
+    const t = a.currentTime + delay;
+    [[1, 1, 4.5], [2.42, .35, 2.4], [4.05, .14, 1.4], [.5, .12, 3]].forEach(([m, g, d]) => {
+      const o = a.createOscillator(), v = a.createGain();
+      o.type = 'sine'; o.frequency.value = 523 * m;
+      v.gain.setValueAtTime(0, t);
+      v.gain.linearRampToValueAtTime(vol * g, t + .008);
+      v.gain.exponentialRampToValueAtTime(.0001, t + d);
+      o.connect(v).connect(a.destination); o.start(t); o.stop(t + d + .1);
+    });
+  }
+  const bells = n => { for (let i = 0; i < n; i++) bell(i * 1.5); };
+  function slap() {
+    const a = audio(); if (!a || !soundOn()) return;
+    const t = a.currentTime, len = Math.floor(a.sampleRate * .14);
+    const buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 5);
+    const n = a.createBufferSource(); n.buffer = buf;
+    const bp = a.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1900; bp.Q.value = .8;
+    const g = a.createGain(); g.gain.value = .9;
+    n.connect(bp).connect(g).connect(a.destination); n.start(t);
+    const o = a.createOscillator(), v = a.createGain();
+    o.frequency.setValueAtTime(190, t); o.frequency.exponentialRampToValueAtTime(70, t + .12);
+    v.gain.setValueAtTime(.5, t); v.gain.exponentialRampToValueAtTime(.001, t + .15);
+    o.connect(v).connect(a.destination); o.start(t); o.stop(t + .2);
+  }
+  const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
+
+  /* ---------- monk motion ---------- */
+  const M = { x: 90, y: 215, ty: 215, tx: 90, speed: 28, face: 1, stick: 10, wait: 1.5, walkT: 0, mode: 'patrol', arrive: null };
+  function pickPatrol() {
+    let tx;
+    if (Math.random() < .22) tx = SITTER_X + (Math.random() * 10 - 5);   // stop behind the sitter and watch
+    else do { tx = 50 + Math.random() * 300; } while (Math.abs(tx - M.x) < 70);
+    M.tx = tx; M.speed = 22 + Math.random() * 12; M.wait = 1.2 + Math.random() * 3.2;
+  }
+  function walkTo(x, speed) { M.tx = x; M.speed = speed; return new Promise(r => { M.arrive = r; }); }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    const dx = M.tx - M.x, moving = Math.abs(dx) > .4;
+    if (moving) {
+      M.x += Math.sign(dx) * Math.min(Math.abs(dx), M.speed * dt);
+      M.face = Math.sign(dx); M.walkT += dt;
+    } else {
+      M.x = M.tx;
+      if (M.arrive) { const r = M.arrive; M.arrive = null; r(); }
+      else if (M.mode === 'patrol') { M.wait -= dt; if (M.wait <= 0) pickPatrol(); }
+    }
+    M.y += (M.ty - M.y) * Math.min(1, dt * 6);
+    const bob = moving && !reduceMotion ? -Math.abs(Math.sin(M.walkT * 7)) * 2.4 : 0;
+    monkEl.setAttribute('transform', `translate(${M.x.toFixed(2)} ${(M.y + bob).toFixed(2)}) scale(${M.face} 1)`);
+    stickEl.setAttribute('transform', `rotate(${M.stick.toFixed(1)} ${PIVOT})`);
+    if (!bubbleEl.hidden) placeBubble();
+    requestAnimationFrame(frame);
+  }
+
+  function placeBubble() {
+    bubbleEl.style.left = Math.min(80, Math.max(20, M.x / 400 * 100)) + '%';
+    bubbleEl.style.top = ((M.y - 92) / 280 * 100) + '%';
+  }
+  function bubble(text) {
+    if (text == null) { bubbleEl.hidden = true; return; }
+    bubbleText.textContent = text; bubbleEl.hidden = false; placeBubble();
+  }
+  function toast(text, hit = false) { toastEl.textContent = text; toastEl.classList.toggle('hit', hit); }
+
+  /* ---------- the monk does one thing at a time ---------- */
+  const queue = []; let busy = false;
+  function enqueue(fn) { queue.push(fn); pump(); }
+  async function pump() {
+    if (busy) return; busy = true;
+    while (queue.length) await queue.shift()();
+    busy = false; M.ty = 215; monkEl.dataset.mood = 'calm';
+    settleMonk();
+  }
+  // What the monk does when nothing is queued: patrol, or drink tea during a break.
+  let teaTalk = 0;
+  function settleMonk() {
+    if (busy) return;
+    const resting = P.phase === 'break';
+    $('#tea').setAttribute('visibility', resting ? 'visible' : 'hidden');
+    if (resting) {
+      if (M.mode !== 'rest') {
+        M.mode = 'rest'; M.stick = 10;
+        walkTo(TEA_X, 40).then(() => {
+          if (P.phase !== 'break') return;
+          M.face = 1; bubble('喫茶去~');
+          clearTimeout(teaTalk); teaTalk = setTimeout(() => bubble(null), 2600);
+        });
+      }
+    } else if (M.mode !== 'patrol') {
+      M.mode = 'patrol'; M.wait = .6; M.arrive = null; M.tx = M.x;
+    }
+  }
+
+  async function strike({ reason, counted }) {
+    M.mode = 'task'; M.ty = 222;
+    await walkTo(STRIKE_X, 150);
+    M.face = -1;
+    monkEl.dataset.mood = counted ? 'stern' : 'calm';
+    bubble(counted ? '喝!' : '請。'); await sleep(420);
+    await tween(M.stick, -48, 380, v => M.stick = v, easeOut);
+    await sleep(160);
+    await tween(-48, 95, 85, v => M.stick = v);
+    impact();
+    if (counted) { P.hits++; P.roundHits++; P.todayHits++; } else { P.asks++; }
+    renderStats();
+    toast(reason, counted);
+    await sleep(480); bubble(null);
+    await tween(95, 10, 480, v => M.stick = v, easeInOut);
+    monkEl.dataset.mood = 'calm';
+    await sleep(350);
+  }
+
+  function impact() {
+    slap(); buzz(80);
+    const wrap = $('#stageWrap');
+    wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake');
+    const pow = $('#pow'); pow.classList.remove('go'); void pow.offsetWidth; pow.classList.add('go');
+    sitterEl.dataset.face = 'ouch';
+    sitterEl.classList.remove('ouch'); void sitterEl.getBoundingClientRect(); sitterEl.classList.add('ouch');
+    setTimeout(() => { if (sitterEl.dataset.face === 'ouch') sitterEl.dataset.face = P.phase === 'break' ? 'happy' : 'calm'; sitterEl.classList.remove('ouch'); }, 1300);
+    const stars = $('#stars');
+    for (let i = 0; i < 6; i++) {
+      const s = document.createElement('span'); s.className = 'star'; s.textContent = '✦';
+      const a = Math.PI * 2 * i / 6 + Math.random() * .5;
+      s.style.left = '55%'; s.style.top = '64%';
+      s.style.setProperty('--dx', Math.cos(a) * 46 + 'px'); s.style.setProperty('--dy', Math.sin(a) * 34 + 'px');
+      stars.appendChild(s); setTimeout(() => s.remove(), 750);
+    }
+  }
+
+  /* ---------- motion sensor ("平衡儀") ---------- */
+  // Low-passed gravity vector. At the start of each round we remember the phone's resting
+  // orientation; tilting away from it, or jolting it, for long enough counts as picking it up.
+  const Mo = { seen: false, lp: null, base: null, still: 0, score: 0, t: 0, picked: false, lastNag: 0, permission: 'unknown' };
+  const angleBetween = (a, b) => {
+    const d = a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    const n = Math.hypot(...a) * Math.hypot(...b) || 1;
+    return Math.acos(Math.max(-1, Math.min(1, d / n))) * 180 / Math.PI;
+  };
+  const lyingFlat = g => Math.abs(g[2]) / (Math.hypot(...g) || 1) > .85;
+  const motionWanted = () => $('#optMotion').checked;
+
+  async function askMotionPermission() {
+    const DME = window.DeviceMotionEvent;
+    if (DME && typeof DME.requestPermission === 'function' && Mo.permission !== 'granted') {
+      try { Mo.permission = await DME.requestPermission(); } catch { Mo.permission = 'denied'; }
+    }
+  }
+  window.addEventListener('devicemotion', e => {
+    const g = e.accelerationIncludingGravity;
+    if (!g || g.x == null) return;
+    const v = [g.x, g.y, g.z];
+    Mo.seen = true;
+    if (!Mo.lp) Mo.lp = v.slice();
+    const jerk = Math.hypot(v[0] - Mo.lp[0], v[1] - Mo.lp[1], v[2] - Mo.lp[2]);
+    for (let i = 0; i < 3; i++) Mo.lp[i] = Mo.lp[i] * .85 + v[i] * .15;
+    const now = performance.now(), dt = Mo.t ? Math.min(.1, (now - Mo.t) / 1000) : 0; Mo.t = now;
+    Mo.still = jerk > 1.2 ? 0 : Mo.still + dt;
+
+    if (P.phase !== 'focus' || !Mo.base || !motionWanted()) return;
+    const ang = angleBetween(Mo.lp, Mo.base);
+    if (!Mo.picked) {
+      const disturbed = ang > 20 || jerk > 3.5;
+      Mo.score = disturbed ? Mo.score + dt : Math.max(0, Mo.score - dt * .5);
+      if (Mo.score > .6) { Mo.picked = true; Mo.score = 0; Mo.lastNag = Date.now(); onPickUp(); }
+    } else if ((Mo.still > 1.5 && ang < 15) || (Mo.still > 3 && lyingFlat(Mo.lp))) {
+      Mo.base = Mo.lp.slice(); Mo.picked = false; onPutDown();
+    } else if (Date.now() - Mo.lastNag > 20000) {
+      Mo.lastNag = Date.now();
+      enqueue(() => strike({ reason: '啪!還在滑?把手機放回去。', counted: true }));
+    }
+  });
+  function onPickUp() {
+    setStatus('拿起手機了', 'hit');
+    sitterEl.dataset.face = 'peek';
+    enqueue(() => strike({ reason: '啪!手機拿起來了。放回原位才能繼續。', counted: true }));
+  }
+  function onPutDown() {
+    setStatus(`坐禪中・第 ${P.round} 炷`, 'on');
+    toast('回座了,繼續專心。');
+  }
+  function renderSense(text, ok) { $('#senseMode').textContent = text; $('#sense').dataset.ok = ok ? 'yes' : 'no'; }
+
+  /* ---------- pomodoro phases ---------- */
+  // idle → settle → focus → break → ready → settle → focus … → (4th focus) → long break → idle
+  const P = { phase: 'idle', focusMin: 25, round: 1, end: 0, start: 0, hits: 0, roundHits: 0, asks: 0, focusTotal: 0,
+              hiddenAt: 0, confirmEnd: 0, todayMin: 0, todayHits: 0, settleTimer: 0 };
+  const today = () => new Date().toDateString();
+  function loadToday() {
+    const log = store.get('keisaku-log-v1', []).filter(e => e.d === today());
+    P.todayMin = log.reduce((a, e) => a + e.min, 0);
+    P.todayHits = log.reduce((a, e) => a + e.hits, 0);
+  }
+  function saveRound(min) {
+    if (min <= 0 && P.roundHits === 0) return;
+    const log = store.get('keisaku-log-v1', []).filter(e => Date.now() - e.t < 30 * 864e5);
+    log.push({ t: Date.now(), d: today(), min, hits: P.roundHits });
+    store.set('keisaku-log-v1', log);
+    P.todayMin += min;
+  }
+  function renderStats() {
+    $('#stHits').firstChild.nodeValue = P.hits;
+    $('#stAsks').firstChild.nodeValue = P.asks;
+    $('#stToday').firstChild.nodeValue = P.todayMin;
+    $('#stTodayHits').firstChild.nodeValue = P.todayHits;
+  }
+  function renderRounds() {
+    const active = P.phase !== 'idle';
+    [...$('#rounds').children].forEach((el, i) => {
+      const n = i + 1;
+      el.className = !active ? '' : n < P.round || (n === P.round && (P.phase === 'break')) ? 'done' : n === P.round ? 'now' : '';
+    });
+    $('#roundLabel').innerHTML = active
+      ? `第 <b>${P.round}</b> 炷 / 共 <b>${ROUNDS}</b> 炷`
+      : `一輪 <b>${ROUNDS}</b> 炷香,炷間休息 ${SHORT_BREAK} 分,最後長休 ${LONG_BREAK} 分`;
+  }
+  function setStatus(text, state) { statusEl.textContent = text; statusEl.dataset.state = state || ''; }
+  function setMain(text, { warn = false, disabled = false } = {}) {
+    mainBtn.textContent = text; mainBtn.classList.toggle('warn', warn); mainBtn.disabled = disabled;
+  }
+  function fmt(ms) {
+    const s = Math.max(0, Math.ceil(ms / 1000));
+    return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  }
+  function setIncense(frac, lit) {
+    const h = 44 * Math.max(0, Math.min(1, frac)), top = 140 - h;
+    $('#incense').setAttribute('y', top); $('#incense').setAttribute('height', h);
+    $('#ember').setAttribute('cy', top);
+    $('#ember').style.opacity = lit && frac > 0 ? '' : 0;
+    $('#smoke').setAttribute('transform', `translate(0 ${top - 96})`);
+    $('#smoke').style.display = lit && frac > 0 ? '' : 'none';
+  }
+  function lockChips(locked) { document.querySelectorAll('.chip').forEach(c => c.disabled = locked); }
+
+  let wakeLock = null;
+  async function keepAwake() {
+    try { if ('wakeLock' in navigator && !wakeLock && P.phase !== 'idle') { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } } catch {}
+  }
+  function letSleep() { try { wakeLock && wakeLock.release(); } catch {} wakeLock = null; }
+
+  async function startCycle() {
+    audio();
+    await askMotionPermission();
+    P.round = 1; P.hits = 0; P.roundHits = 0; P.asks = 0; P.focusTotal = 0;
+    $('#result').hidden = true;
+    lockChips(true);
+    beginSettle();
+  }
+
+  function beginSettle() {
+    P.phase = 'settle'; P.roundHits = 0;
+    renderRounds(); keepAwake(); settleMonk();
+    sitterEl.dataset.face = 'calm';
+    setStatus('落座中', 'on');
+    setMain('取消');
+    const useMotion = motionWanted();
+    let count = 3;
+    const step = () => {
+      if (P.phase !== 'settle') return;
+      if (!useMotion) { beginFocus(false); return; }
+      if (count > 0) {
+        toast(`把手機平放在桌上(或立在架上)別動… ${count}`);
+        clockEl.textContent = fmt(P.focusMin * 60000);
+        count--; P.settleTimer = setTimeout(step, 1000); return;
+      }
+      if (!Mo.seen) { beginFocus(false); return; }             // no sensor: fall back to screen-only
+      if (Mo.still < .8) { toast('手機還在動,放好別碰它…'); P.settleTimer = setTimeout(step, 700); return; }
+      beginFocus(true);
+    };
+    step();
+  }
+
+  function beginFocus(withMotion) {
+    P.phase = 'focus';
+    P.start = Date.now(); P.end = P.start + P.focusMin * 60000;
+    Mo.base = withMotion ? Mo.lp.slice() : null; Mo.picked = false; Mo.score = 0;
+    if (withMotion) renderSense('平衡儀+離開畫面', true);
+    else if (motionWanted()) renderSense(Mo.permission === 'denied' ? '僅離開畫面(平衡儀權限被拒絕)' : '僅離開畫面(這台裝置讀不到平衡儀)', false);
+    else renderSense('僅離開畫面', false);
+    setStatus(`坐禪中・第 ${P.round} 炷`, 'on');
+    setMain('出堂・結束');
+    renderRounds();
+    bells(3);
+    toast(P.round === 1 ? '止靜。住持開始巡堂了。' : `第 ${P.round} 炷,止靜。`);
+  }
+
+  function endFocus() {
+    P.focusTotal += P.focusMin;
+    saveRound(P.focusMin); renderStats();
+    bell(0, .26); buzz([200, 120, 200]);
+    if (P.round >= ROUNDS) {
+      beginBreak(LONG_BREAK);
+      enqueue(async () => showResult(false));
+    } else {
+      beginBreak(SHORT_BREAK);
+      toast(`放禪。這炷被打 ${P.roundHits} 下,休息 ${SHORT_BREAK} 分鐘,手機可以用了。`);
+    }
+  }
+
+  function beginBreak(min) {
+    P.phase = 'break';
+    P.end = Date.now() + min * 60000;
+    Mo.base = null; Mo.picked = false;
+    letSleep();
+    sitterEl.dataset.face = 'happy';
+    setStatus(min === LONG_BREAK ? '長休' : '休息', '');
+    setMain('跳過休息');
+    renderRounds(); settleMonk();
+  }
+
+  function endBreak() {
+    bells(2); buzz([120, 80, 120]);
+    if (P.round >= ROUNDS) { finishCycle(); return; }
+    P.round++;
+    P.phase = 'ready';
+    sitterEl.dataset.face = 'calm';
+    setStatus('該回座了', 'on');
+    setMain(`回座・第 ${P.round} 炷`);
+    toast('休息結束,準備好就回座。');
+    renderRounds(); settleMonk();
+  }
+
+  function finishCycle() {
+    P.phase = 'idle'; P.round = 1;
+    letSleep(); lockChips(false);
+    setStatus('未入堂', ''); setMain('入堂・開始');
+    toast('一輪坐完了,辛苦了。');
+    renderSense('開始後檢查平衡儀', false);
+    renderRounds(); settleMonk();
+  }
+
+  function quitEarly() {
+    const wasFocus = P.phase === 'focus';
+    clearTimeout(P.settleTimer);
+    if (wasFocus) {
+      const min = Math.floor((Date.now() - P.start) / 60000);
+      P.focusTotal += min; saveRound(min); renderStats();
+    }
+    finishCycle();
+    if (wasFocus || P.focusTotal > 0) enqueue(async () => showResult(true));
+  }
+
+  const KOANS = ['日日是好日。', '喫茶去。', '步步是道場。', '莫妄想。', '一期一會。', '行住坐臥,皆是禪。', '放下著。'];
+  function showResult(early) {
+    let seal, line2;
+    const perRound = P.hits / Math.max(1, P.round);
+    if (P.hits === 0) { seal = '不動'; line2 = '一下都沒被打,如山不動。'; }
+    else if (perRound <= 1) { seal = '精進'; line2 = `被打了 ${P.hits} 下,還算專心。`; }
+    else { seal = '喝'; line2 = `被打了 ${P.hits} 下,肩膀辛苦了。`; }
+    $('#seal').replaceChildren(...[...seal].map(ch => Object.assign(document.createElement('i'), { textContent: ch })));
+    $('#resultTitle').textContent = early ? '提早出堂' : `${ROUNDS} 炷坐滿`;
+    $('#resultLine1').textContent = `共坐了 ${P.focusTotal} 分鐘` + (P.asks ? `,自己請打 ${P.asks} 下` : '');
+    $('#resultLine2').textContent = line2;
+    $('#koan').textContent = KOANS[Math.floor(Math.random() * KOANS.length)];
+    $('#closeResult').textContent = early ? '好' : `去長休 ${LONG_BREAK} 分鐘`;
+    $('#result').hidden = false;
+  }
+
+  function tick() {
+    if (P.phase === 'focus' || P.phase === 'break') {
+      const left = P.end - Date.now();
+      clockEl.textContent = fmt(left);
+      if (P.phase === 'focus') setIncense(left / (P.focusMin * 60000), true);
+      else setIncense(1, false);
+      if (left <= 0) {
+        if (P.phase === 'focus') { if (!document.hidden) endFocus(); }
+        else endBreak();
+      }
+    } else if (P.phase !== 'settle') {
+      clockEl.textContent = fmt(P.focusMin * 60000);
+      setIncense(1, false);
+    }
+  }
+  setInterval(tick, 250);
+
+  /* ---------- leaving the screen ---------- */
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { P.hiddenAt = P.phase === 'focus' ? Date.now() : 0; return; }
+    keepAwake();
+    if (!P.hiddenAt) return;
+    const away = Math.min(Date.now(), P.end) - P.hiddenAt; P.hiddenAt = 0;
+    if (away < 2000) { tick(); return; }
+    const secs = Math.round(away / 1000);
+    const label = secs >= 60 ? `${Math.floor(secs / 60)} 分 ${secs % 60} 秒` : `${secs} 秒`;
+    sitterEl.dataset.face = 'peek';
+    setStatus('被抓到了', 'hit');
+    enqueue(() => strike({ reason: `啪!離開畫面 ${label}。`, counted: true }));
+    if (secs >= 90) enqueue(() => strike({ reason: '啪!離開太久,再補一下。', counted: true }));
+    enqueue(async () => { if (P.phase === 'focus') setStatus(`坐禪中・第 ${P.round} 炷`, 'on'); });
+    tick();
+  });
+
+  /* ---------- controls ---------- */
+  document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+    if (P.phase !== 'idle') return;
+    document.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-checked', String(x === c)));
+    P.focusMin = +c.dataset.min; tick();
+  }));
+  mainBtn.addEventListener('click', async () => {
+    switch (P.phase) {
+      case 'idle': startCycle(); break;
+      case 'settle': quitEarly(); break;
+      case 'break': P.end = Date.now(); tick(); break;
+      case 'ready': audio(); await askMotionPermission(); beginSettle(); break;
+      case 'focus':
+        if (Date.now() - P.confirmEnd < 3000) { quitEarly(); break; }
+        P.confirmEnd = Date.now();
+        setMain('確定要出堂?', { warn: true });
+        setTimeout(() => { if (P.phase === 'focus') setMain('出堂・結束'); }, 3000);
+        break;
+    }
+  });
+  askBtn.addEventListener('click', () => {
+    audio();
+    if (busy) return;
+    enqueue(() => strike({ reason: '啪!精神一振,謝謝師父。', counted: false }));
+  });
+  $('#closeResult').addEventListener('click', () => { $('#result').hidden = true; });
+
+  loadToday(); renderStats(); renderRounds(); tick();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
