@@ -45,9 +45,12 @@ PWA 相關檔案:
 |---|---|
 | `manifest.webmanifest` | App 名稱、圖示、全螢幕顯示 |
 | `sw.js` | 離線快取:頁面網路優先(有更新就拿新的),字型和圖示快取優先 |
-| `icons/` | `icon.svg` 是原稿,PNG 從它轉出來(192、512、iPhone 用的 180) |
+| `icons/` | `icon.svg` 是原稿,PNG 從它轉出來(192、512、留安全邊的 maskable 512、iPhone 用的 180) |
 
 改了圖示或 manifest 之後,記得把 `sw.js` 裡的 `VERSION` 加一,舊的快取才會被清掉。
+
+manifest 的 `id` 要寫完整路徑 `/keisaku-dojo/`:寫 `./` 會被解析成網域根目錄,
+跟同一個 `github.io` 網域上的其他網頁 App 撞 ID,Chrome 可能會誤以為已經安裝過。
 
 ## 偵測原理
 
