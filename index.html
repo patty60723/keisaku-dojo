@@ -470,6 +470,13 @@ dialog.sheet.scroll[open] { animation: none; }
   .scroll[open] .scroll-paper, .scroll[open] .roller, .scroll.closing .scroll-paper, .scroll.closing .roller { animation: none; }
 }
 .settings .backup { padding-top: 12px; }
+
+/* the backdrop fades in with the unroll and out over the whole roll-up-and-put-away */
+dialog.sheet[open]::backdrop { animation: backdropIn .45s ease-out; }
+dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forwards; }
+@keyframes backdropIn { from { opacity: 0; } }
+@keyframes backdropOut { to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { dialog.sheet[open]::backdrop, dialog.sheet.closing::backdrop { animation: none; } }
 </style>
 </head>
 <body>
@@ -1532,11 +1539,26 @@ dialog.sheet.scroll[open] { animation: none; }
     if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
   }
   // the 坐禪帳 scroll rolls itself back up before it closes
-  function closeSheet(d) {
+  // closing: roll up, then the rolled scroll turns on its side and flies back into the button that opened it
+  async function closeSheet(d) {
     if (!d.open || d.classList.contains('closing')) return;
-    if (!d.classList.contains('scroll') || reduceMotion) { d.close(); return; }
+    if (!d.classList.contains('scroll') || reduceMotion || !d.animate) { d.close(); return; }
     d.classList.add('closing');
-    setTimeout(() => { d.classList.remove('closing'); d.close(); }, 800);
+    await sleep(820);                                   // the CSS roll-up
+    const wrap = d.querySelector('.scroll-wrap'), btn = $('#' + d.id + 'Btn');
+    const w = wrap.getBoundingClientRect(), t = btn.getBoundingClientRect();
+    const dx = t.left + t.width / 2 - (w.left + w.width / 2), dy = t.top + t.height / 2 - (w.top + w.height / 2);
+    try {
+      await wrap.animate([
+        { transform: 'none', opacity: 1 },
+        { transform: `translate(0px, -10px) rotate(-90deg) scale(.62)`, opacity: 1, offset: .38 },
+        { transform: `translate(${dx}px, ${dy}px) rotate(-90deg) scale(.1)`, opacity: .2 }
+      ], { duration: 700, easing: 'cubic-bezier(.45,0,.25,1)', fill: 'forwards' }).finished;
+    } catch {}
+    d.classList.remove('closing'); d.close();
+    wrap.getAnimations().forEach(a => a.cancel());
+    btn.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.14)' }, { transform: 'scale(1)' }],
+      { duration: 320, easing: 'ease-out' });
   }
   document.querySelectorAll('dialog.sheet').forEach(d => {
     d.addEventListener('click', e => { if (e.target === d) closeSheet(d); });     // tap the dimmed backdrop
