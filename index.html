@@ -917,6 +917,14 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
   const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
 
   /* ---------- background sounds (all synthesized, so they work offline) ---------- */
+  /*SND-START*/
+  // tunable knobs (the sound-lab page edits these live)
+  const SND = {
+    rainBed: .04, dropGain: 2, dropGapMin: 8, dropGapMax: 70,
+    waveCrash: 1, waveBackMin: 7, waveBackMax: 11,
+    leafVol: .03, frogVol: .04,
+    chimeRing: .5, chimeVerb: .28, gustChance: .22, gustKnocksMin: 3, gustKnocksMax: 9
+  };
   const AMBIENT_LABEL = { none: '不播放', rain: '雨聲', waves: '海浪', forest: '森林', chimes: '風鈴' };
   const noiseCache = {};
   // a few seconds of white / pink / brown noise, looped
@@ -993,11 +1001,11 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
   /* rain: many drops, mostly tiny, landing on different things */
   // each drop is a tiny resonant click (a ringing band of noise), not a pitched sweep — sweeps sound like birds
   const RAIN_ON = {
-    leaf(a, l, p)   { burst(a, 'bandpass', rnd(2400, 5200), rnd(4, 9), .01 + l * .16, rnd(.008, .018), p, .2); },
-    puddle(a, l, p) { burst(a, 'bandpass', rnd(700, 1400), rnd(6, 12), .012 + l * .2, rnd(.025, .045), p, .3);
-                      burst(a, 'highpass', 4000, .7, .003 + l * .04, .012, p, .2); },
-    wood(a, l, p)   { burst(a, 'bandpass', rnd(350, 650), rnd(2, 4), .012 + l * .2, rnd(.02, .035), p, .15); },
-    gutter(a, l, p) { burst(a, 'bandpass', rnd(2600, 3600), 40, .006 + l * .1, .12, p, .4); }
+    leaf(a, l, p, k)   { burst(a, 'bandpass', rnd(2400, 5200), rnd(4, 9), (.01 + l * .16) * k, rnd(.008, .018), p, .2); },
+    puddle(a, l, p, k) { burst(a, 'bandpass', rnd(700, 1400), rnd(6, 12), (.012 + l * .2) * k, rnd(.025, .045), p, .3);
+                         burst(a, 'highpass', 4000, .7, (.003 + l * .04) * k, .012, p, .2); },
+    wood(a, l, p, k)   { burst(a, 'bandpass', rnd(350, 650), rnd(2, 4), (.012 + l * .2) * k, rnd(.02, .035), p, .15); },
+    gutter(a, l, p, k) { burst(a, 'bandpass', rnd(2600, 3600), 40, (.006 + l * .1) * k, .12, p, .4); }
   };
   /* forest birds: each resident bird has its own song, pitch and place */
   function song(a, b) {
@@ -1031,24 +1039,25 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     }
   }
   function rustle(a) {                      // a breath of wind through leaves, a second or three
-    const t = a.currentTime + .05, dur = rnd(1, 3), s = a.createBufferSource(), g = a.createGain();
+    const t = a.currentTime + .05, dur = rnd(.7, 1.8), s = a.createBufferSource(), g = a.createGain();
     s.buffer = noiseBuffer(a, 'pink');
-    const pts = []; for (let i = 0; i <= 60; i++) { const env = Math.sin(Math.PI * i / 60); pts.push(.0001 + env * Math.pow(Math.random(), 2.2) * .09); }
+    const pts = []; for (let i = 0; i <= 60; i++) { const env = Math.sin(Math.PI * i / 60); pts.push(.0001 + env * Math.pow(Math.random(), 2.6) * SND.leafVol); }
     shape(g.gain, t, dur, pts);
-    s.connect(filt(a, 'bandpass', rnd(2500, 4200), .7)).connect(filt(a, 'highpass', 1200)).connect(g);
+    s.connect(filt(a, 'bandpass', rnd(4000, 6500), .8)).connect(filt(a, 'highpass', 2500)).connect(g);
     place(a, g, rnd(-.8, .8), .25); s.start(t, Math.random() * 3, dur + .05);
   }
   /* tuned wind chime: aluminium tubes in a chord, long ring, rich partials */
   const TUBES = [1174.7, 1318.5, 1480, 1760, 1975.5, 2349.3];   // D6 E6 F#6 A6 B6 D7 — small, bright tubes
   function tube(a, f, when, vel, pan) {
-    const bus = gainOf(a, 1); place(a, bus, pan, .55);
+    const bus = gainOf(a, 1); place(a, bus, pan, SND.chimeVerb);
     [[1, 1, 4.2], [1.0021, .4, 3.6], [2.756, .38, 1.6], [5.404, .14, .7], [8.933, .05, .35]].forEach(([m, g, d]) => {
       if (f * m > 15000) return;
       const o = a.createOscillator(), v = a.createGain();
       o.frequency.value = f * m * (1 + rnd(-.001, .001));
       v.gain.setValueAtTime(0, when); v.gain.linearRampToValueAtTime(vel * g * .09, when + .002);
-      v.gain.exponentialRampToValueAtTime(.0001, when + d * (.6 + vel * .6));
-      o.connect(v).connect(bus); o.start(when); o.stop(when + d * 1.3 + .05);
+      const ring = d * SND.chimeRing * (.6 + vel * .6);
+      v.gain.exponentialRampToValueAtTime(.0001, when + ring);
+      o.connect(v).connect(bus); o.start(when); o.stop(when + ring + .05);
     });
   }
 
@@ -1069,7 +1078,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
   /* frogs: a call is a fast train of little resonant pulses, heard as "guk-guk" */
   function croak(a, f, pan, when, far) {
     const bus = gainOf(a, far ? .45 : 1); place(a, bus, pan, far ? .6 : .3);
-    const rate = rnd(55, 85), n = Math.floor(rnd(9, 18)), vol = .05;
+    const rate = rnd(55, 85), n = Math.floor(rnd(9, 18)), vol = SND.frogVol;
     for (let k = 0; k < n; k++) {
       const t = when + k / rate, env = Math.sin(Math.PI * (k + .5) / n);       // swell and fade over the call
       [[f, 1], [f * 2.3, .45]].forEach(([ff, g]) => {
@@ -1090,7 +1099,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     Amb.verb = a.createConvolver(); Amb.verb.buffer = hallReverb(a);
     Amb.verb.connect(gainOf(a, .5)).connect(Amb.out);
     if (kind === 'rain') {
-      noiseSource(a, 'brown', filt(a, 'lowpass', 800, .5), gainOf(a, .12));     // very distant
+      noiseSource(a, 'brown', filt(a, 'lowpass', 800, .5), gainOf(a, SND.rainBed));     // very distant
       let intensity = .55;                                                      // the shower slowly comes and goes
       const breathe = () => { intensity = Math.min(1, Math.max(.25, intensity + rnd(-.25, .25))); later(breathe, rnd(4000, 10000)); };
       breathe();
@@ -1098,8 +1107,8 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
         const r = Math.random();
         const loud = Math.random() < .05 ? rnd(.7, 1.4) : Math.pow(Math.random(), 3.2) * .4;   // mostly tiny, now and then a big one
         const on = r < .5 ? 'leaf' : r < .74 ? 'puddle' : r < .96 ? 'wood' : 'gutter';
-        RAIN_ON[on](a, loud * (.6 + intensity * .7), rnd(-.9, .9));
-        later(fall, rnd(18, 140) / intensity);
+        RAIN_ON[on](a, loud * (.6 + intensity * .7), rnd(-.9, .9), SND.dropGain);
+        later(fall, rnd(SND.dropGapMin, SND.dropGapMax) / intensity);
       };
       fall();
     } else if (kind === 'waves') {
@@ -1118,7 +1127,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
       const wash = filt(a, 'bandpass', 1500, .6), wg = gainOf(a, 0);
       noiseSource(a, 'pink', wash, wg);
       const wave = () => {
-        const t = a.currentTime + .05, up = rnd(2.4, 4.5), back = rnd(7, 11), T = up + back, N = 110, peak = rnd(.55, 1.1);
+        const t = a.currentTime + .05, up = rnd(2.4, 4.5), back = rnd(SND.waveBackMin, SND.waveBackMax), T = up + back, N = 110, peak = rnd(.55, 1.1);
         const bumps = [1, 2].map(() => [rnd(.9, 2.2), rnd(0, 6.3), rnd(.05, .14)]);
         const amp = [], cut = [], fizz = [];
         for (let i = 0; i < N; i++) {
@@ -1132,7 +1141,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
         const p = rnd(-.4, .4);
         pan.pan.setTargetAtTime(p, t, 2);
         shape(g.gain, t, T, amp); shape(lp.frequency, t, T, cut); shape(wg.gain, t, T, fizz);
-        crash(a, t + up - .05, peak, p);
+        if (SND.waveCrash > 0) crash(a, t + up - .05, peak * SND.waveCrash, p);
         later(wave, (T + rnd(1.2, 4.5)) * 1000);
       };
       wave();
@@ -1155,10 +1164,10 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
       };
       later(crickets, rnd(2000, 12000));
       const frogs = () => {
-        const pair = [[rnd(520, 700), rnd(-.8, -.2), Math.random() < .5], [rnd(760, 980), rnd(.2, .8), Math.random() < .5]];
+        const f = rnd(560, 720), far = Math.random() < .5;   // one frog; each call comes from the left or the right
         let s = 0;
         for (let i = 0, n = 4 + Math.floor(Math.random() * 7); i < n; i++) {
-          const [f, p, far] = pick(pair), twice = Math.random() < .35;
+          const p = (Math.random() < .5 ? -1 : 1) * rnd(.35, .8), twice = Math.random() < .35;
           later(() => { const t = a.currentTime + .02; croak(a, f, p, t, far); if (twice) croak(a, f, p, t + rnd(.3, .45), far); }, s * 1000);
           s += rnd(.6, 2.2);
         }
@@ -1181,10 +1190,11 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
         lastTube = group[group.length - 1];
       };
       const breeze = () => {
-        const gust = Math.random() < .2, pan = rnd(-.3, .3);
+        const gust = Math.random() < SND.gustChance, pan = rnd(-.3, .3);
         let t = a.currentTime + .05;
-        if (gust) {        // a gust: several knocks in quick succession, louder
-          for (let i = 0, n = 3 + Math.floor(Math.random() * 3); i < n; i++) { knock(t, rnd(.5, 1), pan); t += rnd(.22, .55); }
+        if (gust) {        // a gust: the stronger it is, the more knocks and the louder they get
+          const w = Math.random(), n = Math.round(SND.gustKnocksMin + w * (SND.gustKnocksMax - SND.gustKnocksMin));
+          for (let i = 0; i < n; i++) { knock(t, (.4 + w * .6) * rnd(.75, 1), pan); t += rnd(.15, .45); }
         } else {           // mostly a single soft knock, sometimes a second one after a moment
           knock(t, rnd(.12, .35), pan);
           if (Math.random() < .4) knock(t + rnd(.8, 2), rnd(.1, .28), pan);
@@ -1276,6 +1286,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     setTimeout(() => out.disconnect(), (fade + .4) * 1000);
   }
   const musicOn = () => $('#ambMusic').checked;
+  /*SND-END*/
   function startBackground() { startAmbient(ambientChoice()); if (musicOn()) startMusic(); else stopMusic(1); }
   function stopBackground(fade = 1.5) { stopAmbient(fade); stopMusic(fade); }
 

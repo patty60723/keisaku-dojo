@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+</head>
+<body>
+<title>聲音試聽台</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Fredoka:wght@500;600&display=swap">
+<style>
+/* Layout: a single tuning column — play buttons on top, one card of sliders per sound, copy-out at the bottom. */
+:root { --bg:#e9ecdf; --surface:#f8f9f1; --line:#d3d6c2; --ink:#2a2622; --muted:#696557; --accent:#33456b; --on-accent:#fff;
+  --f-display:"LXGW WenKai TC","Kaiti TC",serif; --f-body:"LXGW WenKai TC","PingFang TC","Noto Sans TC",sans-serif; --f-num:"Fredoka",ui-rounded,system-ui,sans-serif; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#141816; --surface:#1d2320; --line:#323a36; --ink:#ebe6d8; --muted:#a39e8f; --accent:#a8bbe6; --on-accent:#141816; color-scheme:dark; } }
+:root[data-theme="dark"] { --bg:#141816; --surface:#1d2320; --line:#323a36; --ink:#ebe6d8; --muted:#a39e8f; --accent:#a8bbe6; --on-accent:#141816; color-scheme:dark; }
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--ink); font-family:var(--f-body); margin:0; padding-inline:16px; padding-block:18px 32px; line-height:1.5; }
+.wrap { max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
+h1 { font-family:var(--f-display); margin:0; font-size:1.7rem; letter-spacing:.06em; }
+.lead { margin:0; color:var(--muted); font-size:.92rem; }
+.play { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+.play button, .btn { font:inherit; cursor:pointer; border:1.5px solid var(--accent); color:var(--accent); background:transparent; border-radius:12px; padding:8px 4px; font-weight:700; }
+.play button[aria-pressed="true"], .btn.primary { background:var(--accent); color:var(--on-accent); }
+.grp { background:var(--surface); border:1.5px solid var(--line); border-radius:16px; padding:12px 14px; display:flex; flex-direction:column; gap:8px; }
+.grp h2 { margin:0; font-family:var(--f-display); font-size:1.05rem; }
+.knob { display:grid; grid-template-columns:1fr 3.2rem; grid-template-rows:auto auto; gap:2px 8px; align-items:center; }
+.knob .lbl { grid-column:1 / -1; font-size:.88rem; }
+.knob input { width:100%; min-width:0; accent-color:var(--accent); }
+.knob output { font-family:var(--f-num); font-variant-numeric:tabular-nums; text-align:right; font-size:.9rem; }
+.row { display:flex; gap:8px; flex-wrap:wrap; }
+textarea { width:100%; font:.8rem ui-monospace,monospace; border-radius:10px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); padding:8px; }
+.status { color:var(--muted); font-size:.85rem; min-height:1.3em; margin:0; }
+</style>
+<div class="wrap">
+  <h1>聲音試聽台</h1>
+  <p class="lead">跟 App 裡完全相同的聲音程式。點一種聲音開始播,拉滑桿會直接改變接下來的聲音(雨的底聲會重新開始)。調好後按「複製設定」貼回聊天就好。</p>
+  <div class="play" id="play">
+    <button type="button" data-kind="rain" aria-pressed="false">雨聲</button>
+    <button type="button" data-kind="waves" aria-pressed="false">海浪</button>
+    <button type="button" data-kind="forest" aria-pressed="false">森林</button>
+    <button type="button" data-kind="chimes" aria-pressed="false">風鈴</button>
+    <button type="button" id="musicBtn" aria-pressed="false">和音</button>
+  </div>
+  <div class="row"><button type="button" class="btn" id="beep">先測試有沒有聲音</button></div>
+  <label class="knob"><span class="lbl">總音量</span><input type="range" id="ambVol" min="5" max="100" step="1" value="35"><output id="volOut">35</output></label>
+  <section class="grp"><h2>雨聲</h2><label class="knob"><span class="lbl">遠處的雨聲底(風聲感)</span><input type="range" data-k="rainBed" data-restart="1" min="0" max="0.15" step="0.005"><output></output></label><label class="knob"><span class="lbl">雨滴音量</span><input type="range" data-k="dropGain" data-restart="0" min="0.5" max="5" step="0.1"><output></output></label><label class="knob"><span class="lbl">雨滴最短間隔(毫秒,越小越密)</span><input type="range" data-k="dropGapMin" data-restart="0" min="2" max="60" step="1"><output></output></label><label class="knob"><span class="lbl">雨滴最長間隔(毫秒)</span><input type="range" data-k="dropGapMax" data-restart="0" min="20" max="300" step="5"><output></output></label></section><section class="grp"><h2>海浪</h2><label class="knob"><span class="lbl">衝上岸那一下的大小</span><input type="range" data-k="waveCrash" data-restart="0" min="0" max="2" step="0.05"><output></output></label><label class="knob"><span class="lbl">退潮最短(秒)</span><input type="range" data-k="waveBackMin" data-restart="0" min="3" max="14" step="0.5"><output></output></label><label class="knob"><span class="lbl">退潮最長(秒)</span><input type="range" data-k="waveBackMax" data-restart="0" min="4" max="18" step="0.5"><output></output></label></section><section class="grp"><h2>森林</h2><label class="knob"><span class="lbl">樹葉沙沙聲</span><input type="range" data-k="leafVol" data-restart="0" min="0" max="0.1" step="0.002"><output></output></label><label class="knob"><span class="lbl">蛙鳴</span><input type="range" data-k="frogVol" data-restart="0" min="0" max="0.12" step="0.002"><output></output></label></section><section class="grp"><h2>風鈴</h2><label class="knob"><span class="lbl">每個音的長度</span><input type="range" data-k="chimeRing" data-restart="0" min="0.15" max="1.5" step="0.05"><output></output></label><label class="knob"><span class="lbl">殘響</span><input type="range" data-k="chimeVerb" data-restart="0" min="0" max="0.8" step="0.02"><output></output></label><label class="knob"><span class="lbl">起風的機率</span><input type="range" data-k="gustChance" data-restart="0" min="0" max="0.8" step="0.02"><output></output></label><label class="knob"><span class="lbl">風起時最少撞幾次</span><input type="range" data-k="gustKnocksMin" data-restart="0" min="1" max="10" step="1"><output></output></label><label class="knob"><span class="lbl">風最大時最多撞幾次</span><input type="range" data-k="gustKnocksMax" data-restart="0" min="2" max="20" step="1"><output></output></label></section>
+  <div class="row"><button type="button" class="btn primary" id="copy">複製設定</button><button type="button" class="btn" id="reset">還原預設</button></div>
+  <p class="status" id="status" aria-live="polite"></p>
+  <textarea id="out" rows="5" readonly hidden></textarea>
+  <input type="checkbox" id="ambMusic" hidden>
+</div>
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  let ac = null;
+  function audio() { if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); return ac; }
+  let current = null;
+  /*SND-START*/
+  // tunable knobs (the sound-lab page edits these live)
+  const SND = {
+    rainBed: .04, dropGain: 2, dropGapMin: 8, dropGapMax: 70,
+    waveCrash: 1, waveBackMin: 7, waveBackMax: 11,
+    leafVol: .03, frogVol: .04,
+    chimeRing: .5, chimeVerb: .28, gustChance: .22, gustKnocksMin: 3, gustKnocksMax: 9
+  };
+  const AMBIENT_LABEL = { none: '不播放', rain: '雨聲', waves: '海浪', forest: '森林', chimes: '風鈴' };
+  const noiseCache = {};
+  // a few seconds of white / pink / brown noise, looped
+  function noiseBuffer(a, color) {
+    if (noiseCache[color]) return noiseCache[color];
+    const len = a.sampleRate * 4, buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, last = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      if (color === 'pink') {        // Paul Kellet's filter
+        b0 = .99886 * b0 + w * .0555179; b1 = .99332 * b1 + w * .0750759; b2 = .969 * b2 + w * .153852;
+        b3 = .8665 * b3 + w * .3104856; b4 = .55 * b4 + w * .5329522; b5 = -.7616 * b5 - w * .016898;
+        d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * .5362) * .11; b6 = w * .115926;
+      } else if (color === 'brown') {
+        last = (last + .02 * w) / 1.02; d[i] = last * 3.5;
+      } else d[i] = w * .5;
+    }
+    // cross-fade the seam so the loop doesn't click
+    const fade = Math.floor(a.sampleRate * .05);
+    for (let i = 0; i < fade; i++) { const k = i / fade; d[len - fade + i] = d[len - fade + i] * (1 - k) + d[i] * k; }
+    return (noiseCache[color] = buf);
+  }
+  const Amb = { out: null, verb: null, nodes: [], timers: [], kind: 'none', playing: false };
+  const ambientVolume = () => +$('#ambVol').value / 100;
+  function lfo(a, rate, depth, param) {
+    const o = a.createOscillator(), g = a.createGain();
+    o.frequency.value = rate; g.gain.value = depth; o.connect(g).connect(param); o.start();
+    Amb.nodes.push(o);
+  }
+  function noiseSource(a, color, ...chain) {
+    const src = a.createBufferSource(); src.buffer = noiseBuffer(a, color); src.loop = true;
+    src.loopStart = Math.random() * 3;   // so layers don't line up
+    let n = src; for (const c of chain) n = n.connect(c);
+    n.connect(Amb.out); src.start(0, src.loopStart); Amb.nodes.push(src);
+    return src;
+  }
+  const filt = (a, type, freq, q = .7) => { const f = a.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q; return f; };
+  const gainOf = (a, v) => { const g = a.createGain(); g.gain.value = v; return g; };
+  // every event goes through a pan and is shared between a dry path and the room's reverb
+  function place(a, node, pan, wet) {
+    const p = a.createStereoPanner(); p.pan.value = pan;
+    node.connect(p); p.connect(Amb.out);
+    const s = gainOf(a, wet); p.connect(s).connect(Amb.verb);
+  }
+  const rnd = (lo, hi) => lo + Math.random() * (hi - lo);
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const later = (fn, ms) => Amb.timers.push(setTimeout(() => { if (Amb.playing) fn(); }, ms));
+  // schedule an irregular shape on a param as many short ramps (safe to cancel at any time)
+  function shape(param, t, dur, values) {
+    param.cancelScheduledValues(t); param.setValueAtTime(values[0], t);
+    const step = dur / (values.length - 1);
+    for (let i = 1; i < values.length; i++) param.linearRampToValueAtTime(values[i], t + i * step);
+  }
+  // a smoothed random walk between lo and hi
+  function wander(n, lo, hi, smooth = .85) {
+    const out = []; let v = Math.random(), s = v;
+    for (let i = 0; i < n; i++) { v = Math.min(1, Math.max(0, v + (Math.random() - .5) * .4)); s = s * smooth + v * (1 - smooth); out.push(lo + (hi - lo) * s); }
+    return out;
+  }
+  // a short filtered noise hit
+  function burst(a, type, freq, q, vol, dur, pan, wet = .2, when = a.currentTime + .01) {
+    const s = a.createBufferSource(), f = filt(a, type, freq, q), g = a.createGain();
+    s.buffer = noiseBuffer(a, 'white');
+    g.gain.setValueAtTime(vol, when); g.gain.exponentialRampToValueAtTime(.0001, when + dur);
+    s.connect(f).connect(g); place(a, g, pan, wet); s.start(when, Math.random() * 3, dur + .02);
+  }
+  function blip(a, f0, f1, glide, vol, dur, pan, wet = .25, when = a.currentTime + .01, type = 'sine') {
+    const o = a.createOscillator(), v = a.createGain();
+    o.type = type; o.frequency.setValueAtTime(f0, when); o.frequency.exponentialRampToValueAtTime(f1, when + glide);
+    v.gain.setValueAtTime(0, when); v.gain.linearRampToValueAtTime(vol, when + .003); v.gain.exponentialRampToValueAtTime(.0001, when + dur);
+    o.connect(v); place(a, v, pan, wet); o.start(when); o.stop(when + dur + .02);
+  }
+
+  /* rain: many drops, mostly tiny, landing on different things */
+  // each drop is a tiny resonant click (a ringing band of noise), not a pitched sweep — sweeps sound like birds
+  const RAIN_ON = {
+    leaf(a, l, p, k)   { burst(a, 'bandpass', rnd(2400, 5200), rnd(4, 9), (.01 + l * .16) * k, rnd(.008, .018), p, .2); },
+    puddle(a, l, p, k) { burst(a, 'bandpass', rnd(700, 1400), rnd(6, 12), (.012 + l * .2) * k, rnd(.025, .045), p, .3);
+                         burst(a, 'highpass', 4000, .7, (.003 + l * .04) * k, .012, p, .2); },
+    wood(a, l, p, k)   { burst(a, 'bandpass', rnd(350, 650), rnd(2, 4), (.012 + l * .2) * k, rnd(.02, .035), p, .15); },
+    gutter(a, l, p, k) { burst(a, 'bandpass', rnd(2600, 3600), 40, (.006 + l * .1) * k, .12, p, .4); }
+  };
+  /* forest birds: each resident bird has its own song, pitch and place */
+  function song(a, b) {
+    const bus = gainOf(a, b.far ? .4 : 1); place(a, bus, b.pan, b.far ? .7 : .3);
+    const k = b.pitch, v = .045; let t = a.currentTime + .05;
+    const n = (f1, f2, d, vol = v, vib = 0) => { tone(a, bus, t, f1 * k, f2 * k, d, vol, vib); };
+    switch (b.song) {
+      case 0: for (let i = 0, c = 2 + Math.floor(Math.random() * 3); i < c; i++) { n(3200, 4300, .07); t += rnd(.13, .2); } break;   // chip-chip
+      case 1: n(3300, 2250, rnd(.35, .5), v * .9, 18); break;                                                                       // falling whistle
+      case 2: n(3900, 3600, rnd(.5, .8), v * .6, 260); break;                                                                        // trill
+      case 3: n(700, 690, .28, v * 1.3); t += .42; n(575, 565, .36, v * 1.3); break;                                                 // soft two-note call
+      case 4: for (let i = 0, c = 6 + Math.floor(Math.random() * 5), f = 3000; i < c; i++) {                                         // warble
+                const g = f * pick([.84, .89, 1.12, 1.19, 1.26]); n(f, g, .07, v * rnd(.6, 1)); f = Math.min(4600, Math.max(2400, g)); t += rnd(.07, .11); } break;
+      case 5: n(2600, 3500, .16, v); t += .2; n(3400, 2500, .26, v); break;                                                         // tee-oo
+      default: for (let i = 0; i < 3; i++) { n(3800, 3700, .09, v * .8); t += .14; n(3100, 3000, .1, v * .8); t += .26; }            // see-saw
+    }
+  }
+  function tone(a, bus, t, f1, f2, dur, vol, vib = 0) {
+    const o = a.createOscillator(), v = a.createGain();
+    o.frequency.setValueAtTime(f1, t); o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    if (vib) { const l = a.createOscillator(), lg = gainOf(a, vib); l.frequency.value = rnd(22, 32); l.connect(lg).connect(o.frequency); l.start(t); l.stop(t + dur); }
+    v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(vol, t + Math.min(.02, dur / 4));
+    v.gain.setValueAtTime(vol, t + dur * .6); v.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(v).connect(bus); o.start(t); o.stop(t + dur + .02);
+  }
+  function cricket(a, pan, when) {          // one chirp: 3-4 quick pulses of a high tone
+    for (let i = 0, c = 3 + (Math.random() < .5); i < c; i++) {
+      const o = a.createOscillator(), v = a.createGain(), t = when + i * .032;
+      o.frequency.value = 4500; v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(.012, t + .004); v.gain.linearRampToValueAtTime(0, t + .018);
+      o.connect(v); place(a, v, pan, .45); o.start(t); o.stop(t + .02);
+    }
+  }
+  function rustle(a) {                      // a breath of wind through leaves, a second or three
+    const t = a.currentTime + .05, dur = rnd(.7, 1.8), s = a.createBufferSource(), g = a.createGain();
+    s.buffer = noiseBuffer(a, 'pink');
+    const pts = []; for (let i = 0; i <= 60; i++) { const env = Math.sin(Math.PI * i / 60); pts.push(.0001 + env * Math.pow(Math.random(), 2.6) * SND.leafVol); }
+    shape(g.gain, t, dur, pts);
+    s.connect(filt(a, 'bandpass', rnd(4000, 6500), .8)).connect(filt(a, 'highpass', 2500)).connect(g);
+    place(a, g, rnd(-.8, .8), .25); s.start(t, Math.random() * 3, dur + .05);
+  }
+  /* tuned wind chime: aluminium tubes in a chord, long ring, rich partials */
+  const TUBES = [1174.7, 1318.5, 1480, 1760, 1975.5, 2349.3];   // D6 E6 F#6 A6 B6 D7 — small, bright tubes
+  function tube(a, f, when, vel, pan) {
+    const bus = gainOf(a, 1); place(a, bus, pan, SND.chimeVerb);
+    [[1, 1, 4.2], [1.0021, .4, 3.6], [2.756, .38, 1.6], [5.404, .14, .7], [8.933, .05, .35]].forEach(([m, g, d]) => {
+      if (f * m > 15000) return;
+      const o = a.createOscillator(), v = a.createGain();
+      o.frequency.value = f * m * (1 + rnd(-.001, .001));
+      v.gain.setValueAtTime(0, when); v.gain.linearRampToValueAtTime(vel * g * .09, when + .002);
+      const ring = d * SND.chimeRing * (.6 + vel * .6);
+      v.gain.exponentialRampToValueAtTime(.0001, when + ring);
+      o.connect(v).connect(bus); o.start(when); o.stop(when + ring + .05);
+    });
+  }
+
+  // the moment a wave lands: a wide, bright crash with a low thud under it
+  function crash(a, when, peak, pan) {
+    const layer = (color, type, freq, q, vol, attack, decay) => {
+      const s = a.createBufferSource(), g = a.createGain();
+      s.buffer = noiseBuffer(a, color);
+      g.gain.setValueAtTime(.0001, when); g.gain.exponentialRampToValueAtTime(vol, when + attack);
+      g.gain.exponentialRampToValueAtTime(.0001, when + attack + decay);
+      s.connect(filt(a, type, freq, q)).connect(g); place(a, g, pan + rnd(-.2, .2), .35);
+      s.start(when, Math.random() * 3, attack + decay + .1);
+    };
+    layer('pink', 'bandpass', rnd(1100, 1800), .5, peak * .45, .09, rnd(1.4, 2.2));   // the crash
+    layer('white', 'bandpass', rnd(3000, 4200), .9, peak * .1, .06, rnd(.6, 1));     // spray
+    layer('brown', 'lowpass', 170, .7, peak * .9, .07, rnd(.8, 1.2));                 // the thud
+  }
+  /* frogs: a call is a fast train of little resonant pulses, heard as "guk-guk" */
+  function croak(a, f, pan, when, far) {
+    const bus = gainOf(a, far ? .45 : 1); place(a, bus, pan, far ? .6 : .3);
+    const rate = rnd(55, 85), n = Math.floor(rnd(9, 18)), vol = SND.frogVol;
+    for (let k = 0; k < n; k++) {
+      const t = when + k / rate, env = Math.sin(Math.PI * (k + .5) / n);       // swell and fade over the call
+      [[f, 1], [f * 2.3, .45]].forEach(([ff, g]) => {
+        const o = a.createOscillator(), v = a.createGain();
+        o.frequency.value = ff * (1 - k / n * .06);                             // pitch sags a little
+        v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(vol * g * env, t + .0015);
+        v.gain.exponentialRampToValueAtTime(.0001, t + .011);
+        o.connect(v).connect(bus); o.start(t); o.stop(t + .014);
+      });
+    }
+  }
+  function startAmbient(kind) {
+    stopAmbient(0);
+    const a = audio(); if (!a || kind === 'none') return;
+    Amb.kind = kind; Amb.playing = true;
+    Amb.out = a.createGain(); Amb.out.gain.value = 0; Amb.out.connect(a.destination);
+    Amb.out.gain.setTargetAtTime(ambientVolume(), a.currentTime, 1.2);       // slow fade-in
+    Amb.verb = a.createConvolver(); Amb.verb.buffer = hallReverb(a);
+    Amb.verb.connect(gainOf(a, .5)).connect(Amb.out);
+    if (kind === 'rain') {
+      noiseSource(a, 'brown', filt(a, 'lowpass', 800, .5), gainOf(a, SND.rainBed));     // very distant
+      let intensity = .55;                                                      // the shower slowly comes and goes
+      const breathe = () => { intensity = Math.min(1, Math.max(.25, intensity + rnd(-.25, .25))); later(breathe, rnd(4000, 10000)); };
+      breathe();
+      const fall = () => {
+        const r = Math.random();
+        const loud = Math.random() < .05 ? rnd(.7, 1.4) : Math.pow(Math.random(), 3.2) * .4;   // mostly tiny, now and then a big one
+        const on = r < .5 ? 'leaf' : r < .74 ? 'puddle' : r < .96 ? 'wood' : 'gutter';
+        RAIN_ON[on](a, loud * (.6 + intensity * .7), rnd(-.9, .9), SND.dropGain);
+        later(fall, rnd(SND.dropGapMin, SND.dropGapMax) / intensity);
+      };
+      fall();
+    } else if (kind === 'waves') {
+      // the sea never fully stops: a far-off surf that wanders on its own
+      const flp = filt(a, 'lowpass', 420, .4), fg = gainOf(a, .1);
+      noiseSource(a, 'brown', flp, fg);
+      const drift = () => {
+        const t = a.currentTime + .02, d = 10;
+        shape(fg.gain, t, d, wander(40, .05, .17)); shape(flp.frequency, t, d, wander(40, 280, 600));
+        later(drift, d * 1000);
+      };
+      drift();
+      // each wave: an uneven swell with a stumble or two, a break, and a fizzing backwash
+      const lp = filt(a, 'lowpass', 300, .4), g = gainOf(a, .001), pan = a.createStereoPanner();
+      noiseSource(a, 'brown', lp, g, pan);
+      const wash = filt(a, 'bandpass', 1500, .6), wg = gainOf(a, 0);
+      noiseSource(a, 'pink', wash, wg);
+      const wave = () => {
+        const t = a.currentTime + .05, up = rnd(2.4, 4.5), back = rnd(SND.waveBackMin, SND.waveBackMax), T = up + back, N = 110, peak = rnd(.55, 1.1);
+        const bumps = [1, 2].map(() => [rnd(.9, 2.2), rnd(0, 6.3), rnd(.05, .14)]);
+        const amp = [], cut = [], fizz = [];
+        for (let i = 0; i < N; i++) {
+          const x = i / (N - 1) * T;
+          let e = x < up ? Math.pow(x / up, 1.7) : Math.exp(-(x - up) / (back / 2.2));
+          for (const [fr, ph, am] of bumps) e += am * Math.sin(fr * x + ph) * e;     // stumbles and secondary surges
+          e = Math.max(.002, e * (1 + (Math.random() - .5) * .12));
+          amp.push(e * peak); cut.push(260 + e * rnd(1100, 1700));
+          fizz.push(x < up * .85 ? 0 : Math.max(0, Math.exp(-(x - up) / (back / 2)) * peak * .09 * (.6 + Math.random() * .8)));
+        }
+        const p = rnd(-.4, .4);
+        pan.pan.setTargetAtTime(p, t, 2);
+        shape(g.gain, t, T, amp); shape(lp.frequency, t, T, cut); shape(wg.gain, t, T, fizz);
+        if (SND.waveCrash > 0) crash(a, t + up - .05, peak * SND.waveCrash, p);
+        later(wave, (T + rnd(1.2, 4.5)) * 1000);
+      };
+      wave();
+    } else if (kind === 'forest') {
+      noiseSource(a, 'brown', filt(a, 'lowpass', 450, .5), gainOf(a, .08));
+      // a handful of birds who live here, each singing in its own bouts
+      for (let i = 0; i < 5; i++) {
+        const b = { song: Math.floor(Math.random() * 7), pitch: rnd(.88, 1.12), pan: rnd(-.9, .9), far: Math.random() < .4 };
+        const bout = () => {
+          for (let k = 0, c = 1 + Math.floor(Math.random() * 4); k < c; k++) later(() => song(a, b), k * rnd(1400, 3200));
+          later(bout, rnd(9000, 32000));
+        };
+        later(bout, rnd(400, 14000));
+      }
+      // crickets come and go
+      const crickets = () => {
+        const pan = rnd(-.9, .9), len = rnd(6, 20), gap = rnd(.42, .6);
+        for (let s = 0; s < len; s += gap) later(() => cricket(a, pan, a.currentTime + .02), s * 1000);
+        later(crickets, (len + rnd(10, 30)) * 1000);
+      };
+      later(crickets, rnd(2000, 12000));
+      const frogs = () => {
+        const f = rnd(560, 720), far = Math.random() < .5;   // one frog; each call comes from the left or the right
+        let s = 0;
+        for (let i = 0, n = 4 + Math.floor(Math.random() * 7); i < n; i++) {
+          const p = (Math.random() < .5 ? -1 : 1) * rnd(.35, .8), twice = Math.random() < .35;
+          later(() => { const t = a.currentTime + .02; croak(a, f, p, t, far); if (twice) croak(a, f, p, t + rnd(.3, .45), far); }, s * 1000);
+          s += rnd(.6, 2.2);
+        }
+        later(frogs, (s + rnd(25, 70)) * 1000);
+      };
+      later(frogs, rnd(8000, 25000));
+      const leaves = () => { rustle(a); later(leaves, rnd(6000, 20000)); };
+      later(leaves, rnd(3000, 9000));
+    } else if (kind === 'chimes') {
+      let lastTube = -1;
+      // one knock: two or three different tubes ring almost together, or rolled a little apart
+      const knock = (t, vel, pan) => {
+        const pool = [...TUBES.keys()].filter(k => k !== lastTube).sort(() => Math.random() - .5);
+        const group = pool.slice(0, Math.random() < .45 ? 2 : 3);
+        const rolled = Math.random() < .35;
+        group.forEach((k, i) => {
+          const off = i === 0 ? 0 : rolled ? rnd(.07, .2) * i : rnd(.004, .035) * i;
+          tube(a, TUBES[k], t + off, vel * rnd(.7, 1), pan + rnd(-.12, .12));
+        });
+        lastTube = group[group.length - 1];
+      };
+      const breeze = () => {
+        const gust = Math.random() < SND.gustChance, pan = rnd(-.3, .3);
+        let t = a.currentTime + .05;
+        if (gust) {        // a gust: the stronger it is, the more knocks and the louder they get
+          const w = Math.random(), n = Math.round(SND.gustKnocksMin + w * (SND.gustKnocksMax - SND.gustKnocksMin));
+          for (let i = 0; i < n; i++) { knock(t, (.4 + w * .6) * rnd(.75, 1), pan); t += rnd(.15, .45); }
+        } else {           // mostly a single soft knock, sometimes a second one after a moment
+          knock(t, rnd(.12, .35), pan);
+          if (Math.random() < .4) knock(t + rnd(.8, 2), rnd(.1, .28), pan);
+        }
+        later(breeze, gust ? rnd(5000, 9000) : rnd(4500, 13000));
+      };
+      later(breeze, 800);
+    }
+  }
+  function stopAmbient(fade = 1.5) {
+    Amb.playing = false;
+    Amb.timers.forEach(clearTimeout); Amb.timers = [];
+    const out = Amb.out, nodes = Amb.nodes; Amb.out = null; Amb.nodes = [];
+    if (!out) return;
+    const a = audio(), stopAt = a.currentTime + fade;
+    if (fade > 0) out.gain.setTargetAtTime(0, a.currentTime, fade / 4); else out.gain.value = 0;
+    nodes.forEach(n => { try { n.stop(stopAt + .1); } catch {} });
+    setTimeout(() => out.disconnect(), (fade + .3) * 1000);
+  }
+  const ambientChoice = () => (document.querySelector('input[name="ambient"]:checked') || {}).value || 'none';
+
+  /* ---------- soft chords: a few slow, sustained voicings with an occasional high bell ---------- */
+  const Mus = { out: null, bus: null, nodes: [], timers: [], playing: false, chord: 0 };
+  const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+  // open voicings around D major pentatonic: Dadd9, G(add9-ish), Bm7 shell, Asus2, Em7 shell
+  const CHORDS = [[50, 57, 64], [43, 50, 57, 66], [47, 54, 62], [45, 52, 59], [40, 47, 55, 62]];
+  const BELLS = [74, 76, 78, 81, 83, 86];
+  function hallReverb(a) {
+    if (hallReverb.ctx === a) return hallReverb.ir;
+    const len = Math.floor(a.sampleRate * 3.4), buf = a.createBuffer(2, len, a.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = buf.getChannelData(ch);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.8);
+    }
+    hallReverb.ctx = a; hallReverb.ir = buf; return buf;
+  }
+  function padNote(a, midi, when, dur) {
+    const env = a.createGain(), lp = filt(a, 'lowpass', 1100, .5);
+    env.gain.setValueAtTime(0, when);
+    env.gain.linearRampToValueAtTime(.13, when + 2.6);            // slow swell in
+    env.gain.setTargetAtTime(0, when + dur, 1.6);                   // and a long fade out
+    lp.connect(env).connect(Mus.bus);
+    [['sine', 0, 1], ['triangle', 5, .35], ['sine', -4, .5]].forEach(([type, cents, g]) => {
+      const o = a.createOscillator(), og = gainOf(a, g);
+      o.type = type; o.frequency.value = mtof(midi); o.detune.value = cents;
+      o.connect(og).connect(lp); o.start(when); o.stop(when + dur + 9);
+    });
+  }
+  function bellNote(a, midi, when) {
+    [[1, .11, 3.6], [2.01, .025, 1.6]].forEach(([m, g, d]) => {
+      const o = a.createOscillator(), v = a.createGain();
+      o.frequency.value = mtof(midi) * m;
+      v.gain.setValueAtTime(0, when); v.gain.linearRampToValueAtTime(g, when + .03);
+      v.gain.exponentialRampToValueAtTime(.0001, when + d);
+      o.connect(v).connect(Mus.bus); o.start(when); o.stop(when + d + .1);
+    });
+  }
+  function startMusic() {
+    stopMusic(0);
+    const a = audio(); if (!a) return;
+    Mus.playing = true;
+    Mus.out = a.createGain(); Mus.out.gain.value = 0; Mus.out.connect(a.destination);
+    Mus.out.gain.setTargetAtTime(ambientVolume(), a.currentTime, 1.5);
+    Mus.bus = a.createGain();
+    const dry = gainOf(a, .55), wet = gainOf(a, .6), verb = a.createConvolver();
+    verb.buffer = hallReverb(a);
+    Mus.bus.connect(dry).connect(Mus.out);
+    Mus.bus.connect(verb).connect(wet).connect(Mus.out);
+    const step = () => {
+      if (!Mus.playing) return;
+      const len = 9 + Math.random() * 3, t = a.currentTime + .1;
+      CHORDS[Mus.chord].forEach((n, i) => padNote(a, n, t + i * .35, len));
+      // now and then, one or two quiet high notes over the chord
+      const bells = Math.random() < .6 ? 1 + Math.floor(Math.random() * 2) : 0;
+      for (let i = 0; i < bells; i++) bellNote(a, BELLS[Math.floor(Math.random() * BELLS.length)], t + 2 + Math.random() * (len - 3));
+      // drift to a neighbouring chord most of the time
+      Mus.chord = Math.random() < .7 ? (Mus.chord + 1) % CHORDS.length : Math.floor(Math.random() * CHORDS.length);
+      Mus.timers.push(setTimeout(step, len * 1000));
+    };
+    step();
+  }
+  function stopMusic(fade = 1.5) {
+    Mus.playing = false;
+    Mus.timers.forEach(clearTimeout); Mus.timers = [];
+    const out = Mus.out; Mus.out = null; Mus.bus = null;
+    if (!out) return;
+    const a = audio();
+    if (fade > 0) out.gain.setTargetAtTime(0, a.currentTime, fade / 4); else out.gain.value = 0;
+    setTimeout(() => out.disconnect(), (fade + .4) * 1000);
+  }
+  const musicOn = () => $('#ambMusic').checked;
+  
+  const DEFAULTS = JSON.parse(JSON.stringify(SND));
+  const knobs = [...document.querySelectorAll('input[data-k]')];
+  const fmt = v => (Math.round(v * 1000) / 1000).toString();
+  function sync() { knobs.forEach(k => { k.value = SND[k.dataset.k]; k.nextElementSibling.textContent = fmt(SND[k.dataset.k]); }); }
+  sync();
+  let restartTimer = 0;
+  knobs.forEach(k => k.addEventListener('input', () => {
+    SND[k.dataset.k] = +k.value; k.nextElementSibling.textContent = fmt(+k.value);
+    if (k.dataset.restart === '1' && current) { clearTimeout(restartTimer); restartTimer = setTimeout(() => startAmbient(current), 250); }
+  }));
+  document.querySelectorAll('#play button[data-kind]').forEach(b => b.addEventListener('click', () => {
+    const kind = b.dataset.kind;
+    document.querySelectorAll('#play button[data-kind]').forEach(x => x.setAttribute('aria-pressed', 'false'));
+    if (current === kind) { current = null; stopAmbient(.6); return; }
+    current = kind; b.setAttribute('aria-pressed', 'true'); startAmbient(kind);
+  }));
+  $('#musicBtn').addEventListener('click', () => {
+    const on = $('#musicBtn').getAttribute('aria-pressed') !== 'true';
+    $('#musicBtn').setAttribute('aria-pressed', String(on)); $('#ambMusic').checked = on;
+    on ? startMusic() : stopMusic(1);
+  });
+  $('#ambVol').addEventListener('input', () => {
+    $('#volOut').textContent = $('#ambVol').value;
+    const t = audio().currentTime;
+    if (Amb.out) Amb.out.gain.setTargetAtTime(ambientVolume(), t, .1);
+    if (Mus.out) Mus.out.gain.setTargetAtTime(ambientVolume(), t, .1);
+  });
+  $('#beep').addEventListener('click', () => {
+    const a = audio(), o = a.createOscillator(), g = a.createGain(), t = a.currentTime;
+    o.frequency.value = 660; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.25, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + .8);
+    o.connect(g).connect(a.destination); o.start(t); o.stop(t + .85);
+    $('#status').textContent = a.state === 'running' ? '應該聽到「叮」一聲。沒聽到的話,請把手機的媒體音量調大、關掉靜音模式。' : '這個環境不讓網頁播放聲音(' + a.state + ')。';
+  });
+  $('#reset').addEventListener('click', () => { Object.assign(SND, DEFAULTS); sync(); if (current) startAmbient(current); $('#status').textContent = '已還原預設。'; });
+  $('#copy').addEventListener('click', () => {
+    const text = JSON.stringify({ ...SND, volume: +$('#ambVol').value });
+    const show = () => { const o = $('#out'); o.hidden = false; o.value = text; o.select(); $('#status').textContent = '沒辦法自動複製,文字已選取好,請手動複製。'; };
+    try { navigator.clipboard.writeText(text).then(() => { $('#status').textContent = '已複製,貼到聊天給 Claude 就好。'; $('#out').hidden = false; $('#out').value = text; }, show); } catch (e) { show(); }
+  });
+})();
+</script>
+</body>
+</html>

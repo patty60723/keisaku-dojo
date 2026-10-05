@@ -70,3 +70,8 @@ manifest 的 `id` 要寫完整路徑 `/keisaku-dojo/`:寫 `./` 會被解析成�
   做成原生 App 才能在背景偵測、用通知叫你回座。
 - 收集要素:不同的住持、掛軸、香。
 - 坐禪日曆、連續天數。
+
+## 聲音試聽台
+
+`soundlab.html`(上線後在 `https://patty60723.github.io/keisaku-dojo/soundlab.html`)是調背景聲音用的工具頁:
+跟 App 用同一份聲音程式,可以直接播各種聲音、拉滑桿調參數,再按「複製設定」把數值帶回程式裡的 `SND`。
