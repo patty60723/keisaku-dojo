@@ -533,6 +533,12 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
       <rect class="f-heri" x="128" y="177" width="3" height="53"/>
       <rect class="f-heri" x="272" y="233" width="3" height="47"/>
 
+      <!-- the keisaku's place: leaning against the right-hand post until the monk picks it up -->
+      <g id="rackStick" transform="translate(362 176) rotate(9)">
+        <rect class="f-stick" x="-1.4" y="-58" width="2.8" height="58" rx="1.2" stroke="#2a2622" stroke-width=".8"/>
+        <rect class="f-stick" x="-2.8" y="-76" width="5.6" height="22" rx="1.8" stroke="#2a2622" stroke-width=".8"/>
+      </g>
+
       <!-- monk (drawn behind the sitter; feet at 0,0, facing right) -->
       <g id="monk" data-mood="calm" transform="translate(90 215)">
         <!-- drawn in a consistent three-quarter view facing right (flipped with scale(-1,1) to face left) -->
@@ -567,7 +573,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
       </g>
 
       <!-- the keisaku: its own layer that follows the monk; lifted above the mochi while he strikes -->
-      <g id="stickLayer" transform="translate(90 215)">
+      <g id="stickLayer" transform="translate(90 215)" visibility="hidden">
           <g id="stick" transform="rotate(10 12 -38)">
           <rect class="f-stick" x="10.6" y="-90" width="2.8" height="58" rx="1.2" stroke="#2a2622" stroke-width=".8"/>
           <rect class="f-stick" x="9.2" y="-108" width="5.6" height="22" rx="1.8" stroke="#2a2622" stroke-width=".8"/>
@@ -691,7 +697,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   const toastEl = $('#toast'), clockEl = $('#clock'), statusEl = $('#status');
   const mainBtn = $('#mainBtn'), askBtn = $('#askBtn');
   const PIVOT = '12 -38';
-  const SITTER_X = 200, TEA_X = 326, HOST_X = 72;
+  const SITTER_X = 200, TEA_X = 326, HOST_X = 72, RACK_X = 362;
   const STAND = { x: -66, y: 14 };            // where the mochi stands (relative to the cushion) while checking in
   const DEFAULT_CFG = { task: '專注', focusMin: 25, rounds: 4, breakMin: 5 };
   const MAX_PRESETS = 3;
@@ -756,7 +762,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
 
   /* ---------- monk motion ---------- */
-  const M = { x: 60, y: 215, ty: 215, tx: 60, speed: 28, face: 1, stick: 10, wait: 1.5, walkT: 0, mode: 'patrol', arrive: null };
+  const M = { holding: false, x: 60, y: 215, ty: 215, tx: 60, speed: 28, face: 1, stick: 10, wait: 1.5, walkT: 0, mode: 'patrol', arrive: null };
   function pickPatrol() {
     let tx;
     if (Math.random() < .22) tx = SITTER_X + (Math.random() * 10 - 5);   // stop behind the sitter and watch
@@ -854,7 +860,27 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     }
   }
 
+  // the monk only carries the keisaku while people are sitting; otherwise it leans against the post
+  function showStick() {
+    stickLayer.setAttribute('visibility', M.holding ? 'visible' : 'hidden');
+    $('#rackStick').setAttribute('visibility', M.holding ? 'hidden' : 'visible');
+  }
+  async function goToRack() {
+    M.mode = 'fetch'; M.ty = 215;
+    await walkTo(RACK_X - 14, 90);
+    M.face = 1; await sleep(250);
+  }
+  async function takeStick() {
+    if (M.holding) return;
+    await goToRack(); M.holding = true; M.stick = 10; showStick(); await sleep(300);
+  }
+  async function returnStick() {
+    if (!M.holding) return;
+    await goToRack(); M.holding = false; showStick(); await sleep(250);
+  }
+
   async function strike({ reason, counted }) {
+    await takeStick();
     M.mode = 'task'; M.ty = 222;
     await walkTo(mochiX() + 72, 150);
     M.face = -1;
@@ -871,6 +897,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     await tween(95, 10, 480, v => M.stick = v, easeInOut);
     monkEl.dataset.mood = 'calm';
     await sleep(350);
+    if (P.phase !== 'focus' && P.phase !== 'settle') await returnStick();
   }
 
   function impact() {
@@ -1231,6 +1258,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   function beginSettle() {
     if (P.round === 1) { P.hits = 0; P.asks = 0; P.focusTotal = 0; }
     P.phase = 'settle'; P.roundHits = 0;
+    enqueue(takeStick);
     $('#result').hidden = true;
     renderRounds(); renderStats(); keepAwake(); settleMonk();
     sitterEl.dataset.face = 'calm';
@@ -1280,6 +1308,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     setStatus('休息', '');
     setMain('跳過休息');
     toast(`放禪。這炷被打 ${P.roundHits} 下,休息 ${cfg.breakMin} 分鐘,手機可以用了。`);
+    enqueue(returnStick);
     renderRounds(); settleMonk();
   }
 
@@ -1301,6 +1330,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     letSleep(); Mo.base = null; Mo.picked = false; standUp();
     setMain(null); setStatus('報到中', '');
     renderSense('開始後檢查平衡儀', false);
+    enqueue(returnStick);
     renderRounds(); settleMonk();
     if (hadFocus) enqueue(async () => showResult(early));
     else onboarding(true);
