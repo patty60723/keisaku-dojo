@@ -43,7 +43,7 @@ textarea { width:100%; font:.8rem ui-monospace,monospace; border-radius:10px; bo
     <button type="button" id="musicBtn" aria-pressed="false">和音</button>
   </div>
   <div class="row"><button type="button" class="btn" id="beep">先測試有沒有聲音</button></div>
-  <label class="knob"><span class="lbl">總音量</span><input type="range" id="ambVol" min="5" max="100" step="1" value="80"><output id="volOut">80</output></label>
+  <label class="knob"><span class="lbl">總音量</span><input type="range" id="ambVol" min="5" max="100" step="1" value="100"><output id="volOut">100</output></label>
   <section class="grp"><h2>雨聲</h2><label class="knob"><span class="lbl">遠處的雨聲底(風聲感)</span><input type="range" data-k="rainBed" data-restart="1" min="0" max="0.15" step="0.005"><output></output></label><label class="knob"><span class="lbl">雨滴音量</span><input type="range" data-k="dropGain" data-restart="0" min="0.5" max="5" step="0.1"><output></output></label><label class="knob"><span class="lbl">雨滴最短間隔(毫秒,越小越密)</span><input type="range" data-k="dropGapMin" data-restart="0" min="2" max="60" step="1"><output></output></label><label class="knob"><span class="lbl">雨滴最長間隔(毫秒)</span><input type="range" data-k="dropGapMax" data-restart="0" min="20" max="300" step="5"><output></output></label></section><section class="grp"><h2>海浪</h2><label class="knob"><span class="lbl">衝上岸那一下的大小</span><input type="range" data-k="waveCrash" data-restart="0" min="0" max="2" step="0.05"><output></output></label><label class="knob"><span class="lbl">退潮最短(秒)</span><input type="range" data-k="waveBackMin" data-restart="0" min="3" max="14" step="0.5"><output></output></label><label class="knob"><span class="lbl">退潮最長(秒)</span><input type="range" data-k="waveBackMax" data-restart="0" min="4" max="18" step="0.5"><output></output></label></section><section class="grp"><h2>森林</h2><label class="knob"><span class="lbl">風吹過樹葉</span><input type="range" data-k="leafVol" data-restart="0" min="0" max="0.1" step="0.002"><output></output></label><label class="knob"><span class="lbl">蛙鳴</span><input type="range" data-k="frogVol" data-restart="0" min="0" max="0.12" step="0.002"><output></output></label></section><section class="grp"><h2>風鈴</h2><label class="knob"><span class="lbl">每個音的長度</span><input type="range" data-k="chimeRing" data-restart="0" min="0.15" max="1.5" step="0.05"><output></output></label><label class="knob"><span class="lbl">殘響</span><input type="range" data-k="chimeVerb" data-restart="0" min="0" max="0.8" step="0.02"><output></output></label><label class="knob"><span class="lbl">起風的機率</span><input type="range" data-k="gustChance" data-restart="0" min="0" max="0.8" step="0.02"><output></output></label><label class="knob"><span class="lbl">風起時最少撞幾次</span><input type="range" data-k="gustKnocksMin" data-restart="0" min="1" max="10" step="1"><output></output></label><label class="knob"><span class="lbl">風最大時最多撞幾次</span><input type="range" data-k="gustKnocksMax" data-restart="0" min="2" max="20" step="1"><output></output></label><label class="knob"><span class="lbl">風鈴高幾個八度(0 / 1 / 2)</span><input type="range" data-k="chimeOctave" data-restart="0" min="0" max="2" step="1"><output></output></label></section>
   <div class="row"><button type="button" class="btn primary" id="copy">複製設定</button><button type="button" class="btn" id="reset">還原預設</button></div>
   <p class="status" id="status" aria-live="polite"></p>
@@ -59,10 +59,10 @@ textarea { width:100%; font:.8rem ui-monospace,monospace; border-radius:10px; bo
   /*SND-START*/
   // tunable knobs (the sound-lab page edits these live)
   const SND = {
-    rainBed: .04, dropGain: 4.5, dropGapMin: 3, dropGapMax: 70,
+    rainBed: .04, dropGain: 5, dropGapMin: 3, dropGapMax: 70,
     waveCrash: 1, waveBackMin: 7, waveBackMax: 11,
     leafVol: .03, frogVol: .04,
-    chimeRing: .35, chimeVerb: .28, gustChance: .22, gustKnocksMin: 3, gustKnocksMax: 14, chimeOctave: 1
+    chimeRing: .35, chimeVerb: .48, gustChance: .34, gustKnocksMin: 4, gustKnocksMax: 17, chimeOctave: 2
   };
   const AMBIENT_LABEL = { none: '不播放', rain: '雨聲', waves: '海浪', forest: '森林', chimes: '風鈴' };
   const noiseCache = {};

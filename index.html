@@ -598,7 +598,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
       </div>
       <label class="amb-music" for="ambMusic"><input type="checkbox" id="ambMusic"> 加上輕柔的和音 <small>幾個慢慢換的和弦,偶爾一兩聲高音;可以單獨播,也可以疊在上面的聲音上</small></label>
       <div class="amb-row">
-        <label for="ambVol" class="amb-vol">音量 <input type="range" id="ambVol" min="5" max="100" value="80"></label>
+        <label for="ambVol" class="amb-vol">音量 <input type="range" id="ambVol" min="5" max="100" value="100"></label>
         <button type="button" class="small-btn" id="ambPreview" aria-pressed="false">試聽</button>
       </div>
       <p class="amb-note">止靜三鐘敲完才慢慢淡入,放禪時淡出;休息時不播。手機開了靜音模式可能會聽不到。</p>
@@ -920,10 +920,10 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
   /*SND-START*/
   // tunable knobs (the sound-lab page edits these live)
   const SND = {
-    rainBed: .04, dropGain: 4.5, dropGapMin: 3, dropGapMax: 70,
+    rainBed: .04, dropGain: 5, dropGapMin: 3, dropGapMax: 70,
     waveCrash: 1, waveBackMin: 7, waveBackMax: 11,
     leafVol: .03, frogVol: .04,
-    chimeRing: .35, chimeVerb: .28, gustChance: .22, gustKnocksMin: 3, gustKnocksMax: 14, chimeOctave: 1
+    chimeRing: .35, chimeVerb: .48, gustChance: .34, gustKnocksMin: 4, gustKnocksMax: 17, chimeOctave: 2
   };
   const AMBIENT_LABEL = { none: '不播放', rain: '雨聲', waves: '海浪', forest: '森林', chimes: '風鈴' };
   const noiseCache = {};
