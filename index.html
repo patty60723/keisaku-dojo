@@ -272,13 +272,53 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
 .sense b { font-weight: 700; color: var(--ink); }
 .sense[data-ok="yes"] b { color: var(--accent); }
 .btn:disabled { opacity: .55; cursor: wait; }
+
+/* ---------- RPG dialogue box ---------- */
+.dialog {
+  background: var(--surface); border: 1.5px solid var(--ink); border-radius: 16px;
+  box-shadow: 0 3px 0 var(--ink); padding: 12px 14px 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.dlg-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.dlg-name {
+  font-family: var(--f-display); font-weight: 700; font-size: .9rem; letter-spacing: .12em;
+  background: var(--robe); color: #fff; padding: 1px 10px; border-radius: 6px;
+}
+.dlg-skip {
+  font: inherit; font-size: .85rem; color: var(--muted); background: none; border: 0; cursor: pointer;
+  padding: 2px 4px; text-decoration: underline; text-underline-offset: 3px;
+}
+.dlg-text {
+  margin: 0; font-family: var(--f-display); font-size: 1.12rem; line-height: 1.6; min-height: 3.2em;
+  cursor: pointer; text-wrap: pretty;
+}
+.dlg-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 8px; }
+.dlg-choices:empty { display: none; }
+.choice {
+  font: inherit; font-size: 1rem; cursor: pointer; text-align: left;
+  border: 1.5px solid var(--line); background: transparent; color: var(--ink);
+  border-radius: 12px; padding: 8px 12px; display: flex; flex-direction: column; gap: 0; line-height: 1.35;
+  animation: choiceIn .22s ease-out both;
+}
+.choice small { color: var(--muted); font-size: .8rem; }
+.choice:hover { border-color: var(--accent); }
+.choice.primary { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); font-weight: 700; }
+.choice.wide { grid-column: 1 / -1; }
+@keyframes choiceIn { from { opacity: 0; transform: translateY(4px); } }
+.dlg-input { grid-column: 1 / -1; display: flex; gap: 8px; }
+.dlg-input input {
+  flex: 1; min-width: 0; font: inherit; font-size: 1rem; padding: 8px 12px; border-radius: 12px;
+  border: 1.5px solid var(--line); background: var(--bg); color: var(--ink);
+}
+.actions:has(#mainBtn[hidden]) { grid-template-columns: 1fr; }
+@media (prefers-reduced-motion: reduce) { .choice { animation: none; } }
 </style>
 </head>
 <body>
 <main class="app">
   <header class="top">
     <h1>警策道場<small>番茄鐘・不准滑手機</small></h1>
-    <p>手機平放在桌上就開始坐禪。住持一直在巡堂,一拿起手機或切出畫面,就會被警策「啪」一下。</p>
+    <p>跟住持報到、把手機放好就開始坐禪。坐禪中一拿起手機或切出畫面,就會被警策「啪」一下。</p>
   </header>
 
   <section class="stage-wrap" id="stageWrap">
@@ -404,25 +444,28 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     </div>
   </section>
 
-  <p class="toast" id="toast" aria-live="polite">住持在巡堂中。按「合掌請打」可以先試試被打的感覺。</p>
+  <section class="dialog" id="dialog" aria-live="polite" hidden>
+    <div class="dlg-head">
+      <span class="dlg-name">住持</span>
+      <button type="button" class="dlg-skip" id="dlgSkip">略過開場</button>
+    </div>
+    <p class="dlg-text" id="dlgText"></p>
+    <div class="dlg-choices" id="dlgChoices"></div>
+  </section>
+
+  <p class="toast" id="toast" aria-live="polite" hidden></p>
 
   <section class="panel" aria-label="計時與設定">
     <div class="clock-row">
       <div class="clock" id="clock">25:00</div>
-      <span class="pill" id="status">未入堂</span>
+      <span class="pill" id="status">報到中</span>
     </div>
     <div class="round-row">
-      <div class="rounds" id="rounds" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-      <span class="round-label" id="roundLabel">一輪 <b>4</b> 炷香,炷間休息 5 分,最後長休 15 分</span>
-    </div>
-    <div class="chips" role="radiogroup" aria-label="每炷香的專注時間" id="durations">
-      <button type="button" class="chip" role="radio" aria-checked="false" data-min="15" id="d15"><b>15</b><span>小坐</span></button>
-      <button type="button" class="chip" role="radio" aria-checked="true" data-min="25" id="d25"><b>25</b><span>番茄</span></button>
-      <button type="button" class="chip" role="radio" aria-checked="false" data-min="40" id="d40"><b>40</b><span>一炷香</span></button>
-      <button type="button" class="chip" role="radio" aria-checked="false" data-min="50" id="d50"><b>50</b><span>長坐</span></button>
+      <div class="rounds" id="rounds" aria-hidden="true"></div>
+      <span class="round-label" id="roundLabel"></span>
     </div>
     <div class="actions">
-      <button type="button" class="btn primary" id="mainBtn">入堂・開始</button>
+      <button type="button" class="btn primary" id="mainBtn" hidden>出堂・結束</button>
       <button type="button" class="btn ghost" id="askBtn">合掌請打</button>
     </div>
     <p class="sense" id="sense">偵測方式:<b id="senseMode">開始後檢查平衡儀</b></p>
@@ -438,7 +481,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     </dl>
   </section>
 
-  <p class="note">每炷香開始敲<b>止靜三鐘</b>,結束敲<b>放禪一鐘</b>,休息完敲兩鐘叫你回座。休息時間住持去喝茶,手機隨便用。坐禪中螢幕會保持亮著,手機螢幕朝下放也可以,靠鐘聲知道時間到了。在真正的禪堂,想提振精神時也可以自己合掌,請巡香師父打一下。</p>
+  <p class="note">每炷香開始敲<b>止靜三鐘</b>,結束敲<b>放禪一鐘</b>,休息結束敲兩鐘叫你回座。休息時住持去喝茶,手機隨便用。坐禪中螢幕會保持亮著,手機螢幕朝下放也可以,靠鐘聲知道時間到了。在真正的禪堂,想提振精神時也可以自己合掌,請巡香師父打一下。</p>
 </main>
 
 <script>
@@ -450,8 +493,9 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   const toastEl = $('#toast'), clockEl = $('#clock'), statusEl = $('#status');
   const mainBtn = $('#mainBtn'), askBtn = $('#askBtn');
   const PIVOT = '12 -38';
-  const STRIKE_X = 272, SITTER_X = 200, TEA_X = 326;
-  const ROUNDS = 4, SHORT_BREAK = 5, LONG_BREAK = 15;
+  const STRIKE_X = 272, SITTER_X = 200, TEA_X = 326, HOST_X = 132;
+  const DEFAULT_CFG = { task: '專注', focusMin: 25, rounds: 4, breakMin: 5 };
+  const MAX_PRESETS = 3;
 
   /* ---------- helpers ---------- */
   const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -471,6 +515,9 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
   };
+  const sameCfg = (a, b) => a && b && a.task === b.task && a.focusMin === b.focusMin && a.rounds === b.rounds && a.breakMin === b.breakMin;
+  const cfgShort = c => `${c.task}・${c.focusMin} 分 × ${c.rounds} 炷`;
+  const totalMin = c => c.focusMin * c.rounds + c.breakMin * (c.rounds - 1);
 
   /* ---------- sound (synthesized with Web Audio) ---------- */
   let ac = null;
@@ -510,7 +557,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
 
   /* ---------- monk motion ---------- */
-  const M = { x: 90, y: 215, ty: 215, tx: 90, speed: 28, face: 1, stick: 10, wait: 1.5, walkT: 0, mode: 'patrol', arrive: null };
+  const M = { x: 60, y: 215, ty: 215, tx: 60, speed: 28, face: 1, stick: 10, wait: 1.5, walkT: 0, mode: 'patrol', arrive: null };
   function pickPatrol() {
     let tx;
     if (Math.random() < .22) tx = SITTER_X + (Math.random() * 10 - 5);   // stop behind the sitter and watch
@@ -547,7 +594,10 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     if (text == null) { bubbleEl.hidden = true; return; }
     bubbleText.textContent = text; bubbleEl.hidden = false; placeBubble();
   }
-  function toast(text, hit = false) { toastEl.textContent = text; toastEl.classList.toggle('hit', hit); }
+  function toast(text, hit = false) {
+    toastEl.textContent = text; toastEl.classList.toggle('hit', hit);
+    toastEl.hidden = !$('#dialog').hidden;
+  }
 
   /* ---------- the monk does one thing at a time ---------- */
   const queue = []; let busy = false;
@@ -558,23 +608,27 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     busy = false; M.ty = 215; monkEl.dataset.mood = 'calm';
     settleMonk();
   }
-  // What the monk does when nothing is queued: patrol, or drink tea during a break.
-  let teaTalk = 0;
+  // What the monk does when nothing is queued: host the dialogue, drink tea, or patrol.
+  let hostAway = false, teaTalk = 0;
   function settleMonk() {
     if (busy) return;
-    const resting = P.phase === 'break';
-    $('#tea').setAttribute('visibility', resting ? 'visible' : 'hidden');
-    if (resting) {
-      if (M.mode !== 'rest') {
-        M.mode = 'rest'; M.stick = 10;
-        walkTo(TEA_X, 40).then(() => {
-          if (P.phase !== 'break') return;
-          M.face = 1; bubble('喫茶去~');
-          clearTimeout(teaTalk); teaTalk = setTimeout(() => bubble(null), 2600);
-        });
-      }
-    } else if (M.mode !== 'patrol') {
-      M.mode = 'patrol'; M.wait = .6; M.arrive = null; M.tx = M.x;
+    const talking = !$('#dialog').hidden && (P.phase === 'idle' || P.phase === 'ready');
+    const want = P.phase === 'break' || hostAway ? 'rest' : talking ? 'host' : 'patrol';
+    $('#tea').setAttribute('visibility', want === 'rest' ? 'visible' : 'hidden');
+    if (want === M.mode) return;
+    M.mode = want; M.stick = 10;
+    if (want === 'rest') {
+      M.ty = 215;
+      walkTo(TEA_X, 40).then(() => {
+        if (M.mode !== 'rest') return;
+        M.face = 1; bubble('喫茶去~');
+        clearTimeout(teaTalk); teaTalk = setTimeout(() => bubble(null), 2600);
+      });
+    } else if (want === 'host') {
+      M.ty = 220;
+      walkTo(HOST_X, 70).then(() => { if (M.mode === 'host') M.face = 1; });
+    } else {
+      M.ty = 215; M.wait = .6; M.arrive = null; M.tx = M.x;
     }
   }
 
@@ -615,6 +669,192 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     }
   }
 
+  /* ---------- RPG dialogue ---------- */
+  const SKIP = Symbol('skip');
+  const dlg = $('#dialog'), dlgText = $('#dlgText'), dlgChoices = $('#dlgChoices'), dlgSkip = $('#dlgSkip');
+  let finishTyping = null, pendingAsk = null, skipRequested = false;
+
+  function openDialog(skippable) {
+    dlgSkip.hidden = !skippable;
+    if (dlg.hidden) { dlg.hidden = false; toastEl.hidden = true; settleMonk(); }
+  }
+  function closeDialog() {
+    dlg.hidden = true; dlgChoices.replaceChildren(); toastEl.hidden = !toastEl.textContent;
+    settleMonk();
+  }
+  function typeText(text) {
+    return new Promise(res => {
+      const chars = [...text]; let i = 0;
+      dlgText.textContent = '';
+      const done = () => { clearInterval(timer); dlgText.textContent = text; finishTyping = null; res(); };
+      if (reduceMotion) { done(); return; }
+      const timer = setInterval(() => { dlgText.textContent += chars[i++]; if (i >= chars.length) done(); }, 34);
+      finishTyping = done;
+    });
+  }
+  dlgText.addEventListener('click', () => finishTyping && finishTyping());
+  dlgSkip.addEventListener('click', () => {
+    skipRequested = true;
+    if (finishTyping) finishTyping();
+    if (pendingAsk) pendingAsk.reject(SKIP);
+  });
+
+  // choices: [{label, sub?, value, primary?, wide?, onPick?}] — onPick runs inside the click (needed for iOS permission prompts)
+  async function ask(text, choices, { skippable = false, timeout = 0, timeoutValue = null, input = null } = {}) {
+    openDialog(skippable);
+    dlgChoices.replaceChildren();
+    await typeText(text);
+    if (skipRequested) { skipRequested = false; throw SKIP; }
+    return new Promise((resolve, reject) => {
+      let timer = 0;
+      const settle = v => { clearTimeout(timer); pendingAsk = null; dlgChoices.replaceChildren(); resolve(v); };
+      pendingAsk = { reject: e => { clearTimeout(timer); pendingAsk = null; skipRequested = false; dlgChoices.replaceChildren(); reject(e); } };
+      if (input) {
+        const row = document.createElement('form'); row.className = 'dlg-input';
+        row.innerHTML = '<input id="dlgInput" maxlength="12" autocomplete="off"><button type="submit" class="choice primary">確定</button>';
+        const field = row.querySelector('input'); field.placeholder = input.placeholder || '';
+        row.addEventListener('submit', e => { e.preventDefault(); audio(); settle(field.value.trim()); });
+        dlgChoices.appendChild(row);
+        setTimeout(() => field.focus(), 50);
+      }
+      choices.forEach((c, i) => {
+        const b = document.createElement('button'); b.type = 'button';
+        b.className = 'choice' + (c.primary ? ' primary' : '') + (c.wide ? ' wide' : '');
+        b.style.animationDelay = (i * 40) + 'ms';
+        b.textContent = c.label;
+        if (c.sub) { const s = document.createElement('small'); s.textContent = c.sub; b.appendChild(s); }
+        b.addEventListener('click', () => { audio(); c.onPick && c.onPick(); settle(c.value); });
+        dlgChoices.appendChild(b);
+      });
+      if (timeout) timer = setTimeout(() => settle(timeoutValue), timeout);
+    });
+  }
+
+  /* ---------- onboarding script ---------- */
+  const TASKS = ['讀書', '工作', '寫作'];
+  let cfg = { ...DEFAULT_CFG };
+
+  async function onboarding(again = false) {
+    P.phase = 'idle'; renderAll();
+    sitterEl.dataset.face = 'calm';
+    const lastCfg = store.get('keisaku-last-v1', null);
+    const visits = store.get('keisaku-visits-v1', 0);
+    if (!again) store.set('keisaku-visits-v1', visits + 1);
+    const greet = again ? '施主還要再坐一輪嗎?今日想做的事是什麼?'
+      : visits ? '施主又來了。今日想做的事是什麼?'
+      : '歡迎來到警策道場。施主,今日想做的事是什麼?';
+    try {
+      let next = 'new';
+      for (;;) {
+        const presets = store.get('keisaku-presets-v1', []);
+        if (!lastCfg && !presets.length) break;
+        const opts = [];
+        if (lastCfg) opts.push({ label: '跟上次一樣', sub: cfgShort(lastCfg), value: { use: lastCfg }, primary: true });
+        presets.forEach(p => { if (!sameCfg(p, lastCfg)) opts.push({ label: '★ ' + p.task, sub: `${p.focusMin} 分 × ${p.rounds} 炷`, value: { use: p } }); });
+        opts.push({ label: '新的安排', value: 'new' });
+        if (presets.length) opts.push({ label: '整理常用', value: 'manage' });
+        next = await ask(greet, opts, { skippable: true });
+        if (next === 'manage') { await managePresets(); continue; }
+        break;
+      }
+      if (next !== 'new') {
+        cfg = { ...next.use };
+        applyCfg();
+        return readyCheck(`好,一樣是「${cfg.task}」,${cfg.focusMin} 分 × ${cfg.rounds} 炷。`);
+      }
+      await planNew(lastCfg || !presetsEmpty() ? '那麼,今日想做什麼呢?' : greet);
+    } catch (e) {
+      if (e !== SKIP) throw e;
+      cfg = { ...(lastCfg || DEFAULT_CFG) };
+      applyCfg();
+    }
+    return readyCheck('');
+  }
+  const presetsEmpty = () => !store.get('keisaku-presets-v1', []).length;
+
+  async function planNew(openingLine) {
+    // ① what
+    let task = await ask(openingLine, [...TASKS.map(t => ({ label: t, value: t })), { label: '自訂…', value: '*' }], { skippable: true });
+    if (task === '*') task = await ask('要做什麼呢?寫下來給住持看。', [{ label: '不說了', value: '' }], { skippable: true, input: { placeholder: '例如:背單字' } });
+    task = task || '專注';
+    for (;;) {
+      // ② how long
+      const focusMin = await ask(`「${task}」啊,好。每炷香要坐多久?`, [
+        { label: '15 分', sub: '小坐', value: 15 }, { label: '25 分', sub: '番茄', value: 25, primary: true },
+        { label: '40 分', sub: '一炷香', value: 40 }, { label: '50 分', sub: '長坐', value: 50 }
+      ], { skippable: true });
+      const rounds = await ask('要坐幾炷?', [1, 2, 3, 4].map(n => ({ label: `${n} 炷`, value: n, primary: n === 4 })), { skippable: true });
+      const breakMin = rounds > 1
+        ? await ask('炷與炷之間要休息多久?', [{ label: '5 分', value: 5, primary: true }, { label: '10 分', value: 10 }], { skippable: true })
+        : 0;
+      cfg = { task, focusMin, rounds, breakMin };
+      applyCfg();
+      // ③ repeat it back
+      const recap = `好。施主今日要「${task}」,坐 ${rounds} 炷香,每炷 ${focusMin} 分` +
+        (rounds > 1 ? `,中間休息 ${breakMin} 分` : '') + `,總共約 ${totalMin(cfg)} 分鐘。`;
+      const saved = store.get('keisaku-presets-v1', []).some(p => sameCfg(p, cfg));
+      const ok = await ask(recap, [
+        { label: '沒錯', value: 'ok', primary: true },
+        ...(saved ? [] : [{ label: '沒錯,存成常用', value: 'save' }]),
+        { label: '我要改', value: 'edit' }
+      ], { skippable: true });
+      if (ok === 'edit') continue;
+      if (ok === 'save') await savePreset(cfg);
+      return;
+    }
+  }
+
+  async function savePreset(c) {
+    let presets = store.get('keisaku-presets-v1', []).filter(p => !sameCfg(p, c));
+    let line = `記下了。下次選「★ ${c.task}」就好。`;
+    if (presets.length >= MAX_PRESETS) {
+      const dropped = presets.shift();
+      line = `記下了。常用最多 ${MAX_PRESETS} 組,最舊的「${dropped.task}」先拿掉了。`;
+    }
+    presets.push({ ...c });
+    store.set('keisaku-presets-v1', presets);
+    await ask(line, [{ label: '好', value: 1, primary: true }], { skippable: true });
+  }
+
+  async function managePresets() {
+    for (;;) {
+      const presets = store.get('keisaku-presets-v1', []);
+      if (!presets.length) { await ask('常用都清空了。', [{ label: '好', value: 1, primary: true }]); return; }
+      const pick = await ask('要拿掉哪一組常用?', [
+        ...presets.map((p, i) => ({ label: '拿掉 ★ ' + p.task, sub: `${p.focusMin} 分 × ${p.rounds} 炷`, value: i })),
+        { label: '整理好了', value: -1, primary: true }
+      ]);
+      if (pick === -1) return;
+      presets.splice(pick, 1); store.set('keisaku-presets-v1', presets);
+    }
+  }
+
+  // ④ ready check, used before the first round and after every break
+  async function readyCheck(prefix) {
+    const phoneLike = matchMedia('(pointer: coarse)').matches && motionWanted();
+    const howTo = phoneLike
+      ? '請把手機螢幕朝下平放在桌上。聽到三聲鐘響就開始,一聲就是休息。'
+      : '這次請別切走畫面喔。聽到三聲鐘響就開始,一聲就是休息。';
+    let delays = 0;
+    for (;;) {
+      const v = await ask(`${prefix}準備好了嗎?${howTo}`, [
+        { label: '準備好了', value: 'go', primary: true, onPick: askMotionPermission },
+        { label: '再等一下', value: 'wait' }
+      ]);
+      if (v === 'go') break;
+      delays++;
+      const line = delays >= 3 ? '施主,拖延也是一種妄想喔。……好吧,我去喝杯茶,一分鐘後回來。'
+        : '不急,去倒杯水、上個廁所吧。我一分鐘後回來問你。';
+      hostAway = true; settleMonk();
+      await ask(line, [{ label: '我好了', value: 'back', primary: true }], { timeout: 60000, timeoutValue: 'timeout' });
+      hostAway = false; settleMonk();
+      prefix = delays >= 3 ? '回來了。' : '';
+    }
+    await ask('那麼,止靜。', [], { timeout: 900 });
+    closeDialog();
+    beginSettle();
+  }
+
   /* ---------- motion sensor ("平衡儀") ---------- */
   // Low-passed gravity vector. At the start of each round we remember the phone's resting
   // orientation; tilting away from it, or jolting it, for long enough counts as picking it up.
@@ -627,10 +867,10 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   const lyingFlat = g => Math.abs(g[2]) / (Math.hypot(...g) || 1) > .85;
   const motionWanted = () => $('#optMotion').checked;
 
-  async function askMotionPermission() {
+  function askMotionPermission() {
     const DME = window.DeviceMotionEvent;
     if (DME && typeof DME.requestPermission === 'function' && Mo.permission !== 'granted') {
-      try { Mo.permission = await DME.requestPermission(); } catch { Mo.permission = 'denied'; }
+      DME.requestPermission().then(r => { Mo.permission = r; }, () => { Mo.permission = 'denied'; });
     }
   }
   window.addEventListener('devicemotion', e => {
@@ -669,8 +909,8 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   function renderSense(text, ok) { $('#senseMode').textContent = text; $('#sense').dataset.ok = ok ? 'yes' : 'no'; }
 
   /* ---------- pomodoro phases ---------- */
-  // idle → settle → focus → break → ready → settle → focus … → (4th focus) → long break → idle
-  const P = { phase: 'idle', focusMin: 25, round: 1, end: 0, start: 0, hits: 0, roundHits: 0, asks: 0, focusTotal: 0,
+  // idle (dialogue) → settle → focus → break → ready (dialogue) → settle → focus … → last focus → result → idle
+  const P = { phase: 'idle', round: 1, end: 0, start: 0, hits: 0, roundHits: 0, asks: 0, focusTotal: 0,
               hiddenAt: 0, confirmEnd: 0, todayMin: 0, todayHits: 0, settleTimer: 0 };
   const today = () => new Date().toDateString();
   function loadToday() {
@@ -681,10 +921,11 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   function saveRound(min) {
     if (min <= 0 && P.roundHits === 0) return;
     const log = store.get('keisaku-log-v1', []).filter(e => Date.now() - e.t < 30 * 864e5);
-    log.push({ t: Date.now(), d: today(), min, hits: P.roundHits });
+    log.push({ t: Date.now(), d: today(), task: cfg.task, min, hits: P.roundHits });
     store.set('keisaku-log-v1', log);
     P.todayMin += min;
   }
+  function applyCfg() { store.set('keisaku-last-v1', cfg); renderAll(); }
   function renderStats() {
     $('#stHits').firstChild.nodeValue = P.hits;
     $('#stAsks').firstChild.nodeValue = P.asks;
@@ -692,18 +933,27 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     $('#stTodayHits').firstChild.nodeValue = P.todayHits;
   }
   function renderRounds() {
-    const active = P.phase !== 'idle';
-    [...$('#rounds').children].forEach((el, i) => {
+    const box = $('#rounds');
+    while (box.children.length < cfg.rounds) box.appendChild(document.createElement('i'));
+    while (box.children.length > cfg.rounds) box.lastChild.remove();
+    const started = P.phase !== 'idle';
+    [...box.children].forEach((el, i) => {
       const n = i + 1;
-      el.className = !active ? '' : n < P.round || (n === P.round && (P.phase === 'break')) ? 'done' : n === P.round ? 'now' : '';
+      el.className = !started ? '' : n < P.round || (n === P.round && P.phase === 'break') ? 'done' : n === P.round ? 'now' : '';
     });
-    $('#roundLabel').innerHTML = active
-      ? `第 <b>${P.round}</b> 炷 / 共 <b>${ROUNDS}</b> 炷`
-      : `一輪 <b>${ROUNDS}</b> 炷香,炷間休息 ${SHORT_BREAK} 分,最後長休 ${LONG_BREAK} 分`;
+    $('#roundLabel').innerHTML = started
+      ? `「${escapeHtml(cfg.task)}」第 <b>${P.round}</b> 炷 / 共 <b>${cfg.rounds}</b> 炷`
+      : `「${escapeHtml(cfg.task)}」<b>${cfg.focusMin}</b> 分 × <b>${cfg.rounds}</b> 炷`;
   }
+  const escapeHtml = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   function setStatus(text, state) { statusEl.textContent = text; statusEl.dataset.state = state || ''; }
-  function setMain(text, { warn = false, disabled = false } = {}) {
-    mainBtn.textContent = text; mainBtn.classList.toggle('warn', warn); mainBtn.disabled = disabled;
+  function setMain(text, { warn = false } = {}) {
+    mainBtn.hidden = text == null;
+    if (text != null) { mainBtn.textContent = text; mainBtn.classList.toggle('warn', warn); }
+  }
+  function renderAll() {
+    renderRounds(); renderStats(); tick();
+    if (P.phase === 'idle') { setStatus('報到中', ''); setMain(null); }
   }
   function fmt(ms) {
     const s = Math.max(0, Math.ceil(ms / 1000));
@@ -717,26 +967,18 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     $('#smoke').setAttribute('transform', `translate(0 ${top - 96})`);
     $('#smoke').style.display = lit && frac > 0 ? '' : 'none';
   }
-  function lockChips(locked) { document.querySelectorAll('.chip').forEach(c => c.disabled = locked); }
 
   let wakeLock = null;
   async function keepAwake() {
-    try { if ('wakeLock' in navigator && !wakeLock && P.phase !== 'idle') { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } } catch {}
+    try { if ('wakeLock' in navigator && !wakeLock && (P.phase === 'settle' || P.phase === 'focus')) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } } catch {}
   }
   function letSleep() { try { wakeLock && wakeLock.release(); } catch {} wakeLock = null; }
 
-  async function startCycle() {
-    audio();
-    await askMotionPermission();
-    P.round = 1; P.hits = 0; P.roundHits = 0; P.asks = 0; P.focusTotal = 0;
-    $('#result').hidden = true;
-    lockChips(true);
-    beginSettle();
-  }
-
   function beginSettle() {
+    if (P.round === 1) { P.hits = 0; P.asks = 0; P.focusTotal = 0; }
     P.phase = 'settle'; P.roundHits = 0;
-    renderRounds(); keepAwake(); settleMonk();
+    $('#result').hidden = true;
+    renderRounds(); renderStats(); keepAwake(); settleMonk();
     sitterEl.dataset.face = 'calm';
     setStatus('落座中', 'on');
     setMain('取消');
@@ -746,8 +988,8 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
       if (P.phase !== 'settle') return;
       if (!useMotion) { beginFocus(false); return; }
       if (count > 0) {
-        toast(`把手機平放在桌上(或立在架上)別動… ${count}`);
-        clockEl.textContent = fmt(P.focusMin * 60000);
+        toast(`手機放好別動… ${count}`);
+        clockEl.textContent = fmt(cfg.focusMin * 60000);
         count--; P.settleTimer = setTimeout(step, 1000); return;
       }
       if (!Mo.seen) { beginFocus(false); return; }             // no sensor: fall back to screen-only
@@ -759,7 +1001,7 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
 
   function beginFocus(withMotion) {
     P.phase = 'focus';
-    P.start = Date.now(); P.end = P.start + P.focusMin * 60000;
+    P.start = Date.now(); P.end = P.start + cfg.focusMin * 60000;
     Mo.base = withMotion ? Mo.lp.slice() : null; Mo.picked = false; Mo.score = 0;
     if (withMotion) renderSense('平衡儀+離開畫面', true);
     else if (motionWanted()) renderSense(Mo.permission === 'denied' ? '僅離開畫面(平衡儀權限被拒絕)' : '僅離開畫面(這台裝置讀不到平衡儀)', false);
@@ -772,89 +1014,81 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   }
 
   function endFocus() {
-    P.focusTotal += P.focusMin;
-    saveRound(P.focusMin); renderStats();
+    P.focusTotal += cfg.focusMin;
+    saveRound(cfg.focusMin); renderStats();
     bell(0, .26); buzz([200, 120, 200]);
-    if (P.round >= ROUNDS) {
-      beginBreak(LONG_BREAK);
-      enqueue(async () => showResult(false));
-    } else {
-      beginBreak(SHORT_BREAK);
-      toast(`放禪。這炷被打 ${P.roundHits} 下,休息 ${SHORT_BREAK} 分鐘,手機可以用了。`);
-    }
-  }
-
-  function beginBreak(min) {
+    if (P.round >= cfg.rounds) { finishCycle(false); return; }
     P.phase = 'break';
-    P.end = Date.now() + min * 60000;
+    P.end = Date.now() + cfg.breakMin * 60000;
     Mo.base = null; Mo.picked = false;
     letSleep();
     sitterEl.dataset.face = 'happy';
-    setStatus(min === LONG_BREAK ? '長休' : '休息', '');
+    setStatus('休息', '');
     setMain('跳過休息');
+    toast(`放禪。這炷被打 ${P.roundHits} 下,休息 ${cfg.breakMin} 分鐘,手機可以用了。`);
     renderRounds(); settleMonk();
   }
 
   function endBreak() {
     bells(2); buzz([120, 80, 120]);
-    if (P.round >= ROUNDS) { finishCycle(); return; }
     P.round++;
     P.phase = 'ready';
     sitterEl.dataset.face = 'calm';
     setStatus('該回座了', 'on');
-    setMain(`回座・第 ${P.round} 炷`);
-    toast('休息結束,準備好就回座。');
-    renderRounds(); settleMonk();
+    setMain(null);
+    renderRounds(); tick();
+    readyCheck(`休息結束。第 ${P.round} 炷,`);
   }
 
-  function finishCycle() {
+  function finishCycle(early) {
+    clearTimeout(P.settleTimer);
+    const hadFocus = P.focusTotal > 0 || P.hits > 0;
     P.phase = 'idle'; P.round = 1;
-    letSleep(); lockChips(false);
-    setStatus('未入堂', ''); setMain('入堂・開始');
-    toast('一輪坐完了,辛苦了。');
+    letSleep(); Mo.base = null; Mo.picked = false;
+    setMain(null); setStatus('報到中', '');
     renderSense('開始後檢查平衡儀', false);
     renderRounds(); settleMonk();
+    if (hadFocus) enqueue(async () => showResult(early));
+    else onboarding(true);
   }
 
   function quitEarly() {
-    const wasFocus = P.phase === 'focus';
-    clearTimeout(P.settleTimer);
-    if (wasFocus) {
+    if (P.phase === 'focus') {
       const min = Math.floor((Date.now() - P.start) / 60000);
       P.focusTotal += min; saveRound(min); renderStats();
     }
-    finishCycle();
-    if (wasFocus || P.focusTotal > 0) enqueue(async () => showResult(true));
+    finishCycle(true);
   }
 
   const KOANS = ['日日是好日。', '喫茶去。', '步步是道場。', '莫妄想。', '一期一會。', '行住坐臥,皆是禪。', '放下著。'];
   function showResult(early) {
     let seal, line2;
-    const perRound = P.hits / Math.max(1, P.round);
+    const perRound = P.hits / Math.max(1, cfg.rounds);
     if (P.hits === 0) { seal = '不動'; line2 = '一下都沒被打,如山不動。'; }
     else if (perRound <= 1) { seal = '精進'; line2 = `被打了 ${P.hits} 下,還算專心。`; }
     else { seal = '喝'; line2 = `被打了 ${P.hits} 下,肩膀辛苦了。`; }
+    sitterEl.dataset.face = 'happy';
     $('#seal').replaceChildren(...[...seal].map(ch => Object.assign(document.createElement('i'), { textContent: ch })));
-    $('#resultTitle').textContent = early ? '提早出堂' : `${ROUNDS} 炷坐滿`;
-    $('#resultLine1').textContent = `共坐了 ${P.focusTotal} 分鐘` + (P.asks ? `,自己請打 ${P.asks} 下` : '');
+    $('#resultTitle').textContent = early ? '提早出堂' : `${cfg.rounds} 炷坐滿`;
+    $('#resultLine1').textContent = `「${cfg.task}」共坐了 ${P.focusTotal} 分鐘` + (P.asks ? `,自己請打 ${P.asks} 下` : '');
     $('#resultLine2').textContent = line2;
     $('#koan').textContent = KOANS[Math.floor(Math.random() * KOANS.length)];
-    $('#closeResult').textContent = early ? '好' : `去長休 ${LONG_BREAK} 分鐘`;
     $('#result').hidden = false;
+    toast(early ? '下次試著坐完。' : '一輪坐完了,辛苦了。');
   }
 
   function tick() {
     if (P.phase === 'focus' || P.phase === 'break') {
       const left = P.end - Date.now();
       clockEl.textContent = fmt(left);
-      if (P.phase === 'focus') setIncense(left / (P.focusMin * 60000), true);
+      if (P.phase === 'focus') setIncense(left / (cfg.focusMin * 60000), true);
       else setIncense(1, false);
       if (left <= 0) {
         if (P.phase === 'focus') { if (!document.hidden) endFocus(); }
         else endBreak();
       }
     } else if (P.phase !== 'settle') {
-      clockEl.textContent = fmt(P.focusMin * 60000);
+      clockEl.textContent = fmt(cfg.focusMin * 60000);
       setIncense(1, false);
     }
   }
@@ -878,17 +1112,10 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
   });
 
   /* ---------- controls ---------- */
-  document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
-    if (P.phase !== 'idle') return;
-    document.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-checked', String(x === c)));
-    P.focusMin = +c.dataset.min; tick();
-  }));
-  mainBtn.addEventListener('click', async () => {
+  mainBtn.addEventListener('click', () => {
     switch (P.phase) {
-      case 'idle': startCycle(); break;
       case 'settle': quitEarly(); break;
       case 'break': P.end = Date.now(); tick(); break;
-      case 'ready': audio(); await askMotionPermission(); beginSettle(); break;
       case 'focus':
         if (Date.now() - P.confirmEnd < 3000) { quitEarly(); break; }
         P.confirmEnd = Date.now();
@@ -902,10 +1129,12 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
     if (busy) return;
     enqueue(() => strike({ reason: '啪!精神一振,謝謝師父。', counted: false }));
   });
-  $('#closeResult').addEventListener('click', () => { $('#result').hidden = true; });
+  $('#closeResult').addEventListener('click', () => { $('#result').hidden = true; onboarding(true); });
 
-  loadToday(); renderStats(); renderRounds(); tick();
+  cfg = { ...(store.get('keisaku-last-v1', null) || DEFAULT_CFG) };
+  loadToday(); renderAll();
   requestAnimationFrame(frame);
+  onboarding();
 })();
 </script>
 </body>
