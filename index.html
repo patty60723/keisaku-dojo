@@ -436,7 +436,7 @@ dialog.sheet.scroll {
 }
 dialog.sheet.scroll[open] { animation: none; }
 .scroll > .scroll-wrap { position: relative; overflow: visible; padding: 0; }
-.scroll .journal {
+.scroll .scroll-paper {
   margin-inline: 9px; max-height: 84dvh; overflow-y: auto; overscroll-behavior: contain;
   background: var(--scroll-paper); color: var(--ink);
   border-block: 7px solid var(--mount); border-radius: 0;
@@ -454,12 +454,12 @@ dialog.sheet.scroll[open] { animation: none; }
 }
 .roller::before { top: -9px; } .roller::after { bottom: -9px; }
 .roller.left { left: 0; } .roller.right { right: 0; }
-.scroll[open] .journal { animation: unroll .9s cubic-bezier(.45,.05,.3,1) both; }
+.scroll[open] .scroll-paper { animation: unroll .9s cubic-bezier(.45,.05,.3,1) both; }
 .scroll[open] .roller.left { animation: rollLeft .9s cubic-bezier(.45,.05,.3,1) both; }
 .scroll[open] .roller.right { animation: rollRight .9s cubic-bezier(.45,.05,.3,1) both; }
-.scroll.closing .journal { animation: rollUp .45s cubic-bezier(.5,0,.75,.4) both; }
-.scroll.closing .roller.left { animation: rollLeftBack .45s cubic-bezier(.5,0,.75,.4) both; }
-.scroll.closing .roller.right { animation: rollRightBack .45s cubic-bezier(.5,0,.75,.4) both; }
+.scroll.closing .scroll-paper { animation: rollUp .8s cubic-bezier(.55,0,.55,1) both; }
+.scroll.closing .roller.left { animation: rollLeftBack .8s cubic-bezier(.55,0,.55,1) both; }
+.scroll.closing .roller.right { animation: rollRightBack .8s cubic-bezier(.55,0,.55,1) both; }
 @keyframes unroll { from { clip-path: inset(0 50% 0 50%); } to { clip-path: inset(0 0 0 0); } }
 @keyframes rollUp { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 50% 0 50%); } }
 @keyframes rollLeft { from { left: calc(50% - 18px); } to { left: 0; } }
@@ -467,8 +467,9 @@ dialog.sheet.scroll[open] { animation: none; }
 @keyframes rollLeftBack { from { left: 0; } to { left: calc(50% - 18px); } }
 @keyframes rollRightBack { from { right: 0; } to { right: calc(50% - 18px); } }
 @media (prefers-reduced-motion: reduce) {
-  .scroll[open] .journal, .scroll[open] .roller, .scroll.closing .journal, .scroll.closing .roller { animation: none; }
+  .scroll[open] .scroll-paper, .scroll[open] .roller, .scroll.closing .scroll-paper, .scroll.closing .roller { animation: none; }
 }
+.settings .backup { padding-top: 12px; }
 </style>
 </head>
 <body>
@@ -489,7 +490,7 @@ dialog.sheet.scroll[open] { animation: none; }
    <div class="scroll-wrap">
    <span class="roller left" aria-hidden="true"></span>
    <span class="roller right" aria-hidden="true"></span>
-   <div class="journal">
+   <div class="journal scroll-paper">
     <div class="help-head">
       <h2 id="journalTitle">坐禪帳<span class="streak" id="streak"></span></h2>
       <button type="button" class="dlg-skip sheet-close" id="journalClose">關閉</button>
@@ -503,6 +504,51 @@ dialog.sheet.scroll[open] { animation: none; }
     <div class="cal" id="cal"></div>
     <div class="cal-legend" id="calLegend"></div>
     <div class="day-detail" id="dayDetail" aria-live="polite"></div>
+   </div>
+   </div>
+  </dialog>
+
+  <dialog class="sheet scroll" id="help" aria-labelledby="helpTitle">
+   <div class="scroll-wrap">
+   <span class="roller left" aria-hidden="true"></span>
+   <span class="roller right" aria-hidden="true"></span>
+   <div class="help scroll-paper">
+    <div class="help-head">
+      <h2 id="helpTitle">道場的規矩</h2>
+      <button type="button" class="dlg-skip sheet-close" id="helpClose">關閉</button>
+    </div>
+    <ul>
+      <li>開始前先跟住持報到:要做的事、每炷多久、坐幾炷、休息多久。可以存成常用,下次直接選。</li>
+      <li>按「準備好了」後,3 秒內把手機平放在桌上(螢幕朝上朝下都行),或立在手機架上。</li>
+      <li>坐禪中<b>拿起手機</b>,或<b>切到別的 App、分頁超過 2 秒</b>,住持就會用警策啪你一下。</li>
+      <li>拿起來的手機要放回原位才算回座;一直不放,每 20 秒再補一下。</li>
+      <li>每炷開始敲<b>止靜三鐘</b>,結束敲<b>放禪一鐘</b>,休息結束敲兩鐘叫你回座。</li>
+      <li>休息時住持去喝茶,手機隨便用。</li>
+      <li>坐禪中螢幕會保持亮著。手機朝下放也可以,靠鐘聲知道時間到了。</li>
+      <li>想提振精神時可以按「合掌請打」,自己請住持打一下,不算扣分。這是真正禪堂裡也有的規矩。</li>
+      <li>iPhone 第一次開始時,要允許存取「動作與方向」,住持才看得到你有沒有拿起手機。</li>
+    </ul>
+   </div>
+   </div>
+  </dialog>
+
+  <dialog class="sheet scroll" id="settings" aria-labelledby="settingsTitle">
+   <div class="scroll-wrap">
+   <span class="roller left" aria-hidden="true"></span>
+   <span class="roller right" aria-hidden="true"></span>
+   <div class="settings scroll-paper">
+    <div class="help-head">
+      <h2 id="settingsTitle">設定</h2>
+      <button type="button" class="dlg-skip sheet-close" id="settingsClose">關閉</button>
+    </div>
+    <div class="toggles">
+      <label for="optMotion"><input type="checkbox" id="optMotion" checked> 用平衡儀偵測拿起手機 <small>手機平放或立在架上都可以,開始時會記住它的角度</small></label>
+      <label for="optSound"><input type="checkbox" id="optSound" checked> 鐘聲與音效</label>
+    </div>
+    <div class="install" id="installBox" hidden>
+      <button type="button" class="btn ghost" id="installBtn" hidden>把道場裝到主畫面</button>
+      <p id="iosTip" hidden>iPhone 要裝到主畫面:在 Safari 按下方的「分享」,再選「加入主畫面」。</p>
+    </div>
     <div class="backup">
       <h3>備份</h3>
       <p>紀錄只存在這台裝置的瀏覽器裡。換手機或清除瀏覽器資料前,先匯出備份。</p>
@@ -525,43 +571,6 @@ dialog.sheet.scroll[open] { animation: none; }
       <p id="backupStatus" aria-live="polite"></p>
     </div>
    </div>
-   </div>
-  </dialog>
-
-  <dialog class="sheet" id="help" aria-labelledby="helpTitle">
-   <div class="help">
-    <div class="help-head">
-      <h2 id="helpTitle">道場的規矩</h2>
-      <button type="button" class="dlg-skip sheet-close" id="helpClose">關閉</button>
-    </div>
-    <ul>
-      <li>開始前先跟住持報到:要做的事、每炷多久、坐幾炷、休息多久。可以存成常用,下次直接選。</li>
-      <li>按「準備好了」後,3 秒內把手機平放在桌上(螢幕朝上朝下都行),或立在手機架上。</li>
-      <li>坐禪中<b>拿起手機</b>,或<b>切到別的 App、分頁超過 2 秒</b>,住持就會用警策啪你一下。</li>
-      <li>拿起來的手機要放回原位才算回座;一直不放,每 20 秒再補一下。</li>
-      <li>每炷開始敲<b>止靜三鐘</b>,結束敲<b>放禪一鐘</b>,休息結束敲兩鐘叫你回座。</li>
-      <li>休息時住持去喝茶,手機隨便用。</li>
-      <li>坐禪中螢幕會保持亮著。手機朝下放也可以,靠鐘聲知道時間到了。</li>
-      <li>想提振精神時可以按「合掌請打」,自己請住持打一下,不算扣分。這是真正禪堂裡也有的規矩。</li>
-      <li>iPhone 第一次開始時,要允許存取「動作與方向」,住持才看得到你有沒有拿起手機。</li>
-    </ul>
-   </div>
-  </dialog>
-
-  <dialog class="sheet" id="settings" aria-labelledby="settingsTitle">
-   <div class="settings">
-    <div class="help-head">
-      <h2 id="settingsTitle">設定</h2>
-      <button type="button" class="dlg-skip sheet-close" id="settingsClose">關閉</button>
-    </div>
-    <div class="toggles">
-      <label for="optMotion"><input type="checkbox" id="optMotion" checked> 用平衡儀偵測拿起手機 <small>手機平放或立在架上都可以,開始時會記住它的角度</small></label>
-      <label for="optSound"><input type="checkbox" id="optSound" checked> 鐘聲與音效</label>
-    </div>
-    <div class="install" id="installBox" hidden>
-      <button type="button" class="btn ghost" id="installBtn" hidden>把道場裝到主畫面</button>
-      <p id="iosTip" hidden>iPhone 要裝到主畫面:在 Safari 按下方的「分享」,再選「加入主畫面」。</p>
-    </div>
    </div>
   </dialog>
 
@@ -1527,7 +1536,7 @@ dialog.sheet.scroll[open] { animation: none; }
     if (!d.open || d.classList.contains('closing')) return;
     if (!d.classList.contains('scroll') || reduceMotion) { d.close(); return; }
     d.classList.add('closing');
-    setTimeout(() => { d.classList.remove('closing'); d.close(); }, 450);
+    setTimeout(() => { d.classList.remove('closing'); d.close(); }, 800);
   }
   document.querySelectorAll('dialog.sheet').forEach(d => {
     d.addEventListener('click', e => { if (e.target === d) closeSheet(d); });     // tap the dimmed backdrop
