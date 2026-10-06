@@ -619,6 +619,17 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 }
 .top h1 small { white-space: nowrap; }
 @media (max-width: 370px) { .top-btns .help-btn { padding: 0 10px; } }
+
+/* ---------- 告假 and break notifications ---------- */
+.foot-btns { display: flex; gap: 14px; align-items: center; }
+.back-btn { width: 100%; min-height: 48px; }
+.back-btn[hidden] { display: none; }
+.notify-ask {
+  align-self: flex-start; font: inherit; font-size: .88rem; cursor: pointer; color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent); border: 1.5px dashed color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 999px; min-height: 38px; padding: 0 14px;
+}
+.notify-ask[hidden] { display: none; }
 </style>
 </head>
 <body>
@@ -672,7 +683,8 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       <li>坐禪中<b>拿起手機</b>,或<b>切到別的 App、分頁超過 2 秒</b>,住持就會用警策啪你一下。</li>
       <li>拿起來的手機要放回原位才算回座;一直不放,每 20 秒再補一下。</li>
       <li>每炷開始敲<b>止靜三鐘</b>,結束敲<b>放禪一鐘</b>,休息結束敲兩鐘叫你回座。</li>
-      <li>休息時住持去喝茶,手機隨便用。</li>
+      <li>休息時住持去喝茶,手機隨便用。可以在設定打開通知,休息結束時叫你回座(App 在背景時不一定準時)。</li>
+      <li>坐禪中臨時有事(接電話、有人敲門),可以按「<b>告假</b>」暫停計時,每炷一次。回來按「回座」,把手機放好就繼續,不算被打。</li>
       <li>坐禪中螢幕會保持亮著。手機朝下放也可以,靠鐘聲知道時間到了。</li>
       <li>想提振精神時可以按「合掌請打」,自己請住持打一下,不算扣分。這是真正禪堂裡也有的規矩。</li>
       <li>iPhone 第一次開始時,要允許存取「動作與方向」,住持才看得到你有沒有拿起手機。</li>
@@ -717,6 +729,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     <div class="toggles">
       <label for="optMotion"><input type="checkbox" id="optMotion" checked> 用平衡儀偵測拿起手機 <small>手機平放或立在架上都可以,開始時會記住它的角度</small></label>
       <label for="optSound"><input type="checkbox" id="optSound" checked> 鐘聲與音效</label>
+      <label for="optNotify" id="optNotifyRow" hidden><input type="checkbox" id="optNotify"> 休息結束時跳通知 <small>切到別的 App 時,手機可能會晚幾分鐘才叫你,甚至沒叫到</small></label>
     </div>
     <div class="install" id="installBox" hidden>
       <button type="button" class="btn ghost" id="installBtn" hidden>把道場裝到主畫面</button>
@@ -924,13 +937,18 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       <div class="rounds" id="rounds" aria-hidden="true"></div>
     </div>
     <p class="status-line"><span class="state" id="status">報到中</span><span class="round-label" id="roundLabel"></span></p>
+    <button type="button" class="btn primary back-btn" id="backBtn" hidden>回座</button>
+    <button type="button" class="notify-ask" id="notifyAsk" hidden>🔔 休息結束時用通知叫我</button>
     <details class="sense" id="sense" hidden>
       <summary>⚠ 只能偵測切出畫面</summary>
       <p id="senseMode"></p>
     </details>
     <div class="panel-foot">
       <p class="today" id="today">今日坐禪 <b id="stToday">0</b> 分<span id="todayHitsWrap" hidden> · 被打 <b class="hitnum" id="stTodayHits">0</b> 下</span></p>
-      <button type="button" class="quiet-btn" id="mainBtn" hidden>出堂・結束</button>
+      <div class="foot-btns">
+        <button type="button" class="quiet-btn" id="leaveBtn" hidden>告假</button>
+        <button type="button" class="quiet-btn" id="mainBtn" hidden>出堂・結束</button>
+      </div>
     </div>
   </section>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -954,7 +972,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
   const monkEl = $('#monk'), stickEl = $('#stick'), stickLayer = $('#stickLayer'), sitterEl = $('#sitter');
   const bubbleEl = $('#bubble'), bubbleText = $('#bubbleText');
   const toastEl = $('#toast'), clockEl = $('#clock'), statusEl = $('#status');
-  const mainBtn = $('#mainBtn'), askBtn = $('#askBtn');
+  const mainBtn = $('#mainBtn'), askBtn = $('#askBtn'), leaveBtn = $('#leaveBtn'), backBtn = $('#backBtn');
   const PIVOT = '12 -38';
   const SITTER_X = 200, TEA_X = 326, HOST_X = 72, RACK_X = 362;
   const STAND = { x: -66, y: 14 };            // where the mochi stands (relative to the cushion) while checking in
@@ -1851,7 +1869,8 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
   /* ---------- pomodoro phases ---------- */
   // idle (dialogue) → settle → focus → break → ready (dialogue) → settle → focus … → last focus → result → idle
   const P = { phase: 'idle', round: 1, end: 0, start: 0, hits: 0, roundHits: 0, asks: 0, focusTotal: 0,
-              hiddenAt: 0, confirmEnd: 0, todayMin: 0, todayHits: 0, settleTimer: 0 };
+              hiddenAt: 0, confirmEnd: 0, todayMin: 0, todayHits: 0, settleTimer: 0,
+              leaveUsed: false, leaveAt: 0, leaveMs: 0, left: 0, resuming: false, breakEnd: 0, lateMin: 0, awaitReturn: false };
   function loadToday() {
     const log = readLog().filter(e => e.d === dayKey());
     P.todayMin = log.reduce((a, e) => a + e.min, 0);
@@ -1861,7 +1880,11 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
   function saveRound(min, full) {
     if (min <= 0 && P.roundHits === 0) return;
     const log = readLog();
-    log.push({ t: Date.now(), d: dayKey(), task: cfg.task, min, hits: P.roundHits, full });
+    const e = { t: Date.now(), d: dayKey(), task: cfg.task, min, hits: P.roundHits, full };
+    if (P.leaveUsed) e.leave = 1;
+    if (P.lateMin) e.late = P.lateMin;
+    log.push(e);
+    P.lateMin = 0;
     writeLog(log);
     P.todayMin += min;
     askPersist();
@@ -1889,6 +1912,9 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
   function setStatus(text, state) {
     statusEl.textContent = text.replace(/・第 \d+ 炷$/, ''); statusEl.dataset.state = state || '';
     askBtn.hidden = P.phase !== 'focus';            // asking for a strike only makes sense while sitting
+    leaveBtn.hidden = P.phase !== 'focus' || P.leaveUsed;
+    backBtn.hidden = P.phase !== 'leave';
+    $('#notifyAsk').hidden = !(P.phase === 'break' && notifyAskable());
   }
   function setMain(text, { warn = false } = {}) {
     mainBtn.hidden = text == null;
@@ -1919,7 +1945,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 
   function beginSettle() {
     if (P.round === 1) { P.hits = 0; P.asks = 0; P.focusTotal = 0; }
-    P.phase = 'settle'; P.roundHits = 0;
+    P.phase = 'settle'; P.roundHits = 0; P.leaveUsed = false; P.leaveMs = 0; P.resuming = false;
     $('#intro').hidden = true;                      // the intro has done its job once they sit
     enqueue(takeStick);
     $('#result').hidden = true;
@@ -1927,29 +1953,77 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     sitterEl.dataset.face = 'calm';
     setStatus('落座中', 'on');
     setMain('取消');
+    settleCountdown(cfg.focusMin * 60000, beginFocus);
+  }
+  // give the phone three seconds to be put down, then remember how it lies
+  function settleCountdown(showMs, done) {
     const useMotion = motionWanted();
     let count = 3;
     const step = () => {
       if (P.phase !== 'settle') return;
-      if (!useMotion) { beginFocus(false); return; }
+      if (!useMotion) { done(false); return; }
       if (count > 0) {
         toast(`手機放好別動… ${count}`);
-        clockEl.textContent = fmt(cfg.focusMin * 60000);
+        clockEl.textContent = fmt(showMs);
         count--; P.settleTimer = setTimeout(step, 1000); return;
       }
-      if (!Mo.seen) { beginFocus(false); return; }             // no sensor: fall back to screen-only
+      if (!Mo.seen) { done(false); return; }             // no sensor: fall back to screen-only
       if (Mo.still < .8) { toast('手機還在動,放好別碰它…'); P.settleTimer = setTimeout(step, 700); return; }
-      beginFocus(true);
+      done(true);
     };
     step();
   }
+  function senseFor(withMotion) {
+    if (withMotion || !motionWanted()) renderSense(null);
+    else renderSense(Mo.permission === 'denied' ? '平衡儀的權限被拒絕了,' : '這台裝置讀不到平衡儀,');
+  }
+
+  /* ---------- 告假: step away once per round without being struck ---------- */
+  function startLeave() {
+    if (P.phase !== 'focus' || P.leaveUsed) return;
+    P.left = Math.max(0, P.end - Date.now());
+    P.phase = 'leave'; P.leaveUsed = true; P.leaveAt = Date.now();
+    Mo.base = null; Mo.picked = false;
+    stopBackground(1.2); letSleep(); renderSense(null);
+    sitterEl.dataset.face = 'peek'; standUp();
+    setStatus('告假中', '');
+    setMain('出堂・結束');
+    bubble('去吧,快去快回。'); P.leaveBubble = setTimeout(() => bubble(null), 2400);
+    toast('計時暫停。回來按「回座」繼續。', false, 4200);
+    tick();
+  }
+  async function endLeave() {
+    if (P.phase !== 'leave') return;
+    P.leaveMs += Date.now() - P.leaveAt;
+    clearTimeout(P.leaveBubble); bubble(null);
+    P.phase = 'settle'; P.resuming = true;
+    audio(); askMotionPermission();
+    sitterEl.dataset.face = 'calm';
+    setStatus('回座中', 'on');
+    setMain('出堂・結束');
+    keepAwake();
+    await sitDown();
+    settleCountdown(P.left, resumeFocus);
+  }
+  function resumeFocus(withMotion) {
+    P.phase = 'focus'; P.resuming = false;
+    P.end = Date.now() + P.left;
+    Mo.base = withMotion ? Mo.lp.slice() : null; Mo.picked = false; Mo.score = 0;
+    senseFor(withMotion);
+    setStatus(`坐禪中・第 ${P.round} 炷`, 'on');
+    setMain('出堂・結束');
+    bell(0, .2);
+    Amb.timers.push(setTimeout(() => { if (P.phase === 'focus') startBackground(); }, 1500));
+    toast('回座了,繼續。');
+  }
+  leaveBtn.addEventListener('click', () => { audio(); startLeave(); });
+  backBtn.addEventListener('click', endLeave);
 
   function beginFocus(withMotion) {
     P.phase = 'focus';
     P.start = Date.now(); P.end = P.start + cfg.focusMin * 60000;
     Mo.base = withMotion ? Mo.lp.slice() : null; Mo.picked = false; Mo.score = 0;
-    if (withMotion || !motionWanted()) renderSense(null);
-    else renderSense(Mo.permission === 'denied' ? '平衡儀的權限被拒絕了,' : '這台裝置讀不到平衡儀,');
+    senseFor(withMotion);
     setStatus(`坐禪中・第 ${P.round} 炷`, 'on');
     setMain('出堂・結束');
     renderRounds();
@@ -1978,20 +2052,49 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 
   function endBreak() {
     bells(2); buzz([120, 80, 120]);
+    P.breakEnd = P.end;
     P.round++;
     P.phase = 'ready';
     sitterEl.dataset.face = 'peek';
     setStatus('該回座了', 'on');
     setMain(null);
     renderRounds(); tick();
-    readyCheck(`休息結束。第 ${P.round} 炷,`);
+    if (document.hidden) { P.awaitReturn = true; notifyBreakOver(); return; }   // wait until they come back
+    callBack();
+  }
+  // back in the zendo after a break: a word from the monk if the break ran long
+  function callBack() {
+    P.awaitReturn = false;
+    const late = Date.now() - P.breakEnd;
+    P.lateMin = late >= 60000 ? Math.round(late / 60000) : 0;
+    readyCheck(P.lateMin ? `休息超過 ${P.lateMin} 分鐘了喔。第 ${P.round} 炷,` : `休息結束。第 ${P.round} 炷,`);
+  }
+
+  /* ---------- break-over notification (best effort: the page may be frozen in the background) ---------- */
+  const canNotify = () => 'Notification' in window && 'serviceWorker' in navigator && location.protocol.startsWith('http');
+  const notifyAskable = () => canNotify() && Notification.permission === 'default' && !store.get('keisaku-notify-asked', false);
+  async function notifyBreakOver() {
+    if (!canNotify() || !$('#optNotify').checked || Notification.permission !== 'granted') return;
+    const body = `第 ${P.round} 炷要開始了,回來坐禪吧。`;
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      await reg.showNotification('休息結束,該回座了', { body, tag: 'keisaku-break', renotify: true, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', vibrate: [120, 80, 120] });
+    } catch { try { new Notification('休息結束,該回座了', { body, tag: 'keisaku-break' }); } catch {} }
+  }
+  async function enableNotify() {
+    store.set('keisaku-notify-asked', true);
+    let perm = Notification.permission;
+    if (perm !== 'granted') { try { perm = await Notification.requestPermission(); } catch { perm = 'denied'; } }   // after a refusal this just answers 'denied' again
+    $('#optNotify').checked = perm === 'granted';
+    saveOpts();
+    return perm;
   }
 
   function finishCycle(early) {
     stopBackground(2);
     clearTimeout(P.settleTimer);
     const hadFocus = P.focusTotal > 0 || P.hits > 0;
-    P.phase = 'idle'; P.round = 1;
+    P.phase = 'idle'; P.round = 1; P.resuming = false; P.awaitReturn = false; P.lateMin = 0;
     letSleep(); Mo.base = null; Mo.picked = false; standUp();
     setMain(null); setStatus('報到中', '');
     renderSense(null);
@@ -2002,8 +2105,10 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
   }
 
   function quitEarly() {
-    if (P.phase === 'focus') {
-      const min = Math.floor((Date.now() - P.start) / 60000);
+    const done = P.phase === 'focus' ? cfg.focusMin * 60000 - (P.end - Date.now())
+      : P.phase === 'leave' || P.resuming ? cfg.focusMin * 60000 - P.left : -1;
+    if (done >= 0) {
+      const min = Math.floor(done / 60000);
       P.focusTotal += min; saveRound(min, false); renderStats();
     }
     finishCycle(true);
@@ -2035,6 +2140,9 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
         if (P.phase === 'focus') { if (!document.hidden) endFocus(); }
         else endBreak();
       }
+    } else if (P.phase === 'leave') {
+      clockEl.textContent = fmt(P.left);
+      setIncense(P.left / (cfg.focusMin * 60000), false);
     } else if (P.phase !== 'settle') {
       clockEl.textContent = fmt(cfg.focusMin * 60000);
       setIncense(1, false);
@@ -2046,6 +2154,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { P.hiddenAt = P.phase === 'focus' ? Date.now() : 0; return; }
     keepAwake();
+    if (P.awaitReturn && P.phase === 'ready') { callBack(); return; }
     if (!P.hiddenAt) return;
     const away = Math.min(Date.now(), P.end) - P.hiddenAt; P.hiddenAt = 0;
     if (away < 2000) { tick(); return; }
@@ -2062,7 +2171,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
   /* ---------- controls ---------- */
   mainBtn.addEventListener('click', () => {
     switch (P.phase) {
-      case 'settle': quitEarly(); break;
+      case 'settle': case 'leave': quitEarly(); break;
       case 'break': P.end = Date.now(); tick(); break;
       case 'focus':
         if (Date.now() - P.confirmEnd < 3000) { quitEarly(); break; }
@@ -2135,8 +2244,10 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
   const opts = store.get('keisaku-opts-v1', {});
   if (typeof opts.motion === 'boolean') $('#optMotion').checked = opts.motion;
   if (typeof opts.sound === 'boolean') $('#optSound').checked = opts.sound;
+  $('#optNotify').checked = !!opts.notify && canNotify() && Notification.permission === 'granted';
+  $('#optNotifyRow').hidden = !canNotify();
   const themeNow = () => (document.querySelector('input[name="theme"]:checked') || {}).value || 'system';
-  const saveOpts = () => store.set('keisaku-opts-v1', { motion: $('#optMotion').checked, sound: $('#optSound').checked, theme: themeNow(),
+  const saveOpts = () => store.set('keisaku-opts-v1', { motion: $('#optMotion').checked, sound: $('#optSound').checked, notify: $('#optNotify').checked, theme: themeNow(),
     ambient: ambientChoice(), ambVol: +$('#ambVol').value, music: musicOn() });
   if (typeof opts.music === 'boolean') $('#ambMusic').checked = opts.music;
   if (AMBIENT_LABEL[opts.ambient]) document.querySelector(`input[name="ambient"][value="${opts.ambient}"]`).checked = true;
@@ -2173,6 +2284,15 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
   $('#ambVol').addEventListener('change', saveOpts);
   $('#settings').addEventListener('close', () => { if (previewing) setPreview(false); });
   ['optMotion', 'optSound'].forEach(id => $('#' + id).addEventListener('change', saveOpts));
+  $('#optNotify').addEventListener('change', async e => {
+    if (!e.target.checked) { saveOpts(); return; }
+    if (await enableNotify() === 'denied') toast('通知被封鎖了,要到手機的 App 設定裡打開。', false, 4200);
+  });
+  $('#notifyAsk').addEventListener('click', async () => {
+    const perm = await enableNotify();
+    $('#notifyAsk').hidden = true;
+    toast(perm === 'granted' ? '好,休息結束時會用通知叫你。' : '沒關係,休息結束時聽鐘聲回座。', false, 3600);
+  });
 
   // appearance: follow the phone, or force light / dark (the tokens already handle [data-theme])
   const themeMetas = [...document.querySelectorAll('meta[name="theme-color"]')].map(m => [m, m.content]);
@@ -2215,7 +2335,8 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       let a = m.get(e.d);
       if (!a) { a = { min: 0, hits: 0, full: 0, tasks: new Map() }; m.set(e.d, a); }
       a.min += e.min; a.hits += e.hits; if (e.full) a.full++;
-      const t = a.tasks.get(e.task) || { rounds: 0, partial: 0, min: 0, hits: 0 };
+      const t = a.tasks.get(e.task) || { rounds: 0, partial: 0, min: 0, hits: 0, leave: 0, late: 0 };
+      t.leave += e.leave || 0; t.late += e.late || 0;
       if (e.full) t.rounds++; else t.partial++;
       t.min += e.min; t.hits += e.hits;
       a.tasks.set(e.task, t);
@@ -2317,7 +2438,8 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     const ul = box.querySelector('ul');
     for (const [task, t] of a.tasks) {
       const li = document.createElement('li');
-      li.textContent = `${task} ${t.rounds} 炷・${t.min} 分・被打 ${t.hits} 下` + (t.partial ? `(另有 ${t.partial} 次沒坐完)` : '');
+      li.textContent = `${task} ${t.rounds} 炷・${t.min} 分・被打 ${t.hits} 下` + (t.leave ? `・告假 ${t.leave} 次` : '')
+        + (t.late ? `・休息超時 ${t.late} 分` : '') + (t.partial ? `(另有 ${t.partial} 次沒坐完)` : '');
       ul.appendChild(li);
     }
   }

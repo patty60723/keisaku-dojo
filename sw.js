@@ -1,6 +1,6 @@
 // 警策道場 service worker: works offline after the first visit.
 // Bump VERSION whenever the app shell changes so old caches get cleared.
-const VERSION = 'v7';
+const VERSION = 'v8';
 const SHELL = `keisaku-shell-${VERSION}`;
 const FONTS = 'keisaku-fonts';
 const SHELL_FILES = [
@@ -63,4 +63,15 @@ self.addEventListener('fetch', event => {
 
   // Icons and manifest: cache-first.
   event.respondWith(caches.match(req).then(hit => hit || fetch(req)));
+});
+
+// Tapping the "break is over" notification brings the app back (or opens it).
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const app = wins.find(w => new URL(w.url).pathname.startsWith(new URL(self.registration.scope).pathname));
+    if (app) return app.focus();
+    return self.clients.openWindow('./');
+  })());
 });
