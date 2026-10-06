@@ -940,7 +940,7 @@ button { -webkit-tap-highlight-color: transparent; }
    <span class="roller right" aria-hidden="true"></span>
    <div class="help scroll-paper">
     <div class="help-head">
-      <h2 id="helpTitle">道場的規矩</h2>
+      <h2 id="helpTitle">道場規約</h2>
       <button type="button" class="sheet-close" id="helpClose" aria-label="關閉">✕</button>
     </div>
     <ul>
@@ -2925,8 +2925,17 @@ button { -webkit-tap-highlight-color: transparent; }
         place(); setTimeout(place, 300);
         $('#tourNext').focus({ preventScroll: true });   // keyboard and screen-reader users move on from here
       };
-      Tour.next = () => {
+      Tour.next = async () => {
         const s = steps[i];
+        if (s.sheet) {
+          // the tap does what it would do anyway: open the sheet; the tour waits until it is rolled up again
+          const sheet = $(s.sheet), closed = new Promise(r => sheet.addEventListener('close', r, { once: true }));
+          block.hidden = card.hidden = true;
+          $(s.target).click();
+          await closed;
+          if (!Tour.active) return;
+          block.hidden = card.hidden = false;
+        }
         if (++i < steps.length) { show(); return; }
         finish(); s.go && s.go();
       };
@@ -2952,9 +2961,9 @@ button { -webkit-tap-highlight-color: transparent; }
     ['先帶施主看看道場裡的東西。', '好'],
   ];
   const introSteps = returning => [
-    { target: '#helpBtn', text: (returning ? '道場重新布置過了,我帶施主看一下。' : '') + '道場的規矩寫在左邊這塊「規約」木牌上,忘了就點它來看。' },
-    { target: '#journalBtn', text: '右邊柱子上掛的是坐禪帳。每坐完一炷,我就在上面蓋一個章。' },
-    { target: '#settingsBtn', text: '背景聲音、每日目標、深色淺色,都在這個齒輪裡調。', hint: '👆 點一下齒輪,就開始吧' },
+    { target: '#helpBtn', sheet: '#help', text: (returning ? '道場重新布置過了,我帶施主看一下。' : '') + '道場的規矩寫在左邊這塊「規約」木牌上。點它看看,看完收起來就好。', hint: '👆 點一下「規約」木牌' },
+    { target: '#journalBtn', sheet: '#journal', text: '右邊柱子上掛的是坐禪帳。每坐完一炷,我就在上面蓋一個章。點開看看。', hint: '👆 點一下坐禪帳' },
+    { target: '#settingsBtn', sheet: '#settings', text: '背景聲音、每日目標、深色淺色,都在這個齒輪裡調。', hint: '👆 點一下齒輪' },
   ];
   // the first time a round is stamped, point at the ledger, and this time the tap opens it
   function journalTip() {
