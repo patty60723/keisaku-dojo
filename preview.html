@@ -862,6 +862,12 @@ button { -webkit-tap-highlight-color: transparent; }
 .dojo-links h3 { margin: 0; font-size: .95rem; }
 .dojo-links .backup-btns { grid-template-columns: repeat(3, 1fr); }
 .tour-card.at-top { bottom: auto; top: calc(16px + env(safe-area-inset-top, 0px)); }
+
+/* behave like an app, not a page: no grey/blue tap flash anywhere, no text selection or callout on long press
+   (fields you type or paste into keep it) */
+html { -webkit-tap-highlight-color: transparent; }
+body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
 .preview-tag{align-self:flex-start;font-size:.78rem;color:#fff;background:var(--kesa);padding:2px 10px;border-radius:999px;text-decoration:none}
 </style>
 </head>
