@@ -2016,8 +2016,12 @@ button { -webkit-tap-highlight-color: transparent; }
       // first visit: say what this place is before pointing at anything
       if (!hasSat || replayIntro) {
         try {
-          for (const [line, reply] of INTRO) await ask(line, [{ label: reply, value: 1, primary: true }], { skippable: true });
-        } catch (e) { if (e !== SKIP) throw e; }
+          for (const [line, reply, withStick] of INTRO) {
+            if (withStick) await new Promise(r => enqueue(async () => { await takeStick(); r(); }));
+            await ask(line, [{ label: reply, value: 1, primary: true }], { skippable: true });
+            if (withStick) enqueue(returnStick);
+          }
+        } catch (e) { if (e !== SKIP) throw e; enqueue(returnStick); }
         store.set('keisaku-rules-asked-v1', true);      // the essentials were just said; the board holds the rest
         introduced = true;
       }
@@ -2064,17 +2068,21 @@ button { -webkit-tap-highlight-color: transparent; }
       await planNew(firstLine || (lastCfg || !presetsEmpty() ? '那麼,今日想做什麼呢?' : greet));
     } catch (e) {
       if (e !== SKIP) throw e;
-      cfg = { ...(lastCfg || DEFAULT_CFG) };
+      cfg = { ...(store.get('keisaku-last-v1', null) || lastCfg || DEFAULT_CFG) };
       applyCfg();
+      return readyCheck(`好,就照「${cfg.task}」,${cfg.focusMin} 分 × ${cfg.rounds} 炷。`);
     }
     return readyCheck('');
   }
   const presetsEmpty = () => !store.get('keisaku-presets-v1', []).length;
 
+  // 略過開場 only makes sense when there is a plan to fall back on (last time's); a first visit has to choose
+  const canSkipPlan = () => !!store.get('keisaku-last-v1', null);
+
   async function planNew(openingLine) {
     // ① what
-    let task = await ask(openingLine, [...TASKS.map(t => ({ label: t, value: t })), { label: '自訂…', value: '*' }], { skippable: true });
-    if (task === '*') task = await ask('要做什麼呢?寫下來給住持看。', [{ label: '不說了', value: '' }], { skippable: true, input: { placeholder: '例如:背單字' } });
+    let task = await ask(openingLine, [...TASKS.map(t => ({ label: t, value: t })), { label: '自訂…', value: '*' }], { skippable: canSkipPlan() });
+    if (task === '*') task = await ask('要做什麼呢?寫下來給住持看。', [{ label: '不說了', value: '' }], { skippable: canSkipPlan(), input: { placeholder: '例如:背單字' } });
     task = task || '專注';
     for (;;) {
       // ② how long
@@ -2082,17 +2090,17 @@ button { -webkit-tap-highlight-color: transparent; }
         { label: '15 分', sub: '小坐', value: 15 }, { label: '25 分', sub: '番茄', value: 25, primary: true },
         { label: '40 分', sub: '一炷香', value: 40 }, { label: '50 分', sub: '長坐', value: 50 },
         { label: '自訂…', value: '*', wide: true }
-      ], { skippable: true });
+      ], { skippable: canSkipPlan() });
       if (focusMin === '*') focusMin = await askNumber('每炷要坐幾分鐘?', 5, 120, '分', 25);
       let rounds = await ask('要坐幾炷?', [
         ...[1, 2, 3, 4].map(n => ({ label: `${n} 炷`, value: n, primary: n === 4 })), { label: '自訂…', value: '*', wide: true }
-      ], { skippable: true });
+      ], { skippable: canSkipPlan() });
       if (rounds === '*') rounds = await askNumber('要坐幾炷?', 1, 8, '炷', 4);
       let breakMin = rounds > 1
         ? await ask('炷與炷之間要休息多久?', [
             { label: '5 分', value: 5, primary: true }, { label: '10 分', value: 10 },
             { label: '15 分', value: 15 }, { label: '自訂…', value: '*' }
-          ], { skippable: true })
+          ], { skippable: canSkipPlan() })
         : 0;
       if (breakMin === '*') breakMin = await askNumber('休息幾分鐘?', 1, 30, '分', 5);
       cfg = { task, focusMin, rounds, breakMin };
@@ -2105,7 +2113,7 @@ button { -webkit-tap-highlight-color: transparent; }
         { label: '沒錯', value: 'ok', primary: true },
         ...(saved ? [] : [{ label: '沒錯,存成常用', value: 'save' }]),
         { label: '我要改', value: 'edit' }
-      ], { skippable: true });
+      ], { skippable: canSkipPlan() });
       if (ok === 'edit') continue;
       if (ok === 'save') await savePreset(cfg);
       return;
@@ -2115,7 +2123,7 @@ button { -webkit-tap-highlight-color: transparent; }
   // a number typed into the dialogue box; 算了 falls back to the usual choice
   async function askNumber(text, min, max, unit, fallback) {
     for (;;) {
-      const v = await ask(text, [{ label: '算了', value: '' }], { skippable: true, input: { placeholder: `${min}–${max}`, number: { min, max }, unit } });
+      const v = await ask(text, [{ label: '算了', value: '' }], { skippable: canSkipPlan(), input: { placeholder: `${min}–${max}`, number: { min, max }, unit } });
       if (v === '') return fallback;
       const n = Math.round(Number(v));
       if (Number.isFinite(n) && n >= min && n <= max) return n;
@@ -2957,7 +2965,7 @@ button { -webkit-tap-highlight-color: transparent; }
   const INTRO = [
     ['歡迎來到警策道場。我是這裡的住持。', '你好'],
     ['這裡是讓施主專心的地方。手機放下,一次坐一炷香,像番茄鐘一樣,坐完就休息。', '然後呢?'],
-    ['坐禪的時候我會在堂裡巡。施主一拿起手機、或切去別的畫面,我就用這支警策輕輕啪你一下。', '我會專心的'],
+    ['坐禪的時候我會在堂裡巡。施主一拿起手機、或切去別的畫面,我就用這支警策輕輕啪你一下。', '我會專心的', true],
     ['先帶施主看看道場裡的東西。', '好'],
   ];
   const introSteps = returning => [
