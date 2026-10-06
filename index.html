@@ -630,6 +630,96 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
   border-radius: 999px; min-height: 38px; padding: 0 14px;
 }
 .notify-ask[hidden] { display: none; }
+
+/* ---------- custom numbers in the dialogue ---------- */
+.dlg-input { align-items: center; }
+.dlg-unit { color: var(--muted); font-size: .95rem; margin-left: -2px; }
+.dlg-input input[type="number"] { max-width: 9em; font-family: var(--f-num); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* ---------- daily goal ---------- */
+.met-mark {
+  display: inline-grid; place-items: center; width: 1.35em; height: 1.35em; border-radius: 50%;
+  background: var(--shu); color: #fff; font-family: var(--f-display); font-style: normal; font-weight: 700;
+  font-size: .72rem; line-height: 1; vertical-align: .1em;
+}
+.cal .cell .met-mark { position: absolute; right: 1px; top: 1px; z-index: 2; font-size: .58rem; box-shadow: 0 0 0 1.5px var(--surface); }
+.cal-legend .met-mark { width: 18px; height: 18px; font-size: .62rem; }
+#todayGoal.met b { color: var(--accent); }
+.result .goal-met { grid-column: 1 / -1; margin: 0; color: var(--accent); font-weight: 700; font-size: .92rem; }
+
+/* ---------- share ---------- */
+.result-btns { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; margin-top: 4px; }
+.result .result-btns button { grid-column: auto; margin-top: 0; }
+
+/* ---------- 坐禪帳 tabs ---------- */
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.tabs button {
+  font: inherit; font-weight: 700; letter-spacing: .1em; min-height: 40px; border: 0; border-radius: 9px; cursor: pointer;
+  background: transparent; color: var(--muted);
+}
+.tabs button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 0 var(--line), 0 0 0 1.5px var(--line); }
+.tab-view { display: flex; flex-direction: column; gap: 10px; }
+.tab-view[hidden] { display: none; }
+
+/* ---------- 統計 ---------- */
+.range { display: flex; gap: 6px; flex-wrap: wrap; }
+.range button {
+  font: inherit; font-size: .88rem; min-height: 36px; padding: 0 14px; border-radius: 999px; cursor: pointer;
+  border: 1.5px solid var(--line); background: transparent; color: var(--muted);
+}
+.range button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.stat-sum { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 520px) { .stat-sum { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.stat-sum dd small { font-family: var(--f-body); font-weight: 400; font-size: .72rem; color: var(--muted); margin: 0 4px 0 2px; }
+.stat-sum div { padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--ink) 4%, transparent); min-width: 0; }
+.stat-sum dt { font-size: .76rem; color: var(--muted); letter-spacing: .04em; }
+.stat-sum dd { margin: 0; font-family: var(--f-num); font-weight: 600; font-size: 1.12rem; font-variant-numeric: tabular-nums; }
+.chart-box { display: flex; flex-direction: column; gap: 8px; border-top: 1px dashed var(--line); padding-top: 10px; }
+.chart-box h3 { margin: 0; font-size: .92rem; letter-spacing: .06em; }
+.chart-empty { margin: 0; color: var(--muted); font-size: .88rem; padding: 10px 0; }
+.chart-note { margin: 0; min-height: 1.5em; font-size: .86rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* vertical bars: one column per day (or month); --track is the plot height */
+.bars {
+  --track: 128px; --lbl: 20px;
+  position: relative; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 2px; align-items: end;
+}
+.bars:has(.chart-empty) { display: block; }
+.bars .col {
+  display: flex; flex-direction: column; align-items: stretch; gap: 4px; min-width: 0;
+  padding: 0; border: 0; background: none; cursor: pointer; font: inherit; color: inherit;
+}
+.bars .track {
+  position: relative; height: var(--track); display: flex; align-items: flex-end; justify-content: center;
+  border-bottom: 1.5px solid var(--line);
+}
+.bars .track i {
+  display: block; width: min(100%, 22px); height: max(3px, calc(var(--track) * var(--h))); border-radius: 4px 4px 0 0;
+  background: var(--accent);
+}
+.bars .track i.zero { height: 0; }
+.bars .col.on .track i, .bars .col:hover .track i { background: color-mix(in srgb, var(--accent) 70%, var(--ink)); }
+.bars .col:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.bars .lbl { height: var(--lbl); font-size: .72rem; color: var(--muted); text-align: center; white-space: nowrap; overflow: visible; font-variant-numeric: tabular-nums; }
+.bars .grid-line {
+  position: absolute; left: 0; right: 0; bottom: calc(var(--lbl) + 4px + 1.5px + var(--track) * var(--p));
+  border-top: 1px dashed color-mix(in srgb, var(--line) 80%, transparent); pointer-events: none;
+}
+.bars .grid-line span { position: absolute; left: 0; bottom: 2px; font-size: .7rem; color: var(--muted); padding-right: 4px; }
+
+/* horizontal bars: one row per task */
+.hbars { display: flex; flex-direction: column; gap: 10px; }
+.hrow { display: grid; grid-template-columns: minmax(5.5em, 34%) 1fr auto; align-items: center; gap: 10px; }
+.hname { display: flex; flex-direction: column; min-width: 0; font-size: .92rem; overflow-wrap: anywhere; line-height: 1.3; }
+.hname small { color: var(--muted); font-size: .74rem; }
+.htrack { height: 14px; display: flex; align-items: center; }
+.htrack i { display: block; height: 100%; width: max(3px, calc(100% * var(--w))); border-radius: 0 4px 4px 0; background: var(--accent); }
+.hval { font-family: var(--f-num); font-weight: 600; font-size: .9rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chart-table summary { cursor: pointer; font-size: .86rem; color: var(--muted); min-height: 32px; display: flex; align-items: center; }
+.chart-table table { width: 100%; border-collapse: collapse; font-size: .86rem; font-variant-numeric: tabular-nums; }
+.chart-table th, .chart-table td { text-align: right; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+.chart-table th:first-child, .chart-table td:first-child { text-align: left; }
+.chart-table th { color: var(--muted); font-weight: 400; }
 </style>
 </head>
 <body>
@@ -655,6 +745,11 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       <h2 id="journalTitle">坐禪帳<span class="streak" id="streak"></span></h2>
       <button type="button" class="sheet-close" id="journalClose" aria-label="關閉">✕</button>
     </div>
+    <div class="tabs" role="tablist" aria-label="坐禪帳">
+      <button type="button" role="tab" id="tabCal" aria-selected="true" aria-controls="calView">月曆</button>
+      <button type="button" role="tab" id="tabStats" aria-selected="false" aria-controls="statView">統計</button>
+    </div>
+    <div id="calView" class="tab-view" role="tabpanel" aria-labelledby="tabCal">
     <div class="month-nav">
       <button type="button" id="prevMonth" aria-label="上個月">‹</button>
       <b id="monthTitle"></b>
@@ -664,6 +759,25 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     <div class="cal" id="cal"></div>
     <div class="cal-legend" id="calLegend"></div>
     <div class="day-detail" id="dayDetail" aria-live="polite"></div>
+    </div>
+    <div id="statView" class="tab-view" role="tabpanel" aria-labelledby="tabStats" hidden>
+      <div class="range" role="group" aria-label="期間">
+        <button type="button" data-range="7" aria-pressed="true">近 7 天</button>
+        <button type="button" data-range="30" aria-pressed="false">近 30 天</button>
+        <button type="button" data-range="all" aria-pressed="false">全部</button>
+      </div>
+      <dl class="stat-sum" id="statSum"></dl>
+      <section class="chart-box">
+        <h3 id="dailyTitle">每天坐禪分鐘</h3>
+        <div class="bars" id="dailyBars"></div>
+        <p class="chart-note" id="dailyNote" aria-live="polite"></p>
+      </section>
+      <section class="chart-box">
+        <h3>各項目</h3>
+        <div class="hbars" id="taskBars"></div>
+      </section>
+      <details class="chart-table"><summary>看表格</summary><div id="statTable"></div></details>
+    </div>
    </div>
    </div>
   </dialog>
@@ -687,6 +801,8 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       <li>坐禪中臨時有事(接電話、有人敲門),可以按「<b>告假</b>」暫停計時,每炷一次。回來按「回座」,把手機放好就繼續,不算被打。</li>
       <li>坐禪中螢幕會保持亮著。手機朝下放也可以,靠鐘聲知道時間到了。</li>
       <li>想提振精神時可以按「合掌請打」,自己請住持打一下,不算扣分。這是真正禪堂裡也有的規矩。</li>
+      <li>在設定裡可以訂<b>每日目標</b>(一天坐滿幾炷),達成的日子坐禪帳會蓋上「達」。坐禪帳的「統計」可以看近 7 天、30 天和全部的紀錄。</li>
+      <li>一輪坐完後,按「分享」可以把結算卡存成圖片。</li>
       <li>iPhone 第一次開始時,要允許存取「動作與方向」,住持才看得到你有沒有拿起手機。</li>
     </ul>
    </div>
@@ -709,6 +825,17 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
         <label><input type="radio" name="theme" id="themeLight" value="light"><span>淺色</span></label>
         <label><input type="radio" name="theme" id="themeDark" value="dark"><span>深色</span></label>
       </div>
+    </fieldset>
+    <fieldset class="theme-pick">
+      <legend>每日目標</legend>
+      <div class="seg seg-5" role="radiogroup" aria-label="每日目標">
+        <label><input type="radio" name="goal" value="0" checked><span>不設</span></label>
+        <label><input type="radio" name="goal" value="2"><span>2 炷</span></label>
+        <label><input type="radio" name="goal" value="4"><span>4 炷</span></label>
+        <label><input type="radio" name="goal" value="6"><span>6 炷</span></label>
+        <label><input type="radio" name="goal" value="8"><span>8 炷</span></label>
+      </div>
+      <p class="amb-note">一天坐滿幾炷算達成。達成的日子,坐禪帳上會多蓋一個「達」字。</p>
     </fieldset>
     <fieldset class="theme-pick">
       <legend>坐禪時的背景聲音</legend>
@@ -916,8 +1043,12 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
         <h2 id="resultTitle">放禪</h2>
         <p id="resultLine1"></p>
         <p id="resultLine2"></p>
+        <p class="goal-met" id="resultGoal" hidden></p>
         <p class="koan" id="koan"></p>
-        <button type="button" class="btn primary" id="closeResult">好</button>
+        <div class="result-btns">
+          <button type="button" class="btn ghost" id="shareResult">分享</button>
+          <button type="button" class="btn primary" id="closeResult">好</button>
+        </div>
       </div>
     </div>
   </section>
@@ -944,7 +1075,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       <p id="senseMode"></p>
     </details>
     <div class="panel-foot">
-      <p class="today" id="today">今日坐禪 <b id="stToday">0</b> 分<span id="todayHitsWrap" hidden> · 被打 <b class="hitnum" id="stTodayHits">0</b> 下</span></p>
+      <p class="today" id="today">今日坐禪 <b id="stToday">0</b> 分<span id="todayGoal" hidden></span><span id="todayHitsWrap" hidden> · 被打 <b class="hitnum" id="stTodayHits">0</b> 下</span></p>
       <div class="foot-btns">
         <button type="button" class="quiet-btn" id="leaveBtn" hidden>告假</button>
         <button type="button" class="quiet-btn" id="mainBtn" hidden>出堂・結束</button>
@@ -1633,6 +1764,12 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
         const row = document.createElement('form'); row.className = 'dlg-input';
         row.innerHTML = '<input id="dlgInput" maxlength="12" autocomplete="off"><button type="submit" class="choice primary">確定</button>';
         const field = row.querySelector('input'); field.placeholder = input.placeholder || '';
+        if (input.number) {
+          row.noValidate = true;                      // the monk explains out-of-range numbers, not the browser
+          Object.assign(field, { type: 'number', inputMode: 'numeric', min: input.number.min, max: input.number.max, step: 1 });
+          field.removeAttribute('maxlength');
+          field.insertAdjacentElement('afterend', Object.assign(document.createElement('span'), { className: 'dlg-unit', textContent: input.unit || '' }));
+        }
         row.addEventListener('submit', e => { e.preventDefault(); audio(); settle(field.value.trim()); });
         dlgChoices.appendChild(row);
         setTimeout(() => field.focus(), 50);
@@ -1681,8 +1818,10 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     const rulesAsked = store.get('keisaku-rules-asked-v1', false);
     const { streak, gap } = streakInfo(dayMap(log));
     const hello = streak >= 2 ? `施主已經連續來了 ${streak} 天。` : gap != null && gap >= 3 ? '好幾天沒見了,歡迎回來。' : '施主又來了。';
-    const greet = again ? '施主還要再坐一輪嗎?今日想做的事是什麼?'
-      : hasSat ? hello + '今日想做的事是什麼?'
+    const goal = goalNow();
+    const progress = !goal || !P.todayRounds ? '' : P.todayRounds >= goal ? `今日目標 ${goal} 炷已經達成了。` : `今日目標 ${goal} 炷,還差 ${goal - P.todayRounds} 炷。`;
+    const greet = again ? `施主還要再坐一輪嗎?${progress}今日想做的事是什麼?`
+      : hasSat ? hello + progress + '今日想做的事是什麼?'
       : '歡迎來到警策道場。施主,今日想做的事是什麼?';
     try {
       let firstLine = null;
@@ -1730,14 +1869,23 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     task = task || '專注';
     for (;;) {
       // ② how long
-      const focusMin = await ask(`「${task}」啊,好。每炷香要坐多久?`, [
+      let focusMin = await ask(`「${task}」啊,好。每炷香要坐多久?`, [
         { label: '15 分', sub: '小坐', value: 15 }, { label: '25 分', sub: '番茄', value: 25, primary: true },
-        { label: '40 分', sub: '一炷香', value: 40 }, { label: '50 分', sub: '長坐', value: 50 }
+        { label: '40 分', sub: '一炷香', value: 40 }, { label: '50 分', sub: '長坐', value: 50 },
+        { label: '自訂…', value: '*', wide: true }
       ], { skippable: true });
-      const rounds = await ask('要坐幾炷?', [1, 2, 3, 4].map(n => ({ label: `${n} 炷`, value: n, primary: n === 4 })), { skippable: true });
-      const breakMin = rounds > 1
-        ? await ask('炷與炷之間要休息多久?', [{ label: '5 分', value: 5, primary: true }, { label: '10 分', value: 10 }], { skippable: true })
+      if (focusMin === '*') focusMin = await askNumber('每炷要坐幾分鐘?', 5, 120, '分', 25);
+      let rounds = await ask('要坐幾炷?', [
+        ...[1, 2, 3, 4].map(n => ({ label: `${n} 炷`, value: n, primary: n === 4 })), { label: '自訂…', value: '*', wide: true }
+      ], { skippable: true });
+      if (rounds === '*') rounds = await askNumber('要坐幾炷?', 1, 8, '炷', 4);
+      let breakMin = rounds > 1
+        ? await ask('炷與炷之間要休息多久?', [
+            { label: '5 分', value: 5, primary: true }, { label: '10 分', value: 10 },
+            { label: '15 分', value: 15 }, { label: '自訂…', value: '*' }
+          ], { skippable: true })
         : 0;
+      if (breakMin === '*') breakMin = await askNumber('休息幾分鐘?', 1, 30, '分', 5);
       cfg = { task, focusMin, rounds, breakMin };
       applyCfg();
       // ③ repeat it back
@@ -1752,6 +1900,17 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       if (ok === 'edit') continue;
       if (ok === 'save') await savePreset(cfg);
       return;
+    }
+  }
+
+  // a number typed into the dialogue box; 算了 falls back to the usual choice
+  async function askNumber(text, min, max, unit, fallback) {
+    for (;;) {
+      const v = await ask(text, [{ label: '算了', value: '' }], { skippable: true, input: { placeholder: `${min}–${max}`, number: { min, max }, unit } });
+      if (v === '') return fallback;
+      const n = Math.round(Number(v));
+      if (Number.isFinite(n) && n >= min && n <= max) return n;
+      text = `要 ${min} 到 ${max} ${unit}之間喔。${text}`;
     }
   }
 
@@ -1875,6 +2034,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     const log = readLog().filter(e => e.d === dayKey());
     P.todayMin = log.reduce((a, e) => a + e.min, 0);
     P.todayHits = log.reduce((a, e) => a + e.hits, 0);
+    P.todayRounds = log.filter(e => e.full).length;
   }
   // full: the round ran to the end (only full rounds earn a stamp)
   function saveRound(min, full) {
@@ -1882,6 +2042,9 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     const log = readLog();
     const e = { t: Date.now(), d: dayKey(), task: cfg.task, min, hits: P.roundHits, full };
     if (P.leaveUsed) e.leave = 1;
+    const goal = goalNow();
+    if (goal) e.goal = goal;
+    if (full) { P.todayRounds++; if (goal && P.todayRounds === goal) P.goalJustMet = true; }
     if (P.lateMin) e.late = P.lateMin;
     log.push(e);
     P.lateMin = 0;
@@ -1894,6 +2057,13 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     $('#stToday').textContent = P.todayMin;
     $('#stTodayHits').textContent = P.todayHits;
     $('#todayHitsWrap').hidden = P.todayHits === 0;
+    const goal = goalNow(), tg = $('#todayGoal');
+    tg.hidden = !goal;
+    if (goal) {
+      const met = P.todayRounds >= goal;
+      tg.innerHTML = ` · <b>${P.todayRounds}</b>/${goal} 炷` + (met ? ' <span class="met-mark" aria-label="達成">達</span>' : '');
+      tg.classList.toggle('met', met);
+    }
   }
   function renderRounds() {
     const box = $('#rounds');
@@ -2037,7 +2207,8 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     P.focusTotal += cfg.focusMin;
     saveRound(cfg.focusMin, true); renderStats();
     bell(0, .26); buzz([200, 120, 200]);
-    if (P.round >= cfg.rounds) { finishCycle(false); return; }
+    const goalMet = P.goalJustMet; P.goalJustMet = false;
+    if (P.round >= cfg.rounds) { P.showGoal = goalMet; finishCycle(false); return; }
     P.phase = 'break';
     P.end = Date.now() + cfg.breakMin * 60000;
     Mo.base = null; Mo.picked = false;
@@ -2045,7 +2216,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     sitterEl.dataset.face = 'happy'; standUp();
     setStatus('休息', '');
     setMain('跳過休息');
-    toast(`放禪。這炷被打 ${P.roundHits} 下,休息 ${cfg.breakMin} 分鐘,手機可以用了。`);
+    toast(goalMet ? `今日目標 ${goalNow()} 炷達成!休息 ${cfg.breakMin} 分鐘。` : `放禪。這炷被打 ${P.roundHits} 下,休息 ${cfg.breakMin} 分鐘,手機可以用了。`);
     enqueue(returnStick);
     renderRounds(); settleMonk();
   }
@@ -2127,6 +2298,11 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     $('#resultLine1').textContent = `「${cfg.task}」共坐了 ${P.focusTotal} 分鐘` + (P.asks ? `,自己請打 ${P.asks} 下` : '');
     $('#resultLine2').textContent = line2;
     $('#koan').textContent = KOANS[Math.floor(Math.random() * KOANS.length)];
+    const goal = goalNow(), metToday = goal && P.todayRounds >= goal;
+    $('#resultGoal').hidden = !metToday;
+    $('#resultGoal').textContent = P.showGoal ? `今日目標 ${goal} 炷,達成。` : metToday ? `今日目標 ${goal} 炷已達成,今天坐了 ${P.todayRounds} 炷。` : '';
+    P.showGoal = false;
+    prepareShare();
     $('#result').hidden = false; askBtn.hidden = true;
   }
 
@@ -2246,8 +2422,11 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
   if (typeof opts.sound === 'boolean') $('#optSound').checked = opts.sound;
   $('#optNotify').checked = !!opts.notify && canNotify() && Notification.permission === 'granted';
   $('#optNotifyRow').hidden = !canNotify();
+  const goalNow = () => +((document.querySelector('input[name="goal"]:checked') || {}).value || 0);
+  if ([2, 4, 6, 8].includes(opts.goal)) document.querySelector(`input[name="goal"][value="${opts.goal}"]`).checked = true;
+  document.querySelectorAll('input[name="goal"]').forEach(r => r.addEventListener('change', () => { saveOpts(); renderStats(); }));
   const themeNow = () => (document.querySelector('input[name="theme"]:checked') || {}).value || 'system';
-  const saveOpts = () => store.set('keisaku-opts-v1', { motion: $('#optMotion').checked, sound: $('#optSound').checked, notify: $('#optNotify').checked, theme: themeNow(),
+  const saveOpts = () => store.set('keisaku-opts-v1', { motion: $('#optMotion').checked, sound: $('#optSound').checked, notify: $('#optNotify').checked, goal: goalNow(), theme: themeNow(),
     ambient: ambientChoice(), ambVol: +$('#ambVol').value, music: musicOn() });
   if (typeof opts.music === 'boolean') $('#ambMusic').checked = opts.music;
   if (AMBIENT_LABEL[opts.ambient]) document.querySelector(`input[name="ambient"][value="${opts.ambient}"]`).checked = true;
@@ -2335,6 +2514,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       let a = m.get(e.d);
       if (!a) { a = { min: 0, hits: 0, full: 0, tasks: new Map() }; m.set(e.d, a); }
       a.min += e.min; a.hits += e.hits; if (e.full) a.full++;
+      a.goal = Math.max(a.goal || 0, e.goal || 0);
       const t = a.tasks.get(e.task) || { rounds: 0, partial: 0, min: 0, hits: 0, leave: 0, late: 0 };
       t.leave += e.leave || 0; t.late += e.late || 0;
       if (e.full) t.rounds++; else t.partial++;
@@ -2414,13 +2594,15 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       const b = document.createElement('button'); b.type = 'button';
       b.className = 'cell' + (key === todayK ? ' today' : '') + (key === J.sel ? ' sel' : '') + (key > todayK ? ' future' : '');
       b.disabled = key > todayK;
-      b.setAttribute('aria-label', `${J.m + 1} 月 ${d} 日` + (a ? `,坐 ${a.min} 分,被打 ${a.hits} 下` : ''));
-      b.innerHTML = `<span class="d">${d}</span>` + stampSvg(kind, key);
+      const met = a && a.goal && a.full >= a.goal;
+      b.setAttribute('aria-label', `${J.m + 1} 月 ${d} 日` + (a ? `,坐 ${a.min} 分,被打 ${a.hits} 下` : '') + (met ? ',達成每日目標' : ''));
+      b.innerHTML = `<span class="d">${d}</span>` + stampSvg(kind, key) + (met ? '<span class="met-mark" aria-hidden="true">達</span>' : '');
       b.addEventListener('click', () => { J.sel = key; renderJournal(); });
       cal.appendChild(b);
     }
     $('#calLegend').innerHTML = ['light', 'mid', 'full', 'still', 'dot']
-      .map(k => `<span>${stampSvg(k, 'legend')}${KIND_LABEL[k]}</span>`).join('');
+      .map(k => `<span>${stampSvg(k, 'legend')}${KIND_LABEL[k]}</span>`).join('')
+      + (log.some(e => e.goal) ? '<span><i class="met-mark">達</i>達成每日目標</span>' : '');
     renderDay(m);
   }
   function renderDay(m) {
@@ -2434,7 +2616,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       return;
     }
     box.innerHTML = `<div class="big">${stampSvg(stampKind(a), key)}</div><h3></h3><ul></ul>`;
-    box.querySelector('h3').textContent = `${title}・共 ${a.min} 分・被打 ${a.hits} 下`;
+    box.querySelector('h3').textContent = `${title}・共 ${a.min} 分・被打 ${a.hits} 下` + (a.goal ? (a.full >= a.goal ? `・目標 ${a.goal} 炷達成` : `・目標 ${a.full}/${a.goal} 炷`) : '');
     const ul = box.querySelector('ul');
     for (const [task, t] of a.tasks) {
       const li = document.createElement('li');
@@ -2445,7 +2627,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
   }
   journalBtn.addEventListener('click', () => {
     const n = new Date(); J.y = n.getFullYear(); J.m = n.getMonth(); J.sel = dayKey();
-    renderJournal(); openSheet(journalBox);
+    renderJournal(); showTab(false); openSheet(journalBox);
   });
   $('#prevMonth').addEventListener('click', () => { if (--J.m < 0) { J.m = 11; J.y--; } renderJournal(); });
   $('#nextMonth').addEventListener('click', () => { if (++J.m > 11) { J.m = 0; J.y++; } renderJournal(); });
@@ -2507,6 +2689,222 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
   });
 
   $('#closeResult').addEventListener('click', () => { $('#result').hidden = true; onboarding(true); });
+
+  /* ---------- 坐禪帳: 統計 tab ---------- */
+  let statRange = '7';
+  function showTab(stats) {
+    $('#tabCal').setAttribute('aria-selected', String(!stats));
+    $('#tabStats').setAttribute('aria-selected', String(stats));
+    $('#calView').hidden = stats; $('#statView').hidden = !stats;
+    if (stats) renderStatView();
+  }
+  $('#tabCal').addEventListener('click', () => showTab(false));
+  $('#tabStats').addEventListener('click', () => showTab(true));
+  document.querySelectorAll('#statView .range button').forEach(b => b.addEventListener('click', () => {
+    statRange = b.dataset.range;
+    document.querySelectorAll('#statView .range button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    renderStatView();
+  }));
+
+  const WEEKDAY = '日一二三四五六';
+  const fmtMin = m => m >= 60 ? `${Math.floor(m / 60)} 小時${m % 60 ? ` ${m % 60} 分` : ''}` : `${m} 分`;
+  // one bucket per day for the last 7 / 30 days, or one per month for everything
+  function statBuckets(log, range) {
+    const m = dayMap(log), out = [];
+    if (range !== 'all') {
+      const n = +range, d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - (n - 1));
+      for (let i = 0; i < n; i++) {
+        const k = dayKey(d), a = m.get(k), last = i === n - 1;
+        out.push({ from: k, to: k, label: last ? '今' : n === 7 ? WEEKDAY[d.getDay()] : (n - 1 - i) % 7 === 0 ? `${d.getMonth() + 1}/${d.getDate()}` : '',
+          title: `${d.getMonth() + 1}/${d.getDate()}(${WEEKDAY[d.getDay()]})`, min: a?.min || 0, rounds: a?.full || 0, hits: a?.hits || 0 });
+        d.setDate(d.getDate() + 1);
+      }
+      return out;
+    }
+    const now = new Date();
+    let y = now.getFullYear(), mo = now.getMonth() - 11;
+    const first = log.reduce((acc, e) => e.d < acc ? e.d : acc, dayKey());
+    const [fy, fm] = first.split('-').map(Number);
+    if (fy * 12 + fm - 1 > y * 12 + mo) { y = fy; mo = fm - 1; }
+    for (; y * 12 + mo <= now.getFullYear() * 12 + now.getMonth(); mo++) {
+      if (mo > 11) { mo -= 12; y++; }
+      const p = `${y}-${pad2(mo + 1)}-`;
+      let min = 0, rounds = 0, hits = 0;
+      for (const [k, a] of m) if (k.startsWith(p)) { min += a.min; rounds += a.full; hits += a.hits; }
+      out.push({ from: p + '01', to: p + '31', label: `${mo + 1}月`, title: `${y} 年 ${mo + 1} 月`, min, rounds, hits });
+    }
+    return out;
+  }
+  // a round number at or below the tallest bar, for the one gridline
+  function gridValue(max) {
+    const steps = [5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240, 300, 480, 600, 900, 1200, 1800, 2400, 3000, 6000];
+    return steps.filter(s => s <= max).pop() || 0;
+  }
+  function renderStatView() {
+    const log = readLog(), buckets = statBuckets(log, statRange);
+    const from = buckets.length ? buckets[0].from : dayKey();
+    const inRange = log.filter(e => e.d >= from);
+    const min = inRange.reduce((a, e) => a + e.min, 0), rounds = inRange.filter(e => e.full).length;
+    const hits = inRange.reduce((a, e) => a + e.hits, 0), leaves = inRange.reduce((a, e) => a + (e.leave || 0), 0);
+    // numbers big, units small, so each tile stays on one line
+    const u = (n, unit) => `${n}<small>${unit}</small>`;
+    const sum = [['坐禪', min >= 60 ? u(Math.floor(min / 60), '小時') + (min % 60 ? u(min % 60, '分') : '') : u(min, '分')],
+      ['坐滿', u(rounds, '炷')], ['被打', u(hits, '下')],
+      ['每炷平均被打', rounds ? u((hits / rounds).toFixed(1), '下') : '—']];
+    if (leaves) sum.push(['告假', u(leaves, '次')]);
+    $('#statSum').innerHTML = sum.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+
+    // daily (or monthly) minutes
+    const box = $('#dailyBars'), note = $('#dailyNote');
+    $('#dailyTitle').textContent = statRange === 'all' ? '每月坐禪分鐘' : '每天坐禪分鐘';
+    const max = Math.max(0, ...buckets.map(b => b.min));
+    box.style.setProperty('--n', buckets.length);
+    box.replaceChildren();
+    if (!max) {
+      box.innerHTML = '<p class="chart-empty">這段時間還沒有坐禪紀錄。</p>';
+      note.textContent = '';
+    } else {
+      const top = max * 1.12, g = gridValue(max);
+      if (g) box.insertAdjacentHTML('beforeend', `<div class="grid-line" style="--p:${(g / top).toFixed(4)}"><span>${g} 分</span></div>`);
+      const describe = b => `${b.title}・${fmtMin(b.min)}・坐滿 ${b.rounds} 炷・被打 ${b.hits} 下`;
+      buckets.forEach(b => {
+        const col = document.createElement('button'); col.type = 'button'; col.className = 'col';
+        col.setAttribute('aria-label', describe(b));
+        col.innerHTML = `<span class="track"><i style="--h:${(b.min / top).toFixed(4)}"${b.min ? '' : ' class="zero"'}></i></span><span class="lbl">${b.label}</span>`;
+        const show = () => { note.textContent = describe(b); box.querySelectorAll('.col.on').forEach(x => x.classList.remove('on')); col.classList.add('on'); };
+        col.addEventListener('pointerenter', show); col.addEventListener('focus', show); col.addEventListener('click', show);
+        box.appendChild(col);
+      });
+      note.textContent = statRange === 'all' ? '點長條看那個月的數字。' : '點長條看那天的數字。';
+    }
+
+    // per task
+    const tasks = new Map();
+    for (const e of inRange) {
+      const t = tasks.get(e.task) || { min: 0, rounds: 0, hits: 0 };
+      t.min += e.min; t.hits += e.hits; if (e.full) t.rounds++;
+      tasks.set(e.task, t);
+    }
+    let rows = [...tasks].sort((a, b) => b[1].min - a[1].min);
+    if (rows.length > 6) {
+      const rest = rows.slice(5).reduce((a, [, t]) => ({ min: a.min + t.min, rounds: a.rounds + t.rounds, hits: a.hits + t.hits }), { min: 0, rounds: 0, hits: 0 });
+      rows = [...rows.slice(0, 5), ['其他', rest]];
+    }
+    const tmax = Math.max(1, ...rows.map(([, t]) => t.min));
+    $('#taskBars').innerHTML = rows.length ? rows.map(([name, t]) =>
+      `<div class="hrow"><span class="hname">${escapeHtml(name)}<small>${t.rounds} 炷・被打 ${t.hits} 下</small></span>` +
+      `<span class="htrack"><i style="--w:${(t.min / tmax).toFixed(4)}"></i></span><b class="hval">${fmtMin(t.min)}</b></div>`).join('')
+      : '<p class="chart-empty">這段時間還沒有坐禪紀錄。</p>';
+
+    // the same numbers as a table
+    const filled = buckets.filter(b => b.min || b.hits);
+    $('#statTable').innerHTML = filled.length
+      ? `<table><thead><tr><th>${statRange === 'all' ? '月份' : '日期'}</th><th>分鐘</th><th>坐滿</th><th>被打</th></tr></thead><tbody>` +
+        filled.map(b => `<tr><td>${b.title}</td><td>${b.min}</td><td>${b.rounds}</td><td>${b.hits}</td></tr>`).join('') + '</tbody></table>'
+      : '<p class="chart-empty">沒有資料。</p>';
+  }
+
+  /* ---------- share the result as a picture ---------- */
+  // the zendo SVG, with its CSS-driven colours written onto each element so it renders as a standalone image
+  function sceneImage() {
+    const src = $('#stage'), clone = src.cloneNode(true);
+    const a = [src, ...src.querySelectorAll('*')], b = [clone, ...clone.querySelectorAll('*')];
+    const PROPS = ['fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'opacity',
+      'fill-opacity', 'stroke-opacity', 'display', 'visibility', 'font-family', 'font-size', 'font-weight'];
+    a.forEach((el, i) => {
+      const cs = getComputedStyle(el);
+      b[i].setAttribute('style', PROPS.map(p => `${p}:${cs.getPropertyValue(p)}`).join(';'));
+      b[i].removeAttribute('class');
+    });
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    clone.setAttribute('width', 1200); clone.setAttribute('height', 840);
+    const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml' }));
+    return new Promise((res, rej) => {
+      const img = new Image();
+      img.onload = () => { URL.revokeObjectURL(url); res(img); };
+      img.onerror = e => { URL.revokeObjectURL(url); rej(e); };
+      img.src = url;
+    });
+  }
+  function wrapLines(g, text, width) {
+    const lines = []; let line = '';
+    for (const ch of text) {
+      if (g.measureText(line + ch).width > width && line) { lines.push(line); line = ch; } else line += ch;
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+  async function drawShareCard() {
+    const W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d'), cs = getComputedStyle(document.documentElement), v = n => cs.getPropertyValue(n).trim();
+    const disp = v('--f-display'), bodyF = v('--f-body');
+    const seal = $('#seal').textContent, title = $('#resultTitle').textContent;
+    const l1 = $('#resultLine1').textContent, l2 = $('#resultLine2').textContent, koan = $('#koan').textContent;
+    const goal = $('#resultGoal').hidden ? '' : $('#resultGoal').textContent;
+    const all = seal + title + l1 + l2 + koan + goal + '警策道場0123456789年月日';
+    try { await Promise.all([document.fonts.load(`700 60px ${disp}`, all), document.fonts.load(`400 40px ${disp}`, all)]); } catch {}
+
+    g.fillStyle = v('--bg'); g.fillRect(0, 0, W, H);
+    g.beginPath(); g.roundRect(48, 48, W - 96, H - 96, 40);
+    g.fillStyle = v('--surface'); g.fill(); g.lineWidth = 3; g.strokeStyle = v('--line'); g.stroke();
+    const sw = W - 168, sh = sw * .7;
+    const img = await sceneImage().catch(() => null);
+    if (img) { g.save(); g.beginPath(); g.roundRect(84, 84, sw, sh, 28); g.clip(); g.drawImage(img, 84, 84, sw, sh); g.restore(); }
+
+    // the seal
+    const shu = v('--shu');
+    g.save(); g.translate(195, 875); g.rotate(-4 * Math.PI / 180);
+    g.strokeStyle = shu; g.lineWidth = 9; g.beginPath(); g.roundRect(-92, -92, 184, 184, 14); g.stroke();
+    g.fillStyle = shu; g.textAlign = 'center'; g.textBaseline = 'middle';
+    const chars = [...seal];
+    g.font = `700 ${chars.length > 1 ? 74 : 110}px ${disp}`;
+    chars.forEach((ch, i) => g.fillText(ch, 0, (i - (chars.length - 1) / 2) * 80));
+    g.restore();
+
+    // the words
+    let y = 820;
+    g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+    g.fillStyle = v('--ink'); g.font = `700 62px ${disp}`; g.fillText(title, 330, y);
+    g.font = `400 36px ${bodyF}`; g.fillStyle = v('--muted');
+    for (const t of [l1, l2]) for (const line of wrapLines(g, t, W - 330 - 100)) { y += 54; g.fillText(line, 330, y); }
+    if (goal) { y += 58; g.fillStyle = v('--accent'); g.font = `700 36px ${bodyF}`; g.fillText(goal, 330, y); }
+
+    const ky = Math.max(y + 70, 1060);
+    g.strokeStyle = v('--line'); g.lineWidth = 3; g.setLineDash([12, 10]);
+    g.beginPath(); g.moveTo(100, ky); g.lineTo(W - 100, ky); g.stroke(); g.setLineDash([]);
+    g.fillStyle = v('--ink'); g.font = `700 58px ${disp}`; g.textAlign = 'center';
+    g.fillText(koan, W / 2, ky + 96);
+
+    const d = new Date();
+    g.font = `400 30px ${bodyF}`; g.fillStyle = v('--muted'); g.textAlign = 'left';
+    g.fillText(`${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`, 100, H - 100);
+    g.textAlign = 'right'; g.fillStyle = v('--ink'); g.font = `700 40px ${disp}`;
+    g.fillText('警策道場', W - 100, H - 100);
+    return c;
+  }
+  function prepareShare() {
+    P.sharePromise = drawShareCard().then(c => new Promise(r => c.toBlob(r, 'image/png'))).catch(() => null);
+    return P.sharePromise;
+  }
+  function saveImage(file) {
+    const url = URL.createObjectURL(file);
+    const a = Object.assign(document.createElement('a'), { href: url, download: file.name });
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    toast('圖片存好了。');
+  }
+  $('#shareResult').addEventListener('click', async () => {
+    audio();
+    const blob = await (P.sharePromise || prepareShare());
+    if (!blob) { toast('圖片做不出來,截圖分享吧。'); return; }
+    const file = new File([blob], `keisaku-${dayKey()}.png`, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], text: `${$('#resultTitle').textContent}・${$('#resultLine1').textContent}` }); }
+      catch (e) { if (e.name !== 'AbortError') saveImage(file); }
+      return;
+    }
+    saveImage(file);
+  });
 
   cfg = { ...(store.get('keisaku-last-v1', null) || DEFAULT_CFG) };
   loadToday(); renderAll();
