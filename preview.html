@@ -1998,7 +1998,7 @@ button { -webkit-tap-highlight-color: transparent; }
       const v = await ask(RULES[i], [
         { label: i < RULES.length - 1 ? '繼續' : '明白了', value: 'next', primary: true },
         ...(i < RULES.length - 1 ? [{ label: '略過說明', value: 'skip' }] : [])
-      ], { skippable: true });
+      ]);
       if (v === 'skip') return;
     }
   }
@@ -2032,7 +2032,8 @@ button { -webkit-tap-highlight-color: transparent; }
     const hello = streak >= 2 ? `施主已經連續來了 ${streak} 天。` : gap != null && gap >= 3 ? '好幾天沒見了,歡迎回來。' : '施主又來了。';
     const goal = goalNow();
     const progress = !goal || !P.todayRounds ? '' : P.todayRounds >= goal ? `今日目標 ${goal} 炷已經達成了。` : `今日目標 ${goal} 炷,還差 ${goal - P.todayRounds} 炷。`;
-    const greet = again ? `施主還要再坐一輪嗎?${progress}今日想做的事是什麼?`
+    const greet = introduced ? '那麼,施主今日想做的事是什麼?'          // the welcome was just said
+      : again ? `施主還要再坐一輪嗎?${progress}今日想做的事是什麼?`
       : hasSat ? hello + progress + '今日想做的事是什麼?'
       : '歡迎來到警策道場。施主,今日想做的事是什麼?';
     try {
@@ -2041,7 +2042,7 @@ button { -webkit-tap-highlight-color: transparent; }
       else if (!hasSat && !rulesAsked && !again) {
         const v = await ask('歡迎來到警策道場。施主是第一次來吧?要先聽聽道場的規矩嗎?', [
           { label: '請說明', value: 'help', primary: true }, { label: '略過說明', value: 'skip' }
-        ], { skippable: true }).finally(() => store.set('keisaku-rules-asked-v1', true));
+        ]).finally(() => store.set('keisaku-rules-asked-v1', true));
         if (v === 'help') await explainRules();
         firstLine = '那麼,施主今日想做的事是什麼?';
       }
@@ -2055,7 +2056,7 @@ button { -webkit-tap-highlight-color: transparent; }
         opts.push({ label: '新的安排', value: 'new' });
         if (presets.length) opts.push({ label: '整理常用', value: 'manage' });
         opts.push({ label: '聽說明', value: 'help' });
-        next = await ask(greet, opts, { skippable: true });
+        next = await ask(greet, opts);
         if (next === 'manage') { await managePresets(); continue; }
         if (next === 'help') { await explainRules(); continue; }
         break;
@@ -2076,13 +2077,10 @@ button { -webkit-tap-highlight-color: transparent; }
   }
   const presetsEmpty = () => !store.get('keisaku-presets-v1', []).length;
 
-  // 略過開場 only makes sense when there is a plan to fall back on (last time's); a first visit has to choose
-  const canSkipPlan = () => !!store.get('keisaku-last-v1', null);
-
   async function planNew(openingLine) {
     // ① what
-    let task = await ask(openingLine, [...TASKS.map(t => ({ label: t, value: t })), { label: '自訂…', value: '*' }], { skippable: canSkipPlan() });
-    if (task === '*') task = await ask('要做什麼呢?寫下來給住持看。', [{ label: '不說了', value: '' }], { skippable: canSkipPlan(), input: { placeholder: '例如:背單字' } });
+    let task = await ask(openingLine, [...TASKS.map(t => ({ label: t, value: t })), { label: '自訂…', value: '*' }]);
+    if (task === '*') task = await ask('要做什麼呢?寫下來給住持看。', [{ label: '不說了', value: '' }], { input: { placeholder: '例如:背單字' } });
     task = task || '專注';
     for (;;) {
       // ② how long
@@ -2090,17 +2088,17 @@ button { -webkit-tap-highlight-color: transparent; }
         { label: '15 分', sub: '小坐', value: 15 }, { label: '25 分', sub: '番茄', value: 25, primary: true },
         { label: '40 分', sub: '一炷香', value: 40 }, { label: '50 分', sub: '長坐', value: 50 },
         { label: '自訂…', value: '*', wide: true }
-      ], { skippable: canSkipPlan() });
+      ]);
       if (focusMin === '*') focusMin = await askNumber('每炷要坐幾分鐘?', 5, 120, '分', 25);
       let rounds = await ask('要坐幾炷?', [
         ...[1, 2, 3, 4].map(n => ({ label: `${n} 炷`, value: n, primary: n === 4 })), { label: '自訂…', value: '*', wide: true }
-      ], { skippable: canSkipPlan() });
+      ]);
       if (rounds === '*') rounds = await askNumber('要坐幾炷?', 1, 8, '炷', 4);
       let breakMin = rounds > 1
         ? await ask('炷與炷之間要休息多久?', [
             { label: '5 分', value: 5, primary: true }, { label: '10 分', value: 10 },
             { label: '15 分', value: 15 }, { label: '自訂…', value: '*' }
-          ], { skippable: canSkipPlan() })
+          ])
         : 0;
       if (breakMin === '*') breakMin = await askNumber('休息幾分鐘?', 1, 30, '分', 5);
       cfg = { task, focusMin, rounds, breakMin };
@@ -2113,7 +2111,7 @@ button { -webkit-tap-highlight-color: transparent; }
         { label: '沒錯', value: 'ok', primary: true },
         ...(saved ? [] : [{ label: '沒錯,存成常用', value: 'save' }]),
         { label: '我要改', value: 'edit' }
-      ], { skippable: canSkipPlan() });
+      ]);
       if (ok === 'edit') continue;
       if (ok === 'save') await savePreset(cfg);
       return;
@@ -2123,7 +2121,7 @@ button { -webkit-tap-highlight-color: transparent; }
   // a number typed into the dialogue box; 算了 falls back to the usual choice
   async function askNumber(text, min, max, unit, fallback) {
     for (;;) {
-      const v = await ask(text, [{ label: '算了', value: '' }], { skippable: canSkipPlan(), input: { placeholder: `${min}–${max}`, number: { min, max }, unit } });
+      const v = await ask(text, [{ label: '算了', value: '' }], { input: { placeholder: `${min}–${max}`, number: { min, max }, unit } });
       if (v === '') return fallback;
       const n = Math.round(Number(v));
       if (Number.isFinite(n) && n >= min && n <= max) return n;
@@ -2140,7 +2138,7 @@ button { -webkit-tap-highlight-color: transparent; }
     }
     presets.push({ ...c });
     store.set('keisaku-presets-v1', presets);
-    await ask(line, [{ label: '好', value: 1, primary: true }], { skippable: true });
+    await ask(line, [{ label: '好', value: 1, primary: true }]);
   }
 
   async function managePresets() {
