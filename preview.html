@@ -2077,44 +2077,75 @@ button { -webkit-tap-highlight-color: transparent; }
   }
   const presetsEmpty = () => !store.get('keisaku-presets-v1', []).length;
 
-  async function planNew(openingLine) {
-    // ① what
-    let task = await ask(openingLine, [...TASKS.map(t => ({ label: t, value: t })), { label: '自訂…', value: '*' }]);
+  // one question per setting, so the plan can be made in order or changed one piece at a time
+  async function askTask(line) {
+    let task = await ask(line, [...TASKS.map(t => ({ label: t, value: t })), { label: '自訂…', value: '*' }]);
     if (task === '*') task = await ask('要做什麼呢?寫下來給住持看。', [{ label: '不說了', value: '' }], { input: { placeholder: '例如:背單字' } });
-    task = task || '專注';
+    return task || '專注';
+  }
+  async function askFocus(line) {
+    const v = await ask(line, [
+      { label: '15 分', sub: '小坐', value: 15 }, { label: '25 分', sub: '番茄', value: 25, primary: true },
+      { label: '40 分', sub: '一炷香', value: 40 }, { label: '50 分', sub: '長坐', value: 50 },
+      { label: '自訂…', value: '*', wide: true }
+    ]);
+    return v === '*' ? askNumber('每炷要坐幾分鐘?', 5, 120, '分', 25) : v;
+  }
+  async function askRounds() {
+    const v = await ask('要坐幾炷?', [
+      ...[1, 2, 3, 4].map(n => ({ label: `${n} 炷`, value: n, primary: n === 4 })), { label: '自訂…', value: '*', wide: true }
+    ]);
+    return v === '*' ? askNumber('要坐幾炷?', 1, 8, '炷', 4) : v;
+  }
+  async function askBreak() {
+    const v = await ask('炷與炷之間要休息多久?', [
+      { label: '5 分', value: 5, primary: true }, { label: '10 分', value: 10 },
+      { label: '15 分', value: 15 }, { label: '自訂…', value: '*' }
+    ]);
+    return v === '*' ? askNumber('休息幾分鐘?', 1, 30, '分', 5) : v;
+  }
+  const recapLine = c => `好。施主今日要「${c.task}」,坐 ${c.rounds} 炷香,每炷 ${c.focusMin} 分` +
+    (c.rounds > 1 ? `,中間休息 ${c.breakMin} 分` : '') + `,總共約 ${totalMin(c)} 分鐘。`;
+
+  async function planNew(openingLine) {
+    const task = await askTask(openingLine);
+    const focusMin = await askFocus(`「${task}」啊,好。每炷香要坐多久?`);
+    const rounds = await askRounds();
+    const breakMin = rounds > 1 ? await askBreak() : 0;
+    cfg = { task, focusMin, rounds, breakMin };
+    applyCfg();
     for (;;) {
-      // ② how long
-      let focusMin = await ask(`「${task}」啊,好。每炷香要坐多久?`, [
-        { label: '15 分', sub: '小坐', value: 15 }, { label: '25 分', sub: '番茄', value: 25, primary: true },
-        { label: '40 分', sub: '一炷香', value: 40 }, { label: '50 分', sub: '長坐', value: 50 },
-        { label: '自訂…', value: '*', wide: true }
-      ]);
-      if (focusMin === '*') focusMin = await askNumber('每炷要坐幾分鐘?', 5, 120, '分', 25);
-      let rounds = await ask('要坐幾炷?', [
-        ...[1, 2, 3, 4].map(n => ({ label: `${n} 炷`, value: n, primary: n === 4 })), { label: '自訂…', value: '*', wide: true }
-      ]);
-      if (rounds === '*') rounds = await askNumber('要坐幾炷?', 1, 8, '炷', 4);
-      let breakMin = rounds > 1
-        ? await ask('炷與炷之間要休息多久?', [
-            { label: '5 分', value: 5, primary: true }, { label: '10 分', value: 10 },
-            { label: '15 分', value: 15 }, { label: '自訂…', value: '*' }
-          ])
-        : 0;
-      if (breakMin === '*') breakMin = await askNumber('休息幾分鐘?', 1, 30, '分', 5);
-      cfg = { task, focusMin, rounds, breakMin };
-      applyCfg();
-      // ③ repeat it back
-      const recap = `好。施主今日要「${task}」,坐 ${rounds} 炷香,每炷 ${focusMin} 分` +
-        (rounds > 1 ? `,中間休息 ${breakMin} 分` : '') + `,總共約 ${totalMin(cfg)} 分鐘。`;
       const saved = store.get('keisaku-presets-v1', []).some(p => sameCfg(p, cfg));
-      const ok = await ask(recap, [
+      const ok = await ask(recapLine(cfg), [
         { label: '沒錯', value: 'ok', primary: true },
         ...(saved ? [] : [{ label: '沒錯,存成常用', value: 'save' }]),
         { label: '我要改', value: 'edit' }
       ]);
-      if (ok === 'edit') continue;
+      if (ok === 'edit') { await editPlan(); continue; }
       if (ok === 'save') await savePreset(cfg);
       return;
+    }
+  }
+  // change one setting at a time; each row shows what it is now
+  async function editPlan() {
+    for (;;) {
+      const what = await ask('要改哪裡?', [
+        { label: '要做的事', sub: cfg.task, value: 'task' },
+        { label: '每炷多久', sub: `${cfg.focusMin} 分`, value: 'focus' },
+        { label: '坐幾炷', sub: `${cfg.rounds} 炷`, value: 'rounds' },
+        ...(cfg.rounds > 1 ? [{ label: '休息多久', sub: `${cfg.breakMin} 分`, value: 'break' }] : []),
+        { label: '改好了', value: 'done', primary: true, wide: true }
+      ]);
+      if (what === 'done') return;
+      if (what === 'task') cfg.task = await askTask('要做什麼呢?');
+      if (what === 'focus') cfg.focusMin = await askFocus('每炷香要坐多久?');
+      if (what === 'rounds') {
+        cfg.rounds = await askRounds();
+        if (cfg.rounds > 1 && !cfg.breakMin) cfg.breakMin = await askBreak();   // a break is needed once there are two
+      }
+      if (what === 'break') cfg.breakMin = await askBreak();
+      cfg = { ...cfg };
+      applyCfg();
     }
   }
 
@@ -2162,11 +2193,14 @@ button { -webkit-tap-highlight-color: transparent; }
       : '這次請別切走畫面喔。聽到三聲鐘響就開始,一聲就是休息。';
     let delays = 0;
     for (;;) {
+      const beforeFirst = P.phase === 'idle';         // the plan can still change before the first stick is lit
       const v = await ask(`${prefix}準備好了嗎?${howTo}`, [
         { label: '準備好了', value: 'go', primary: true, onPick: askMotionPermission },
-        { label: '再等一下', value: 'wait' }
+        { label: '再等一下', value: 'wait' },
+        ...(beforeFirst ? [{ label: '改設定', sub: cfgShort(cfg), value: 'edit', wide: true }] : [])
       ]);
       if (v === 'go') break;
+      if (v === 'edit') { await editPlan(); prefix = `好,改成「${cfg.task}」,${cfg.focusMin} 分 × ${cfg.rounds} 炷。`; continue; }
       delays++;
       const line = delays >= 3 ? '施主,拖延也是一種妄想喔。……好吧,我去喝杯茶,一分鐘後回來。'
         : '不急,去倒杯水、上個廁所吧。我一分鐘後回來問你。';
