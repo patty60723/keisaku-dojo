@@ -702,6 +702,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 .ledger div + div { border-left: 1px solid var(--line); }
 .ledger dt { font-size: .76rem; color: var(--muted); letter-spacing: .14em; }
 .ledger dd { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: 1.55rem; line-height: 1.25; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ledger dd .sub { display: block; font-family: var(--f-body); font-weight: 400; font-size: .7rem; color: var(--muted); line-height: 1.4; }
 .ledger dd small { font-family: var(--f-body); font-weight: 400; font-size: .72rem; color: var(--muted); margin: 0 3px 0 1px; }
 
 .chart-box { display: flex; flex-direction: column; gap: 8px; border-top: 1px dashed var(--line); padding-top: 12px; }
@@ -775,6 +776,10 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 .htrack i { display: block; height: 100%; width: max(6px, calc(100% * var(--w))); border-radius: 2px 999px 999px 2px; background: color-mix(in srgb, var(--ink) 88%, transparent); }
 .hval { font-family: var(--f-display); font-weight: 700; font-size: .95rem; white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .bars .wisp { animation: none; } }
+
+/* no grey/blue flash when a stick (or any button) is tapped on iOS; the stick's own highlight shows the choice */
+button { -webkit-tap-highlight-color: transparent; }
+.bars .col:focus:not(:focus-visible) { outline: none; }
 .preview-tag{align-self:flex-start;font-size:.78rem;color:#fff;background:var(--kesa);padding:2px 10px;border-radius:999px;text-decoration:none}
 </style>
 </head>
@@ -2877,8 +2882,9 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     // ledger: numbers big, units small
     const u = (n, unit) => `${n}<small>${unit}</small>`;
     const time = cur.min >= 60 ? u(Math.floor(cur.min / 60), '時') + (cur.min % 60 ? u(cur.min % 60, '分') : '') : u(cur.min, '分');
-    $('#statSum').innerHTML = [['坐禪', time], ['坐滿', u(cur.rounds, '炷')],
-      ['每炷被打', cur.rounds ? u((cur.hits / cur.rounds).toFixed(1), '下') : '—']]
+    // hits as a plain count (it always has a value); the per-round average only once a round has been sat in full
+    const avg = cur.rounds ? `<span class="sub">平均每炷 ${(cur.hits / cur.rounds).toFixed(1)} 下</span>` : '';
+    $('#statSum').innerHTML = [['坐禪', time], ['坐滿', u(cur.rounds, '炷')], ['被打', u(cur.hits, '下') + avg]]
       .map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
 
     // incense: one stick per day (or month); today's is lit
