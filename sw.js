@@ -1,6 +1,6 @@
 // 警策道場 service worker: works offline after the first visit.
 // Bump VERSION whenever the app shell changes so old caches get cleared.
-const VERSION = 'v5';
+const VERSION = 'v6';
 const SHELL = `keisaku-shell-${VERSION}`;
 const FONTS = 'keisaku-fonts';
 const SHELL_FILES = [
@@ -52,10 +52,11 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       fetch(req)
         .then(res => {
-          if (res.ok) { const copy = res.clone(); caches.open(SHELL).then(c => c.put('./index.html', copy)); }
+          // cache each page under its own URL, so opening preview.html or soundlab.html never replaces the app
+          if (res.ok) { const copy = res.clone(); caches.open(SHELL).then(c => c.put(req, copy)); }
           return res;
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(async () => (await caches.match(req, { ignoreSearch: true })) || caches.match('./index.html'))
     );
     return;
   }
