@@ -780,6 +780,48 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 /* no grey/blue flash when a stick (or any button) is tapped on iOS; the stick's own highlight shows the choice */
 button { -webkit-tap-highlight-color: transparent; }
 .bars .col:focus:not(:focus-visible) { outline: none; }
+
+/* the round numbers use the line's own font, so they sit on the same baseline as the Chinese around them */
+.round-label b, .status-line b { font-family: inherit; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ---------- header: the journal is a little rolled-open scroll; help and settings are quiet round buttons ---------- */
+.top-btns { align-items: center; gap: 8px; }
+.scroll-btn {
+  position: relative; flex: none; display: inline-flex; align-items: stretch; height: 40px; padding: 0; margin-top: 2px;
+  border: 0; background: none; cursor: pointer; font: inherit; color: var(--ink);
+}
+.scroll-btn .label {
+  display: flex; align-items: center; padding: 0 10px; margin: 4px -2px;
+  font-family: var(--f-display); font-weight: 700; font-size: .95rem; letter-spacing: .12em;
+  background: var(--scroll-paper); border-block: 3px solid var(--mount);
+  box-shadow: 0 1px 2px color-mix(in srgb, #000 18%, transparent);
+}
+.scroll-btn .roll {
+  position: relative; z-index: 1; width: 8px; border-radius: 4px;
+  background: linear-gradient(90deg, var(--wood) 0%, var(--wood-2) 45%, var(--wood) 100%);
+}
+.scroll-btn .roll::before, .scroll-btn .roll::after {     /* the knobs at either end */
+  content: ""; position: absolute; left: 50%; width: 6px; height: 4px; margin-left: -3px; border-radius: 2px; background: var(--kesa);
+}
+.scroll-btn .roll::before { top: -2px; } .scroll-btn .roll::after { bottom: -2px; }
+.scroll-btn:hover .label { background: color-mix(in srgb, var(--scroll-paper) 85%, var(--kesa)); }
+.scroll-btn:active { transform: translateY(1px); }
+.streak-badge {
+  position: absolute; right: -6px; top: -6px; z-index: 2; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px;
+  display: grid; place-items: center; background: var(--shu); color: #fff; box-shadow: 0 0 0 2px var(--bg);
+  font-family: var(--f-num); font-weight: 600; font-size: .72rem; line-height: 1;
+}
+.streak-badge[hidden] { display: none; }
+.icon-btn {
+  flex: none; width: 40px; height: 40px; margin-top: 2px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+  border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: inherit; padding: 0;
+}
+.icon-btn:hover { border-color: var(--ink); }
+.icon-btn .glyph { font-family: var(--f-display); font-weight: 700; font-size: 1.1rem; line-height: 1; }
+.icon-btn .glyph-gear { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; }
+.icon-btn .glyph-char { display: none; }
+:root[data-icons="char"] .icon-btn .glyph-char { display: block; }
+:root[data-icons="char"] .icon-btn .glyph-gear { display: none; }
 .preview-tag{align-self:flex-start;font-size:.78rem;color:#fff;background:var(--kesa);padding:2px 10px;border-radius:999px;text-decoration:none}
 </style>
 </head>
@@ -790,9 +832,15 @@ button { -webkit-tap-highlight-color: transparent; }
     <div class="top-row">
       <h1>警策道場<small>番茄鐘・不准滑手機</small></h1>
       <div class="top-btns">
-        <button type="button" class="help-btn" id="journalBtn" aria-haspopup="dialog">坐禪帳</button>
-        <button type="button" class="help-btn" id="helpBtn" aria-haspopup="dialog">說明</button>
-        <button type="button" class="help-btn" id="settingsBtn" aria-haspopup="dialog">設定</button>
+        <button type="button" class="scroll-btn" id="journalBtn" aria-haspopup="dialog">
+          <span class="roll" aria-hidden="true"></span><span class="label">坐禪帳</span><span class="roll" aria-hidden="true"></span>
+          <span class="streak-badge" id="streakBadge" hidden></span>
+        </button>
+        <button type="button" class="icon-btn" id="helpBtn" aria-haspopup="dialog" aria-label="說明" title="說明"><span class="glyph" aria-hidden="true">規</span></button>
+        <button type="button" class="icon-btn" id="settingsBtn" aria-haspopup="dialog" aria-label="設定" title="設定">
+          <span class="glyph glyph-char" aria-hidden="true">設</span>
+          <svg class="glyph-gear" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8Zm8 3.4-.1-1.3 2-1.6-2-3.4-2.4 1a8 8 0 0 0-2.2-1.3L14.9 3h-3.8l-.4 2.4a8 8 0 0 0-2.2 1.3l-2.4-1-2 3.4 2 1.6a8 8 0 0 0 0 2.6l-2 1.6 2 3.4 2.4-1a8 8 0 0 0 2.2 1.3l.4 2.4h3.8l.4-2.4a8 8 0 0 0 2.2-1.3l2.4 1 2-3.4-2-1.6.1-1.3Z"/></svg>
+        </button>
       </div>
     </div>
     <p id="intro" hidden>跟住持報到、把手機放好就開始坐禪。坐禪中一拿起手機或切出畫面,就會被警策「啪」一下。</p>
@@ -999,7 +1047,7 @@ button { -webkit-tap-highlight-color: transparent; }
       <path class="f-wood2" d="M326 140 h24 q-1 12 -12 12 q-11 0 -12 -12 z"/>
       <rect class="f-kesa" id="incense" x="337" y="96" width="2.2" height="44"/>
       <circle class="ember" id="ember" cx="338.1" cy="96" r="1.8"/>
-      <path class="smoke" id="smoke" stroke-width="1.3" d="M338 92 q-5 -8 0 -16 q5 -8 0 -16 q-4 -6 1 -12"/>
+      <g id="smoke"><path class="smoke" stroke-width="1.3" d="M338 92 q-5 -8 0 -16 q5 -8 0 -16 q-4 -6 1 -12"/></g>
 
       <!-- tea for break time -->
       <g id="tea" visibility="hidden">
@@ -1902,7 +1950,7 @@ button { -webkit-tap-highlight-color: transparent; }
           { label: '請說明', value: 'help', primary: true }, { label: '略過說明', value: 'skip' }
         ], { skippable: true }).finally(() => store.set('keisaku-rules-asked-v1', true));
         if (v === 'help') await explainRules();
-        firstLine = '那麼,施主今日想做的事是什麼?';
+        firstLine = '道場的規矩都在右上角的「規」字裡,想看隨時打開。那麼,施主今日想做的事是什麼?';
       }
       let next = 'new';
       for (;;) {
@@ -2120,6 +2168,7 @@ button { -webkit-tap-highlight-color: transparent; }
     if (P.lateMin) e.late = P.lateMin;
     log.push(e);
     P.lateMin = 0;
+    renderStreakBadge(streakInfo(dayMap(log)).streak);
     writeLog(log);
     P.todayMin += min;
     askPersist();
@@ -2649,6 +2698,7 @@ button { -webkit-tap-highlight-color: transparent; }
     const log = readLog(), m = dayMap(log), todayK = dayKey();
     const { streak } = streakInfo(m);
     $('#streak').textContent = streak >= 1 ? `連續 ${streak} 日` : '';
+    renderStreakBadge(streak);
     $('#monthTitle').textContent = `${J.y} 年 ${J.m + 1} 月`;
     const now = new Date();
     $('#nextMonth').disabled = J.y > now.getFullYear() || (J.y === now.getFullYear() && J.m >= now.getMonth());
@@ -3051,6 +3101,16 @@ button { -webkit-tap-highlight-color: transparent; }
     }
     saveImage(file);
   });
+
+  // the journal button carries the current streak (2 days or more) like a small seal
+  function renderStreakBadge(streak) {
+    const badge = $('#streakBadge');
+    badge.hidden = streak < 2; badge.textContent = streak;
+    $('#journalBtn').setAttribute('aria-label', streak >= 2 ? `坐禪帳,連續 ${streak} 日` : '坐禪帳');
+  }
+  renderStreakBadge(streakInfo(dayMap(readLog())).streak);
+  // preview only: ?icons=char shows 設 instead of the gear
+  if (/[?&]icons=char\b/.test(location.search)) document.documentElement.dataset.icons = 'char';
 
   cfg = { ...(store.get('keisaku-last-v1', null) || DEFAULT_CFG) };
   loadToday(); renderAll();
