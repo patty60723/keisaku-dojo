@@ -511,6 +511,114 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
 /* give the title room to breathe above the subtitle */
 .top { gap: 6px; }
 .top h1 small { margin-top: .55em; line-height: 1.4; }
+
+/* ---------- UI review pass ---------- */
+/* 11: fill the screen; the timer card sits at the bottom, in thumb reach */
+body { min-height: 100dvh; display: flex; flex-direction: column; }
+.app { flex: 1; width: 100%; }
+.panel { margin-top: auto; }
+
+/* 12: one card style for the dialogue box and the timer card */
+.dialog, .panel {
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 18px;
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--line) 70%, transparent);
+}
+.dialog { padding: 14px 16px 16px; gap: 12px; }
+.panel { padding: 16px 18px; gap: 10px; }
+
+/* 7: touch targets */
+.top-btns .help-btn { min-height: 40px; padding: 0 12px; margin-top: 2px; }
+.sheet-close {
+  flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+  font: inherit; font-size: 1.05rem; line-height: 1; cursor: pointer;
+  border: 1.5px solid var(--line); background: transparent; color: var(--muted);
+}
+.sheet-close:hover { color: var(--ink); border-color: var(--ink); }
+.month-nav button { width: 44px; height: 40px; }
+.dlg-skip {
+  min-height: 34px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 999px;
+  text-decoration: none; font-size: .82rem;
+}
+.dlg-skip:hover { color: var(--ink); border-color: var(--ink); }
+
+/* 8: the suggested answer stands out; answers sit two to a row */
+.dlg-choices { grid-template-columns: repeat(auto-fit, minmax(min(128px, 100%), 1fr)); }
+.choice { min-height: 48px; justify-content: center; }
+.choice.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.choice.primary small { color: inherit; opacity: .8; }
+
+/* 10 + 2: bigger incense sticks beside the clock, one status line under it */
+.rounds { gap: 12px; padding-top: 8px; }
+.rounds i { width: 9px; height: 34px; border-radius: 4px; border-width: 2px; }
+.rounds i::before { width: 7px; height: 7px; top: -9px; }
+.rounds i.done { height: 10px; background: var(--muted); border-color: var(--muted); opacity: .55; }
+.rounds i.now::before { box-shadow: 0 0 6px 1px var(--shu); }
+.status-line { margin: 0; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; color: var(--muted); font-size: .95rem; }
+.status-line .state { font-weight: 700; color: var(--ink); letter-spacing: .06em; }
+.status-line .state::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--line); margin-right: 6px; transform: translateY(-1px); }
+.status-line .state[data-state="on"] { color: var(--accent); }
+.status-line .state[data-state="on"]::before { background: var(--accent); }
+.status-line .state[data-state="hit"] { color: var(--shu); }
+.status-line .state[data-state="hit"]::before { background: var(--shu); }
+.status-line .round-label::before { content: "·"; margin-right: 8px; }
+.round-label b { color: var(--ink); }
+
+/* 4: sensor note only when degraded */
+.sense { display: block; font-size: .88rem; color: var(--shu); }
+.sense summary { cursor: pointer; font-weight: 700; min-height: 32px; display: flex; align-items: center; list-style: none; }
+.sense summary::-webkit-details-marker { display: none; }
+.sense summary::after { content: "為什麼?"; font-weight: 400; color: var(--muted); margin-left: 8px; text-decoration: underline; text-underline-offset: 3px; }
+.sense[open] summary::after { content: "收起"; }
+.sense p { margin: 2px 0 0; color: var(--muted); }
+
+/* 9 + 1 + 3: one quiet line of today's numbers, and a quiet way out */
+.panel-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px dashed var(--line); padding-top: 10px; }
+.today { margin: 0; color: var(--muted); font-size: .9rem; }
+.today b { font-family: var(--f-num); font-weight: 600; color: var(--ink); font-size: 1.05rem; }
+.today .hitnum { color: var(--shu); }
+.quiet-btn {
+  font: inherit; font-size: .9rem; color: var(--muted); background: none; cursor: pointer;
+  border: 0; border-radius: 10px; min-height: 40px; padding: 0 6px; margin-right: -6px;
+  text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--line);
+}
+.quiet-btn:hover { color: var(--ink); }
+.quiet-btn.warn { color: var(--shu); font-weight: 700; text-decoration-color: currentColor; }
+
+/* 6: 合掌請打 lives in the corner of the zendo */
+.ask-btn {
+  position: absolute; right: 10px; bottom: 10px; z-index: 3;
+  font: inherit; font-size: .85rem; font-weight: 700; letter-spacing: .04em; cursor: pointer;
+  min-height: 40px; padding: 0 14px 0 10px; border-radius: 999px; display: flex; align-items: center; gap: 4px;
+  border: 1.5px solid var(--line); background: color-mix(in srgb, var(--surface) 88%, transparent); color: var(--ink);
+  backdrop-filter: blur(3px);
+}
+.ask-btn[hidden] { display: none; }
+
+/* 2: events float over the zendo and fade away by themselves */
+.stage-wrap .toast {
+  position: absolute; left: 50%; top: 10px; transform: translateX(-50%); z-index: 3;
+  margin: 0; min-height: 0; width: max-content; max-width: calc(100% - 24px);
+  padding: 6px 14px; border-radius: 999px; font-size: .9rem; line-height: 1.4; text-align: center;
+  background: color-mix(in srgb, var(--surface) 92%, transparent); border: 1.5px solid var(--line); color: var(--ink);
+  animation: toastIn .25s ease-out;
+}
+.stage-wrap .toast.hit { border-color: var(--shu); color: var(--shu); }
+.stage-wrap .toast[hidden] { display: none; }
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, -6px); } }
+@media (prefers-reduced-motion: reduce) { .stage-wrap .toast { animation: none; } }
+
+/* 11 (cont.): the zendo floor stretches into the spare height, so the space reads as room, not as a gap.
+   One SVG unit = (stage inner width) / 400; the weave repeats every 3 units from the top, same as the SVG pattern. */
+.app { container-type: inline-size; }
+.stage-wrap {
+  --u: calc((100cqw - 3px) / 400);
+  flex: 1 0 auto;
+  background:
+    linear-gradient(to right, transparent 68%, var(--heri) 0 68.75%, transparent 0),
+    repeating-linear-gradient(to bottom, var(--tatami) 0 calc(var(--u) * 1.2), var(--tatami-line) 0 calc(var(--u) * 1.8), var(--tatami) 0 calc(var(--u) * 3));
+}
+.top h1 small { white-space: nowrap; }
+@media (max-width: 370px) { .top-btns .help-btn { padding: 0 10px; } }
 </style>
 </head>
 <body>
@@ -524,7 +632,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
         <button type="button" class="help-btn" id="settingsBtn" aria-haspopup="dialog">設定</button>
       </div>
     </div>
-    <p>跟住持報到、把手機放好就開始坐禪。坐禪中一拿起手機或切出畫面,就會被警策「啪」一下。</p>
+    <p id="intro" hidden>跟住持報到、把手機放好就開始坐禪。坐禪中一拿起手機或切出畫面,就會被警策「啪」一下。</p>
   </header>
 
   <dialog class="sheet scroll" id="journal" aria-labelledby="journalTitle">
@@ -534,7 +642,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
    <div class="journal scroll-paper">
     <div class="help-head">
       <h2 id="journalTitle">坐禪帳<span class="streak" id="streak"></span></h2>
-      <button type="button" class="dlg-skip sheet-close" id="journalClose">關閉</button>
+      <button type="button" class="sheet-close" id="journalClose" aria-label="關閉">✕</button>
     </div>
     <div class="month-nav">
       <button type="button" id="prevMonth" aria-label="上個月">‹</button>
@@ -556,7 +664,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
    <div class="help scroll-paper">
     <div class="help-head">
       <h2 id="helpTitle">道場的規矩</h2>
-      <button type="button" class="dlg-skip sheet-close" id="helpClose">關閉</button>
+      <button type="button" class="sheet-close" id="helpClose" aria-label="關閉">✕</button>
     </div>
     <ul>
       <li>開始前先跟住持報到:要做的事、每炷多久、坐幾炷、休息多久。可以存成常用,下次直接選。</li>
@@ -580,7 +688,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
    <div class="settings scroll-paper">
     <div class="help-head">
       <h2 id="settingsTitle">設定</h2>
-      <button type="button" class="dlg-skip sheet-close" id="settingsClose">關閉</button>
+      <button type="button" class="sheet-close" id="settingsClose" aria-label="關閉">✕</button>
     </div>
     <fieldset class="theme-pick">
       <legend>外觀</legend>
@@ -787,8 +895,9 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     <div class="bubble" id="bubble" hidden><span id="bubbleText"></span></div>
     <div class="pow" id="pow" aria-hidden="true">啪!</div>
     <div class="stars" id="stars" aria-hidden="true"></div>
-
-    <div class="result" id="result" hidden>
+    <button type="button" class="ask-btn" id="askBtn" hidden><span aria-hidden="true">🙏</span>合掌請打</button>
+    <p class="toast" id="toast" aria-live="polite" hidden></p>
+      <div class="result" id="result" hidden>
       <div class="result-card">
         <div class="seal"><span id="seal"><i>不</i><i>動</i></span></div>
         <h2 id="resultTitle">放禪</h2>
@@ -809,28 +918,20 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     <div class="dlg-choices" id="dlgChoices"></div>
   </section>
 
-  <p class="toast" id="toast" aria-live="polite" hidden></p>
-
-  <section class="panel" aria-label="計時與設定">
+  <section class="panel" aria-label="計時">
     <div class="clock-row">
       <div class="clock" id="clock">25:00</div>
-      <span class="pill" id="status">報到中</span>
-    </div>
-    <div class="round-row">
       <div class="rounds" id="rounds" aria-hidden="true"></div>
-      <span class="round-label" id="roundLabel"></span>
     </div>
-    <div class="actions">
-      <button type="button" class="btn primary" id="mainBtn" hidden>出堂・結束</button>
-      <button type="button" class="btn ghost" id="askBtn">合掌請打</button>
+    <p class="status-line"><span class="state" id="status">報到中</span><span class="round-label" id="roundLabel"></span></p>
+    <details class="sense" id="sense" hidden>
+      <summary>⚠ 只能偵測切出畫面</summary>
+      <p id="senseMode"></p>
+    </details>
+    <div class="panel-foot">
+      <p class="today" id="today">今日坐禪 <b id="stToday">0</b> 分<span id="todayHitsWrap" hidden> · 被打 <b class="hitnum" id="stTodayHits">0</b> 下</span></p>
+      <button type="button" class="quiet-btn" id="mainBtn" hidden>出堂・結束</button>
     </div>
-    <p class="sense" id="sense">偵測方式:<b id="senseMode">開始後檢查平衡儀</b></p>
-    <dl class="stats">
-      <div><dt>本輪被打</dt><dd class="hitnum" id="stHits">0<small>下</small></dd></div>
-      <div><dt>自己請打</dt><dd id="stAsks">0<small>下</small></dd></div>
-      <div><dt>今日坐禪</dt><dd id="stToday">0<small>分</small></dd></div>
-      <div><dt>今日被打</dt><dd class="hitnum" id="stTodayHits">0<small>下</small></dd></div>
-    </dl>
   </section>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
@@ -1353,9 +1454,12 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     if (text == null) { bubbleEl.hidden = true; return; }
     bubbleText.textContent = text; bubbleEl.hidden = false; placeBubble();
   }
-  function toast(text, hit = false) {
+  let toastTimer = 0;
+  function toast(text, hit = false, ms = 3200) {
+    clearTimeout(toastTimer);
     toastEl.textContent = text; toastEl.classList.toggle('hit', hit);
     toastEl.hidden = !$('#dialog').hidden;
+    toastTimer = setTimeout(() => { toastEl.hidden = true; toastEl.textContent = ''; }, ms);
   }
 
   /* ---------- the mochi: standing while checking in, seated while sitting ---------- */
@@ -1441,7 +1545,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     impact();
     if (counted) { P.hits++; P.roundHits++; P.todayHits++; } else { P.asks++; }
     renderStats();
-    toast(reason, counted);
+    toast(reason, counted, 2600);
     await sleep(480); bubble(null);
     await tween(95, 10, 480, v => M.stick = v, easeInOut);
     monkEl.dataset.mood = 'calm';
@@ -1555,6 +1659,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     const lastCfg = store.get('keisaku-last-v1', null);
     // "returning" means they have actually sat before, not just opened the page
     const log = readLog(), hasSat = log.length > 0;
+    $('#intro').hidden = hasSat;
     const rulesAsked = store.get('keisaku-rules-asked-v1', false);
     const { streak, gap } = streakInfo(dayMap(log));
     const hello = streak >= 2 ? `施主已經連續來了 ${streak} 天。` : gap != null && gap >= 3 ? '好幾天沒見了,歡迎回來。' : '施主又來了。';
@@ -1736,7 +1841,12 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     setStatus(`坐禪中・第 ${P.round} 炷`, 'on');
     toast('回座了,繼續專心。');
   }
-  function renderSense(text, ok) { $('#senseMode').textContent = text; $('#sense').dataset.ok = ok ? 'yes' : 'no'; }
+  // only shown when pick-ups can't be caught; the details say why
+  function renderSense(why) {
+    const box = $('#sense');
+    box.hidden = !why; box.open = false;
+    if (why) $('#senseMode').textContent = why + '拿起手機不會被發現,但切到別的 App 或分頁還是會被打。';
+  }
 
   /* ---------- pomodoro phases ---------- */
   // idle (dialogue) → settle → focus → break → ready (dialogue) → settle → focus … → last focus → result → idle
@@ -1758,10 +1868,9 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
   }
   function applyCfg() { store.set('keisaku-last-v1', cfg); renderAll(); }
   function renderStats() {
-    $('#stHits').firstChild.nodeValue = P.hits;
-    $('#stAsks').firstChild.nodeValue = P.asks;
-    $('#stToday').firstChild.nodeValue = P.todayMin;
-    $('#stTodayHits').firstChild.nodeValue = P.todayHits;
+    $('#stToday').textContent = P.todayMin;
+    $('#stTodayHits').textContent = P.todayHits;
+    $('#todayHitsWrap').hidden = P.todayHits === 0;
   }
   function renderRounds() {
     const box = $('#rounds');
@@ -1773,11 +1882,14 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
       el.className = !started ? '' : n < P.round || (n === P.round && P.phase === 'break') ? 'done' : n === P.round ? 'now' : '';
     });
     $('#roundLabel').innerHTML = started
-      ? `「${escapeHtml(cfg.task)}」第 <b>${P.round}</b> 炷 / 共 <b>${cfg.rounds}</b> 炷`
-      : `「${escapeHtml(cfg.task)}」<b>${cfg.focusMin}</b> 分 × <b>${cfg.rounds}</b> 炷`;
+      ? `${escapeHtml(cfg.task)}・第 <b>${P.round}</b>/${cfg.rounds} 炷`
+      : `${escapeHtml(cfg.task)}・<b>${cfg.focusMin}</b> 分 × ${cfg.rounds} 炷`;
   }
   const escapeHtml = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  function setStatus(text, state) { statusEl.textContent = text; statusEl.dataset.state = state || ''; }
+  function setStatus(text, state) {
+    statusEl.textContent = text.replace(/・第 \d+ 炷$/, ''); statusEl.dataset.state = state || '';
+    askBtn.hidden = P.phase !== 'focus';            // asking for a strike only makes sense while sitting
+  }
   function setMain(text, { warn = false } = {}) {
     mainBtn.hidden = text == null;
     if (text != null) { mainBtn.textContent = text; mainBtn.classList.toggle('warn', warn); }
@@ -1808,6 +1920,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
   function beginSettle() {
     if (P.round === 1) { P.hits = 0; P.asks = 0; P.focusTotal = 0; }
     P.phase = 'settle'; P.roundHits = 0;
+    $('#intro').hidden = true;                      // the intro has done its job once they sit
     enqueue(takeStick);
     $('#result').hidden = true;
     renderRounds(); renderStats(); keepAwake(); settleMonk();
@@ -1835,9 +1948,8 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     P.phase = 'focus';
     P.start = Date.now(); P.end = P.start + cfg.focusMin * 60000;
     Mo.base = withMotion ? Mo.lp.slice() : null; Mo.picked = false; Mo.score = 0;
-    if (withMotion) renderSense('平衡儀+離開畫面', true);
-    else if (motionWanted()) renderSense(Mo.permission === 'denied' ? '僅離開畫面(平衡儀權限被拒絕)' : '僅離開畫面(這台裝置讀不到平衡儀)', false);
-    else renderSense('僅離開畫面', false);
+    if (withMotion || !motionWanted()) renderSense(null);
+    else renderSense(Mo.permission === 'denied' ? '平衡儀的權限被拒絕了,' : '這台裝置讀不到平衡儀,');
     setStatus(`坐禪中・第 ${P.round} 炷`, 'on');
     setMain('出堂・結束');
     renderRounds();
@@ -1855,7 +1967,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     P.phase = 'break';
     P.end = Date.now() + cfg.breakMin * 60000;
     Mo.base = null; Mo.picked = false;
-    letSleep();
+    letSleep(); renderSense(null);
     sitterEl.dataset.face = 'happy'; standUp();
     setStatus('休息', '');
     setMain('跳過休息');
@@ -1882,7 +1994,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     P.phase = 'idle'; P.round = 1;
     letSleep(); Mo.base = null; Mo.picked = false; standUp();
     setMain(null); setStatus('報到中', '');
-    renderSense('開始後檢查平衡儀', false);
+    renderSense(null);
     enqueue(returnStick);
     renderRounds(); settleMonk();
     if (hadFocus) enqueue(async () => showResult(early));
@@ -1910,8 +2022,7 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
     $('#resultLine1').textContent = `「${cfg.task}」共坐了 ${P.focusTotal} 分鐘` + (P.asks ? `,自己請打 ${P.asks} 下` : '');
     $('#resultLine2').textContent = line2;
     $('#koan').textContent = KOANS[Math.floor(Math.random() * KOANS.length)];
-    $('#result').hidden = false;
-    toast(early ? '下次試著坐完。' : '一輪坐完了,辛苦了。');
+    $('#result').hidden = false; askBtn.hidden = true;
   }
 
   function tick() {
