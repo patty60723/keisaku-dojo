@@ -678,8 +678,20 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 .range button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 8px; }
 
 /* the monk's verdict */
-.monk-note { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
-.monk-note p { margin: 0; font-family: var(--f-display); font-size: 1.06rem; line-height: 1.65; text-wrap: pretty; }
+.monk-note { display: flex; align-items: flex-end; gap: 10px; }
+.monk-face { flex: none; width: 44px; height: 44px; color: var(--ink); }
+.monk-bubble {
+  position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px 16px 16px 4px;
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--line) 70%, transparent); padding: 10px 14px 12px;
+}
+.monk-bubble::before {                          /* the tail, pointing at the monk */
+  content: ""; position: absolute; left: -7px; bottom: 10px; width: 12px; height: 12px;
+  background: var(--surface); border-left: 1.5px solid var(--line); border-bottom: 1.5px solid var(--line);
+  transform: rotate(45deg) skew(8deg, 8deg); border-bottom-left-radius: 3px;
+}
+.monk-bubble .dlg-name { font-size: .78rem; padding: 0 8px; }
+.monk-bubble p { margin: 0; font-family: var(--f-display); font-size: 1.06rem; line-height: 1.65; text-wrap: pretty; min-height: 3.3em; }
 
 /* totals as one ruled ledger line */
 .ledger {
@@ -811,7 +823,16 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
         <button type="button" data-range="30" aria-pressed="false">三十日</button>
         <button type="button" data-range="all" aria-pressed="false">全部</button>
       </div>
-      <div class="monk-note"><span class="dlg-name">住持</span><p id="statNote"></p></div>
+      <div class="monk-note">
+        <svg class="monk-face" viewBox="0 0 40 40" aria-hidden="true">
+          <circle cx="20" cy="21" r="15" class="f-skin"/>
+          <path d="M9 15 q11 -12 22 0" fill="none" stroke="currentColor" stroke-width="1" opacity=".18"/>
+          <circle cx="15" cy="20" r="1.8" class="f-ink"/><circle cx="25" cy="20" r="1.8" class="f-ink"/>
+          <ellipse cx="11.5" cy="25" rx="2.6" ry="1.6" class="f-blush"/><ellipse cx="28.5" cy="25" rx="2.6" ry="1.6" class="f-blush"/>
+          <path d="M17 26 q3 2.6 6 0" fill="none" stroke="#2a2622" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <div class="monk-bubble"><span class="dlg-name">住持</span><p id="statNote" aria-live="polite"></p></div>
+      </div>
       <dl class="ledger" id="statSum"></dl>
       <section class="chart-box">
         <h3 id="dailyTitle">每天坐了多久</h3>
@@ -2786,14 +2807,22 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     const steps = [5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240, 300, 480, 600, 900, 1200, 1800, 2400, 3000, 6000];
     return steps.filter(s => s <= max).pop() || 0;
   }
-  // the monk's one-line verdict: compares with the period before, always kindly
+  // durations the way the monk would say them
+  function talkMin(m) {
+    if (m < 60) return `${m} 分鐘`;
+    const h = Math.round(m / 30) / 2, whole = Math.floor(h);
+    return h === whole ? `${whole} 小時` : whole ? `${whole} 小時半` : '半小時';
+  }
+  // the monk's words for this page: spoken to the visitor, picking the one or two things worth saying
   function monkVerdict(log, range, cur) {
+    if (!log.length) return '坐禪帳還是空的。施主坐完第一炷,我就幫你記上。';
     if (range === 'all') {
-      if (!cur.min) return '還沒有紀錄。坐完第一炷,這裡就會開始記。';
       const first = log.reduce((acc, e) => e.d < acc ? e.d : acc, dayKey()).split('-');
+      const since = +first[0] === new Date().getFullYear() ? `${+first[1]} 月` : `${first[0]} 年 ${+first[1]} 月`;
+      if (!cur.rounds) return `施主從 ${since}開始來,還沒坐滿過一炷呢。下次撐到放禪鐘響,我幫你蓋章。`;
       const top = [...cur.tasks].sort((a, b) => b[1].min - a[1].min)[0];
-      return `從 ${first[0]} 年 ${+first[1]} 月到現在,一共坐了 ${fmtMin(cur.min)},坐滿 ${cur.rounds} 炷。` +
-        (cur.tasks.size > 1 ? `最常做的是「${top[0]}」。` : '');
+      return `施主從 ${since}開始來,一共坐了 ${talkMin(cur.min)}。` +
+        (cur.tasks.size > 1 ? `花最多時間的是「${top[0]}」。` : `都在「${top[0]}」上,很專一。`);
     }
     const n = +range, label = n === 7 ? '七日' : '三十日';
     const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - (n - 1));
@@ -2801,19 +2830,35 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     const prevLog = log.filter(e => e.d >= prevFrom && e.d < from);
     const prev = { min: prevLog.reduce((a, e) => a + e.min, 0), rounds: prevLog.filter(e => e.full).length, hits: prevLog.reduce((a, e) => a + e.hits, 0) };
     const hasHistory = log.some(e => e.d < from);
-    if (!cur.min) return prev.min ? '這幾天沒來坐禪。沒關係,想到了就來坐一炷吧。' : '還沒有紀錄。坐完第一炷,這裡就會開始記。';
-    let line = `這${label}坐了 ${fmtMin(cur.min)},坐滿 ${cur.rounds} 炷。`;
-    if (hasHistory) {
+    if (!cur.min) return prev.min ? '這幾天沒見到施主。不要緊,想到了就回來坐一炷吧。' : '這段時間還沒來坐過。想到了就來坐一炷吧。';
+
+    let line, gentle = false;                  // gentle: they sat less, so no nagging after it
+    if (!hasHistory) line = !cur.rounds ? `施主才剛開始,已經坐了 ${talkMin(cur.min)}。`
+      : n === 7 ? `施主這${label}坐了 ${talkMin(cur.min)}。好的開始。` : `施主這${label}坐了 ${talkMin(cur.min)}。`;
+    else {
       const diff = cur.min - prev.min;
-      line += diff >= 30 ? `比前${label}多了 ${fmtMin(diff)}。` : diff <= -30 ? `比前${label}少一些,慢慢來就好。` : `跟前${label}差不多,很穩。`;
+      gentle = diff <= -30;
+      line = diff >= 30 ? `施主這${label}比前${label}多坐了 ${talkMin(diff)},了不起。`
+        : gentle ? `這${label}坐得少一些。不要緊,今天來坐一炷就好。`
+        : `這${label}跟前${label}差不多,穩穩的,很好。`;
     }
-    if (cur.rounds) {
-      const a = cur.hits / cur.rounds, b = prev.rounds ? prev.hits / prev.rounds : null;
-      if (!cur.hits) line += '一下都沒被打,如山不動。';
-      else if (hasHistory && b != null && a < b - .1) line += '被打得比之前少,有進步。';
-      else if (a > 1.2) line += '最近常被打,手機放遠一點試試。';
-    }
+    if (!cur.rounds) return line + '下次試著撐到放禪鐘響吧。';
+    const a = cur.hits / cur.rounds, b = prev.rounds ? prev.hits / prev.rounds : null;
+    if (!cur.hits) line += '一下都沒被打,如山不動。';
+    else if (hasHistory && b != null && a < b - .1) line += '被打的也少了,有進步。';
+    else if (a > 1.2 && !gentle) line += '最近常被打喔,手機放遠一點吧。';
     return line;
+  }
+  // the words appear the way the monk speaks in the zendo
+  let verdictTimer = 0;
+  function sayVerdict(text) {
+    const el = $('#statNote');
+    clearInterval(verdictTimer);
+    el.setAttribute('aria-label', text);
+    if (reduceMotion) { el.textContent = text; return; }
+    const chars = [...text]; let i = 0;
+    el.textContent = '';
+    verdictTimer = setInterval(() => { el.textContent += chars[i++]; if (i >= chars.length) clearInterval(verdictTimer); }, 30);
   }
   function renderStatView() {
     const log = readLog(), buckets = statBuckets(log, statRange);
@@ -2827,7 +2872,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     }
     const cur = { min: inRange.reduce((a, e) => a + e.min, 0), rounds: inRange.filter(e => e.full).length,
       hits: inRange.reduce((a, e) => a + e.hits, 0), tasks };
-    $('#statNote').textContent = monkVerdict(log, statRange, cur);
+    sayVerdict(monkVerdict(log, statRange, cur));
 
     // ledger: numbers big, units small
     const u = (n, unit) => `${n}<small>${unit}</small>`;
