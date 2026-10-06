@@ -876,7 +876,6 @@ button { -webkit-tap-highlight-color: transparent; }
         </button>
       </div>
     </div>
-    <p id="intro" hidden>跟住持報到、把手機放好就開始坐禪。坐禪中一拿起手機或切出畫面,就會被警策「啪」一下。</p>
   </header>
 
   <dialog class="sheet scroll" id="journal" aria-labelledby="journalTitle">
@@ -2010,10 +2009,19 @@ button { -webkit-tap-highlight-color: transparent; }
     const lastCfg = store.get('keisaku-last-v1', null);
     // "returning" means they have actually sat before, not just opened the page
     const log = readLog(), hasSat = log.length > 0;
-    $('#intro').hidden = hasSat;
     const rulesAsked = store.get('keisaku-rules-asked-v1', false);
-    if (!again && !store.get('keisaku-tour-v1', false)) {
-      await tour(introSteps(hasSat));
+    let introduced = false;
+    const replayIntro = !again && /[?&]intro\b/.test(location.search);   // preview only: ?intro plays the first-visit opening again
+    if (!again && (replayIntro || !store.get('keisaku-tour-v1', false))) {
+      // first visit: say what this place is before pointing at anything
+      if (!hasSat || replayIntro) {
+        try {
+          for (const [line, reply] of INTRO) await ask(line, [{ label: reply, value: 1, primary: true }], { skippable: true });
+        } catch (e) { if (e !== SKIP) throw e; }
+        store.set('keisaku-rules-asked-v1', true);      // the essentials were just said; the board holds the rest
+        introduced = true;
+      }
+      await tour(introSteps(hasSat && !replayIntro));
       store.set('keisaku-tour-v1', true);
     }
     const { streak, gap } = streakInfo(dayMap(log));
@@ -2025,7 +2033,8 @@ button { -webkit-tap-highlight-color: transparent; }
       : '歡迎來到警策道場。施主,今日想做的事是什麼?';
     try {
       let firstLine = null;
-      if (!hasSat && !rulesAsked && !again) {
+      if (introduced) firstLine = '那麼,施主今日想做的事是什麼?';
+      else if (!hasSat && !rulesAsked && !again) {
         const v = await ask('歡迎來到警策道場。施主是第一次來吧?要先聽聽道場的規矩嗎?', [
           { label: '請說明', value: 'help', primary: true }, { label: '略過說明', value: 'skip' }
         ], { skippable: true }).finally(() => store.set('keisaku-rules-asked-v1', true));
@@ -2317,7 +2326,6 @@ button { -webkit-tap-highlight-color: transparent; }
   function beginSettle() {
     if (P.round === 1) { P.hits = 0; P.asks = 0; P.focusTotal = 0; }
     P.phase = 'settle'; P.roundHits = 0; P.leaveUsed = false; P.leaveMs = 0; P.resuming = false;
-    $('#intro').hidden = true;                      // the intro has done its job once they sit
     enqueue(takeStick);
     $('#result').hidden = true;
     renderRounds(); renderStats(); keepAwake(); settleMonk();
@@ -2936,8 +2944,15 @@ button { -webkit-tap-highlight-color: transparent; }
   });
   $('#tourNext').addEventListener('click', () => Tour.next());
   $('#tourSkip').addEventListener('click', () => Tour.skip());
+  // what the dojo is, said once on the first visit before the tour
+  const INTRO = [
+    ['歡迎來到警策道場。我是這裡的住持。', '你好'],
+    ['這裡是讓施主專心的地方。手機放下,一次坐一炷香,像番茄鐘一樣,坐完就休息。', '然後呢?'],
+    ['坐禪的時候我會在堂裡巡。施主一拿起手機、或切去別的畫面,我就用這支警策輕輕啪你一下。', '我會專心的'],
+    ['先帶施主看看道場裡的東西。', '好'],
+  ];
   const introSteps = returning => [
-    { target: '#helpBtn', text: (returning ? '道場重新布置過了,我帶施主看一下。' : '施主好,先帶你認識一下道場。') + '道場的規矩寫在左邊這塊「規約」木牌上,忘了就點它來看。' },
+    { target: '#helpBtn', text: (returning ? '道場重新布置過了,我帶施主看一下。' : '') + '道場的規矩寫在左邊這塊「規約」木牌上,忘了就點它來看。' },
     { target: '#journalBtn', text: '右邊柱子上掛的是坐禪帳。每坐完一炷,我就在上面蓋一個章。' },
     { target: '#settingsBtn', text: '背景聲音、每日目標、深色淺色,都在這個齒輪裡調。', hint: '👆 點一下齒輪,就開始吧' },
   ];
