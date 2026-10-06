@@ -822,6 +822,45 @@ button { -webkit-tap-highlight-color: transparent; }
 .icon-btn .glyph-char { display: none; }
 :root[data-icons="char"] .icon-btn .glyph-char { display: block; }
 :root[data-icons="char"] .icon-btn .glyph-gear { display: none; }
+
+/* ---------- the board and the ledger in the zendo are buttons ---------- */
+.hotspot {
+  position: absolute; z-index: 2; padding: 0; border: 0; border-radius: 10px; background: transparent; cursor: pointer;
+  left: calc(var(--u) * var(--x)); top: calc(var(--u) * var(--y)); width: calc(var(--u) * var(--w)); height: calc(var(--u) * var(--h));
+}
+@media (hover: hover) { .hotspot:hover { background: color-mix(in srgb, #fff 16%, transparent); } }
+.hotspot:focus-visible { outline: 2.5px solid var(--accent); outline-offset: -2px; }
+.hotspot .streak-badge { right: auto; left: calc(var(--u) * 23 - 11px); top: calc(var(--u) * 76); box-shadow: 0 0 0 2px var(--wall); }
+.result { z-index: 5; }
+.stage-wrap .toast { pointer-events: none; }
+.icon-btn .glyph-gear { width: 22px; height: 22px; }
+
+/* ---------- guided tour ---------- */
+.tour-block { position: fixed; inset: 0; z-index: 900; -webkit-tap-highlight-color: transparent; }
+.tour-block[hidden] { display: none; }
+.tour-ring {
+  position: fixed; border-radius: 14px; pointer-events: none;
+  box-shadow: 0 0 0 200vmax rgba(14, 17, 15, .62);
+  outline: 2.5px solid #fff; outline-offset: 0;
+  transition: left .35s ease, top .35s ease, width .35s ease, height .35s ease;
+  animation: ringPulse 1.6s ease-in-out infinite;
+}
+@keyframes ringPulse { 50% { outline-offset: 5px; outline-color: rgba(255, 255, 255, .45); } }
+.tour-ring.nudge { animation: ringNudge .45s ease-out; }
+@keyframes ringNudge { 25% { transform: scale(1.1); } 60% { transform: scale(.96); } }
+.tour-card {
+  position: fixed; z-index: 901; left: 16px; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  max-width: 508px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px;
+  background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); border-radius: 18px; padding: 14px 16px 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .3);
+}
+.tour-card[hidden] { display: none; }
+.tour-card .dlg-text { min-height: 0; cursor: default; }
+.tour-hint { margin: 0; font-size: .9rem; font-weight: 700; color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .tour-ring, .tour-ring.nudge { animation: none; transition: none; } }
+.dojo-links { border-top: 1px dashed var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.dojo-links h3 { margin: 0; font-size: .95rem; }
+.dojo-links .backup-btns { grid-template-columns: repeat(3, 1fr); }
 .preview-tag{align-self:flex-start;font-size:.78rem;color:#fff;background:var(--kesa);padding:2px 10px;border-radius:999px;text-decoration:none}
 </style>
 </head>
@@ -832,14 +871,8 @@ button { -webkit-tap-highlight-color: transparent; }
     <div class="top-row">
       <h1>警策道場<small>番茄鐘・不准滑手機</small></h1>
       <div class="top-btns">
-        <button type="button" class="scroll-btn" id="journalBtn" aria-haspopup="dialog">
-          <span class="roll" aria-hidden="true"></span><span class="label">坐禪帳</span><span class="roll" aria-hidden="true"></span>
-          <span class="streak-badge" id="streakBadge" hidden></span>
-        </button>
-        <button type="button" class="icon-btn" id="helpBtn" aria-haspopup="dialog" aria-label="說明" title="說明"><span class="glyph" aria-hidden="true">規</span></button>
         <button type="button" class="icon-btn" id="settingsBtn" aria-haspopup="dialog" aria-label="設定" title="設定">
-          <span class="glyph glyph-char" aria-hidden="true">設</span>
-          <svg class="glyph-gear" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8Zm8 3.4-.1-1.3 2-1.6-2-3.4-2.4 1a8 8 0 0 0-2.2-1.3L14.9 3h-3.8l-.4 2.4a8 8 0 0 0-2.2 1.3l-2.4-1-2 3.4 2 1.6a8 8 0 0 0 0 2.6l-2 1.6 2 3.4 2.4-1a8 8 0 0 0 2.2 1.3l.4 2.4h3.8l.4-2.4a8 8 0 0 0 2.2-1.3l2.4 1 2-3.4-2-1.6.1-1.3Z"/></svg>
+          <svg class="glyph-gear" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.19 9.53 L22.05 10.23 L22.05 13.77 L19.19 14.47 L18.83 15.33 L20.36 17.85 L17.85 20.36 L15.33 18.83 L14.47 19.19 L13.77 22.05 L10.23 22.05 L9.53 19.19 L8.67 18.83 L6.15 20.36 L3.64 17.85 L5.17 15.33 L4.81 14.47 L1.95 13.77 L1.95 10.23 L4.81 9.53 L5.17 8.67 L3.64 6.15 L6.15 3.64 L8.67 5.17 L9.53 4.81 L10.23 1.95 L13.77 1.95 L14.47 4.81 L15.33 5.17 L17.85 3.64 L20.36 6.15 L18.83 8.67 Z"/><circle cx="12" cy="12" r="3.2"/></svg>
         </button>
       </div>
     </div>
@@ -978,6 +1011,14 @@ button { -webkit-tap-highlight-color: transparent; }
       <label for="optSound"><input type="checkbox" id="optSound" checked> 鐘聲與音效</label>
       <label for="optNotify" id="optNotifyRow" hidden><input type="checkbox" id="optNotify"> 休息結束時跳通知 <small>切到別的 App 時,手機可能會晚幾分鐘才叫你,甚至沒叫到</small></label>
     </div>
+    <div class="dojo-links">
+      <h3>道場</h3>
+      <div class="backup-btns">
+        <button type="button" class="small-btn" id="openRules">道場規約</button>
+        <button type="button" class="small-btn" id="openJournal">坐禪帳</button>
+        <button type="button" class="small-btn" id="replayTour">重看導覽</button>
+      </div>
+    </div>
     <div class="install" id="installBox" hidden>
       <button type="button" class="btn ghost" id="installBtn" hidden>把道場裝到主畫面</button>
       <p id="iosTip" hidden>iPhone 要裝到主畫面:在 Safari 按下方的「分享」,再選「加入主畫面」。</p>
@@ -1032,6 +1073,15 @@ button { -webkit-tap-highlight-color: transparent; }
       </g>
       <circle cx="86" cy="98" r="33" class="s-wood" stroke-width="5"/>
 
+      <!-- 規約: a wooden notice board hung on the left wall -->
+      <g id="rulesBoard">
+        <path d="M38 42 L29 55 M38 42 L47 55" stroke="#2a2622" stroke-width=".7" fill="none"/>
+        <circle cx="38" cy="42" r="1.4" class="f-wood"/>
+        <rect class="f-stick" x="27" y="55" width="22" height="58" rx="1.5" stroke="#5d4230" stroke-width="1.2"/>
+        <text class="scroll-char f-sink" x="38" y="79" font-size="12" text-anchor="middle">規</text>
+        <text class="scroll-char f-sink" x="38" y="96" font-size="12" text-anchor="middle">約</text>
+      </g>
+
       <!-- hanging scroll -->
       <rect class="f-wood" x="176" y="46" width="48" height="4" rx="2"/>
       <rect class="f-mount" x="180" y="50" width="40" height="92"/>
@@ -1048,6 +1098,18 @@ button { -webkit-tap-highlight-color: transparent; }
       <rect class="f-kesa" id="incense" x="337" y="96" width="2.2" height="44"/>
       <circle class="ember" id="ember" cx="338.1" cy="96" r="1.8"/>
       <g id="smoke"><path class="smoke" stroke-width="1.3" d="M338 92 q-5 -8 0 -16 q5 -8 0 -16 q-4 -6 1 -12"/></g>
+
+      <!-- 坐禪帳: a 大福帳-style ledger hung by a cord on the right pillar -->
+      <g id="ledgerBook">
+        <path d="M383 42 L374 57 M383 42 L392 57" stroke="#2a2622" stroke-width=".7" fill="none"/>
+        <circle cx="383" cy="42" r="1.4" class="f-wood2"/>
+        <rect class="f-paper" x="371" y="57" width="24" height="62" rx="1" stroke="#2a2622" stroke-width=".8"/>
+        <rect class="f-wood2" x="371" y="57" width="24" height="5"/>
+        <rect x="377" y="66" width="12" height="44" fill="#fffdf6" stroke="#2a2622" stroke-width=".5"/>
+        <text class="scroll-char f-sink" x="383" y="77" font-size="9.5" text-anchor="middle">坐</text>
+        <text class="scroll-char f-sink" x="383" y="90" font-size="9.5" text-anchor="middle">禪</text>
+        <text class="scroll-char f-sink" x="383" y="103" font-size="9.5" text-anchor="middle">帳</text>
+      </g>
 
       <!-- tea for break time -->
       <g id="tea" visibility="hidden">
@@ -1155,6 +1217,9 @@ button { -webkit-tap-highlight-color: transparent; }
     <div class="bubble" id="bubble" hidden><span id="bubbleText"></span></div>
     <div class="pow" id="pow" aria-hidden="true">啪!</div>
     <div class="stars" id="stars" aria-hidden="true"></div>
+    <!-- the notice board and the ledger in the picture are the way into 規約 and 坐禪帳 -->
+    <button type="button" class="hotspot" id="helpBtn" aria-haspopup="dialog" aria-label="道場規約" title="道場規約" style="--x:12;--y:36;--w:52;--h:86"></button>
+    <button type="button" class="hotspot" id="journalBtn" aria-haspopup="dialog" aria-label="坐禪帳" title="坐禪帳" style="--x:348;--y:36;--w:52;--h:90"><span class="streak-badge" id="streakBadge" hidden></span></button>
     <button type="button" class="ask-btn" id="askBtn" hidden><span aria-hidden="true">🙏</span>合掌請打</button>
     <p class="toast" id="toast" aria-live="polite" hidden></p>
       <div class="result" id="result" hidden>
@@ -1180,6 +1245,17 @@ button { -webkit-tap-highlight-color: transparent; }
     </div>
     <p class="dlg-text" id="dlgText"></p>
     <div class="dlg-choices" id="dlgChoices"></div>
+  </section>
+
+  <div class="tour-block" id="tourBlock" hidden><div class="tour-ring" id="tourRing"></div></div>
+  <section class="tour-card" id="tourCard" role="dialog" aria-labelledby="tourText" hidden>
+    <div class="dlg-head">
+      <span class="dlg-name">住持</span>
+      <button type="button" class="dlg-skip" id="tourSkip">略過導覽</button>
+    </div>
+    <p class="dlg-text" id="tourText" aria-live="polite"></p>
+    <p class="tour-hint" id="tourHint" aria-hidden="true"></p>
+    <button type="button" class="sr-only" id="tourNext">下一步</button>
   </section>
 
   <section class="panel" aria-label="計時">
@@ -1936,6 +2012,10 @@ button { -webkit-tap-highlight-color: transparent; }
     const log = readLog(), hasSat = log.length > 0;
     $('#intro').hidden = hasSat;
     const rulesAsked = store.get('keisaku-rules-asked-v1', false);
+    if (!again && !store.get('keisaku-tour-v1', false)) {
+      await tour(introSteps(hasSat));
+      store.set('keisaku-tour-v1', true);
+    }
     const { streak, gap } = streakInfo(dayMap(log));
     const hello = streak >= 2 ? `施主已經連續來了 ${streak} 天。` : gap != null && gap >= 3 ? '好幾天沒見了,歡迎回來。' : '施主又來了。';
     const goal = goalNow();
@@ -1950,7 +2030,7 @@ button { -webkit-tap-highlight-color: transparent; }
           { label: '請說明', value: 'help', primary: true }, { label: '略過說明', value: 'skip' }
         ], { skippable: true }).finally(() => store.set('keisaku-rules-asked-v1', true));
         if (v === 'help') await explainRules();
-        firstLine = '道場的規矩都在右上角的「規」字裡,想看隨時打開。那麼,施主今日想做的事是什麼?';
+        firstLine = '那麼,施主今日想做的事是什麼?';
       }
       let next = 'new';
       for (;;) {
@@ -2810,7 +2890,66 @@ button { -webkit-tap-highlight-color: transparent; }
     askPersist();
   });
 
-  $('#closeResult').addEventListener('click', () => { $('#result').hidden = true; onboarding(true); });
+  $('#closeResult').addEventListener('click', () => { $('#result').hidden = true; onboarding(true); journalTip(); });
+
+  /* ---------- guided tour: the monk points at things; the lit spot has to be tapped to go on ---------- */
+  const Tour = { active: false, next() {}, skip() {} };
+  function tour(steps) {
+    return new Promise(resolve => {
+      const block = $('#tourBlock'), ring = $('#tourRing'), card = $('#tourCard');
+      let i = 0;
+      const place = () => {
+        const r = $(steps[i].target).getBoundingClientRect(), pad = 6;
+        Object.assign(ring.style, { left: r.left - pad + 'px', top: r.top - pad + 'px', width: r.width + pad * 2 + 'px', height: r.height + pad * 2 + 'px' });
+      };
+      const finish = () => {
+        Tour.active = false; block.hidden = card.hidden = true;
+        removeEventListener('resize', place); removeEventListener('scroll', place);
+        resolve();
+      };
+      const show = () => {
+        const s = steps[i];
+        $(s.target).scrollIntoView({ block: 'nearest' });
+        $('#tourText').textContent = s.text;
+        $('#tourHint').textContent = s.hint || '👆 點一下亮起來的地方';
+        $('#tourSkip').textContent = s.skipLabel || '略過導覽';
+        $('#tourNext').textContent = s.nextLabel || '下一步';
+        place(); setTimeout(place, 300);
+        $('#tourNext').focus({ preventScroll: true });   // keyboard and screen-reader users move on from here
+      };
+      Tour.next = () => {
+        const s = steps[i];
+        if (++i < steps.length) { show(); return; }
+        finish(); s.go && s.go();
+      };
+      Tour.skip = finish;
+      Tour.active = true; block.hidden = card.hidden = false;
+      addEventListener('resize', place); addEventListener('scroll', place, { passive: true });
+      show();
+    });
+  }
+  // the whole screen is covered while the tour runs: only the lit spot moves it on, anything else nudges the ring
+  $('#tourBlock').addEventListener('click', e => {
+    const ring = $('#tourRing'), r = ring.getBoundingClientRect();
+    if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) { Tour.next(); return; }
+    ring.classList.remove('nudge'); void ring.offsetWidth; ring.classList.add('nudge');
+  });
+  $('#tourNext').addEventListener('click', () => Tour.next());
+  $('#tourSkip').addEventListener('click', () => Tour.skip());
+  const introSteps = returning => [
+    { target: '#helpBtn', text: (returning ? '道場重新布置過了,我帶施主看一下。' : '施主好,先帶你認識一下道場。') + '道場的規矩寫在左邊這塊「規約」木牌上,忘了就點它來看。' },
+    { target: '#journalBtn', text: '右邊柱子上掛的是坐禪帳。每坐完一炷,我就在上面蓋一個章。' },
+    { target: '#settingsBtn', text: '背景聲音、每日目標、深色淺色,都在這個齒輪裡調。', hint: '👆 點一下齒輪,就開始吧' },
+  ];
+  // the first time a round is stamped, point at the ledger, and this time the tap opens it
+  function journalTip() {
+    if (store.get('keisaku-tip-journal-v1', false) || !readLog().some(e => e.full)) return;
+    store.set('keisaku-tip-journal-v1', true);
+    tour([{ target: '#journalBtn', text: '蓋好章了。點坐禪帳,看看今天的章吧。', hint: '👆 點一下坐禪帳', skipLabel: '等一下再看', go: () => $('#journalBtn').click() }]);
+  }
+  $('#openRules').addEventListener('click', () => openSheet(helpBox));
+  $('#openJournal').addEventListener('click', () => $('#journalBtn').click());
+  $('#replayTour').addEventListener('click', () => { $('#settings').close(); tour(introSteps(true)); });
 
   /* ---------- 坐禪帳: 統計 tab ---------- */
   let statRange = '7';
@@ -3109,8 +3248,6 @@ button { -webkit-tap-highlight-color: transparent; }
     $('#journalBtn').setAttribute('aria-label', streak >= 2 ? `坐禪帳,連續 ${streak} 日` : '坐禪帳');
   }
   renderStreakBadge(streakInfo(dayMap(readLog())).streak);
-  // preview only: ?icons=char shows 設 instead of the gear
-  if (/[?&]icons=char\b/.test(location.search)) document.documentElement.dataset.icons = 'char';
 
   cfg = { ...(store.get('keisaku-last-v1', null) || DEFAULT_CFG) };
   loadToday(); renderAll();
