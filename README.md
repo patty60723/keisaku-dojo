@@ -47,6 +47,17 @@ python3 build_lab.py        # 改了聲音引擎時,重新產生 soundlab.html
 python3 -m http.server      # 在 http://localhost:8000 試(Service Worker、通知要透過 http:// 才會啟用)
 ```
 
+**自動測試**(`tests/`,用 Playwright 在手機尺寸上跑完整流程,約 3 分鐘):
+
+```sh
+npm install                     # 第一次:裝 Playwright
+npx playwright install chromium # 第一次:下載測試用的瀏覽器
+npm test
+```
+
+測試會自己開本機伺服器,截圖和存下的分享圖放在 `tests/output/`(不進版本控制)。
+其中 `build.test.mjs` 會檢查 `index.html`、`soundlab.html` 跟 `src/` 組出來的一致,忘了 build 就會失敗。
+
 - **電腦上試**:沒有平衡儀,會自動改用「離開畫面」偵測。
 - **手機上用**:平衡儀(DeviceMotion)和 PWA 都需要 HTTPS,最簡單是開 GitHub Pages:
   Settings → Pages → Source 選 `Deploy from a branch`,branch 選 `main` / `/ (root)`。
@@ -88,7 +99,6 @@ manifest 的 `id` 要寫完整路徑 `/keisaku-dojo/`:寫 `./` 會被解析成�
 - [ ] iPhone 實機測試(請朋友幫忙):動作與方向權限、背景聲音(含靜音模式)、休息結束通知(要 iOS 16.4 以上並加入主畫面)、分享結算卡、加入主畫面
 - [ ] Pixel 實機確認:分享時會不會叫出系統分享選單、休息通知在背景時實際晚多久
 - [ ] 導覽可用性:不給提示,看第一次用的人能不能在 10 秒內找到坐禪帳;找不到的人多就加強提示
-- [ ] 把 Playwright 自動測試腳本放進 repo(目前不在版本控制裡,作法見技術文件第 13 節)
 
 **功能**
 - [ ] 準時的休息結束通知:加一個推播伺服器(例如 Cloudflare Workers + Web Push)排程發送。目前只能在頁面還醒著時發
@@ -108,7 +118,7 @@ manifest 的 `id` 要寫完整路徑 `/keisaku-dojo/`:寫 `./` 會被解析成�
 1. 改 `src/`,執行 `python3 build.py`(改到聲音的話加跑 `python3 build_lab.py`)。
 2. 需要先給人看的改動,用 `python3 build.py preview` 推 `preview.html`,確認後再刪掉。
 3. `sw.js` 的 `VERSION` 加一,已安裝的 App 才會清掉舊快取、換成新版。
-4. 用 `python3 -m http.server` 在手機尺寸上走過一次流程,再 commit、push 到 `main`。
+4. 跑 `npm test` 全部通過,再用 `python3 -m http.server` 在手機上走過一次,然後 commit、push 到 `main`。
 5. GitHub Pages 約 1–2 分鐘後更新。已安裝的 App 重開就是新版;還是舊畫面的話,完全關掉再開一次。
 
 **版本紀錄**

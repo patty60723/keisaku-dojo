@@ -213,9 +213,23 @@ idle(報到對話)→ settle(放手機的 3 秒)→ focus → break → ready(�
 
 ## 13. 測試方式
 
-用 Playwright 在 390 × 844 的手機尺寸上跑完整流程。目前這些腳本還不在 repo 裡,見 README 的待辦。
+`tests/` 裡是用 Playwright 寫的端對端測試,跑在 Node 內建的測試框架上(`npm test`,也就是 `node --test 'tests/*.test.mjs'`),一次只跑一個檔案。
 
-- **時間:** 用 `addInitScript` 包住 `Date.now`,加一個可以調的偏移量,就能瞬間「快轉」25 分鐘。
-- **離開頁面:** 覆寫 `document.hidden` 再送出 `visibilitychange`,模擬切到別的 App。
-- **通知:** 無頭瀏覽器沒辦法真的顯示通知,所以把 `ServiceWorkerRegistration.prototype.showNotification` 換掉,只記錄它被呼叫的時機和內容。
-- **伺服器:** 用 `python3 -m http.server` 在 `http://localhost` 開,Service Worker 和通知 API 才會啟用。
+| 檔案 | 測什麼 |
+|---|---|
+| `build.test.mjs` | `index.html`、`soundlab.html` 跟 `src/` 重新組出來的完全一致 |
+| `onboarding.test.mjs` | 第一次來的介紹(住持拿著警策)、必點的導覽(點框外不前進、點了會打開面板)、略過開場、鍵盤操作、老使用者的導覽、禪堂物件和設定裡的入口 |
+| `plan.test.mjs` | 自訂數字超出範圍、逐項改設定、「改設定」只在第一炷前出現、略過開場沿用上次設定 |
+| `sitting.test.mjs` | 請打時泡泡和「啪!」的位置、煙跟著香、數字字體、告假暫停與續算、告假中出堂、第一次被打的告假提示 |
+| `break.test.mjs` | 在背景時休息結束會發通知、回來時說超時幾分鐘 |
+| `journal.test.mjs` | 每日目標達成、分享圖是 1080 × 1350 的 PNG、第一次蓋章的提示、圖例對齊、統計的線香與籤紙、只有未坐滿紀錄時的被打數、各種情況的住持評語 |
+| `ui.test.mjs` | 沒有點按高亮和選字、標題列只有齒輪、天數章不被切掉、淺色 / 深色和窄螢幕不出錯也不超出畫面 |
+
+`tests/helpers.mjs` 提供的作法:
+
+- **伺服器:** 每個檔案用 `python3 -m http.server` 在隨機埠開 repo,因為 Service Worker 和通知 API 只在 `http://` 下啟用。
+- **時間:** `addInitScript` 包住 `Date.now`,加上可調的偏移量 `window.__skew`,就能瞬間「快轉」25 分鐘。App 的計時都是算結束時間點,所以快轉後下一次 `tick()` 就會生效。
+- **離開頁面:** 覆寫 `document.hidden` / `visibilityState`,`window.__hide(true/false)` 再送出 `visibilitychange`,模擬切到別的 App 再回來。
+- **通知:** 無頭瀏覽器沒辦法真的顯示通知,所以把 `ServiceWorkerRegistration.prototype.showNotification` 換掉,只把標題和內容記到 `window.__notes`。
+- **一次性說明:** 預設把導覽、開場說明、告假說明等標成「已看過」,每個測試只跑它關心的那一段;要測那些說明時再把對應的 key 拿掉。
+- **等待:** 對話是一個字一個字打出來的,選項要等打完才出現,所以測試一律等「選項出現」或「整句文字出現」,不用固定秒數。
