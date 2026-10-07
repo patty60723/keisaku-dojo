@@ -38,3 +38,19 @@ for (const [dark, width] of [[false, 360], [true, 390]]) {
     await ctx.close();
   });
 }
+
+test('dark theme: the monk keeps dark eyes and feet, and the stats smoke rises straight from the lit stick', async () => {
+  const log = [entry(0, { min: 15, hits: 7 }), entry(1, { min: 20 })];
+  const { p, ctx } = await openApp(browser, server.url, { dark: true, storage: { 'keisaku-log-v2': log } });
+  const ink = 'rgb(42, 38, 34)';
+  const fills = await p.evaluate(() => [...document.querySelectorAll('#monk > ellipse.f-sink, .monk-face .f-sink')].map(e => getComputedStyle(e).fill));
+  assert.ok(fills.length >= 4 && fills.every(f => f === ink), `dark ink in dark mode, got ${fills.join(', ')}`);
+  await p.locator('#journalBtn').click(); await p.waitForFunction(() => document.getElementById('journal').open);
+  await p.locator('#tabStats').click();
+  await p.waitForTimeout(400);
+  const [wisp, stick] = await p.evaluate(() => [document.querySelector('.bars .wisp'), document.querySelector('.bars .stick.lit')]
+    .map(e => { const r = e.getBoundingClientRect(); return r.left + r.width / 2; }));
+  assert.ok(Math.abs(wisp - stick) < 2.5, `smoke centred on the stick (${wisp} vs ${stick})`);
+  await shot(p, 'stats-dark');
+  await ctx.close();
+});
