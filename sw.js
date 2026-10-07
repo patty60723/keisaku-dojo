@@ -1,6 +1,6 @@
 // 警策道場 service worker: works offline after the first visit.
 // Bump VERSION whenever the app shell changes so old caches get cleared.
-const VERSION = 'v9';
+const VERSION = 'v10';
 const SHELL = `keisaku-shell-${VERSION}`;
 const FONTS = 'keisaku-fonts';
 const SHELL_FILES = [

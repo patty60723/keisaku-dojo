@@ -166,7 +166,7 @@ body {
 @keyframes countdown { to { transform: scaleX(0); } }
 
 .pow {
-  position: absolute; left: 56%; top: 52%; transform: translate(-50%,-50%) scale(0) rotate(-12deg);
+  position: absolute; left: 56%; top: calc(var(--u) * 146); transform: translate(-50%,-50%) scale(0) rotate(-12deg);
   font-family: var(--f-display); font-weight: 700; font-size: clamp(2.2rem, 11vw, 3.6rem); line-height: 1;
   color: var(--shu); -webkit-text-stroke: 2px var(--surface); paint-order: stroke fill;
   pointer-events: none; opacity: 0;
@@ -661,65 +661,221 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 .tab-view { display: flex; flex-direction: column; gap: 10px; }
 .tab-view[hidden] { display: none; }
 
-/* ---------- 統計 ---------- */
-.range { display: flex; gap: 6px; flex-wrap: wrap; }
-.range button {
-  font: inherit; font-size: .88rem; min-height: 36px; padding: 0 14px; border-radius: 999px; cursor: pointer;
-  border: 1.5px solid var(--line); background: transparent; color: var(--muted);
-}
-.range button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 700; }
-.stat-sum { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-@media (min-width: 520px) { .stat-sum { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.stat-sum dd small { font-family: var(--f-body); font-weight: 400; font-size: .72rem; color: var(--muted); margin: 0 4px 0 2px; }
-.stat-sum div { padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--ink) 4%, transparent); min-width: 0; }
-.stat-sum dt { font-size: .76rem; color: var(--muted); letter-spacing: .04em; }
-.stat-sum dd { margin: 0; font-family: var(--f-num); font-weight: 600; font-size: 1.12rem; font-variant-numeric: tabular-nums; }
-.chart-box { display: flex; flex-direction: column; gap: 8px; border-top: 1px dashed var(--line); padding-top: 10px; }
-.chart-box h3 { margin: 0; font-size: .92rem; letter-spacing: .06em; }
-.chart-empty { margin: 0; color: var(--muted); font-size: .88rem; padding: 10px 0; }
-.chart-note { margin: 0; min-height: 1.5em; font-size: .86rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+/* ---------- 統計: a page of the practice ledger ---------- */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
-/* vertical bars: one column per day (or month); --track is the plot height */
-.bars {
-  --track: 128px; --lbl: 20px;
-  position: relative; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 2px; align-items: end;
+/* period: plain words, the chosen one underlined with a vermilion brush stroke */
+.range { display: flex; gap: 4px; justify-content: center; }
+.range button {
+  position: relative; font: inherit; font-family: var(--f-display); font-size: 1rem; letter-spacing: .12em;
+  min-height: 40px; padding: 0 14px; border: 0; background: none; cursor: pointer; color: var(--muted);
 }
-.bars:has(.chart-empty) { display: block; }
+.range button[aria-pressed="true"] { color: var(--ink); font-weight: 700; }
+.range button[aria-pressed="true"]::after {
+  content: ""; position: absolute; left: 10px; right: 10px; bottom: 5px; height: 4px;
+  background: var(--shu); border-radius: 40% 60% 55% 45% / 60% 40% 60% 40%; transform: rotate(-1.5deg); opacity: .9;
+}
+.range button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 8px; }
+
+/* the monk's verdict */
+.monk-note { display: flex; align-items: flex-end; gap: 10px; }
+.monk-face { flex: none; width: 44px; height: 44px; color: var(--ink); }
+.monk-bubble {
+  position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px 16px 16px 4px;
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--line) 70%, transparent); padding: 10px 14px 12px;
+}
+.monk-bubble::before {                          /* the tail, pointing at the monk */
+  content: ""; position: absolute; left: -7px; bottom: 10px; width: 12px; height: 12px;
+  background: var(--surface); border-left: 1.5px solid var(--line); border-bottom: 1.5px solid var(--line);
+  transform: rotate(45deg) skew(8deg, 8deg); border-bottom-left-radius: 3px;
+}
+.monk-bubble .dlg-name { font-size: .78rem; padding: 0 8px; }
+.monk-bubble p { margin: 0; font-family: var(--f-display); font-size: 1.06rem; line-height: 1.65; text-wrap: pretty; min-height: 3.3em; }
+
+/* totals as one ruled ledger line */
+.ledger {
+  margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 2px solid var(--ink); border-bottom: 4px double var(--ink);
+}
+.ledger div { padding: 8px 4px 10px; text-align: center; min-width: 0; }
+.ledger div + div { border-left: 1px solid var(--line); }
+.ledger dt { font-size: .76rem; color: var(--muted); letter-spacing: .14em; }
+.ledger dd { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: 1.55rem; line-height: 1.25; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ledger dd .sub { display: block; font-family: var(--f-body); font-weight: 400; font-size: .7rem; color: var(--muted); line-height: 1.4; }
+.ledger dd small { font-family: var(--f-body); font-weight: 400; font-size: .72rem; color: var(--muted); margin: 0 3px 0 1px; }
+
+.chart-box { display: flex; flex-direction: column; gap: 8px; border-top: 1px dashed var(--line); padding-top: 12px; }
+.chart-box h3 { margin: 0; font-family: var(--f-display); font-size: 1rem; letter-spacing: .1em; }
+.chart-empty { margin: 0; color: var(--muted); font-size: .9rem; padding: 14px 0; text-align: center; }
+.chart-hint { margin: 0; font-size: .82rem; color: var(--muted); text-align: center; }
+.chart-hint[hidden] { display: none; }
+
+/* incense sticks standing in a censer's sand */
+.bars {
+  --track: 132px; --lbl: 20px; --sw: 6px;
+  position: relative; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); align-items: end;
+  padding-top: 46px;                           /* room for the slip */
+}
+.bars:has(.chart-empty) { display: block; padding-top: 0; }
 .bars .col {
-  display: flex; flex-direction: column; align-items: stretch; gap: 4px; min-width: 0;
+  display: flex; flex-direction: column; align-items: stretch; gap: 6px; min-width: 0;
   padding: 0; border: 0; background: none; cursor: pointer; font: inherit; color: inherit;
 }
 .bars .track {
   position: relative; height: var(--track); display: flex; align-items: flex-end; justify-content: center;
-  border-bottom: 1.5px solid var(--line);
+  border-bottom: 5px solid color-mix(in srgb, var(--kesa) 28%, var(--line));     /* the sand line */
 }
-.bars .track i {
-  display: block; width: min(100%, 22px); height: max(3px, calc(var(--track) * var(--h))); border-radius: 4px 4px 0 0;
-  background: var(--accent);
+.bars .col:first-of-type .track { border-bottom-left-radius: 3px; }
+.bars .stick {
+  position: relative; display: block; width: var(--sw); height: max(4px, calc(var(--track) * var(--h)));
+  border-radius: 2px 2px 0 0; background: var(--kesa);
 }
-.bars .track i.zero { height: 0; }
-.bars .col.on .track i, .bars .col:hover .track i { background: color-mix(in srgb, var(--accent) 70%, var(--ink)); }
+.bars .stick::before {                          /* grey ash tip */
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: min(5px, 30%);
+  background: color-mix(in srgb, var(--muted) 55%, var(--surface)); border-radius: 2px 2px 0 0;
+}
+.bars .stick.lit::before { background: var(--shu); height: 5px; box-shadow: 0 0 6px 1px color-mix(in srgb, var(--shu) 70%, transparent); border-radius: 50% 50% 1px 1px; }
+.bars .ash { display: block; width: var(--sw); height: 3px; border-radius: 1px; background: color-mix(in srgb, var(--muted) 35%, transparent); }
+.bars .wisp {
+  position: absolute; width: 10px; height: 24px; left: 50%; transform: translateX(-50%);
+  bottom: calc(var(--track) * var(--wh, 0) + 8px); fill: none; stroke: var(--muted); stroke-width: 1.2; stroke-linecap: round;
+  opacity: .5; animation: smoke 5s ease-in-out infinite;
+}
+.bars .col.on .stick { background: color-mix(in srgb, var(--kesa) 65%, var(--ink)); }
+.bars .col.on .lbl { color: var(--ink); font-weight: 700; }
 .bars .col:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
-.bars .lbl { height: var(--lbl); font-size: .72rem; color: var(--muted); text-align: center; white-space: nowrap; overflow: visible; font-variant-numeric: tabular-nums; }
+.bars .lbl { height: var(--lbl); font-size: .74rem; color: var(--muted); text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .bars .grid-line {
-  position: absolute; left: 0; right: 0; bottom: calc(var(--lbl) + 4px + 1.5px + var(--track) * var(--p));
-  border-top: 1px dashed color-mix(in srgb, var(--line) 80%, transparent); pointer-events: none;
+  position: absolute; left: 0; right: 0; bottom: calc(var(--lbl) + 6px + 5px + var(--track) * var(--p));
+  border-top: 1px dashed var(--line); pointer-events: none;
 }
-.bars .grid-line span { position: absolute; left: 0; bottom: 2px; font-size: .7rem; color: var(--muted); padding-right: 4px; }
+.bars .grid-line span { position: absolute; left: 0; bottom: 2px; font-size: .7rem; color: var(--muted); }
 
-/* horizontal bars: one row per task */
-.hbars { display: flex; flex-direction: column; gap: 10px; }
-.hrow { display: grid; grid-template-columns: minmax(5.5em, 34%) 1fr auto; align-items: center; gap: 10px; }
-.hname { display: flex; flex-direction: column; min-width: 0; font-size: .92rem; overflow-wrap: anywhere; line-height: 1.3; }
-.hname small { color: var(--muted); font-size: .74rem; }
-.htrack { height: 14px; display: flex; align-items: center; }
-.htrack i { display: block; height: 100%; width: max(3px, calc(100% * var(--w))); border-radius: 0 4px 4px 0; background: var(--accent); }
-.hval { font-family: var(--f-num); font-weight: 600; font-size: .9rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.chart-table summary { cursor: pointer; font-size: .86rem; color: var(--muted); min-height: 32px; display: flex; align-items: center; }
-.chart-table table { width: 100%; border-collapse: collapse; font-size: .86rem; font-variant-numeric: tabular-nums; }
-.chart-table th, .chart-table td { text-align: right; padding: 4px 6px; border-bottom: 1px solid var(--line); }
-.chart-table th:first-child, .chart-table td:first-child { text-align: left; }
-.chart-table th { color: var(--muted); font-weight: 400; }
+/* the slip: a fortune-paper label over the chosen stick */
+.slip {
+  position: absolute; top: 0; z-index: 2; display: flex; flex-direction: column; align-items: center;
+  padding: 4px 10px; background: var(--paper); color: #2a2622; border-radius: 3px;
+  box-shadow: 0 1px 0 color-mix(in srgb, #000 20%, transparent), 0 0 0 1px color-mix(in srgb, var(--kesa) 35%, transparent);
+  font-size: .8rem; line-height: 1.35; white-space: nowrap; pointer-events: none;
+  border-top: 3px solid var(--shu);
+}
+.slip b { font-family: var(--f-display); font-size: .86rem; }
+.slip::after {
+  content: ""; position: absolute; top: 100%; left: var(--tip, 50%); width: 8px; height: 8px; margin: -4px 0 0 -4px;
+  background: var(--paper); transform: rotate(45deg); box-shadow: 1px 1px 0 color-mix(in srgb, var(--kesa) 35%, transparent);
+}
+.slip[hidden] { display: none; }
+
+/* per task: one ink stroke each */
+.hbars { display: flex; flex-direction: column; gap: 12px; }
+.hrow { display: grid; grid-template-columns: minmax(5.5em, 32%) 1fr auto; align-items: center; gap: 10px; }
+.hname { display: flex; flex-direction: column; min-width: 0; font-family: var(--f-display); font-size: 1rem; overflow-wrap: anywhere; line-height: 1.3; }
+.hname small { font-family: var(--f-body); color: var(--muted); font-size: .74rem; }
+.htrack { height: 12px; display: flex; align-items: center; }
+.htrack i { display: block; height: 100%; width: max(6px, calc(100% * var(--w))); border-radius: 2px 999px 999px 2px; background: color-mix(in srgb, var(--ink) 88%, transparent); }
+.hval { font-family: var(--f-display); font-weight: 700; font-size: .95rem; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .bars .wisp { animation: none; } }
+
+/* no grey/blue flash when a stick (or any button) is tapped on iOS; the stick's own highlight shows the choice */
+button { -webkit-tap-highlight-color: transparent; }
+.bars .col:focus:not(:focus-visible) { outline: none; }
+
+/* the round numbers use the line's own font, so they sit on the same baseline as the Chinese around them */
+.round-label b, .status-line b { font-family: inherit; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ---------- header: the journal is a little rolled-open scroll; help and settings are quiet round buttons ---------- */
+.top-btns { align-items: center; gap: 8px; }
+.scroll-btn {
+  position: relative; flex: none; display: inline-flex; align-items: stretch; height: 40px; padding: 0; margin-top: 2px;
+  border: 0; background: none; cursor: pointer; font: inherit; color: var(--ink);
+}
+.scroll-btn .label {
+  display: flex; align-items: center; padding: 0 10px; margin: 4px -2px;
+  font-family: var(--f-display); font-weight: 700; font-size: .95rem; letter-spacing: .12em;
+  background: var(--scroll-paper); border-block: 3px solid var(--mount);
+  box-shadow: 0 1px 2px color-mix(in srgb, #000 18%, transparent);
+}
+.scroll-btn .roll {
+  position: relative; z-index: 1; width: 8px; border-radius: 4px;
+  background: linear-gradient(90deg, var(--wood) 0%, var(--wood-2) 45%, var(--wood) 100%);
+}
+.scroll-btn .roll::before, .scroll-btn .roll::after {     /* the knobs at either end */
+  content: ""; position: absolute; left: 50%; width: 6px; height: 4px; margin-left: -3px; border-radius: 2px; background: var(--kesa);
+}
+.scroll-btn .roll::before { top: -2px; } .scroll-btn .roll::after { bottom: -2px; }
+.scroll-btn:hover .label { background: color-mix(in srgb, var(--scroll-paper) 85%, var(--kesa)); }
+.scroll-btn:active { transform: translateY(1px); }
+.streak-badge {
+  position: absolute; right: -6px; top: -6px; z-index: 2; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px;
+  display: grid; place-items: center; background: var(--shu); color: #fff; box-shadow: 0 0 0 2px var(--bg);
+  font-family: var(--f-num); font-weight: 600; font-size: .72rem; line-height: 1;
+}
+.streak-badge[hidden] { display: none; }
+.icon-btn {
+  flex: none; width: 40px; height: 40px; margin-top: 2px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+  border: 1.5px solid var(--line); background: transparent; color: var(--ink); font: inherit; padding: 0;
+}
+.icon-btn:hover { border-color: var(--ink); }
+.icon-btn .glyph { font-family: var(--f-display); font-weight: 700; font-size: 1.1rem; line-height: 1; }
+.icon-btn .glyph-gear { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; }
+.icon-btn .glyph-char { display: none; }
+:root[data-icons="char"] .icon-btn .glyph-char { display: block; }
+:root[data-icons="char"] .icon-btn .glyph-gear { display: none; }
+
+/* ---------- the board and the ledger in the zendo are buttons ---------- */
+.hotspot {
+  position: absolute; z-index: 2; padding: 0; border: 0; border-radius: 10px; background: transparent; cursor: pointer;
+  left: calc(var(--u) * var(--x)); top: calc(var(--u) * var(--y)); width: calc(var(--u) * var(--w)); height: calc(var(--u) * var(--h));
+}
+@media (hover: hover) { .hotspot:hover { background: color-mix(in srgb, #fff 16%, transparent); } }
+.hotspot:focus-visible { outline: 2.5px solid var(--accent); outline-offset: -2px; }
+.hotspot .streak-badge { right: auto; left: calc(var(--u) * 23 - 11px); top: calc(var(--u) * 76); box-shadow: 0 0 0 2px var(--wall); }
+.result { z-index: 5; }
+.stage-wrap .toast { pointer-events: none; }
+.icon-btn .glyph-gear { width: 22px; height: 22px; }
+
+/* ---------- guided tour ---------- */
+.tour-block { position: fixed; inset: 0; z-index: 900; -webkit-tap-highlight-color: transparent; }
+.tour-block[hidden] { display: none; }
+.tour-ring {
+  position: fixed; border-radius: 14px; pointer-events: none;
+  box-shadow: 0 0 0 200vmax rgba(14, 17, 15, .62);
+  outline: 2.5px solid #fff; outline-offset: 0;
+  transition: left .35s ease, top .35s ease, width .35s ease, height .35s ease;
+  animation: ringPulse 1.6s ease-in-out infinite;
+}
+@keyframes ringPulse { 50% { outline-offset: 5px; outline-color: rgba(255, 255, 255, .45); } }
+.tour-ring.nudge { animation: ringNudge .45s ease-out; }
+@keyframes ringNudge { 25% { transform: scale(1.1); } 60% { transform: scale(.96); } }
+.tour-card {
+  position: fixed; z-index: 901; left: 16px; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  max-width: 508px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px;
+  background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); border-radius: 18px; padding: 14px 16px 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .3);
+}
+.tour-card[hidden] { display: none; }
+.tour-card .dlg-text { min-height: 0; cursor: default; }
+.tour-hint { margin: 0; font-size: .9rem; font-weight: 700; color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .tour-ring, .tour-ring.nudge { animation: none; transition: none; } }
+.dojo-links { border-top: 1px dashed var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.dojo-links h3 { margin: 0; font-size: .95rem; }
+.dojo-links .backup-btns { grid-template-columns: repeat(3, 1fr); }
+.tour-card.at-top { bottom: auto; top: calc(16px + env(safe-area-inset-top, 0px)); }
+
+/* behave like an app, not a page: no grey/blue tap flash anywhere, no text selection or callout on long press
+   (fields you type or paste into keep it) */
+html { -webkit-tap-highlight-color: transparent; }
+body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
+
+/* legend: a fixed grid, every icon in the same box, so the rows line up */
+.cal-legend { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 6px; }
+.cal-legend span { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.cal-legend .key { flex: none; width: 26px; height: 26px; display: grid; place-items: center; }
+.cal-legend .key svg { width: 26px; height: 26px; }
+.cal-legend .key .met-mark { width: 20px; height: 20px; font-size: .66rem; }
+.day-detail .kind { margin: 0; font-size: .82rem; color: var(--muted); grid-column: 2; }
 </style>
 </head>
 <body>
@@ -728,12 +884,11 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     <div class="top-row">
       <h1>警策道場<small>番茄鐘・不准滑手機</small></h1>
       <div class="top-btns">
-        <button type="button" class="help-btn" id="journalBtn" aria-haspopup="dialog">坐禪帳</button>
-        <button type="button" class="help-btn" id="helpBtn" aria-haspopup="dialog">說明</button>
-        <button type="button" class="help-btn" id="settingsBtn" aria-haspopup="dialog">設定</button>
+        <button type="button" class="icon-btn" id="settingsBtn" aria-haspopup="dialog" aria-label="設定" title="設定">
+          <svg class="glyph-gear" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.19 9.53 L22.05 10.23 L22.05 13.77 L19.19 14.47 L18.83 15.33 L20.36 17.85 L17.85 20.36 L15.33 18.83 L14.47 19.19 L13.77 22.05 L10.23 22.05 L9.53 19.19 L8.67 18.83 L6.15 20.36 L3.64 17.85 L5.17 15.33 L4.81 14.47 L1.95 13.77 L1.95 10.23 L4.81 9.53 L5.17 8.67 L3.64 6.15 L6.15 3.64 L8.67 5.17 L9.53 4.81 L10.23 1.95 L13.77 1.95 L14.47 4.81 L15.33 5.17 L17.85 3.64 L20.36 6.15 L18.83 8.67 Z"/><circle cx="12" cy="12" r="3.2"/></svg>
+        </button>
       </div>
     </div>
-    <p id="intro" hidden>跟住持報到、把手機放好就開始坐禪。坐禪中一拿起手機或切出畫面,就會被警策「啪」一下。</p>
   </header>
 
   <dialog class="sheet scroll" id="journal" aria-labelledby="journalTitle">
@@ -762,21 +917,31 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     </div>
     <div id="statView" class="tab-view" role="tabpanel" aria-labelledby="tabStats" hidden>
       <div class="range" role="group" aria-label="期間">
-        <button type="button" data-range="7" aria-pressed="true">近 7 天</button>
-        <button type="button" data-range="30" aria-pressed="false">近 30 天</button>
+        <button type="button" data-range="7" aria-pressed="true">七日</button>
+        <button type="button" data-range="30" aria-pressed="false">三十日</button>
         <button type="button" data-range="all" aria-pressed="false">全部</button>
       </div>
-      <dl class="stat-sum" id="statSum"></dl>
+      <div class="monk-note">
+        <svg class="monk-face" viewBox="0 0 40 40" aria-hidden="true">
+          <circle cx="20" cy="21" r="15" class="f-skin"/>
+          <path d="M9 15 q11 -12 22 0" fill="none" stroke="currentColor" stroke-width="1" opacity=".18"/>
+          <circle cx="15" cy="20" r="1.8" class="f-ink"/><circle cx="25" cy="20" r="1.8" class="f-ink"/>
+          <ellipse cx="11.5" cy="25" rx="2.6" ry="1.6" class="f-blush"/><ellipse cx="28.5" cy="25" rx="2.6" ry="1.6" class="f-blush"/>
+          <path d="M17 26 q3 2.6 6 0" fill="none" stroke="#2a2622" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <div class="monk-bubble"><span class="dlg-name">住持</span><p id="statNote" aria-live="polite"></p></div>
+      </div>
+      <dl class="ledger" id="statSum"></dl>
       <section class="chart-box">
-        <h3 id="dailyTitle">每天坐禪分鐘</h3>
-        <div class="bars" id="dailyBars"></div>
-        <p class="chart-note" id="dailyNote" aria-live="polite"></p>
+        <h3 id="dailyTitle">每天坐了多久</h3>
+        <div class="bars incense" id="dailyBars"></div>
+        <p class="chart-hint" id="dailyHint"></p>
       </section>
       <section class="chart-box">
         <h3>各項目</h3>
         <div class="hbars" id="taskBars"></div>
       </section>
-      <details class="chart-table"><summary>看表格</summary><div id="statTable"></div></details>
+      <div class="sr-only" id="statTable"></div>
     </div>
    </div>
    </div>
@@ -788,7 +953,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
    <span class="roller right" aria-hidden="true"></span>
    <div class="help scroll-paper">
     <div class="help-head">
-      <h2 id="helpTitle">道場的規矩</h2>
+      <h2 id="helpTitle">道場規約</h2>
       <button type="button" class="sheet-close" id="helpClose" aria-label="關閉">✕</button>
     </div>
     <ul>
@@ -858,6 +1023,14 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       <label for="optSound"><input type="checkbox" id="optSound" checked> 鐘聲與音效</label>
       <label for="optNotify" id="optNotifyRow" hidden><input type="checkbox" id="optNotify"> 休息結束時跳通知 <small>切到別的 App 時,手機可能會晚幾分鐘才叫你,甚至沒叫到</small></label>
     </div>
+    <div class="dojo-links">
+      <h3>道場</h3>
+      <div class="backup-btns">
+        <button type="button" class="small-btn" id="openRules">道場規約</button>
+        <button type="button" class="small-btn" id="openJournal">坐禪帳</button>
+        <button type="button" class="small-btn" id="replayTour">重看導覽</button>
+      </div>
+    </div>
     <div class="install" id="installBox" hidden>
       <button type="button" class="btn ghost" id="installBtn" hidden>把道場裝到主畫面</button>
       <p id="iosTip" hidden>iPhone 要裝到主畫面:在 Safari 按下方的「分享」,再選「加入主畫面」。</p>
@@ -912,6 +1085,15 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       </g>
       <circle cx="86" cy="98" r="33" class="s-wood" stroke-width="5"/>
 
+      <!-- 規約: a wooden notice board hung on the left wall -->
+      <g id="rulesBoard">
+        <path d="M38 42 L29 55 M38 42 L47 55" stroke="#2a2622" stroke-width=".7" fill="none"/>
+        <circle cx="38" cy="42" r="1.4" class="f-wood"/>
+        <rect class="f-stick" x="27" y="55" width="22" height="58" rx="1.5" stroke="#5d4230" stroke-width="1.2"/>
+        <text class="scroll-char f-sink" x="38" y="79" font-size="12" text-anchor="middle">規</text>
+        <text class="scroll-char f-sink" x="38" y="96" font-size="12" text-anchor="middle">約</text>
+      </g>
+
       <!-- hanging scroll -->
       <rect class="f-wood" x="176" y="46" width="48" height="4" rx="2"/>
       <rect class="f-mount" x="180" y="50" width="40" height="92"/>
@@ -927,7 +1109,19 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       <path class="f-wood2" d="M326 140 h24 q-1 12 -12 12 q-11 0 -12 -12 z"/>
       <rect class="f-kesa" id="incense" x="337" y="96" width="2.2" height="44"/>
       <circle class="ember" id="ember" cx="338.1" cy="96" r="1.8"/>
-      <path class="smoke" id="smoke" stroke-width="1.3" d="M338 92 q-5 -8 0 -16 q5 -8 0 -16 q-4 -6 1 -12"/>
+      <g id="smoke"><path class="smoke" stroke-width="1.3" d="M338 92 q-5 -8 0 -16 q5 -8 0 -16 q-4 -6 1 -12"/></g>
+
+      <!-- 坐禪帳: a 大福帳-style ledger hung by a cord on the right pillar -->
+      <g id="ledgerBook">
+        <path d="M383 42 L374 57 M383 42 L392 57" stroke="#2a2622" stroke-width=".7" fill="none"/>
+        <circle cx="383" cy="42" r="1.4" class="f-wood2"/>
+        <rect class="f-paper" x="371" y="57" width="24" height="62" rx="1" stroke="#2a2622" stroke-width=".8"/>
+        <rect class="f-wood2" x="371" y="57" width="24" height="5"/>
+        <rect x="377" y="66" width="12" height="44" fill="#fffdf6" stroke="#2a2622" stroke-width=".5"/>
+        <text class="scroll-char f-sink" x="383" y="77" font-size="9.5" text-anchor="middle">坐</text>
+        <text class="scroll-char f-sink" x="383" y="90" font-size="9.5" text-anchor="middle">禪</text>
+        <text class="scroll-char f-sink" x="383" y="103" font-size="9.5" text-anchor="middle">帳</text>
+      </g>
 
       <!-- tea for break time -->
       <g id="tea" visibility="hidden">
@@ -1035,6 +1229,9 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     <div class="bubble" id="bubble" hidden><span id="bubbleText"></span></div>
     <div class="pow" id="pow" aria-hidden="true">啪!</div>
     <div class="stars" id="stars" aria-hidden="true"></div>
+    <!-- the notice board and the ledger in the picture are the way into 規約 and 坐禪帳 -->
+    <button type="button" class="hotspot" id="helpBtn" aria-haspopup="dialog" aria-label="道場規約" title="道場規約" style="--x:12;--y:36;--w:52;--h:86"></button>
+    <button type="button" class="hotspot" id="journalBtn" aria-haspopup="dialog" aria-label="坐禪帳" title="坐禪帳" style="--x:348;--y:36;--w:52;--h:90"><span class="streak-badge" id="streakBadge" hidden></span></button>
     <button type="button" class="ask-btn" id="askBtn" hidden><span aria-hidden="true">🙏</span>合掌請打</button>
     <p class="toast" id="toast" aria-live="polite" hidden></p>
       <div class="result" id="result" hidden>
@@ -1060,6 +1257,17 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     </div>
     <p class="dlg-text" id="dlgText"></p>
     <div class="dlg-choices" id="dlgChoices"></div>
+  </section>
+
+  <div class="tour-block" id="tourBlock" hidden><div class="tour-ring" id="tourRing"></div></div>
+  <section class="tour-card" id="tourCard" role="dialog" aria-labelledby="tourText" hidden>
+    <div class="dlg-head">
+      <span class="dlg-name">住持</span>
+      <button type="button" class="dlg-skip" id="tourSkip">略過導覽</button>
+    </div>
+    <p class="dlg-text" id="tourText" aria-live="polite"></p>
+    <p class="tour-hint" id="tourHint" aria-hidden="true"></p>
+    <button type="button" class="sr-only" id="tourNext">下一步</button>
   </section>
 
   <section class="panel" aria-label="計時">
@@ -1597,7 +1805,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 
   function placeBubble() {
     bubbleEl.style.left = Math.min(80, Math.max(20, M.x / 400 * 100)) + '%';
-    bubbleEl.style.top = ((M.y - 92) / 280 * 100) + '%';
+    bubbleEl.style.top = `calc(var(--u) * ${M.y - 92})`;   // scene units: the floor below can grow without moving it
   }
   function bubble(text) {
     if (text == null) { bubbleEl.hidden = true; return; }
@@ -1714,7 +1922,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     for (let i = 0; i < 6; i++) {
       const s = document.createElement('span'); s.className = 'star'; s.textContent = '✦';
       const a = Math.PI * 2 * i / 6 + Math.random() * .5;
-      s.style.left = (mochiX() + 22) / 4 + '%'; s.style.top = (standing ? 61 : 64) + '%';
+      s.style.left = (mochiX() + 22) / 4 + '%'; s.style.top = `calc(var(--u) * ${standing ? 171 : 179})`;
       s.style.setProperty('--dx', Math.cos(a) * 46 + 'px'); s.style.setProperty('--dy', Math.sin(a) * 34 + 'px');
       stars.appendChild(s); setTimeout(() => s.remove(), 750);
     }
@@ -1796,6 +2004,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     '拿起手機,或切到別的畫面超過兩秒,我就用這支警策啪你一下。',
     '每炷香開始敲三聲鐘,結束敲一聲。手機朝下也聽得到。',
     '休息時我去喝茶,手機隨你用。休息完敲兩聲,叫你回座。',
+    '坐禪中臨時有事,可以按「告假」暫停計時,一炷一次,不會被打。',
     '想提振精神,也可以按「合掌請打」,自己請我打一下,不算扣分。'
   ];
   async function explainRules() {
@@ -1803,7 +2012,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       const v = await ask(RULES[i], [
         { label: i < RULES.length - 1 ? '繼續' : '明白了', value: 'next', primary: true },
         ...(i < RULES.length - 1 ? [{ label: '略過說明', value: 'skip' }] : [])
-      ], { skippable: true });
+      ]);
       if (v === 'skip') return;
     }
   }
@@ -1814,21 +2023,39 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     const lastCfg = store.get('keisaku-last-v1', null);
     // "returning" means they have actually sat before, not just opened the page
     const log = readLog(), hasSat = log.length > 0;
-    $('#intro').hidden = hasSat;
     const rulesAsked = store.get('keisaku-rules-asked-v1', false);
+    let introduced = false;
+    if (!again && !store.get('keisaku-tour-v1', false)) {
+      // first visit: say what this place is before pointing at anything
+      if (!hasSat) {
+        try {
+          for (const [line, reply, withStick] of INTRO) {
+            if (withStick) await new Promise(r => enqueue(async () => { await takeStick(); r(); }));
+            await ask(line, [{ label: reply, value: 1, primary: true }], { skippable: true });
+            if (withStick) enqueue(returnStick);
+          }
+        } catch (e) { if (e !== SKIP) throw e; enqueue(returnStick); }
+        store.set('keisaku-rules-asked-v1', true);      // the essentials were just said; the board holds the rest
+        introduced = true;
+      }
+      await tour(introSteps(hasSat));
+      store.set('keisaku-tour-v1', true);
+    }
     const { streak, gap } = streakInfo(dayMap(log));
     const hello = streak >= 2 ? `施主已經連續來了 ${streak} 天。` : gap != null && gap >= 3 ? '好幾天沒見了,歡迎回來。' : '施主又來了。';
     const goal = goalNow();
     const progress = !goal || !P.todayRounds ? '' : P.todayRounds >= goal ? `今日目標 ${goal} 炷已經達成了。` : `今日目標 ${goal} 炷,還差 ${goal - P.todayRounds} 炷。`;
-    const greet = again ? `施主還要再坐一輪嗎?${progress}今日想做的事是什麼?`
+    const greet = introduced ? '那麼,施主今日想做的事是什麼?'          // the welcome was just said
+      : again ? `施主還要再坐一輪嗎?${progress}今日想做的事是什麼?`
       : hasSat ? hello + progress + '今日想做的事是什麼?'
       : '歡迎來到警策道場。施主,今日想做的事是什麼?';
     try {
       let firstLine = null;
-      if (!hasSat && !rulesAsked && !again) {
+      if (introduced) firstLine = '那麼,施主今日想做的事是什麼?';
+      else if (!hasSat && !rulesAsked && !again) {
         const v = await ask('歡迎來到警策道場。施主是第一次來吧?要先聽聽道場的規矩嗎?', [
           { label: '請說明', value: 'help', primary: true }, { label: '略過說明', value: 'skip' }
-        ], { skippable: true }).finally(() => store.set('keisaku-rules-asked-v1', true));
+        ]).finally(() => store.set('keisaku-rules-asked-v1', true));
         if (v === 'help') await explainRules();
         firstLine = '那麼,施主今日想做的事是什麼?';
       }
@@ -1842,7 +2069,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
         opts.push({ label: '新的安排', value: 'new' });
         if (presets.length) opts.push({ label: '整理常用', value: 'manage' });
         opts.push({ label: '聽說明', value: 'help' });
-        next = await ask(greet, opts, { skippable: true });
+        next = await ask(greet, opts);
         if (next === 'manage') { await managePresets(); continue; }
         if (next === 'help') { await explainRules(); continue; }
         break;
@@ -1855,58 +2082,90 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       await planNew(firstLine || (lastCfg || !presetsEmpty() ? '那麼,今日想做什麼呢?' : greet));
     } catch (e) {
       if (e !== SKIP) throw e;
-      cfg = { ...(lastCfg || DEFAULT_CFG) };
+      cfg = { ...(store.get('keisaku-last-v1', null) || lastCfg || DEFAULT_CFG) };
       applyCfg();
+      return readyCheck(`好,就照「${cfg.task}」,${cfg.focusMin} 分 × ${cfg.rounds} 炷。`);
     }
     return readyCheck('');
   }
   const presetsEmpty = () => !store.get('keisaku-presets-v1', []).length;
 
+  // one question per setting, so the plan can be made in order or changed one piece at a time
+  async function askTask(line) {
+    let task = await ask(line, [...TASKS.map(t => ({ label: t, value: t })), { label: '自訂…', value: '*' }]);
+    if (task === '*') task = await ask('要做什麼呢?寫下來給住持看。', [{ label: '不說了', value: '' }], { input: { placeholder: '例如:背單字' } });
+    return task || '專注';
+  }
+  async function askFocus(line) {
+    const v = await ask(line, [
+      { label: '15 分', sub: '小坐', value: 15 }, { label: '25 分', sub: '番茄', value: 25, primary: true },
+      { label: '40 分', sub: '一炷香', value: 40 }, { label: '50 分', sub: '長坐', value: 50 },
+      { label: '自訂…', value: '*', wide: true }
+    ]);
+    return v === '*' ? askNumber('每炷要坐幾分鐘?', 5, 120, '分', 25) : v;
+  }
+  async function askRounds() {
+    const v = await ask('要坐幾炷?', [
+      ...[1, 2, 3, 4].map(n => ({ label: `${n} 炷`, value: n, primary: n === 4 })), { label: '自訂…', value: '*', wide: true }
+    ]);
+    return v === '*' ? askNumber('要坐幾炷?', 1, 8, '炷', 4) : v;
+  }
+  async function askBreak() {
+    const v = await ask('炷與炷之間要休息多久?', [
+      { label: '5 分', value: 5, primary: true }, { label: '10 分', value: 10 },
+      { label: '15 分', value: 15 }, { label: '自訂…', value: '*' }
+    ]);
+    return v === '*' ? askNumber('休息幾分鐘?', 1, 30, '分', 5) : v;
+  }
+  const recapLine = c => `好。施主今日要「${c.task}」,坐 ${c.rounds} 炷香,每炷 ${c.focusMin} 分` +
+    (c.rounds > 1 ? `,中間休息 ${c.breakMin} 分` : '') + `,總共約 ${totalMin(c)} 分鐘。`;
+
   async function planNew(openingLine) {
-    // ① what
-    let task = await ask(openingLine, [...TASKS.map(t => ({ label: t, value: t })), { label: '自訂…', value: '*' }], { skippable: true });
-    if (task === '*') task = await ask('要做什麼呢?寫下來給住持看。', [{ label: '不說了', value: '' }], { skippable: true, input: { placeholder: '例如:背單字' } });
-    task = task || '專注';
+    const task = await askTask(openingLine);
+    const focusMin = await askFocus(`「${task}」啊,好。每炷香要坐多久?`);
+    const rounds = await askRounds();
+    const breakMin = rounds > 1 ? await askBreak() : 0;
+    cfg = { task, focusMin, rounds, breakMin };
+    applyCfg();
     for (;;) {
-      // ② how long
-      let focusMin = await ask(`「${task}」啊,好。每炷香要坐多久?`, [
-        { label: '15 分', sub: '小坐', value: 15 }, { label: '25 分', sub: '番茄', value: 25, primary: true },
-        { label: '40 分', sub: '一炷香', value: 40 }, { label: '50 分', sub: '長坐', value: 50 },
-        { label: '自訂…', value: '*', wide: true }
-      ], { skippable: true });
-      if (focusMin === '*') focusMin = await askNumber('每炷要坐幾分鐘?', 5, 120, '分', 25);
-      let rounds = await ask('要坐幾炷?', [
-        ...[1, 2, 3, 4].map(n => ({ label: `${n} 炷`, value: n, primary: n === 4 })), { label: '自訂…', value: '*', wide: true }
-      ], { skippable: true });
-      if (rounds === '*') rounds = await askNumber('要坐幾炷?', 1, 8, '炷', 4);
-      let breakMin = rounds > 1
-        ? await ask('炷與炷之間要休息多久?', [
-            { label: '5 分', value: 5, primary: true }, { label: '10 分', value: 10 },
-            { label: '15 分', value: 15 }, { label: '自訂…', value: '*' }
-          ], { skippable: true })
-        : 0;
-      if (breakMin === '*') breakMin = await askNumber('休息幾分鐘?', 1, 30, '分', 5);
-      cfg = { task, focusMin, rounds, breakMin };
-      applyCfg();
-      // ③ repeat it back
-      const recap = `好。施主今日要「${task}」,坐 ${rounds} 炷香,每炷 ${focusMin} 分` +
-        (rounds > 1 ? `,中間休息 ${breakMin} 分` : '') + `,總共約 ${totalMin(cfg)} 分鐘。`;
       const saved = store.get('keisaku-presets-v1', []).some(p => sameCfg(p, cfg));
-      const ok = await ask(recap, [
+      const ok = await ask(recapLine(cfg), [
         { label: '沒錯', value: 'ok', primary: true },
         ...(saved ? [] : [{ label: '沒錯,存成常用', value: 'save' }]),
         { label: '我要改', value: 'edit' }
-      ], { skippable: true });
-      if (ok === 'edit') continue;
+      ]);
+      if (ok === 'edit') { await editPlan(); continue; }
       if (ok === 'save') await savePreset(cfg);
       return;
+    }
+  }
+  // change one setting at a time; each row shows what it is now
+  async function editPlan() {
+    for (;;) {
+      const what = await ask('要改哪裡?', [
+        { label: '要做的事', sub: cfg.task, value: 'task' },
+        { label: '每炷多久', sub: `${cfg.focusMin} 分`, value: 'focus' },
+        { label: '坐幾炷', sub: `${cfg.rounds} 炷`, value: 'rounds' },
+        ...(cfg.rounds > 1 ? [{ label: '休息多久', sub: `${cfg.breakMin} 分`, value: 'break' }] : []),
+        { label: '改好了', value: 'done', primary: true, wide: true }
+      ]);
+      if (what === 'done') return;
+      if (what === 'task') cfg.task = await askTask('要做什麼呢?');
+      if (what === 'focus') cfg.focusMin = await askFocus('每炷香要坐多久?');
+      if (what === 'rounds') {
+        cfg.rounds = await askRounds();
+        if (cfg.rounds > 1 && !cfg.breakMin) cfg.breakMin = await askBreak();   // a break is needed once there are two
+      }
+      if (what === 'break') cfg.breakMin = await askBreak();
+      cfg = { ...cfg };
+      applyCfg();
     }
   }
 
   // a number typed into the dialogue box; 算了 falls back to the usual choice
   async function askNumber(text, min, max, unit, fallback) {
     for (;;) {
-      const v = await ask(text, [{ label: '算了', value: '' }], { skippable: true, input: { placeholder: `${min}–${max}`, number: { min, max }, unit } });
+      const v = await ask(text, [{ label: '算了', value: '' }], { input: { placeholder: `${min}–${max}`, number: { min, max }, unit } });
       if (v === '') return fallback;
       const n = Math.round(Number(v));
       if (Number.isFinite(n) && n >= min && n <= max) return n;
@@ -1923,7 +2182,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     }
     presets.push({ ...c });
     store.set('keisaku-presets-v1', presets);
-    await ask(line, [{ label: '好', value: 1, primary: true }], { skippable: true });
+    await ask(line, [{ label: '好', value: 1, primary: true }]);
   }
 
   async function managePresets() {
@@ -1946,12 +2205,19 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       ? '請把手機螢幕朝下平放在桌上。聽到三聲鐘響就開始,一聲就是休息。'
       : '這次請別切走畫面喔。聽到三聲鐘響就開始,一聲就是休息。';
     let delays = 0;
+    if (!store.get('keisaku-leave-told-v1', false)) {
+      await ask('對了,坐禪中臨時有事,可以按計時下面的「告假」暫停一下。一炷一次,不會被打。', [{ label: '知道了', value: 1, primary: true }]);
+      store.set('keisaku-leave-told-v1', true);
+    }
     for (;;) {
+      const beforeFirst = P.phase === 'idle';         // the plan can still change before the first stick is lit
       const v = await ask(`${prefix}準備好了嗎?${howTo}`, [
         { label: '準備好了', value: 'go', primary: true, onPick: askMotionPermission },
-        { label: '再等一下', value: 'wait' }
+        { label: '再等一下', value: 'wait' },
+        ...(beforeFirst ? [{ label: '改設定', sub: cfgShort(cfg), value: 'edit', wide: true }] : [])
       ]);
       if (v === 'go') break;
+      if (v === 'edit') { await editPlan(); prefix = `好,改成「${cfg.task}」,${cfg.focusMin} 分 × ${cfg.rounds} 炷。`; continue; }
       delays++;
       const line = delays >= 3 ? '施主,拖延也是一種妄想喔。……好吧,我去喝杯茶,一分鐘後回來。'
         : '不急,去倒杯水、上個廁所吧。我一分鐘後回來問你。';
@@ -2013,6 +2279,14 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     setStatus('拿起手機了', 'hit');
     sitterEl.dataset.face = 'peek';
     enqueue(() => strike({ reason: '啪!手機拿起來了。放回原位才能繼續。', counted: true }));
+    enqueue(leaveTip);
+  }
+  // caught for the first time: if it was something that couldn't wait, this is the button for next time
+  async function leaveTip() {
+    if (P.phase !== 'focus' || P.leaveUsed || store.get('keisaku-tip-leave-v1', false)) return;
+    store.set('keisaku-tip-leave-v1', true);
+    tour([{ target: '#leaveBtn', act: true, skipLabel: '知道了',
+      text: '如果是有事要用手機,先按「告假」,計時會暫停,就不會被打了。一炷可以告假一次。', hint: '👆 現在就要告假的話,點一下「告假」' }]);
   }
   function onPutDown() {
     setStatus(`坐禪中・第 ${P.round} 炷`, 'on');
@@ -2048,6 +2322,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     if (P.lateMin) e.late = P.lateMin;
     log.push(e);
     P.lateMin = 0;
+    renderStreakBadge(streakInfo(dayMap(log)).streak);
     writeLog(log);
     P.todayMin += min;
     askPersist();
@@ -2116,7 +2391,6 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
   function beginSettle() {
     if (P.round === 1) { P.hits = 0; P.asks = 0; P.focusTotal = 0; }
     P.phase = 'settle'; P.roundHits = 0; P.leaveUsed = false; P.leaveMs = 0; P.resuming = false;
-    $('#intro').hidden = true;                      // the intro has done its job once they sit
     enqueue(takeStick);
     $('#result').hidden = true;
     renderRounds(); renderStats(); keepAwake(); settleMonk();
@@ -2341,6 +2615,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     enqueue(() => strike({ reason: `啪!離開畫面 ${label}。`, counted: true }));
     if (secs >= 90) enqueue(() => strike({ reason: '啪!離開太久,再補一下。', counted: true }));
     enqueue(async () => { if (P.phase === 'focus') setStatus(`坐禪中・第 ${P.round} 炷`, 'on'); });
+    enqueue(leaveTip);
     tick();
   });
 
@@ -2570,6 +2845,12 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     return `<svg viewBox="0 0 100 100"><g filter="url(#ink)" opacity="${OPACITY[kind]}" transform="translate(${j.x} ${j.y}) rotate(${j.a} 50 52)">${rings}${inner}</g></svg>`;
   }
   const KIND_LABEL = { light: '未滿 25 分', mid: '25–74 分', full: '75 分以上', still: '坐滿、0 下', dot: '沒坐滿一炷' };
+  // what the big stamp in the day detail means, in words
+  const KIND_MEANING = {
+    light: '淡淡的「坐」章:這天坐了不到 25 分鐘。', mid: '「坐」章:這天坐了 25 到 74 分鐘。',
+    full: '合掌章:這天坐了 75 分鐘以上。', still: '「不動」章:坐滿一炷以上,一下都沒被打。',
+    dot: '小紅點:這天有來坐,但還沒坐滿一炷。'
+  };
 
   const J = { y: 0, m: 0, sel: '' };          // shown month (m: 0-11) and selected day
   const journalBtn = $('#journalBtn'), journalBox = $('#journal');
@@ -2577,6 +2858,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     const log = readLog(), m = dayMap(log), todayK = dayKey();
     const { streak } = streakInfo(m);
     $('#streak').textContent = streak >= 1 ? `連續 ${streak} 日` : '';
+    renderStreakBadge(streak);
     $('#monthTitle').textContent = `${J.y} 年 ${J.m + 1} 月`;
     const now = new Date();
     $('#nextMonth').disabled = J.y > now.getFullYear() || (J.y === now.getFullYear() && J.m >= now.getMonth());
@@ -2601,8 +2883,8 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       cal.appendChild(b);
     }
     $('#calLegend').innerHTML = ['light', 'mid', 'full', 'still', 'dot']
-      .map(k => `<span>${stampSvg(k, 'legend')}${KIND_LABEL[k]}</span>`).join('')
-      + (log.some(e => e.goal) ? '<span><i class="met-mark">達</i>達成每日目標</span>' : '');
+      .map(k => `<span><b class="key">${stampSvg(k, 'legend')}</b>${KIND_LABEL[k]}</span>`).join('')
+      + (log.some(e => e.goal) ? '<span><b class="key"><i class="met-mark">達</i></b>達成每日目標</span>' : '');
     renderDay(m);
   }
   function renderDay(m) {
@@ -2615,7 +2897,8 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
       box.querySelector('.empty').textContent = key === dayKey() ? '今天還沒有坐禪。' : '這天沒有來坐禪。';
       return;
     }
-    box.innerHTML = `<div class="big">${stampSvg(stampKind(a), key)}</div><h3></h3><ul></ul>`;
+    box.innerHTML = `<div class="big">${stampSvg(stampKind(a), key)}</div><h3></h3><p class="kind"></p><ul></ul>`;
+    box.querySelector('.kind').textContent = KIND_MEANING[stampKind(a)] || '';
     box.querySelector('h3').textContent = `${title}・共 ${a.min} 分・被打 ${a.hits} 下` + (a.goal ? (a.full >= a.goal ? `・目標 ${a.goal} 炷達成` : `・目標 ${a.full}/${a.goal} 炷`) : '');
     const ul = box.querySelector('ul');
     for (const [task, t] of a.tasks) {
@@ -2688,7 +2971,85 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     askPersist();
   });
 
-  $('#closeResult').addEventListener('click', () => { $('#result').hidden = true; onboarding(true); });
+  $('#closeResult').addEventListener('click', () => { $('#result').hidden = true; onboarding(true); journalTip(); });
+
+  /* ---------- guided tour: the monk points at things; the lit spot has to be tapped to go on ---------- */
+  const Tour = { active: false, next() {}, skip() {} };
+  function tour(steps) {
+    return new Promise(resolve => {
+      const block = $('#tourBlock'), ring = $('#tourRing'), card = $('#tourCard');
+      let i = 0;
+      const place = () => {
+        const r = $(steps[i].target).getBoundingClientRect(), pad = 6;
+        Object.assign(ring.style, { left: r.left - pad + 'px', top: r.top - pad + 'px', width: r.width + pad * 2 + 'px', height: r.height + pad * 2 + 'px' });
+      };
+      const finish = () => {
+        Tour.active = false; block.hidden = card.hidden = true;
+        removeEventListener('resize', place); removeEventListener('scroll', place);
+        resolve();
+      };
+      const show = () => {
+        const s = steps[i];
+        $(s.target).scrollIntoView({ block: 'nearest' });
+        $('#tourText').textContent = s.text;
+        $('#tourHint').textContent = s.hint || '👆 點一下亮起來的地方';
+        $('#tourSkip').textContent = s.skipLabel || '略過導覽';
+        $('#tourNext').textContent = s.nextLabel || '下一步';
+        place(); setTimeout(place, 300);
+        // keep the card out of the way: when the lit spot is low on the screen, the card goes to the top
+        card.classList.toggle('at-top', $(s.target).getBoundingClientRect().top > innerHeight / 2);
+        $('#tourNext').focus({ preventScroll: true });   // keyboard and screen-reader users move on from here
+      };
+      Tour.next = async () => {
+        const s = steps[i];
+        if (s.sheet) {
+          // the tap does what it would do anyway: open the sheet; the tour waits until it is rolled up again
+          const sheet = $(s.sheet), closed = new Promise(r => sheet.addEventListener('close', r, { once: true }));
+          block.hidden = card.hidden = true;
+          $(s.target).click();
+          await closed;
+          if (!Tour.active) return;
+          block.hidden = card.hidden = false;
+        }
+        if (++i < steps.length) { show(); return; }
+        finish(); s.go && s.go();
+        if (s.act) $(s.target).click();
+      };
+      Tour.skip = finish;
+      Tour.active = true; block.hidden = card.hidden = false;
+      addEventListener('resize', place); addEventListener('scroll', place, { passive: true });
+      show();
+    });
+  }
+  // the whole screen is covered while the tour runs: only the lit spot moves it on, anything else nudges the ring
+  $('#tourBlock').addEventListener('click', e => {
+    const ring = $('#tourRing'), r = ring.getBoundingClientRect();
+    if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) { Tour.next(); return; }
+    ring.classList.remove('nudge'); void ring.offsetWidth; ring.classList.add('nudge');
+  });
+  $('#tourNext').addEventListener('click', () => Tour.next());
+  $('#tourSkip').addEventListener('click', () => Tour.skip());
+  // what the dojo is, said once on the first visit before the tour
+  const INTRO = [
+    ['歡迎來到警策道場。我是這裡的住持。', '你好'],
+    ['這裡是讓施主專心的地方。手機放下,一次坐一炷香,像番茄鐘一樣,坐完就休息。', '然後呢?'],
+    ['坐禪的時候我會在堂裡巡。施主一拿起手機、或切去別的畫面,我就用這支警策輕輕啪你一下。', '我會專心的', true],
+    ['先帶施主看看道場裡的東西。', '好'],
+  ];
+  const introSteps = returning => [
+    { target: '#helpBtn', sheet: '#help', text: (returning ? '道場重新布置過了,我帶施主看一下。' : '') + '道場的規矩寫在左邊這塊「規約」木牌上。點它看看,看完收起來就好。', hint: '👆 點一下「規約」木牌' },
+    { target: '#journalBtn', sheet: '#journal', text: '右邊柱子上掛的是坐禪帳。每坐完一炷,我就在上面蓋一個章。點開看看。', hint: '👆 點一下坐禪帳' },
+    { target: '#settingsBtn', sheet: '#settings', text: '背景聲音、每日目標、深色淺色,都在這個齒輪裡調。', hint: '👆 點一下齒輪' },
+  ];
+  // the first time a round is stamped, point at the ledger, and this time the tap opens it
+  function journalTip() {
+    if (store.get('keisaku-tip-journal-v1', false) || !readLog().some(e => e.full)) return;
+    store.set('keisaku-tip-journal-v1', true);
+    tour([{ target: '#journalBtn', text: '蓋好章了。點坐禪帳,看看今天的章吧。', hint: '👆 點一下坐禪帳', skipLabel: '等一下再看', go: () => $('#journalBtn').click() }]);
+  }
+  $('#openRules').addEventListener('click', () => openSheet(helpBox));
+  $('#openJournal').addEventListener('click', () => $('#journalBtn').click());
+  $('#replayTour').addEventListener('click', () => { $('#settings').close(); tour(introSteps(true)); });
 
   /* ---------- 坐禪帳: 統計 tab ---------- */
   let statRange = '7';
@@ -2740,51 +3101,125 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     const steps = [5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240, 300, 480, 600, 900, 1200, 1800, 2400, 3000, 6000];
     return steps.filter(s => s <= max).pop() || 0;
   }
+  // durations the way the monk would say them
+  function talkMin(m) {
+    if (m < 60) return `${m} 分鐘`;
+    const h = Math.round(m / 30) / 2, whole = Math.floor(h);
+    return h === whole ? `${whole} 小時` : whole ? `${whole} 小時半` : '半小時';
+  }
+  // the monk's words for this page: spoken to the visitor, picking the one or two things worth saying
+  function monkVerdict(log, range, cur) {
+    if (!log.length) return '坐禪帳還是空的。施主坐完第一炷,我就幫你記上。';
+    if (range === 'all') {
+      const first = log.reduce((acc, e) => e.d < acc ? e.d : acc, dayKey()).split('-');
+      const since = +first[0] === new Date().getFullYear() ? `${+first[1]} 月` : `${first[0]} 年 ${+first[1]} 月`;
+      if (!cur.rounds) return `施主從 ${since}開始來,還沒坐滿過一炷呢。下次撐到放禪鐘響,我幫你蓋章。`;
+      const top = [...cur.tasks].sort((a, b) => b[1].min - a[1].min)[0];
+      return `施主從 ${since}開始來,一共坐了 ${talkMin(cur.min)}。` +
+        (cur.tasks.size > 1 ? `花最多時間的是「${top[0]}」。` : `都在「${top[0]}」上,很專一。`);
+    }
+    const n = +range, label = n === 7 ? '七日' : '三十日';
+    const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - (n - 1));
+    const from = dayKey(d); d.setDate(d.getDate() - n); const prevFrom = dayKey(d);
+    const prevLog = log.filter(e => e.d >= prevFrom && e.d < from);
+    const prev = { min: prevLog.reduce((a, e) => a + e.min, 0), rounds: prevLog.filter(e => e.full).length, hits: prevLog.reduce((a, e) => a + e.hits, 0) };
+    const hasHistory = log.some(e => e.d < from);
+    if (!cur.min) return prev.min ? '這幾天沒見到施主。不要緊,想到了就回來坐一炷吧。' : '這段時間還沒來坐過。想到了就來坐一炷吧。';
+
+    let line, gentle = false;                  // gentle: they sat less, so no nagging after it
+    if (!hasHistory) line = !cur.rounds ? `施主才剛開始,已經坐了 ${talkMin(cur.min)}。`
+      : n === 7 ? `施主這${label}坐了 ${talkMin(cur.min)}。好的開始。` : `施主這${label}坐了 ${talkMin(cur.min)}。`;
+    else {
+      const diff = cur.min - prev.min;
+      gentle = diff <= -30;
+      line = diff >= 30 ? `施主這${label}比前${label}多坐了 ${talkMin(diff)},了不起。`
+        : gentle ? `這${label}坐得少一些。不要緊,今天來坐一炷就好。`
+        : `這${label}跟前${label}差不多,穩穩的,很好。`;
+    }
+    if (!cur.rounds) return line + '下次試著撐到放禪鐘響吧。';
+    const a = cur.hits / cur.rounds, b = prev.rounds ? prev.hits / prev.rounds : null;
+    if (!cur.hits) line += '一下都沒被打,如山不動。';
+    else if (hasHistory && b != null && a < b - .1) line += '被打的也少了,有進步。';
+    else if (a > 1.2 && !gentle) line += '最近常被打喔,手機放遠一點吧。';
+    return line;
+  }
+  // the words appear the way the monk speaks in the zendo
+  let verdictTimer = 0;
+  function sayVerdict(text) {
+    const el = $('#statNote');
+    clearInterval(verdictTimer);
+    el.setAttribute('aria-label', text);
+    if (reduceMotion) { el.textContent = text; return; }
+    const chars = [...text]; let i = 0;
+    el.textContent = '';
+    verdictTimer = setInterval(() => { el.textContent += chars[i++]; if (i >= chars.length) clearInterval(verdictTimer); }, 30);
+  }
   function renderStatView() {
     const log = readLog(), buckets = statBuckets(log, statRange);
     const from = buckets.length ? buckets[0].from : dayKey();
     const inRange = log.filter(e => e.d >= from);
-    const min = inRange.reduce((a, e) => a + e.min, 0), rounds = inRange.filter(e => e.full).length;
-    const hits = inRange.reduce((a, e) => a + e.hits, 0), leaves = inRange.reduce((a, e) => a + (e.leave || 0), 0);
-    // numbers big, units small, so each tile stays on one line
-    const u = (n, unit) => `${n}<small>${unit}</small>`;
-    const sum = [['坐禪', min >= 60 ? u(Math.floor(min / 60), '小時') + (min % 60 ? u(min % 60, '分') : '') : u(min, '分')],
-      ['坐滿', u(rounds, '炷')], ['被打', u(hits, '下')],
-      ['每炷平均被打', rounds ? u((hits / rounds).toFixed(1), '下') : '—']];
-    if (leaves) sum.push(['告假', u(leaves, '次')]);
-    $('#statSum').innerHTML = sum.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
-
-    // daily (or monthly) minutes
-    const box = $('#dailyBars'), note = $('#dailyNote');
-    $('#dailyTitle').textContent = statRange === 'all' ? '每月坐禪分鐘' : '每天坐禪分鐘';
-    const max = Math.max(0, ...buckets.map(b => b.min));
-    box.style.setProperty('--n', buckets.length);
-    box.replaceChildren();
-    if (!max) {
-      box.innerHTML = '<p class="chart-empty">這段時間還沒有坐禪紀錄。</p>';
-      note.textContent = '';
-    } else {
-      const top = max * 1.12, g = gridValue(max);
-      if (g) box.insertAdjacentHTML('beforeend', `<div class="grid-line" style="--p:${(g / top).toFixed(4)}"><span>${g} 分</span></div>`);
-      const describe = b => `${b.title}・${fmtMin(b.min)}・坐滿 ${b.rounds} 炷・被打 ${b.hits} 下`;
-      buckets.forEach(b => {
-        const col = document.createElement('button'); col.type = 'button'; col.className = 'col';
-        col.setAttribute('aria-label', describe(b));
-        col.innerHTML = `<span class="track"><i style="--h:${(b.min / top).toFixed(4)}"${b.min ? '' : ' class="zero"'}></i></span><span class="lbl">${b.label}</span>`;
-        const show = () => { note.textContent = describe(b); box.querySelectorAll('.col.on').forEach(x => x.classList.remove('on')); col.classList.add('on'); };
-        col.addEventListener('pointerenter', show); col.addEventListener('focus', show); col.addEventListener('click', show);
-        box.appendChild(col);
-      });
-      note.textContent = statRange === 'all' ? '點長條看那個月的數字。' : '點長條看那天的數字。';
-    }
-
-    // per task
     const tasks = new Map();
     for (const e of inRange) {
       const t = tasks.get(e.task) || { min: 0, rounds: 0, hits: 0 };
       t.min += e.min; t.hits += e.hits; if (e.full) t.rounds++;
       tasks.set(e.task, t);
     }
+    const cur = { min: inRange.reduce((a, e) => a + e.min, 0), rounds: inRange.filter(e => e.full).length,
+      hits: inRange.reduce((a, e) => a + e.hits, 0), tasks };
+    sayVerdict(monkVerdict(log, statRange, cur));
+
+    // ledger: numbers big, units small
+    const u = (n, unit) => `${n}<small>${unit}</small>`;
+    const time = cur.min >= 60 ? u(Math.floor(cur.min / 60), '時') + (cur.min % 60 ? u(cur.min % 60, '分') : '') : u(cur.min, '分');
+    // hits as a plain count (it always has a value); the per-round average only once a round has been sat in full
+    const avg = cur.rounds ? `<span class="sub">平均每炷 ${(cur.hits / cur.rounds).toFixed(1)} 下</span>` : '';
+    $('#statSum').innerHTML = [['坐禪', time], ['坐滿', u(cur.rounds, '炷')], ['被打', u(cur.hits, '下') + avg]]
+      .map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+
+    // incense: one stick per day (or month); today's is lit
+    const box = $('#dailyBars'), hint = $('#dailyHint');
+    $('#dailyTitle').textContent = statRange === 'all' ? '每月坐了多久' : '每天坐了多久';
+    const max = Math.max(0, ...buckets.map(b => b.min));
+    box.style.setProperty('--n', buckets.length);
+    box.style.setProperty('--sw', statRange === '30' ? '4px' : statRange === '7' ? '6px' : '8px');
+    box.replaceChildren();
+    if (!max) {
+      box.innerHTML = '<p class="chart-empty">這段時間還沒有點過香。</p>';
+      hint.hidden = true;
+    } else {
+      hint.hidden = false;
+      const top = max * 1.15, g = gridValue(max);
+      if (g) box.insertAdjacentHTML('beforeend', `<div class="grid-line" style="--p:${(g / top).toFixed(4)}"><span>${fmtMin(g)}</span></div>`);
+      const slip = Object.assign(document.createElement('div'), { className: 'slip', hidden: true });
+      const todayK = dayKey();
+      buckets.forEach((b, i) => {
+        const col = document.createElement('button'); col.type = 'button'; col.className = 'col';
+        const lit = b.min && b.from <= todayK && b.to >= todayK;     // today, or this month
+        const desc = `${b.title}・${fmtMin(b.min)}・坐滿 ${b.rounds} 炷・被打 ${b.hits} 下`;
+        col.setAttribute('aria-label', desc);
+        const h = (b.min / top).toFixed(4);
+        col.innerHTML = `<span class="track">${lit ? `<svg class="wisp" style="--wh:${h}" viewBox="0 0 10 24" aria-hidden="true"><path d="M5 24 q-4 -6 0 -12 q4 -6 0 -12"/></svg>` : ''}` +
+          `<i class="${b.min ? 'stick' : 'ash'}${lit ? ' lit' : ''}" style="--h:${h}"></i></span><span class="lbl">${b.label}</span>`;
+        const show = () => {
+          box.querySelectorAll('.col.on').forEach(x => x.classList.remove('on')); col.classList.add('on');
+          slip.innerHTML = `<b>${b.title}</b><span>${fmtMin(b.min)}・${b.rounds} 炷・被打 ${b.hits}</span>`;
+          slip.hidden = false;
+          // sit the slip over the stick, kept inside the chart
+          const x = col.offsetLeft + col.offsetWidth / 2, w = slip.offsetWidth, W = box.clientWidth;
+          const left = Math.max(0, Math.min(W - w, x - w / 2));
+          slip.style.left = left + 'px';
+          slip.style.setProperty('--tip', Math.max(10, Math.min(w - 10, x - left)) + 'px');   // the point stays on the paper
+          hint.hidden = true;
+        };
+        col.addEventListener('click', show); col.addEventListener('focus', show);
+        col.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') show(); });
+        box.appendChild(col);
+      });
+      box.appendChild(slip);
+      hint.textContent = statRange === 'all' ? '點一炷香,看那個月坐了多久。' : '點一炷香,看那天坐了多久。';
+    }
+
+    // per task: one ink stroke each
     let rows = [...tasks].sort((a, b) => b[1].min - a[1].min);
     if (rows.length > 6) {
       const rest = rows.slice(5).reduce((a, [, t]) => ({ min: a.min + t.min, rounds: a.rounds + t.rounds, hits: a.hits + t.hits }), { min: 0, rounds: 0, hits: 0 });
@@ -2794,14 +3229,14 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     $('#taskBars').innerHTML = rows.length ? rows.map(([name, t]) =>
       `<div class="hrow"><span class="hname">${escapeHtml(name)}<small>${t.rounds} 炷・被打 ${t.hits} 下</small></span>` +
       `<span class="htrack"><i style="--w:${(t.min / tmax).toFixed(4)}"></i></span><b class="hval">${fmtMin(t.min)}</b></div>`).join('')
-      : '<p class="chart-empty">這段時間還沒有坐禪紀錄。</p>';
+      : '<p class="chart-empty">這段時間還沒有紀錄。</p>';
 
-    // the same numbers as a table
+    // the same numbers as a table, for screen readers only (the calendar shows each day on screen)
     const filled = buckets.filter(b => b.min || b.hits);
     $('#statTable').innerHTML = filled.length
-      ? `<table><thead><tr><th>${statRange === 'all' ? '月份' : '日期'}</th><th>分鐘</th><th>坐滿</th><th>被打</th></tr></thead><tbody>` +
+      ? `<table><caption>${$('#dailyTitle').textContent}</caption><thead><tr><th>${statRange === 'all' ? '月份' : '日期'}</th><th>分鐘</th><th>坐滿</th><th>被打</th></tr></thead><tbody>` +
         filled.map(b => `<tr><td>${b.title}</td><td>${b.min}</td><td>${b.rounds}</td><td>${b.hits}</td></tr>`).join('') + '</tbody></table>'
-      : '<p class="chart-empty">沒有資料。</p>';
+      : '';
   }
 
   /* ---------- share the result as a picture ---------- */
@@ -2905,6 +3340,14 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
     }
     saveImage(file);
   });
+
+  // the journal button carries the current streak (2 days or more) like a small seal
+  function renderStreakBadge(streak) {
+    const badge = $('#streakBadge');
+    badge.hidden = streak < 2; badge.textContent = streak;
+    $('#journalBtn').setAttribute('aria-label', streak >= 2 ? `坐禪帳,連續 ${streak} 日` : '坐禪帳');
+  }
+  renderStreakBadge(streakInfo(dayMap(readLog())).streak);
 
   cfg = { ...(store.get('keisaku-last-v1', null) || DEFAULT_CFG) };
   loadToday(); renderAll();
