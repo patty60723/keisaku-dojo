@@ -1,0 +1,21 @@
+
+/* ---------- pomodoro rounds & sensor line ---------- */
+.round-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.rounds { display: flex; gap: 10px; align-items: flex-end; }
+.rounds i {
+  display: block; width: 6px; height: 26px; border-radius: 3px; border: 1.5px solid var(--line);
+  position: relative;
+}
+.rounds i::before { /* the ember */
+  content: ""; position: absolute; left: 50%; top: -5px; width: 5px; height: 5px; border-radius: 50%;
+  transform: translateX(-50%); background: transparent;
+}
+.rounds i.done { background: var(--line); height: 8px; }
+.rounds i.now { border-color: var(--kesa); background: var(--kesa); }
+.rounds i.now::before { background: var(--shu); }
+.round-label { color: var(--muted); font-size: .9rem; }
+.round-label b { color: var(--ink); font-family: var(--f-num); font-weight: 600; }
+.sense { margin: 0; font-size: .85rem; color: var(--muted); display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
+.sense b { font-weight: 700; color: var(--ink); }
+.sense[data-ok="yes"] b { color: var(--accent); }
+.btn:disabled { opacity: .55; cursor: wait; }

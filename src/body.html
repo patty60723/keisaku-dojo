@@ -1,0 +1,260 @@
+<main class="app">
+  <header class="top">
+    <div class="top-row">
+      <h1>警策道場<small>番茄鐘・不准滑手機</small></h1>
+      <div class="top-btns">
+        <button type="button" class="icon-btn" id="settingsBtn" aria-haspopup="dialog" aria-label="設定" title="設定">
+          <svg class="glyph-gear" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.19 9.53 L22.05 10.23 L22.05 13.77 L19.19 14.47 L18.83 15.33 L20.36 17.85 L17.85 20.36 L15.33 18.83 L14.47 19.19 L13.77 22.05 L10.23 22.05 L9.53 19.19 L8.67 18.83 L6.15 20.36 L3.64 17.85 L5.17 15.33 L4.81 14.47 L1.95 13.77 L1.95 10.23 L4.81 9.53 L5.17 8.67 L3.64 6.15 L6.15 3.64 L8.67 5.17 L9.53 4.81 L10.23 1.95 L13.77 1.95 L14.47 4.81 L15.33 5.17 L17.85 3.64 L20.36 6.15 L18.83 8.67 Z"/><circle cx="12" cy="12" r="3.2"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <dialog class="sheet scroll" id="journal" aria-labelledby="journalTitle">
+   <div class="scroll-wrap">
+   <span class="roller left" aria-hidden="true"></span>
+   <span class="roller right" aria-hidden="true"></span>
+   <div class="journal scroll-paper">
+    <div class="help-head">
+      <h2 id="journalTitle">坐禪帳<span class="streak" id="streak"></span></h2>
+      <button type="button" class="sheet-close" id="journalClose" aria-label="關閉">✕</button>
+    </div>
+    <div class="tabs" role="tablist" aria-label="坐禪帳">
+      <button type="button" role="tab" id="tabCal" aria-selected="true" aria-controls="calView">月曆</button>
+      <button type="button" role="tab" id="tabStats" aria-selected="false" aria-controls="statView">統計</button>
+    </div>
+    <div id="calView" class="tab-view" role="tabpanel" aria-labelledby="tabCal">
+    <div class="month-nav">
+      <button type="button" id="prevMonth" aria-label="上個月">‹</button>
+      <b id="monthTitle"></b>
+      <button type="button" id="nextMonth" aria-label="下個月">›</button>
+    </div>
+    <p class="month-sum" id="monthSum"></p>
+    <div class="cal" id="cal"></div>
+    <div class="cal-legend" id="calLegend"></div>
+    <div class="day-detail" id="dayDetail" aria-live="polite"></div>
+    </div>
+    <div id="statView" class="tab-view" role="tabpanel" aria-labelledby="tabStats" hidden>
+      <div class="range" role="group" aria-label="期間">
+        <button type="button" data-range="7" aria-pressed="true">七日</button>
+        <button type="button" data-range="30" aria-pressed="false">三十日</button>
+        <button type="button" data-range="all" aria-pressed="false">全部</button>
+      </div>
+      <div class="monk-note">
+        <svg class="monk-face" viewBox="0 0 40 40" aria-hidden="true">
+          <circle cx="20" cy="21" r="15" class="f-skin"/>
+          <path d="M9 15 q11 -12 22 0" fill="none" stroke="currentColor" stroke-width="1" opacity=".18"/>
+          <circle cx="15" cy="20" r="1.8" class="f-ink"/><circle cx="25" cy="20" r="1.8" class="f-ink"/>
+          <ellipse cx="11.5" cy="25" rx="2.6" ry="1.6" class="f-blush"/><ellipse cx="28.5" cy="25" rx="2.6" ry="1.6" class="f-blush"/>
+          <path d="M17 26 q3 2.6 6 0" fill="none" stroke="#2a2622" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <div class="monk-bubble"><span class="dlg-name">住持</span><p id="statNote" aria-live="polite"></p></div>
+      </div>
+      <dl class="ledger" id="statSum"></dl>
+      <section class="chart-box">
+        <h3 id="dailyTitle">每天坐了多久</h3>
+        <div class="bars incense" id="dailyBars"></div>
+        <p class="chart-hint" id="dailyHint"></p>
+      </section>
+      <section class="chart-box">
+        <h3>各項目</h3>
+        <div class="hbars" id="taskBars"></div>
+      </section>
+      <div class="sr-only" id="statTable"></div>
+    </div>
+   </div>
+   </div>
+  </dialog>
+
+  <dialog class="sheet scroll" id="help" aria-labelledby="helpTitle">
+   <div class="scroll-wrap">
+   <span class="roller left" aria-hidden="true"></span>
+   <span class="roller right" aria-hidden="true"></span>
+   <div class="help scroll-paper">
+    <div class="help-head">
+      <h2 id="helpTitle">道場規約</h2>
+      <button type="button" class="sheet-close" id="helpClose" aria-label="關閉">✕</button>
+    </div>
+    <ul>
+      <li>開始前先跟住持報到:要做的事、每炷多久、坐幾炷、休息多久。可以存成常用,下次直接選。</li>
+      <li>按「準備好了」後,3 秒內把手機平放在桌上(螢幕朝上朝下都行),或立在手機架上。</li>
+      <li>坐禪中<b>拿起手機</b>,或<b>切到別的 App、分頁超過 2 秒</b>,住持就會用警策啪你一下。</li>
+      <li>拿起來的手機要放回原位才算回座;一直不放,每 20 秒再補一下。</li>
+      <li>每炷開始敲<b>止靜三鐘</b>,結束敲<b>放禪一鐘</b>,休息結束敲兩鐘叫你回座。</li>
+      <li>休息時住持去喝茶,手機隨便用。可以在設定打開通知,休息結束時叫你回座(App 在背景時不一定準時)。</li>
+      <li>坐禪中臨時有事(接電話、有人敲門),可以按「<b>告假</b>」暫停計時,每炷一次。回來按「回座」,把手機放好就繼續,不算被打。</li>
+      <li>坐禪中螢幕會保持亮著。手機朝下放也可以,靠鐘聲知道時間到了。</li>
+      <li>想提振精神時可以按「合掌請打」,自己請住持打一下,不算扣分。這是真正禪堂裡也有的規矩。</li>
+      <li>在設定裡可以訂<b>每日目標</b>(一天坐滿幾炷),達成的日子坐禪帳會蓋上「達」。坐禪帳的「統計」可以看近 7 天、30 天和全部的紀錄。</li>
+      <li>一輪坐完後,按「分享」可以把結算卡存成圖片。</li>
+      <li>iPhone 第一次開始時,要允許存取「動作與方向」,住持才看得到你有沒有拿起手機。</li>
+    </ul>
+   </div>
+   </div>
+  </dialog>
+
+  <dialog class="sheet scroll" id="settings" aria-labelledby="settingsTitle">
+   <div class="scroll-wrap">
+   <span class="roller left" aria-hidden="true"></span>
+   <span class="roller right" aria-hidden="true"></span>
+   <div class="settings scroll-paper">
+    <div class="help-head">
+      <h2 id="settingsTitle">設定</h2>
+      <button type="button" class="sheet-close" id="settingsClose" aria-label="關閉">✕</button>
+    </div>
+    <fieldset class="theme-pick">
+      <legend>外觀</legend>
+      <div class="seg" role="radiogroup" aria-label="外觀">
+        <label><input type="radio" name="theme" id="themeSystem" value="system" checked><span>跟隨手機</span></label>
+        <label><input type="radio" name="theme" id="themeLight" value="light"><span>淺色</span></label>
+        <label><input type="radio" name="theme" id="themeDark" value="dark"><span>深色</span></label>
+      </div>
+    </fieldset>
+    <fieldset class="theme-pick">
+      <legend>每日目標</legend>
+      <div class="seg seg-5" role="radiogroup" aria-label="每日目標">
+        <label><input type="radio" name="goal" value="0" checked><span>不設</span></label>
+        <label><input type="radio" name="goal" value="2"><span>2 炷</span></label>
+        <label><input type="radio" name="goal" value="4"><span>4 炷</span></label>
+        <label><input type="radio" name="goal" value="6"><span>6 炷</span></label>
+        <label><input type="radio" name="goal" value="8"><span>8 炷</span></label>
+      </div>
+      <p class="amb-note">一天坐滿幾炷算達成。達成的日子,坐禪帳上會多蓋一個「達」字。</p>
+    </fieldset>
+    <fieldset class="theme-pick">
+      <legend>坐禪時的背景聲音</legend>
+      <div class="seg seg-5" role="radiogroup" aria-label="坐禪時的背景聲音">
+        <label><input type="radio" name="ambient" value="none" checked><span>不播放</span></label>
+        <label><input type="radio" name="ambient" value="rain"><span>雨聲</span></label>
+        <label><input type="radio" name="ambient" value="waves"><span>海浪</span></label>
+        <label><input type="radio" name="ambient" value="forest"><span>森林</span></label>
+        <label><input type="radio" name="ambient" value="chimes"><span>風鈴</span></label>
+      </div>
+      <label class="amb-music" for="ambMusic"><input type="checkbox" id="ambMusic"> 加上輕柔的和音 <small>幾個慢慢換的和弦,偶爾一兩聲高音;可以單獨播,也可以疊在上面的聲音上</small></label>
+      <div class="amb-row">
+        <label for="ambVol" class="amb-vol">音量 <input type="range" id="ambVol" min="5" max="100" value="100"></label>
+        <button type="button" class="small-btn" id="ambPreview" aria-pressed="false">試聽</button>
+      </div>
+      <p class="amb-note">止靜三鐘敲完才慢慢淡入,放禪時淡出;休息時不播。手機開了靜音模式可能會聽不到。</p>
+    </fieldset>
+    <div class="toggles">
+      <label for="optMotion"><input type="checkbox" id="optMotion" checked> 用平衡儀偵測拿起手機 <small>手機平放或立在架上都可以,開始時會記住它的角度</small></label>
+      <label for="optSound"><input type="checkbox" id="optSound" checked> 鐘聲與音效</label>
+      <label for="optNotify" id="optNotifyRow" hidden><input type="checkbox" id="optNotify"> 休息結束時跳通知 <small>切到別的 App 時,手機可能會晚幾分鐘才叫你,甚至沒叫到</small></label>
+    </div>
+    <div class="dojo-links">
+      <h3>道場</h3>
+      <div class="backup-btns">
+        <button type="button" class="small-btn" id="openRules">道場規約</button>
+        <button type="button" class="small-btn" id="openJournal">坐禪帳</button>
+        <button type="button" class="small-btn" id="replayTour">重看導覽</button>
+      </div>
+    </div>
+    <div class="install" id="installBox" hidden>
+      <button type="button" class="btn ghost" id="installBtn" hidden>把道場裝到主畫面</button>
+      <p id="iosTip" hidden>iPhone 要裝到主畫面:在 Safari 按下方的「分享」,再選「加入主畫面」。</p>
+    </div>
+    <div class="backup">
+      <h3>備份</h3>
+      <p>紀錄只存在這台裝置的瀏覽器裡。換手機或清除瀏覽器資料前,先匯出備份。</p>
+      <div class="backup-btns">
+        <button type="button" class="small-btn" id="exportBtn">匯出備份檔</button>
+        <button type="button" class="small-btn" id="importBtn">匯入備份檔</button>
+        <button type="button" class="small-btn" id="copyBtn">複製備份文字</button>
+        <button type="button" class="small-btn" id="pasteBtn">貼上備份文字</button>
+      </div>
+      <input type="file" id="importFile" accept=".json,application/json,text/plain" hidden>
+      <div class="paste-box" id="pasteBox" hidden>
+        <textarea id="pasteText" rows="3" placeholder="把備份文字貼在這裡"></textarea>
+        <button type="button" class="small-btn" id="pasteGo">讀取這段文字</button>
+      </div>
+      <div class="confirm" id="importConfirm" hidden>
+        <p id="importMsg"></p>
+        <button type="button" class="small-btn primary" id="importYes">匯入</button>
+        <button type="button" class="small-btn" id="importNo">取消</button>
+      </div>
+      <p id="backupStatus" aria-live="polite"></p>
+    </div>
+   </div>
+   </div>
+  </dialog>
+
+  <section class="stage-wrap" id="stageWrap">
+{{SVG}}
+    <div class="bubble" id="bubble" hidden><span id="bubbleText"></span></div>
+    <div class="pow" id="pow" aria-hidden="true">啪!</div>
+    <div class="stars" id="stars" aria-hidden="true"></div>
+    <!-- the notice board and the ledger in the picture are the way into 規約 and 坐禪帳 -->
+    <button type="button" class="hotspot" id="helpBtn" aria-haspopup="dialog" aria-label="道場規約" title="道場規約" style="--x:12;--y:36;--w:52;--h:86"></button>
+    <button type="button" class="hotspot" id="journalBtn" aria-haspopup="dialog" aria-label="坐禪帳" title="坐禪帳" style="--x:348;--y:36;--w:52;--h:90"><span class="streak-badge" id="streakBadge" hidden></span></button>
+    <button type="button" class="ask-btn" id="askBtn" hidden><span aria-hidden="true">🙏</span>合掌請打</button>
+    <p class="toast" id="toast" aria-live="polite" hidden></p>
+      <div class="result" id="result" hidden>
+      <div class="result-card">
+        <div class="seal"><span id="seal"><i>不</i><i>動</i></span></div>
+        <h2 id="resultTitle">放禪</h2>
+        <p id="resultLine1"></p>
+        <p id="resultLine2"></p>
+        <p class="goal-met" id="resultGoal" hidden></p>
+        <p class="koan" id="koan"></p>
+        <div class="result-btns">
+          <button type="button" class="btn ghost" id="shareResult">分享</button>
+          <button type="button" class="btn primary" id="closeResult">好</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dialog" id="dialog" aria-live="polite" hidden>
+    <div class="dlg-head">
+      <span class="dlg-name">住持</span>
+      <button type="button" class="dlg-skip" id="dlgSkip">略過開場</button>
+    </div>
+    <p class="dlg-text" id="dlgText"></p>
+    <div class="dlg-choices" id="dlgChoices"></div>
+  </section>
+
+  <div class="tour-block" id="tourBlock" hidden><div class="tour-ring" id="tourRing"></div></div>
+  <section class="tour-card" id="tourCard" role="dialog" aria-labelledby="tourText" hidden>
+    <div class="dlg-head">
+      <span class="dlg-name">住持</span>
+      <button type="button" class="dlg-skip" id="tourSkip">略過導覽</button>
+    </div>
+    <p class="dlg-text" id="tourText" aria-live="polite"></p>
+    <p class="tour-hint" id="tourHint" aria-hidden="true"></p>
+    <button type="button" class="sr-only" id="tourNext">下一步</button>
+  </section>
+
+  <section class="panel" aria-label="計時">
+    <div class="clock-row">
+      <div class="clock" id="clock">25:00</div>
+      <div class="rounds" id="rounds" aria-hidden="true"></div>
+    </div>
+    <p class="status-line"><span class="state" id="status">報到中</span><span class="round-label" id="roundLabel"></span></p>
+    <button type="button" class="btn primary back-btn" id="backBtn" hidden>回座</button>
+    <button type="button" class="notify-ask" id="notifyAsk" hidden>🔔 休息結束時用通知叫我</button>
+    <details class="sense" id="sense" hidden>
+      <summary>⚠ 只能偵測切出畫面</summary>
+      <p id="senseMode"></p>
+    </details>
+    <div class="panel-foot">
+      <p class="today" id="today">今日坐禪 <b id="stToday">0</b> 分<span id="todayGoal" hidden></span><span id="todayHitsWrap" hidden> · 被打 <b class="hitnum" id="stTodayHits">0</b> 下</span></p>
+      <div class="foot-btns">
+        <button type="button" class="quiet-btn" id="leaveBtn" hidden>告假</button>
+        <button type="button" class="quiet-btn" id="mainBtn" hidden>出堂・結束</button>
+      </div>
+    </div>
+  </section>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <!-- rough, uneven ink like a real hanko impression -->
+      <filter id="ink" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6" result="d"/>
+        <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="1" seed="8" result="s"/>
+        <feColorMatrix in="s" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.1 1.55" result="mask"/>
+        <feComposite in="d" in2="mask" operator="in"/>
+      </filter>
+    </defs>
+  </svg>
+</main>
