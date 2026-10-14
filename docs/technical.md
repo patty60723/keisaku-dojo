@@ -134,6 +134,12 @@ idle(報到對話)→ settle(放手機的 3 秒)→ focus → break → ready(�
   - 不能用禪堂高度的百分比:禪堂容器會長高去填滿畫面,百分比會跟著變。
 - **延伸的地板:** 禪堂容器長高時,下面露出的部分用 CSS 背景畫成榻榻米。織紋是 `repeating-linear-gradient`,週期跟 SVG 裡的 `pattern` 一樣是 3 個 SVG 單位,而且都從 y = 0 開始,所以接縫處紋路連續;直線的疊蓆邊放在 68%(x = 272 / 400)。
 - **線香計時:** 香長 `44 × 剩餘比例`。火點和煙的位置跟著香頂移動;煙的外層 `<g>` 負責往下移,內層 path 負責飄動,因為 CSS 動畫的 `transform` 會蓋掉 SVG 的 `transform` 屬性。
+- **夜裡的光(深色模式):**
+  - **開關:** 色彩 token `--night-o` 在淺色是 0、深色是 1,所有只在夜裡出現的元素都掛 `.night { opacity: var(--night-o) }`。這跟月亮的 `--moon-o` 是同一招,切換主題時不用跑 JS。
+  - **行燈:** 木框和米白紙罩白天晚上都在;晚上多疊一層發光的紙(`#andonPaperLit`),加上光暈(`#andonLight`,一個半徑 135 的 `radialGradient`,中心不透明度 0.32,分五段慢慢衰減到 0)和一圈模糊過的地面光。行燈放在蒲團右邊、茶几前方的榻榻米上,跟左邊的月光一暖一冷,平衡畫面重心。
+  - **月光:** 圓窗前的榻榻米上一個高斯模糊(`stdDeviation 4.5`)的淡藍橢圓,用 `mix-blend-mode: screen` 疊上去。一般的半透明疊色會把橄欖色地板混成灰色,`screen` 只會提亮。光斑裡用 `clipPath` 裁出幾條淡淡的窗格影子。
+  - **搖曳:** `#andonLight` 的不透明度用不規則的 keyframes 在 0.84–1 之間變化。警策打下去時(`impact()`)換成一段 0.8 秒的 `jolt` 動畫,`animationend` 時拿掉 class,回到搖曳。開啟「減少動態效果」時兩者都停掉。
+  - **休息時變暗:** `setStatus()` 把目前階段寫到 `#stageWrap[data-phase]`。休息時光暈降到 0.6、發光紙降到 0.75 倍,有 2 秒的過渡。
 
 ## 9. 資料儲存
 
@@ -196,7 +202,7 @@ idle(報到對話)→ settle(放手機的 3 秒)→ focus → break → ready(�
 ## 11. 分享圖
 
 - 1080 × 1350 的 canvas。
-- **禪堂畫面:** 把 SVG 複製一份,逐一把每個元素算好的 `fill`、`stroke`、`opacity`、`display`、字型等寫進 `style`,因為原本的顏色來自 CSS class 和變數,單獨的 SVG 圖片讀不到。接著序列化成 `image/svg+xml` 的 Blob,載入成圖片再畫上 canvas。
+- **禪堂畫面:** 把 SVG 複製一份,逐一把每個元素算好的 `fill`、`stroke`、`opacity`、`display`、字型、`mix-blend-mode` 等寫進 `style`,因為原本的顏色來自 CSS class 和變數,單獨的 SVG 圖片讀不到。接著序列化成 `image/svg+xml` 的 Blob,載入成圖片再畫上 canvas。
 - **字型:** 文字用 `document.fonts.load()` 確定字型載好再畫。
 - **提前產生:** 結算卡一出現就先產生 PNG,按「分享」時才不會因為等待而失去使用者手勢。
 - **分享方式:** 支援 `navigator.canShare({ files })` 就叫出系統分享選單,否則用 `<a download>` 存檔。

@@ -40,7 +40,7 @@ try { const t = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).them
   --tatami-line: #bdb476;
   --heri: #3d4a2d;
   --window: #f7f5e9;
-  --moon-o: 0;
+  --moon-o: 0; --night-o: 0;
   --paper: #f5f1e4;
   --mount: #8c9a7a;
   --scroll-ink: #2a2622;
@@ -63,7 +63,7 @@ try { const t = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).them
     --bg: #141816; --surface: #1d2320; --line: #323a36; --ink: #ebe6d8; --muted: #a39e8f;
     --accent: #a8bbe6; --on-accent: #141816; --shu: #ff6b4f;
     --wall: #1f2624; --wood: #2d211a; --wood-2: #4a3a2e; --tatami: #4a4831; --tatami-line: #5a5739; --heri: #1b2316;
-    --window: #263142; --moon-o: 1; --scroll-paper: #232925; --paper: #d8d2c0; --mount: #4d5a45; --scroll-ink: #2a2622;
+    --window: #263142; --moon-o: 1; --night-o: 1; --scroll-paper: #232925; --paper: #d8d2c0; --mount: #4d5a45; --scroll-ink: #2a2622;
     --mochi: #f3eee2; --blush: #e08d84; --skin: #e0bd9b; --robe: #3d4c70; --kesa: #85582f; --stick: #b88d55;
     --cushion: #8a699c; --mat: #2a2622;
     color-scheme: dark;
@@ -73,7 +73,7 @@ try { const t = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).them
   --bg: #141816; --surface: #1d2320; --line: #323a36; --ink: #ebe6d8; --muted: #a39e8f;
   --accent: #a8bbe6; --on-accent: #141816; --shu: #ff6b4f;
   --wall: #1f2624; --wood: #2d211a; --wood-2: #4a3a2e; --tatami: #4a4831; --tatami-line: #5a5739; --heri: #1b2316;
-  --window: #263142; --moon-o: 1; --scroll-paper: #232925; --paper: #d8d2c0; --mount: #4d5a45; --scroll-ink: #2a2622;
+  --window: #263142; --moon-o: 1; --night-o: 1; --scroll-paper: #232925; --paper: #d8d2c0; --mount: #4d5a45; --scroll-ink: #2a2622;
   --mochi: #f3eee2; --blush: #e08d84; --skin: #e0bd9b; --robe: #3d4c70; --kesa: #85582f; --stick: #b88d55;
   --cushion: #8a699c; --mat: #2a2622;
   color-scheme: dark;
@@ -876,6 +876,18 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
 .cal-legend .key svg { width: 26px; height: 26px; }
 .cal-legend .key .met-mark { width: 20px; height: 20px; font-size: .66rem; }
 .day-detail .kind { margin: 0; font-size: .82rem; color: var(--muted); grid-column: 2; }
+
+/* ---------- night: the andon and the moonlight (dark theme only) ---------- */
+.night { opacity: var(--night-o); }
+#andonLamp { transition: opacity 2s ease; }
+#andonPaperLit { transition: opacity 2s ease; }
+#stageWrap[data-phase="break"] #andonLamp { opacity: .6; }      /* the monk is at his tea; the lamp burns low */
+#stageWrap[data-phase="break"] #andonPaperLit { opacity: calc(var(--night-o) * .75); }
+#andonLight { animation: flicker 3.4s ease-in-out infinite; }
+@keyframes flicker { 0%, 100% { opacity: 1; } 17% { opacity: .86; } 22% { opacity: .97; } 46% { opacity: .9; } 52% { opacity: 1; } 74% { opacity: .84; } 79% { opacity: .95; } }
+#andonLight.jolt { animation: jolt .8s ease-out; }                /* the strike shakes the flame */
+@keyframes jolt { 8% { opacity: .4; } 25% { opacity: 1; } 42% { opacity: .65; } 100% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { #andonLight, #andonLight.jolt { animation: none; } }
 </style>
 </head>
 <body>
@@ -1066,6 +1078,20 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
         <pattern id="weave" width="400" height="3" patternUnits="userSpaceOnUse">
           <line x1="0" y1="1.5" x2="400" y2="1.5" class="s-weave" stroke-width=".6"/>
         </pattern>
+        <!-- night only: the andon's warm light and the moon's cool beam -->
+        <radialGradient id="andonGlow">
+          <stop offset="0" stop-color="#ffc98a" stop-opacity=".32"/>
+          <stop offset=".25" stop-color="#ffbe7c" stop-opacity=".2"/>
+          <stop offset=".55" stop-color="#ffb066" stop-opacity=".08"/>
+          <stop offset=".8" stop-color="#ffb066" stop-opacity=".025"/>
+          <stop offset="1" stop-color="#ffb066" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="andonPaper" cx=".5" cy=".55" r=".65">
+          <stop offset="0" stop-color="#fff4d2"/>
+          <stop offset="1" stop-color="#eebd70"/>
+        </radialGradient>
+        <filter id="soft" x="-40%" y="-120%" width="180%" height="340%"><feGaussianBlur stdDeviation="4.5"/></filter>
+        <clipPath id="moonPool"><ellipse cx="116" cy="248" rx="60" ry="17"/></clipPath>
         <clipPath id="winClip"><circle cx="86" cy="98" r="33"/></clipPath>
       </defs>
 
@@ -1136,6 +1162,37 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
       <rect class="f-heri" x="0" y="230" width="400" height="3"/>
       <rect class="f-heri" x="128" y="177" width="3" height="53"/>
       <rect class="f-heri" x="272" y="233" width="3" height="47"/>
+
+      <!-- night: moonlight falls from the round window; an andon (paper floor lantern) glows by the tea table -->
+      <g class="night" id="nightLights">
+        <!-- the round window's moonlight lying on the tatami, with the lattice's shadow in it -->
+        <g filter="url(#soft)">
+          <ellipse cx="116" cy="248" rx="60" ry="17" fill="#9fb8e8" opacity=".4" style="mix-blend-mode: screen"/>
+          <g clip-path="url(#moonPool)" stroke="#1f2624" stroke-width="2.2" opacity=".16">
+            <line x1="96" y1="228" x2="92" y2="268"/><line x1="116" y1="228" x2="116" y2="268"/><line x1="136" y1="228" x2="140" y2="268"/>
+            <line x1="52" y1="242" x2="180" y2="242"/><line x1="52" y1="254" x2="180" y2="254"/>
+          </g>
+        </g>
+        <g id="andonLamp" transform="translate(230 16)">
+          <g id="andonLight">
+            <circle cx="38" cy="160" r="135" fill="url(#andonGlow)"/>
+            <ellipse cx="40" cy="186" rx="62" ry="12" fill="#ffb874" opacity=".16" filter="url(#soft)"/>
+          </g>
+        </g>
+      </g>
+
+      <!-- the andon itself stands there day and night; only at night is its paper lit.
+           It sits on the tatami right of the cushion and in front of the tea table (not touching it),
+           so its warm light balances the moonlit window on the left. -->
+      <g id="andon" transform="translate(230 16)">
+        <rect class="f-wood" x="30" y="176" width="2" height="10"/>
+        <rect class="f-wood" x="46" y="176" width="2" height="10"/>
+        <rect x="29" y="153" width="20" height="25" fill="#efe6cf" stroke="#5d4230" stroke-width=".8"/>
+        <rect class="night" id="andonPaperLit" x="29" y="153" width="20" height="25" fill="url(#andonPaper)" stroke="#5d4230" stroke-width=".8"/>
+        <path d="M39 153 V178 M29 161.3 H49 M29 169.6 H49" stroke="#5d4230" stroke-width=".55" opacity=".55"/>
+        <rect class="f-wood" x="27" y="150" width="24" height="3" rx="1"/>
+        <rect class="f-wood" x="27" y="178" width="24" height="3" rx="1"/>
+      </g>
 
       <!-- the keisaku's place: leaning against the right-hand post until the monk picks it up -->
       <g id="rackStick" transform="translate(362 176) rotate(9)">
@@ -1910,10 +1967,14 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     if (P.phase !== 'focus' && P.phase !== 'settle') await returnStick();
   }
 
+  // after the strike's jolt the lamp goes back to its gentle flicker
+  $('#andonLight').addEventListener('animationend', e => { if (e.animationName === 'jolt') e.currentTarget.classList.remove('jolt'); });
   function impact() {
     slap(); buzz(80);
     const wrap = $('#stageWrap');
     wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake');
+    const lamp = $('#andonLight');
+    lamp.classList.remove('jolt'); void lamp.getBoundingClientRect(); lamp.classList.add('jolt');
     const pow = $('#pow'); pow.style.left = (mochiX() + 24) / 4 + '%'; pow.classList.remove('go'); void pow.offsetWidth; pow.classList.add('go');
     sitterEl.dataset.face = 'ouch';
     sitterEl.classList.remove('ouch'); void sitterEl.getBoundingClientRect(); sitterEl.classList.add('ouch');
@@ -2357,6 +2418,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
   function setStatus(text, state) {
     statusEl.textContent = text.replace(/・第 \d+ 炷$/, ''); statusEl.dataset.state = state || '';
     askBtn.hidden = P.phase !== 'focus';            // asking for a strike only makes sense while sitting
+    $('#stageWrap').dataset.phase = P.phase;       // the night lamp burns low during the break
     leaveBtn.hidden = P.phase !== 'focus' || P.leaveUsed;
     backBtn.hidden = P.phase !== 'leave';
     $('#notifyAsk').hidden = !(P.phase === 'break' && notifyAskable());
@@ -3245,7 +3307,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     const src = $('#stage'), clone = src.cloneNode(true);
     const a = [src, ...src.querySelectorAll('*')], b = [clone, ...clone.querySelectorAll('*')];
     const PROPS = ['fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'opacity',
-      'fill-opacity', 'stroke-opacity', 'display', 'visibility', 'font-family', 'font-size', 'font-weight'];
+      'fill-opacity', 'stroke-opacity', 'display', 'visibility', 'font-family', 'font-size', 'font-weight', 'mix-blend-mode'];
     a.forEach((el, i) => {
       const cs = getComputedStyle(el);
       b[i].setAttribute('style', PROPS.map(p => `${p}:${cs.getPropertyValue(p)}`).join(';'));
