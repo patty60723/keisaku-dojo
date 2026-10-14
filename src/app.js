@@ -603,10 +603,14 @@
     if (P.phase !== 'focus' && P.phase !== 'settle') await returnStick();
   }
 
+  // after the strike's jolt the lamp goes back to its gentle flicker
+  $('#andonLight').addEventListener('animationend', e => { if (e.animationName === 'jolt') e.currentTarget.classList.remove('jolt'); });
   function impact() {
     slap(); buzz(80);
     const wrap = $('#stageWrap');
     wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake');
+    const lamp = $('#andonLight');
+    lamp.classList.remove('jolt'); void lamp.getBoundingClientRect(); lamp.classList.add('jolt');
     const pow = $('#pow'); pow.style.left = (mochiX() + 24) / 4 + '%'; pow.classList.remove('go'); void pow.offsetWidth; pow.classList.add('go');
     sitterEl.dataset.face = 'ouch';
     sitterEl.classList.remove('ouch'); void sitterEl.getBoundingClientRect(); sitterEl.classList.add('ouch');
@@ -1050,6 +1054,7 @@
   function setStatus(text, state) {
     statusEl.textContent = text.replace(/・第 \d+ 炷$/, ''); statusEl.dataset.state = state || '';
     askBtn.hidden = P.phase !== 'focus';            // asking for a strike only makes sense while sitting
+    $('#stageWrap').dataset.phase = P.phase;       // the night lamp burns low during the break
     leaveBtn.hidden = P.phase !== 'focus' || P.leaveUsed;
     backBtn.hidden = P.phase !== 'leave';
     $('#notifyAsk').hidden = !(P.phase === 'break' && notifyAskable());
@@ -1938,7 +1943,7 @@
     const src = $('#stage'), clone = src.cloneNode(true);
     const a = [src, ...src.querySelectorAll('*')], b = [clone, ...clone.querySelectorAll('*')];
     const PROPS = ['fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'opacity',
-      'fill-opacity', 'stroke-opacity', 'display', 'visibility', 'font-family', 'font-size', 'font-weight'];
+      'fill-opacity', 'stroke-opacity', 'display', 'visibility', 'font-family', 'font-size', 'font-weight', 'mix-blend-mode'];
     a.forEach((el, i) => {
       const cs = getComputedStyle(el);
       b[i].setAttribute('style', PROPS.map(p => `${p}:${cs.getPropertyValue(p)}`).join(';'));

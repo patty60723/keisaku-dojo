@@ -586,3 +586,13 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
 .cal-legend .key svg { width: 26px; height: 26px; }
 .cal-legend .key .met-mark { width: 20px; height: 20px; font-size: .66rem; }
 .day-detail .kind { margin: 0; font-size: .82rem; color: var(--muted); grid-column: 2; }
+
+/* ---------- night: the andon and the moonlight (dark theme only) ---------- */
+.night { opacity: var(--night-o); }
+#andonLamp { transition: opacity 2s ease; }
+#stageWrap[data-phase="break"] #andonLamp { opacity: .6; }      /* the monk is at his tea; the lamp burns low */
+#andonLight { animation: flicker 3.4s ease-in-out infinite; }
+@keyframes flicker { 0%, 100% { opacity: 1; } 17% { opacity: .86; } 22% { opacity: .97; } 46% { opacity: .9; } 52% { opacity: 1; } 74% { opacity: .84; } 79% { opacity: .95; } }
+#andonLight.jolt { animation: jolt .8s ease-out; }                /* the strike shakes the flame */
+@keyframes jolt { 8% { opacity: .4; } 25% { opacity: 1; } 42% { opacity: .65; } 100% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { #andonLight, #andonLight.jolt { animation: none; } }

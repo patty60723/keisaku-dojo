@@ -16,7 +16,7 @@
   --tatami-line: #bdb476;
   --heri: #3d4a2d;
   --window: #f7f5e9;
-  --moon-o: 0;
+  --moon-o: 0; --night-o: 0;
   --paper: #f5f1e4;
   --mount: #8c9a7a;
   --scroll-ink: #2a2622;
@@ -39,7 +39,7 @@
     --bg: #141816; --surface: #1d2320; --line: #323a36; --ink: #ebe6d8; --muted: #a39e8f;
     --accent: #a8bbe6; --on-accent: #141816; --shu: #ff6b4f;
     --wall: #1f2624; --wood: #2d211a; --wood-2: #4a3a2e; --tatami: #4a4831; --tatami-line: #5a5739; --heri: #1b2316;
-    --window: #263142; --moon-o: 1; --scroll-paper: #232925; --paper: #d8d2c0; --mount: #4d5a45; --scroll-ink: #2a2622;
+    --window: #263142; --moon-o: 1; --night-o: 1; --scroll-paper: #232925; --paper: #d8d2c0; --mount: #4d5a45; --scroll-ink: #2a2622;
     --mochi: #f3eee2; --blush: #e08d84; --skin: #e0bd9b; --robe: #3d4c70; --kesa: #85582f; --stick: #b88d55;
     --cushion: #8a699c; --mat: #2a2622;
     color-scheme: dark;
@@ -49,7 +49,7 @@
   --bg: #141816; --surface: #1d2320; --line: #323a36; --ink: #ebe6d8; --muted: #a39e8f;
   --accent: #a8bbe6; --on-accent: #141816; --shu: #ff6b4f;
   --wall: #1f2624; --wood: #2d211a; --wood-2: #4a3a2e; --tatami: #4a4831; --tatami-line: #5a5739; --heri: #1b2316;
-  --window: #263142; --moon-o: 1; --scroll-paper: #232925; --paper: #d8d2c0; --mount: #4d5a45; --scroll-ink: #2a2622;
+  --window: #263142; --moon-o: 1; --night-o: 1; --scroll-paper: #232925; --paper: #d8d2c0; --mount: #4d5a45; --scroll-ink: #2a2622;
   --mochi: #f3eee2; --blush: #e08d84; --skin: #e0bd9b; --robe: #3d4c70; --kesa: #85582f; --stick: #b88d55;
   --cushion: #8a699c; --mat: #2a2622;
   color-scheme: dark;
