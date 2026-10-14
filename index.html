@@ -7,8 +7,8 @@
 <meta name="theme-color" content="#141816" media="(prefers-color-scheme: dark)">
 <meta name="description" content="可愛的番茄鐘專注 App。拿起手機,住持就會拿警策「啪」你一下。">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-v2.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-v2.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -2585,7 +2585,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     const body = `第 ${P.round} 炷要開始了,回來坐禪吧。`;
     try {
       const reg = await navigator.serviceWorker.ready;
-      await reg.showNotification('休息結束,該回座了', { body, tag: 'keisaku-break', renotify: true, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', vibrate: [120, 80, 120] });
+      await reg.showNotification('休息結束,該回座了', { body, tag: 'keisaku-break', renotify: true, icon: 'icons/icon-192-v2.png', badge: 'icons/icon-192-v2.png', vibrate: [120, 80, 120] });
     } catch { try { new Notification('休息結束,該回座了', { body, tag: 'keisaku-break' }); } catch {} }
   }
   async function enableNotify() {

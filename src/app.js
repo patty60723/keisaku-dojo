@@ -1221,7 +1221,7 @@
     const body = `第 ${P.round} 炷要開始了,回來坐禪吧。`;
     try {
       const reg = await navigator.serviceWorker.ready;
-      await reg.showNotification('休息結束,該回座了', { body, tag: 'keisaku-break', renotify: true, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', vibrate: [120, 80, 120] });
+      await reg.showNotification('休息結束,該回座了', { body, tag: 'keisaku-break', renotify: true, icon: 'icons/icon-192-v2.png', badge: 'icons/icon-192-v2.png', vibrate: [120, 80, 120] });
     } catch { try { new Notification('休息結束,該回座了', { body, tag: 'keisaku-break' }); } catch {} }
   }
   async function enableNotify() {

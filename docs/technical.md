@@ -33,6 +33,7 @@
   | 同源的其他檔案(圖示、manifest) | 快取優先 |
 
   頁面要用各自的 URL 快取,是因為以前全部存成 `index.html`,打開 `soundlab.html` 或 `preview.html` 會蓋掉 App 本體。
+- 圖示檔名帶版本號(`icon-192-v2.png`…)。換圖示時一定要換檔名:Android 的 Chrome 只會偶爾(約一天一次、從主畫面開啟時)重新檢查 manifest,網址不變很容易被判斷成沒變;Service Worker 對圖示也是快取優先。
 - 每次上版把 `VERSION` 加一:`activate` 時會刪掉所有 `keisaku-shell-*` 舊快取,並用 `skipWaiting` + `clients.claim` 讓新版立刻接手。
 - `notificationclick` 會把已開著的 App 視窗拉到前面,沒有的話開一個新的。
 

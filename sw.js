@@ -1,17 +1,17 @@
 // 警策道場 service worker: works offline after the first visit.
 // Bump VERSION whenever the app shell changes so old caches get cleared.
-const VERSION = 'v12';
+const VERSION = 'v13';
 const SHELL = `keisaku-shell-${VERSION}`;
 const FONTS = 'keisaku-fonts';
 const SHELL_FILES = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icons/icon.svg',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon.png'
+  './icons/icon-v2.svg',
+  './icons/icon-192-v2.png',
+  './icons/icon-512-v2.png',
+  './icons/icon-maskable-512-v2.png',
+  './icons/apple-touch-icon-v2.png'
 ];
 
 self.addEventListener('install', event => {
