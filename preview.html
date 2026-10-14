@@ -880,7 +880,9 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
 /* ---------- night: the andon and the moonlight (dark theme only) ---------- */
 .night { opacity: var(--night-o); }
 #andonLamp { transition: opacity 2s ease; }
+#andonPaperLit { transition: opacity 2s ease; }
 #stageWrap[data-phase="break"] #andonLamp { opacity: .6; }      /* the monk is at his tea; the lamp burns low */
+#stageWrap[data-phase="break"] #andonPaperLit { opacity: calc(var(--night-o) * .75); }
 #andonLight { animation: flicker 3.4s ease-in-out infinite; }
 @keyframes flicker { 0%, 100% { opacity: 1; } 17% { opacity: .86; } 22% { opacity: .97; } 46% { opacity: .9; } 52% { opacity: 1; } 74% { opacity: .84; } 79% { opacity: .95; } }
 #andonLight.jolt { animation: jolt .8s ease-out; }                /* the strike shakes the flame */
@@ -1178,13 +1180,18 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
             <circle cx="38" cy="160" r="135" fill="url(#andonGlow)"/>
             <ellipse cx="40" cy="186" rx="62" ry="12" fill="#ffb874" opacity=".16" filter="url(#soft)"/>
           </g>
-          <rect class="f-wood" x="30" y="176" width="2" height="10"/>
-          <rect class="f-wood" x="46" y="176" width="2" height="10"/>
-          <rect x="29" y="153" width="20" height="25" fill="url(#andonPaper)" stroke="#5d4230" stroke-width=".8"/>
-          <path d="M39 153 V178 M29 161.3 H49 M29 169.6 H49" stroke="#5d4230" stroke-width=".55" opacity=".55"/>
-          <rect class="f-wood" x="27" y="150" width="24" height="3" rx="1"/>
-          <rect class="f-wood" x="27" y="178" width="24" height="3" rx="1"/>
         </g>
+      </g>
+
+      <!-- the andon itself stands there day and night; only at night is its paper lit -->
+      <g id="andon">
+        <rect class="f-wood" x="30" y="176" width="2" height="10"/>
+        <rect class="f-wood" x="46" y="176" width="2" height="10"/>
+        <rect x="29" y="153" width="20" height="25" fill="#efe6cf" stroke="#5d4230" stroke-width=".8"/>
+        <rect class="night" id="andonPaperLit" x="29" y="153" width="20" height="25" fill="url(#andonPaper)" stroke="#5d4230" stroke-width=".8"/>
+        <path d="M39 153 V178 M29 161.3 H49 M29 169.6 H49" stroke="#5d4230" stroke-width=".55" opacity=".55"/>
+        <rect class="f-wood" x="27" y="150" width="24" height="3" rx="1"/>
+        <rect class="f-wood" x="27" y="178" width="24" height="3" rx="1"/>
       </g>
 
       <!-- the keisaku's place: leaning against the right-hand post until the monk picks it up -->
