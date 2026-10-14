@@ -1080,16 +1080,18 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
         </pattern>
         <!-- night only: the andon's warm light and the moon's cool beam -->
         <radialGradient id="andonGlow">
-          <stop offset="0" stop-color="#ffc98a" stop-opacity=".52"/>
-          <stop offset=".45" stop-color="#ffb066" stop-opacity=".15"/>
+          <stop offset="0" stop-color="#ffc98a" stop-opacity=".32"/>
+          <stop offset=".25" stop-color="#ffbe7c" stop-opacity=".2"/>
+          <stop offset=".55" stop-color="#ffb066" stop-opacity=".08"/>
+          <stop offset=".8" stop-color="#ffb066" stop-opacity=".025"/>
           <stop offset="1" stop-color="#ffb066" stop-opacity="0"/>
         </radialGradient>
         <radialGradient id="andonPaper" cx=".5" cy=".55" r=".65">
           <stop offset="0" stop-color="#fff4d2"/>
           <stop offset="1" stop-color="#eebd70"/>
         </radialGradient>
-        <filter id="soft" x="-30%" y="-80%" width="160%" height="260%"><feGaussianBlur stdDeviation="2.2"/></filter>
-        <clipPath id="moonPool"><ellipse cx="116" cy="248" rx="40" ry="11"/></clipPath>
+        <filter id="soft" x="-40%" y="-120%" width="180%" height="340%"><feGaussianBlur stdDeviation="4.5"/></filter>
+        <clipPath id="moonPool"><ellipse cx="116" cy="248" rx="60" ry="17"/></clipPath>
         <clipPath id="winClip"><circle cx="86" cy="98" r="33"/></clipPath>
       </defs>
 
@@ -1165,16 +1167,16 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
       <g class="night" id="nightLights">
         <!-- the round window's moonlight lying on the tatami, with the lattice's shadow in it -->
         <g filter="url(#soft)">
-          <ellipse cx="116" cy="248" rx="40" ry="11" fill="#9fb8e8" opacity=".55" style="mix-blend-mode: screen"/>
-          <g clip-path="url(#moonPool)" stroke="#1f2624" stroke-width="1.6" opacity=".22">
-            <line x1="103" y1="234" x2="100" y2="262"/><line x1="116" y1="234" x2="116" y2="262"/><line x1="129" y1="234" x2="132" y2="262"/>
-            <line x1="72" y1="244" x2="160" y2="244"/><line x1="72" y1="252" x2="160" y2="252"/>
+          <ellipse cx="116" cy="248" rx="60" ry="17" fill="#9fb8e8" opacity=".4" style="mix-blend-mode: screen"/>
+          <g clip-path="url(#moonPool)" stroke="#1f2624" stroke-width="2.2" opacity=".16">
+            <line x1="96" y1="228" x2="92" y2="268"/><line x1="116" y1="228" x2="116" y2="268"/><line x1="136" y1="228" x2="140" y2="268"/>
+            <line x1="52" y1="242" x2="180" y2="242"/><line x1="52" y1="254" x2="180" y2="254"/>
           </g>
         </g>
         <g id="andonLamp">
           <g id="andonLight">
-            <circle cx="38" cy="160" r="88" fill="url(#andonGlow)"/>
-            <ellipse cx="39" cy="185" rx="38" ry="7" fill="#ffb874" opacity=".22"/>
+            <circle cx="38" cy="160" r="135" fill="url(#andonGlow)"/>
+            <ellipse cx="40" cy="186" rx="62" ry="12" fill="#ffb874" opacity=".16" filter="url(#soft)"/>
           </g>
           <rect class="f-wood" x="30" y="176" width="2" height="10"/>
           <rect class="f-wood" x="46" y="176" width="2" height="10"/>
