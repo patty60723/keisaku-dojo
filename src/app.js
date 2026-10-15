@@ -29,6 +29,13 @@
     get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
   };
+  const isInt = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
+  // a plan read back from storage or a backup is only used if every part of it is in range
+  // (a preset of a billion rounds would otherwise try to draw a billion incense sticks)
+  const validCfg = c => !!c && typeof c.task === 'string' && c.task.length > 0 && c.task.length <= 12
+    && isInt(c.focusMin, 5, 120) && isInt(c.rounds, 1, 8) && isInt(c.breakMin, 0, 30);
+  const loadLast = () => { const c = store.get('keisaku-last-v1', null); return validCfg(c) ? c : null; };
+  const loadPresets = () => { const v = store.get('keisaku-presets-v1', []); return Array.isArray(v) ? v.filter(validCfg) : []; };
   const sameCfg = (a, b) => a && b && a.task === b.task && a.focusMin === b.focusMin && a.rounds === b.rounds && a.breakMin === b.breakMin;
   const cfgShort = c => `${c.task}・${c.focusMin} 分 × ${c.rounds} 炷`;
   const totalMin = c => c.focusMin * c.rounds + c.breakMin * (c.rounds - 1);
@@ -717,7 +724,7 @@
   async function onboarding(again = false) {
     P.phase = 'idle'; renderAll();
     sitterEl.dataset.face = 'peek';
-    const lastCfg = store.get('keisaku-last-v1', null);
+    const lastCfg = loadLast();
     // "returning" means they have actually sat before, not just opened the page
     const log = readLog(), hasSat = log.length > 0;
     const rulesAsked = store.get('keisaku-rules-asked-v1', false);
@@ -758,7 +765,7 @@
       }
       let next = 'new';
       for (;;) {
-        const presets = store.get('keisaku-presets-v1', []);
+        const presets = loadPresets();
         if (!lastCfg && !presets.length) break;
         const opts = [];
         if (lastCfg) opts.push({ label: '跟上次一樣', sub: cfgShort(lastCfg), value: { use: lastCfg }, primary: true });
@@ -779,13 +786,13 @@
       await planNew(firstLine || (lastCfg || !presetsEmpty() ? '那麼,今日想做什麼呢?' : greet));
     } catch (e) {
       if (e !== SKIP) throw e;
-      cfg = { ...(store.get('keisaku-last-v1', null) || lastCfg || DEFAULT_CFG) };
+      cfg = { ...(loadLast() || lastCfg || DEFAULT_CFG) };
       applyCfg();
       return readyCheck(`好,就照「${cfg.task}」,${cfg.focusMin} 分 × ${cfg.rounds} 炷。`);
     }
     return readyCheck('');
   }
-  const presetsEmpty = () => !store.get('keisaku-presets-v1', []).length;
+  const presetsEmpty = () => !loadPresets().length;
 
   // one question per setting, so the plan can be made in order or changed one piece at a time
   async function askTask(line) {
@@ -825,7 +832,7 @@
     cfg = { task, focusMin, rounds, breakMin };
     applyCfg();
     for (;;) {
-      const saved = store.get('keisaku-presets-v1', []).some(p => sameCfg(p, cfg));
+      const saved = loadPresets().some(p => sameCfg(p, cfg));
       const ok = await ask(recapLine(cfg), [
         { label: '沒錯', value: 'ok', primary: true },
         ...(saved ? [] : [{ label: '沒錯,存成常用', value: 'save' }]),
@@ -871,7 +878,7 @@
   }
 
   async function savePreset(c) {
-    let presets = store.get('keisaku-presets-v1', []).filter(p => !sameCfg(p, c));
+    let presets = loadPresets().filter(p => !sameCfg(p, c));
     let line = `記下了。下次選「★ ${c.task}」就好。`;
     if (presets.length >= MAX_PRESETS) {
       const dropped = presets.shift();
@@ -884,7 +891,7 @@
 
   async function managePresets() {
     for (;;) {
-      const presets = store.get('keisaku-presets-v1', []);
+      const presets = loadPresets();
       if (!presets.length) { await ask('常用都清空了。', [{ label: '好', value: 1, primary: true }]); return; }
       const pick = await ask('要拿掉哪一組常用?', [
         ...presets.map((p, i) => ({ label: '拿掉 ★ ' + p.task, sub: `${p.focusMin} 分 × ${p.rounds} 炷`, value: i })),
@@ -1050,7 +1057,7 @@
       ? `${escapeHtml(cfg.task)}・第 <b>${P.round}</b>/${cfg.rounds} 炷`
       : `${escapeHtml(cfg.task)}・<b>${cfg.focusMin}</b> 分 × ${cfg.rounds} 炷`;
   }
-  const escapeHtml = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   function setStatus(text, state) {
     statusEl.textContent = text.replace(/・第 \d+ 炷$/, ''); statusEl.dataset.state = state || '';
     askBtn.hidden = P.phase !== 'focus';            // asking for a strike only makes sense while sitting
@@ -1463,7 +1470,17 @@
   const LOG_KEY = 'keisaku-log-v2';
   const pad2 = n => String(n).padStart(2, '0');
   const dayKey = (t = Date.now()) => { const d = new Date(t); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
-  const validEntry = e => e && typeof e.t === 'number' && /^\d{4}-\d{2}-\d{2}$/.test(e.d) && typeof e.min === 'number' && typeof e.hits === 'number';
+  // an entry from a backup: dates, whole non-negative numbers in sensible ranges, text where text belongs
+  const validEntry = e => !!e && typeof e === 'object' && typeof e.t === 'number' && /^\d{4}-\d{2}-\d{2}$/.test(e.d)
+    && isInt(e.min, 0, 240) && isInt(e.hits, 0, 999)
+    && (e.task === undefined || typeof e.task === 'string') && (e.full === undefined || typeof e.full === 'boolean');
+  const cleanEntry = e => {
+    const c = { t: e.t, d: e.d, task: (e.task || '專注').slice(0, 12), min: e.min, hits: e.hits, full: !!e.full };
+    if (e.leave === 1) c.leave = 1;
+    if (isInt(e.late, 1, 1440)) c.late = e.late;
+    if (isInt(e.goal, 1, 8)) c.goal = e.goal;
+    return c;
+  };
   function readLog() {
     let log = store.get(LOG_KEY, null);
     if (!Array.isArray(log)) {
@@ -1616,7 +1633,7 @@
   // backup: a JSON file, or the same JSON as text for phones that can't save files easily
   const backupStatus = t => { $('#backupStatus').textContent = t; };
   const backupText = () => JSON.stringify({ app: 'keisaku-dojo', version: 2, exported: new Date().toISOString(),
-    log: readLog(), presets: store.get('keisaku-presets-v1', []) });
+    log: readLog(), presets: loadPresets() });
   $('#exportBtn').addEventListener('click', () => {
     try {
       const url = URL.createObjectURL(new Blob([backupText()], { type: 'application/json' }));
@@ -1650,7 +1667,7 @@
     if (!incoming.length) { backupStatus('備份裡沒有任何紀錄。'); return; }
     const have = new Set(readLog().map(e => e.t + '|' + e.d));
     const fresh = incoming.filter(e => !have.has(e.t + '|' + e.d));
-    pendingImport = { fresh, presets: Array.isArray(data.presets) ? data.presets : [] };
+    pendingImport = { fresh, presets: Array.isArray(data.presets) ? data.presets.filter(validCfg) : [] };
     $('#importMsg').textContent = fresh.length
       ? `備份裡有 ${incoming.length} 筆紀錄,其中 ${fresh.length} 筆是新的。要匯入嗎?`
       : `備份裡的 ${incoming.length} 筆紀錄都已經在了,不用匯入。`;
@@ -1661,8 +1678,8 @@
   $('#importYes').addEventListener('click', () => {
     if (!pendingImport) return;
     const { fresh, presets } = pendingImport; pendingImport = null;
-    writeLog(readLog().concat(fresh.map(e => ({ t: e.t, d: e.d, task: String(e.task || '專注').slice(0, 12), min: e.min, hits: e.hits, full: !!e.full }))));
-    if (presets.length && !store.get('keisaku-presets-v1', []).length) store.set('keisaku-presets-v1', presets.filter(p => p && p.task).slice(0, MAX_PRESETS));
+    writeLog(readLog().concat(fresh.map(cleanEntry)));
+    if (presets.length && !loadPresets().length) store.set('keisaku-presets-v1', presets.slice(0, MAX_PRESETS));
     $('#importConfirm').hidden = true; $('#pasteBox').hidden = true;
     loadToday(); renderStats(); renderJournal();
     backupStatus(`匯入了 ${fresh.length} 筆紀錄。`);
@@ -1745,6 +1762,14 @@
     store.set('keisaku-tip-journal-v1', true);
     tour([{ target: '#journalBtn', text: '蓋好章了。點坐禪帳,看看今天的章吧。', hint: '👆 點一下坐禪帳', skipLabel: '等一下再看', go: () => $('#journalBtn').click() }]);
   }
+  $('#feedbackLink').addEventListener('click', e => {
+    const installed = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    const dark = document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+    const body = ['## 發生了什麼事', '', '', '## 怎麼做會出現', '', '', '---',
+      `版本:${$('#appVersion').textContent}`, `裝置:${navigator.userAgent}`,
+      `開啟方式:${installed ? '已安裝的 App' : '瀏覽器'}`, `外觀:${dark ? '深色' : '淺色'}`].join('\n');
+    e.currentTarget.href = 'https://github.com/patty60723/keisaku-dojo/issues/new?body=' + encodeURIComponent(body);
+  });
   $('#openRules').addEventListener('click', () => openSheet(helpBox));
   $('#openJournal').addEventListener('click', () => $('#journalBtn').click());
   $('#replayTour').addEventListener('click', () => { $('#settings').close(); tour(introSteps(true)); });
@@ -2047,7 +2072,7 @@
   }
   renderStreakBadge(streakInfo(dayMap(readLog())).streak);
 
-  cfg = { ...(store.get('keisaku-last-v1', null) || DEFAULT_CFG) };
+  cfg = { ...(loadLast() || DEFAULT_CFG) };
   loadToday(); renderAll();
   requestAnimationFrame(frame);
   onboarding();

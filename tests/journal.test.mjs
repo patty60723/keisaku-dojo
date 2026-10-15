@@ -120,3 +120,49 @@ for (const [name, log, line] of VERDICTS) {
     await ctx.close();
   });
 }
+
+test('malformed entries already in storage do not break the 統計 tab', async () => {
+  const log = [entry(0, { task: { not: 'text' } }), entry(1, { task: 42, min: 30 })];
+  const { p, ctx, errors } = await openApp(browser, server.url, { storage: { 'keisaku-log-v2': log } });
+  await openStats(p, 'all');
+  await verdict(p);
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});
+
+test('a backup only brings in sensible entries and plans, and keeps 告假 / late / goal', async () => {
+  const backup = {
+    app: 'keisaku-dojo', version: 2,
+    log: [
+      entry(2, { leave: 1, late: 4, goal: 4 }),             // good, with the optional fields
+      entry(3, { min: -50 }),                                // negative minutes
+      entry(4, { task: { not: 'text' } }),                   // task is not text
+      entry(5, { hits: 1.5 }),                               // not a whole number
+    ],
+    presets: [{ task: '讀書', focusMin: 25, rounds: 1e9, breakMin: 5 }, { task: '寫作', focusMin: 40, rounds: 2, breakMin: 10 }],
+  };
+  const { p, ctx, errors } = await openApp(browser, server.url);
+  await p.locator('#settingsBtn').click(); await p.waitForFunction(() => document.getElementById('settings').open);
+  await p.locator('#pasteBtn').click();
+  await p.locator('#pasteText').fill(JSON.stringify(backup));
+  await p.locator('#pasteGo').click();
+  await p.waitForFunction(() => !document.getElementById('importConfirm').hidden);
+  assert.equal(await p.locator('#importMsg').textContent(), '備份裡有 1 筆紀錄,其中 1 筆是新的。要匯入嗎?');
+  await p.locator('#importYes').click();
+  const [log, presets] = await p.evaluate(() => ['keisaku-log-v2', 'keisaku-presets-v1'].map(k => JSON.parse(localStorage.getItem(k))));
+  assert.equal(log.length, 1);
+  assert.equal(log[0].leave, 1); assert.equal(log[0].late, 4); assert.equal(log[0].goal, 4);
+  assert.deepEqual(presets.map(x => x.task), ['寫作'], 'the billion-round preset is left out');
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});
+
+test('a broken plan from last time is ignored instead of used', async () => {
+  const { p, ctx, errors } = await openApp(browser, server.url, { storage: {
+    'keisaku-log-v2': [entry(1)], 'keisaku-last-v1': { task: '讀書', focusMin: 25, rounds: 1e9, breakMin: 5 } } });
+  await waitForLine(p, '今日想做的事');
+  assert.equal(await p.locator('#rounds i').count() <= 8, true, 'no flood of incense sticks');
+  assert.ok(!(await p.evaluate(() => [...document.querySelectorAll('.choice')].some(c => c.textContent.startsWith('跟上次一樣')))));
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});

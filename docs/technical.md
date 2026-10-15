@@ -17,6 +17,7 @@
   | `src/svg.html` | 禪堂場景(viewBox `0 0 400 280`) |
   | `src/app.js` | 全部程式,包在一個 IIFE 裡 |
 
+- `build.py` 會從 `sw.js` 讀出快取版本 `VERSION`,填進設定最下面顯示的版本號,所以版本只要在 `sw.js` 改一個地方。
 - `python3 build.py` 產生 `index.html`;`python3 build.py preview` 產生 `preview.html`(左上角多一個「預覽版」標籤,其餘相同)。
 - `python3 build_lab.py` 從 `app.js` 裡 `/*SND-START*/ … /*SND-END*/` 之間的聲音引擎產生 `soundlab.html`,所以試聽台跟 App 永遠用同一份聲音程式。
 - `<head>` 裡有一小段同步 script,在第一次繪製前把存好的深淺色套到 `<html data-theme>`,避免閃一下另一個主題。
@@ -170,7 +171,9 @@ idle(報到對話)→ settle(放手機的 3 秒)→ focus → break → ready(�
 
 - **沒存的情況:** 分鐘數為 0 而且沒被打的一炷不存。
 - **備份格式:** `{ app: 'keisaku-dojo', version: 2, exported, log, presets }`。
-  - 匯入時用 `validEntry` 過濾格式不對的紀錄:`t`、`min`、`hits` 是數字,`d` 是 `YYYY-MM-DD`。
+  - 匯入時用 `validEntry` 只收合理的紀錄:`t` 是數字、`d` 是 `YYYY-MM-DD`、`min` 是 0–240 的整數、`hits` 是 0–999 的整數、`task` 是文字(或沒有)、`full` 是是非值(或沒有)。收進來時由 `cleanEntry` 整理,事項名稱截到 12 字,並保留合理的 `leave`、`late`、`goal`。
+  - 常用設定(備份裡的、或手機裡存的上次設定和常用設定)一律經過 `validCfg`:事項名稱 1–12 字、每炷 5–120 分、1–8 炷、休息 0–30 分,不合理的就不用。例如寫著「10 億炷」的常用設定,如果沒擋,畫炷香圖示時會讓 App 卡死。
+  - 畫面上用到 `innerHTML` 的地方,事項名稱都先經過 `escapeHtml(String(…))`,就算儲存裡有格式錯的資料,也不會當掉或被插入 HTML。
   - 以 `t|d` 判斷是不是已經有了,只加入新的,不會覆蓋或刪除。
 
 ## 10. 坐禪帳的計算

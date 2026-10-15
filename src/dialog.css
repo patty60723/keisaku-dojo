@@ -598,3 +598,13 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
 #andonLight.jolt { animation: jolt .8s ease-out; }                /* the strike shakes the flame */
 @keyframes jolt { 8% { opacity: .4; } 25% { opacity: 1; } 42% { opacity: .65; } 100% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { #andonLight, #andonLight.jolt { animation: none; } }
+
+/* ---------- 設定: privacy, version, reporting a problem ---------- */
+.about { border-top: 1px dashed var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.about h3 { margin: 0; font-size: .95rem; }
+.about p { margin: 0; font-size: .85rem; color: var(--muted); }
+.about-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.about .version { font-size: .85rem; color: var(--muted); }
+.about .version b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.about .small-btn { text-decoration: none; min-height: 36px; display: inline-flex; align-items: center; }
+.about-note { font-size: .78rem !important; }

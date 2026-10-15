@@ -54,3 +54,33 @@ test('dark theme: the monk keeps dark eyes and feet, and the stats smoke rises s
   await shot(p, 'stats-dark');
   await ctx.close();
 });
+
+test('link preview tags point at a 1200×630 image that exists', async () => {
+  const { readFileSync, existsSync } = await import('node:fs');
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const meta = name => (html.match(new RegExp(`<meta property="${name}" content="([^"]+)"`)) || [])[1];
+  assert.equal(meta('og:title'), '警策道場|番茄鐘・不准滑手機');
+  const img = meta('og:image');
+  assert.match(img, /^https:\/\/patty60723\.github\.io\/keisaku-dojo\/icons\/og-v\d+\.png$/);
+  const file = new URL('../' + img.split('/keisaku-dojo/')[1], import.meta.url);
+  assert.ok(existsSync(file), 'the preview image is in the repo');
+  const png = readFileSync(file);
+  assert.equal(png.readUInt32BE(16), 1200); assert.equal(png.readUInt32BE(20), 630);
+  assert.match(html, /<meta name="twitter:card" content="summary_large_image">/);
+});
+
+test('settings show the version from sw.js, a privacy note, and a report link that carries version and device', async () => {
+  const { readFileSync } = await import('node:fs');
+  const version = readFileSync(new URL('../sw.js', import.meta.url), 'utf8').match(/const VERSION = '([^']+)'/)[1];
+  const { p, ctx } = await openApp(browser, server.url);
+  await p.locator('#settingsBtn').click(); await p.waitForFunction(() => document.getElementById('settings').open);
+  assert.equal(await p.locator('#appVersion').textContent(), version);
+  assert.match(await p.locator('.about').textContent(), /不會上傳/);
+  await p.evaluate(() => document.addEventListener('click', e => e.preventDefault()));   // read the link instead of opening GitHub
+  await p.locator('#feedbackLink').click();
+  const body = decodeURIComponent((await p.locator('#feedbackLink').getAttribute('href')).split('body=')[1]);
+  assert.match(body, new RegExp(`版本:${version}`));
+  assert.match(body, /裝置:Mozilla/);
+  assert.match(body, /開啟方式:瀏覽器/);
+  await ctx.close();
+});

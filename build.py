@@ -6,7 +6,9 @@ def src(name): return open(os.path.join(ROOT, 'src', name), encoding='utf-8').re
 import sys
 preview = 'preview' in sys.argv[1:]   # build preview.html instead of index.html
 style=src('style.css')+src('extra.css')+src('dialog.css')
-body=src('body.html').replace('{{SVG}}',src('svg.html').rstrip('\n'))
+import re
+VERSION = re.search(r"const VERSION = '([^']+)'", open(os.path.join(ROOT, 'sw.js'), encoding='utf-8').read()).group(1)   # shown in 設定
+body=src('body.html').replace('{{SVG}}',src('svg.html').rstrip('\n')).replace('{{VERSION}}', VERSION)
 if preview:
     body = body.replace('<main class="app">', '<main class="app">\n  <a class="preview-tag" href="./">預覽版 · 回正式版</a>', 1)
     style += '.preview-tag{align-self:flex-start;font-size:.78rem;color:#fff;background:var(--kesa);padding:2px 10px;border-radius:999px;text-decoration:none}\n'
@@ -37,6 +39,17 @@ open(os.path.join(ROOT, 'preview.html' if preview else 'index.html'),'w').write(
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="警策道場">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="警策道場">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:title" content="警策道場|番茄鐘・不准滑手機">
+<meta property="og:description" content="可愛的番茄鐘專注 App。拿起手機,住持就會拿警策「啪」你一下。">
+<meta property="og:url" content="https://patty60723.github.io/keisaku-dojo/">
+<meta property="og:image" content="https://patty60723.github.io/keisaku-dojo/icons/og-v1.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="禪堂裡,麻糬在蒲團上打坐,住持拿著警策站在後面">
+<meta name="twitter:card" content="summary_large_image">
 '''+head+'''</head>
 <body>
 '''+body+'\n<script>\n'+script+'</script>\n<script>\nif (\'serviceWorker\' in navigator && location.protocol.startsWith(\'http\')) {\n  addEventListener(\'load\', () => navigator.serviceWorker.register(\'sw.js\').catch(() => {}));\n}\n</script>\n</body>\n</html>\n')
