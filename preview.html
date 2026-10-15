@@ -1216,7 +1216,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
         <clipPath id="moonPool"><ellipse cx="116" cy="248" rx="60" ry="17"/></clipPath>
         <clipPath id="winClip"><circle cx="86" cy="98" r="33"/></clipPath>
         <clipPath id="sqClip"><rect x="282" y="66" width="64" height="64"/></clipPath>
-        <clipPath id="sqPool"><path d="M246 234 H322 L332 262 H236 Z"/></clipPath>
+        <clipPath id="sqPool"><path d="M306 234 H382 L392 262 H296 Z"/></clipPath>
       </defs>
 
       <!-- wall & woodwork -->
@@ -1261,8 +1261,9 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
       <g id="scrollText"><text class="scroll-char f-sink" x="200" y="92" font-size="22" text-anchor="middle">靜</text><rect class="f-shu" x="204" y="118" width="6" height="6" rx="1"/></g>
       <rect class="f-wood" x="174" y="141" width="52" height="5" rx="2.5"/>
 
-      <!-- incense table (doubles as the timer), between the scroll and the square window; tea waits on it at break time -->
-      <g id="incenseTable" transform="translate(-84 0)">
+      <!-- incense table (doubles as the timer), between the round window and the scroll, so the left wall carries
+           as much as the right (square window, andon, ledger); tea waits on it at break time -->
+      <g id="incenseTable" transform="translate(-192 0)">
       <rect class="f-wood" x="312" y="152" width="52" height="5" rx="1"/>
       <rect class="f-wood" x="316" y="157" width="4" height="17"/>
       <rect class="f-wood" x="356" y="157" width="4" height="17"/>
@@ -1298,10 +1299,11 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
 
       <!-- night: moonlight falls from both windows; an andon (paper floor lantern) glows under the square one -->
       <g class="night" id="nightLights">
-        <!-- each window's moonlight lying on the tatami, faint and soft-edged, with its lattice's shadow in it -->
+        <!-- each window's moonlight lying on the tatami, faint and soft-edged, with its lattice's shadow in it.
+             One moon lights both: each patch lands the same 30 units right of its window. -->
         <g filter="url(#softer)" style="mix-blend-mode: screen">
           <ellipse cx="116" cy="248" rx="74" ry="22" fill="url(#moonGlow)"/>
-          <path d="M246 234 H322 L332 262 H236 Z" fill="#9fb8e8" opacity=".28"/>
+          <path d="M306 234 H382 L392 262 H296 Z" fill="#9fb8e8" opacity=".28"/>
         </g>
         <g filter="url(#soft)" stroke="#1f2624" stroke-width="2.2" opacity=".1">
           <g clip-path="url(#moonPool)">
@@ -1309,8 +1311,8 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
             <line x1="52" y1="242" x2="180" y2="242"/><line x1="52" y1="254" x2="180" y2="254"/>
           </g>
           <g clip-path="url(#sqPool)">
-            <line x1="265" y1="230" x2="262" y2="266"/><line x1="284" y1="230" x2="284" y2="266"/><line x1="303" y1="230" x2="306" y2="266"/>
-            <line x1="230" y1="243" x2="340" y2="243"/><line x1="230" y1="253" x2="340" y2="253"/>
+            <line x1="325" y1="230" x2="322" y2="266"/><line x1="344" y1="230" x2="344" y2="266"/><line x1="363" y1="230" x2="366" y2="266"/>
+            <line x1="290" y1="243" x2="400" y2="243"/><line x1="290" y1="253" x2="400" y2="253"/>
           </g>
         </g>
         <g id="andonLamp" transform="translate(272 16)">
@@ -1322,7 +1324,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
       </g>
 
       <!-- the andon itself stands there day and night; only at night is its paper lit.
-           It sits on the tatami under the square window, clear of the incense table. -->
+           It sits on the tatami under the square window. -->
       <g id="andon" transform="translate(272 16)">
         <rect class="f-wood" x="30" y="176" width="2" height="10"/>
         <rect class="f-wood" x="46" y="176" width="2" height="10"/>
@@ -1513,7 +1515,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
   const toastEl = $('#toast'), clockEl = $('#clock'), statusEl = $('#status');
   const mainBtn = $('#mainBtn'), askBtn = $('#askBtn'), leaveBtn = $('#leaveBtn'), backBtn = $('#backBtn');
   const PIVOT = '12 -38';
-  const SITTER_X = 200, TEA_X = 242, HOST_X = 72, RACK_X = 375;
+  const SITTER_X = 200, TEA_X = 190, HOST_X = 72, RACK_X = 375;
   const STAND = { x: -66, y: 14 };            // where the mochi stands (relative to the cushion) while checking in
   const DEFAULT_CFG = { task: '專注', focusMin: 25, rounds: 4, breakMin: 5 };
   const MAX_PRESETS = 3;
@@ -2066,7 +2068,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
       M.ty = 215;
       walkTo(TEA_X, 40).then(() => {
         if (M.mode !== 'rest') return;
-        M.face = 1; bubble('喫茶去~');
+        M.face = -1; bubble('喫茶去~');                  // the tea is on the table to his left
         clearTimeout(teaTalk); teaTalk = setTimeout(() => bubble(null), 2600);
       });
     } else if (want === 'host') {
