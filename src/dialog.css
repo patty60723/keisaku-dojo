@@ -686,7 +686,8 @@ html:lang(en) * { letter-spacing: normal !important; }
 .acc-drop { opacity: 0; }
 @media (prefers-reduced-motion: no-preference) {
   .acc-leaf.react { animation: accFly 1.1s ease-out; transform-origin: 50% 50%; }
-  .acc-bird.react { animation: accBird 1.5s ease-in-out; }
+  .acc-bird.react { animation: accBird 1.9s ease-in-out; }
+  .acc-bird.react .bird-wing { animation: accFlap .12s ease-in-out 12 alternate; transform-origin: 80% 70%; }
   .acc-sakura.react, .acc-lotus.react, .acc-maple.react { animation: accShake .55s ease-in-out; }
   .react .acc-drop { animation: accDrop 1.4s ease-in forwards; }
   .acc-hat.react { animation: accPop .9s ease-out; }
@@ -695,7 +696,15 @@ html:lang(en) * { letter-spacing: normal !important; }
   .acc-chawan.react, .acc-uchiwa.react, .acc-lantern.react { animation: accWobble .6s ease-in-out; }
 }
 @keyframes accFly { 30% { transform: translate(6px, -22px) rotate(200deg); } 65% { transform: translate(2px, -10px) rotate(330deg); } }
-@keyframes accBird { 20% { transform: translate(-4px, -18px); } 50% { transform: translate(18px, -28px) scaleX(-1); } 80% { transform: translate(4px, -10px); } }
+/* the bird: startled hop, off to the right and up, a loop back over the head, then down onto its spot */
+@keyframes accBird {
+  8% { transform: translate(0, -6px); }
+  30% { transform: translate(26px, -30px) rotate(-12deg); }
+  50% { transform: translate(14px, -46px) scaleX(-1); }
+  72% { transform: translate(-16px, -26px) scaleX(-1) rotate(8deg); }
+  90% { transform: translate(-2px, -4px); }
+}
+@keyframes accFlap { to { transform: rotate(-38deg) scaleY(.6); } }
 @keyframes accShake { 25% { transform: rotate(-12deg); } 60% { transform: rotate(9deg); } }
 @keyframes accDrop { 0% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translate(14px, 50px) rotate(140deg); } }
 @keyframes accPop { 25% { transform: translate(3px, -10px) rotate(-14deg); } 60% { transform: translate(2px, -3px) rotate(-7deg); } }
