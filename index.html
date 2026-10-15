@@ -4866,9 +4866,14 @@ const I18N = {
       svg: `<path d="M56 -3 L62 -13" stroke="#8a5d34" stroke-width="1.6" stroke-linecap="round"/><circle cx="62.5" cy="-14" r="2.2" fill="#d9b56b" ${INK}/>`
         + `<ellipse cx="47" cy="-7" rx="10" ry="6.5" fill="#a5582f" ${INK}/><path d="M39 -6 q8 3 16 0" stroke="#2a2622" stroke-width="1" fill="none"/><circle cx="52" cy="-9" r="1.2" fill="#2a2622"/>` },
     { id: 'lantern', slot: 'extra', place: 'side', name: tr('小提燈'), gift: tr('這盞小提燈'), how: tr('晚上 10 點後坐滿一炷'), need: s => [s.night, 1, tr('炷')],
-      svg: '<circle class="night" cx="47" cy="-17" r="18" fill="url(#andonGlow)"/><path d="M47 -7.5 v6.5" stroke="#5d4230" stroke-width="1.2"/>'
-        + `<rect x="43" y="-27.5" width="8" height="2" fill="#5d4230"/><ellipse cx="47" cy="-17" rx="6.5" ry="8.5" fill="#f4e3c1" ${INK}/>`
-        + '<path d="M40.6 -20 h12.8 M40.6 -14 h12.8" stroke="#c9a85c" stroke-width=".7"/><rect x="43" y="-9.5" width="8" height="2" fill="#5d4230"/>' },
+      svg: '<circle class="night" cx="49" cy="-21" r="20" fill="url(#andonGlow)"/>'           // a red chōchin hung from a little wooden stand
+        + '<rect x="55.5" y="-2" width="8" height="2.4" rx="1" fill="#5d4230"/><path d="M59.5 -2 V-35 H48.6" stroke="#5d4230" stroke-width="1.6" fill="none" stroke-linejoin="round"/>'
+        + '<path d="M49 -35 v3.6" stroke="#2a2622" stroke-width=".8"/>'
+        + `<ellipse cx="49" cy="-22" rx="6.4" ry="8.4" fill="#d9493b" ${INK}/>`
+        + '<path d="M42.9 -26.5 q6.1 1.6 12.2 0 M42.6 -22 q6.4 1.6 12.8 0 M42.9 -17.5 q6.1 1.6 12.2 0" stroke="#a8322a" stroke-width=".8" fill="none"/>'
+        + '<ellipse class="night" cx="49" cy="-22" rx="4.4" ry="6.4" fill="#ffcf8a" opacity=".55"/>'
+        + '<rect x="45" y="-32.2" width="8" height="2.6" rx=".6" fill="#2a2622"/><rect x="45" y="-14.4" width="8" height="2.6" rx=".6" fill="#2a2622"/>'
+        + '<path d="M49 -11.8 v3" stroke="#d9493b" stroke-width="1.4" stroke-linecap="round"/>' },
   ];
   const SLOTS = [['head', tr('頭')], ['body', tr('身體')], ['extra', tr('配飾')]];
   const unlocked = (item, s) => { const [have, need] = item.need(s); return have >= need; };
