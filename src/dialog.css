@@ -690,3 +690,6 @@ html:lang(en) * { letter-spacing: normal !important; }
 .debug-bar b { padding: 0 4px; }
 .debug-bar button { font: inherit; color: #fff; background: transparent; border: 1px solid rgba(255,255,255,.4); border-radius: 8px; padding: 4px 8px; cursor: pointer; }
 .debug-bar button.on { background: #fff; color: #2a2622; }
+
+/* the lap blanket is on the lap only while sitting; standing, it lies folded on the cushion */
+#sitter.standing #mochiAccBack .acc-blanket, #sitter:not(.standing) #accCushion { display: none; }

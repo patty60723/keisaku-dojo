@@ -2340,6 +2340,9 @@
         + '<rect x="45" y="-32.2" width="8" height="2.6" rx=".6" fill="#2a2622"/><rect x="45" y="-14.4" width="8" height="2.6" rx=".6" fill="#2a2622"/>'
         + '<path d="M49 -11.8 v3" stroke="#d9493b" stroke-width="1.4" stroke-linecap="round"/>' },
   ];
+  // the lap blanket, folded on the cushion while the mochi is up
+  const FOLDED_BLANKET = `<path d="M-15 -16 h30 q3 0 3 3 v3 q0 3 -3 3 h-30 q-3 0 -3 -3 v-3 q0 -3 3 -3z" fill="#b5654a" ${INK}/>`
+    + '<path d="M-17 -11.5 h34 M-6 -16 v9 M6 -16 v9" stroke="#e7c9a0" stroke-width=".9"/>';
   const SLOTS = [['head', tr('頭')], ['body', tr('身體')], ['extra', tr('配飾')]];
   const unlocked = (item, s) => { const [have, need] = item.need(s); return have >= need; };
   const unlockedIds = log => { const s = collectStats(log); return [...SCROLLS.filter(x => unlocked(x, s)).map(x => 's:' + x.id), ...ACCS.filter(x => unlocked(x, s)).map(x => 'a:' + x.id)]; };
@@ -2357,7 +2360,7 @@
       + [[66, 96, -1], [78, 80, 1], [108, 90, -1], [78, 110, 1], [108, 70, 1]].map(([x, y, d]) => `<path d="M${x} ${y} q${d * 8} -3 ${d * 14} 2 q${-d * 7} 2 ${-d * 14} -2z" fill="#86b061"/>`).join('') + '</g>'
       + '<g class="night">' + [[70, 100, 0], [96, 84, 1.3], [106, 112, 2.1], [84, 122, .7], [116, 96, 2.8]].map(([x, y, dl]) => `<g class="firefly" style="--delay:-${dl}s"><circle cx="${x}" cy="${y}" r="4" fill="#f3e48a" opacity=".25"/><circle cx="${x}" cy="${y}" r="1.6" fill="#f3e48a"/></g>`).join('') + '</g>',
     autumn: () => '<path d="M124 64 Q104 74 92 70 Q80 66 66 76 M100 72 Q98 84 104 92" stroke="#6b4a33" stroke-width="2" fill="none" stroke-linecap="round"/>'
-      + [[92, 72, '#d4572e', 0], [80, 70, '#e07a2f', 20], [68, 78, '#c8432b', -15], [104, 92, '#e39a2f', 10], [100, 74, '#cf4f2c', 35], [70, 124, '#d4572e', -40]].map(([x, y, c, r]) => maple(x, y, c, 1.15, r)).join('')
+      + [[92, 72, '#d4572e', 0], [80, 70, '#e07a2f', 20], [68, 78, '#c8432b', -15], [100, 74, '#cf4f2c', 35], [70, 124, '#d4572e', -40]].map(([x, y, c, r]) => maple(x, y, c, 1.15, r)).join('')
       + drift('leaf', maple(0, 0, '#e07a2f', .9), 3, 12),
     winter: () => '<path d="M50 128 Q86 116 122 126 V140 H50Z" fill="#f4f6f8"/><path d="M58 126 Q70 100 86 90 M70 108 Q62 98 64 88" stroke="#5a4030" stroke-width="2" fill="none" stroke-linecap="round"/>'
       + [[86, 90], [64, 88], [76, 100], [66, 112]].map(([x, y]) => blossom(x, y, '#c8434b', 2.3)).join('')
@@ -2393,7 +2396,8 @@
     const head = worn('head'), body = worn('body'), extra = worn('extra');
     $('#mochiAccBack').innerHTML = g(body);                                   // under the arms
     $('#mochiAcc').innerHTML = g(head) + (extra && extra.place !== 'side' ? g(extra) : '');
-    $('#accSide').innerHTML = extra && extra.place === 'side' ? g(extra) : '';   // on the mat beside the cushion
+    $('#accSide').innerHTML = extra && extra.place === 'side' ? g(extra) : '';
+    $('#accCushion').innerHTML = body && body.id === 'blanket' ? FOLDED_BLANKET : '';   // shown only while standing (CSS)   // on the mat beside the cushion
     sitterEl.dataset.head = head ? head.id : '';
     sitterEl.classList.toggle('no-bump', !!(head && head.hidesBump));      // a hat or beanie hides the bump
   }
