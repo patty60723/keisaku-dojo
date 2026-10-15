@@ -841,7 +841,7 @@ button { -webkit-tap-highlight-color: transparent; }
 }
 @media (hover: hover) { .hotspot:hover { background: color-mix(in srgb, #fff 16%, transparent); } }
 .hotspot:focus-visible { outline: 2.5px solid var(--accent); outline-offset: -2px; }
-.hotspot .streak-badge { right: auto; left: calc(var(--u) * 23 - 11px); top: calc(var(--u) * 76); box-shadow: 0 0 0 2px var(--wall); }
+.hotspot .streak-badge { right: auto; left: calc(var(--u) * 38 - 11px); top: calc(var(--u) * 76); box-shadow: 0 0 0 2px var(--wall); }
 .result { z-index: 5; }
 .stage-wrap .toast { pointer-events: none; }
 .icon-btn .glyph-gear { width: 22px; height: 22px; }
@@ -1207,9 +1207,16 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
           <stop offset="1" stop-color="#eebd70"/>
         </radialGradient>
         <filter id="soft" x="-40%" y="-120%" width="180%" height="340%"><feGaussianBlur stdDeviation="4.5"/></filter>
+        <filter id="softer" x="-60%" y="-200%" width="220%" height="500%"><feGaussianBlur stdDeviation="8"/></filter>
+        <radialGradient id="moonGlow">
+          <stop offset="0" stop-color="#9fb8e8" stop-opacity=".42"/>
+          <stop offset=".55" stop-color="#9fb8e8" stop-opacity=".24"/>
+          <stop offset="1" stop-color="#9fb8e8" stop-opacity="0"/>
+        </radialGradient>
         <clipPath id="moonPool"><ellipse cx="116" cy="248" rx="60" ry="17"/></clipPath>
         <clipPath id="winClip"><circle cx="86" cy="98" r="33"/></clipPath>
-        <clipPath id="sqClip"><rect x="246" y="66" width="62" height="62"/></clipPath>
+        <clipPath id="sqClip"><rect x="282" y="66" width="64" height="64"/></clipPath>
+        <clipPath id="sqPool"><path d="M246 234 H322 L332 262 H236 Z"/></clipPath>
       </defs>
 
       <!-- wall & woodwork -->
@@ -1229,15 +1236,14 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
       </g>
       <circle cx="86" cy="98" r="33" class="s-wood" stroke-width="5"/>
 
-      <!-- square window (迷之窗) to the right of the scroll, after 源光庵 in Kyoto: the same season, seen from further along -->
-      <rect class="f-window" x="246" y="66" width="62" height="62"/>
-      <g clip-path="url(#sqClip)"><g id="sqView" transform="translate(277 97) scale(-1 1) translate(-86 -98)"></g></g>
+      <!-- square window (迷之窗): the round window mirrored about the scroll, after 源光庵 in Kyoto -->
+      <rect class="f-window" x="282" y="66" width="64" height="64"/>
+      <g clip-path="url(#sqClip)"><g id="sqView" transform="translate(314 98) scale(-1 1) translate(-86 -98)"></g></g>
       <g class="s-wood" stroke-width="1.6">
-        <line x1="261.5" y1="66" x2="261.5" y2="128"/><line x1="277" y1="66" x2="277" y2="128"/><line x1="292.5" y1="66" x2="292.5" y2="128"/>
-        <line x1="246" y1="81.5" x2="308" y2="81.5"/><line x1="246" y1="97" x2="308" y2="97"/><line x1="246" y1="112.5" x2="308" y2="112.5"/>
+        <line x1="298" y1="66" x2="298" y2="130"/><line x1="314" y1="66" x2="314" y2="130"/><line x1="330" y1="66" x2="330" y2="130"/>
+        <line x1="282" y1="82" x2="346" y2="82"/><line x1="282" y1="98" x2="346" y2="98"/><line x1="282" y1="114" x2="346" y2="114"/>
       </g>
-      <rect class="s-wood" x="246" y="66" width="62" height="62" fill="none" stroke-width="5"/>
-      <rect class="f-wood" x="240" y="130" width="74" height="4" rx="1"/>
+      <rect class="s-wood" x="282" y="66" width="64" height="64" fill="none" stroke-width="5"/>
 
       <!-- 堂規: a wooden notice board hung on the left wall -->
       <g id="rulesBoard">
@@ -1255,7 +1261,8 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
       <g id="scrollText"><text class="scroll-char f-sink" x="200" y="92" font-size="22" text-anchor="middle">靜</text><rect class="f-shu" x="204" y="118" width="6" height="6" rx="1"/></g>
       <rect class="f-wood" x="174" y="141" width="52" height="5" rx="2.5"/>
 
-      <!-- incense table (doubles as the timer) -->
+      <!-- incense table (doubles as the timer), between the scroll and the square window; tea waits on it at break time -->
+      <g id="incenseTable" transform="translate(-84 0)">
       <rect class="f-wood" x="312" y="152" width="52" height="5" rx="1"/>
       <rect class="f-wood" x="316" y="157" width="4" height="17"/>
       <rect class="f-wood" x="356" y="157" width="4" height="17"/>
@@ -1263,9 +1270,14 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
       <rect class="f-kesa" id="incense" x="337" y="96" width="2.2" height="44"/>
       <circle class="ember" id="ember" cx="338.1" cy="96" r="1.8"/>
       <g id="smoke"><path class="smoke" stroke-width="1.3" d="M338 92 q-5 -8 0 -16 q5 -8 0 -16 q-4 -6 1 -12"/></g>
+      <g id="tea" visibility="hidden">
+        <path class="f-paper" d="M352 143 h13 l-1.6 9 h-9.8 z" stroke="#2a2622" stroke-width="1"/>
+        <path class="smoke" stroke-width="1" d="M356 140 q-2 -4 0 -8 M361 140 q2 -4 0 -8"/>
+      </g>
+      </g>
 
       <!-- 坐禪帳: a 大福帳-style ledger hung by a cord on the right pillar -->
-      <g id="ledgerBook">
+      <g id="ledgerBook" transform="translate(-21 0)">
         <path d="M383 42 L374 57 M383 42 L392 57" stroke="#2a2622" stroke-width=".7" fill="none"/>
         <circle cx="383" cy="42" r="1.4" class="f-wood2"/>
         <rect class="f-paper" x="371" y="57" width="24" height="62" rx="1" stroke="#2a2622" stroke-width=".8"/>
@@ -1276,12 +1288,6 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
         <text class="scroll-char f-sink" x="383" y="103" font-size="9.5" text-anchor="middle">帳</text>
       </g>
 
-      <!-- tea for break time -->
-      <g id="tea" visibility="hidden">
-        <path class="f-paper" d="M352 143 h13 l-1.6 9 h-9.8 z" stroke="#2a2622" stroke-width="1"/>
-        <path class="smoke" stroke-width="1" d="M356 140 q-2 -4 0 -8 M361 140 q2 -4 0 -8"/>
-      </g>
-
       <!-- floor -->
       <rect x="0" y="176" width="400" height="104" class="f-tatami"/>
       <rect x="0" y="176" width="400" height="104" fill="url(#weave)"/>
@@ -1290,17 +1296,24 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
       <rect class="f-heri" x="128" y="177" width="3" height="53"/>
       <rect class="f-heri" x="272" y="233" width="3" height="47"/>
 
-      <!-- night: moonlight falls from the round window; an andon (paper floor lantern) glows by the tea table -->
+      <!-- night: moonlight falls from both windows; an andon (paper floor lantern) glows under the square one -->
       <g class="night" id="nightLights">
-        <!-- the round window's moonlight lying on the tatami, with the lattice's shadow in it -->
-        <g filter="url(#soft)">
-          <ellipse cx="116" cy="248" rx="60" ry="17" fill="#9fb8e8" opacity=".4" style="mix-blend-mode: screen"/>
-          <g clip-path="url(#moonPool)" stroke="#1f2624" stroke-width="2.2" opacity=".16">
+        <!-- each window's moonlight lying on the tatami, faint and soft-edged, with its lattice's shadow in it -->
+        <g filter="url(#softer)" style="mix-blend-mode: screen">
+          <ellipse cx="116" cy="248" rx="74" ry="22" fill="url(#moonGlow)"/>
+          <path d="M246 234 H322 L332 262 H236 Z" fill="#9fb8e8" opacity=".28"/>
+        </g>
+        <g filter="url(#soft)" stroke="#1f2624" stroke-width="2.2" opacity=".1">
+          <g clip-path="url(#moonPool)">
             <line x1="96" y1="228" x2="92" y2="268"/><line x1="116" y1="228" x2="116" y2="268"/><line x1="136" y1="228" x2="140" y2="268"/>
             <line x1="52" y1="242" x2="180" y2="242"/><line x1="52" y1="254" x2="180" y2="254"/>
           </g>
+          <g clip-path="url(#sqPool)">
+            <line x1="265" y1="230" x2="262" y2="266"/><line x1="284" y1="230" x2="284" y2="266"/><line x1="303" y1="230" x2="306" y2="266"/>
+            <line x1="230" y1="243" x2="340" y2="243"/><line x1="230" y1="253" x2="340" y2="253"/>
+          </g>
         </g>
-        <g id="andonLamp" transform="translate(230 16)">
+        <g id="andonLamp" transform="translate(272 16)">
           <g id="andonLight">
             <circle cx="38" cy="160" r="135" fill="url(#andonGlow)"/>
             <ellipse cx="40" cy="186" rx="62" ry="12" fill="#ffb874" opacity=".16" filter="url(#soft)"/>
@@ -1309,9 +1322,8 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
       </g>
 
       <!-- the andon itself stands there day and night; only at night is its paper lit.
-           It sits on the tatami right of the cushion and in front of the tea table (not touching it),
-           so its warm light balances the moonlit window on the left. -->
-      <g id="andon" transform="translate(230 16)">
+           It sits on the tatami under the square window, clear of the incense table. -->
+      <g id="andon" transform="translate(272 16)">
         <rect class="f-wood" x="30" y="176" width="2" height="10"/>
         <rect class="f-wood" x="46" y="176" width="2" height="10"/>
         <rect x="29" y="153" width="20" height="25" fill="#efe6cf" stroke="#5d4230" stroke-width=".8"/>
@@ -1322,7 +1334,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
       </g>
 
       <!-- the keisaku's place: leaning against the right-hand post until the monk picks it up -->
-      <g id="rackStick" transform="translate(362 176) rotate(9)">
+      <g id="rackStick" transform="translate(375 176) rotate(4)">
         <rect class="f-stick" x="-1.4" y="-58" width="2.8" height="58" rx="1.2" stroke="#2a2622" stroke-width=".8"/>
         <rect class="f-stick" x="-2.8" y="-76" width="5.6" height="22" rx="1.8" stroke="#2a2622" stroke-width=".8"/>
       </g>
@@ -1417,8 +1429,8 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     <!-- the notice board, the hanging scroll and the ledger in the picture are the way into 堂規, 收藏冊 and 坐禪帳 -->
     <button type="button" class="hotspot" id="helpBtn" aria-haspopup="dialog" aria-label="堂規" title="堂規" style="--x:12;--y:36;--w:52;--h:86"></button>
     <button type="button" class="hotspot" id="collectBtn" aria-haspopup="dialog" aria-label="收藏冊" title="收藏冊" style="--x:172;--y:42;--w:56;--h:108"></button>
-    <button type="button" class="hotspot" id="windowBtn" aria-label="方窗(迷之窗)" title="迷之窗" style="--x:240;--y:60;--w:74;--h:76"></button>
-    <button type="button" class="hotspot" id="journalBtn" aria-haspopup="dialog" aria-label="坐禪帳" title="坐禪帳" style="--x:348;--y:36;--w:52;--h:90"><span class="streak-badge" id="streakBadge" hidden></span></button>
+    <button type="button" class="hotspot" id="windowBtn" aria-label="方窗(迷之窗)" title="迷之窗" style="--x:278;--y:60;--w:58;--h:76"></button>
+    <button type="button" class="hotspot" id="journalBtn" aria-haspopup="dialog" aria-label="坐禪帳" title="坐禪帳" style="--x:336;--y:36;--w:52;--h:90"><span class="streak-badge" id="streakBadge" hidden></span></button>
     <button type="button" class="ask-btn" id="askBtn" hidden><span aria-hidden="true">🙏</span>合掌請打</button>
     <p class="toast" id="toast" aria-live="polite" hidden></p>
       <div class="result" id="result" hidden>
@@ -1501,7 +1513,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
   const toastEl = $('#toast'), clockEl = $('#clock'), statusEl = $('#status');
   const mainBtn = $('#mainBtn'), askBtn = $('#askBtn'), leaveBtn = $('#leaveBtn'), backBtn = $('#backBtn');
   const PIVOT = '12 -38';
-  const SITTER_X = 200, TEA_X = 326, HOST_X = 72, RACK_X = 362;
+  const SITTER_X = 200, TEA_X = 242, HOST_X = 72, RACK_X = 375;
   const STAND = { x: -66, y: 14 };            // where the mochi stands (relative to the cushion) while checking in
   const DEFAULT_CFG = { task: '專注', focusMin: 25, rounds: 4, breakMin: 5 };
   const MAX_PRESETS = 3;
