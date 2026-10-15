@@ -4873,15 +4873,14 @@ const I18N = {
     { id: 'chawan', slot: 'extra', place: 'side', name: tr('茶碗'), gift: tr('這只茶碗'), how: tr('一天坐滿 2 炷、休息沒超時,累計 10 天'), need: s => [s.onTime, 10, tr('天')],
       svg: `<path d="M38 -9 h15 q-1 8 -7.5 8 q-6.5 0 -7.5 -8z" fill="#7c9a74" ${INK}/><path class="smoke" d="M43 -12 q-2 -3 0 -6 M48 -12 q2 -3 0 -6" stroke-width=".9"/>` },
     { id: 'uchiwa', slot: 'extra', place: 'side', name: tr('團扇'), gift: tr('這把團扇'), how: tr('在 3 種不同的事上坐滿過'), need: s => [s.tasks, 3, tr('種')],
-      svg: '<g transform="rotate(-14 47 -2) translate(47 -2) scale(1.3) translate(-47 2)">'                     // leaning against the cushion
-        + '<path d="M50.4 -15 L45.4 -1.5" stroke="#2a2622" stroke-width="3.2" stroke-linecap="round"/><path d="M50.4 -15 L45.4 -1.5" stroke="#c9a35c" stroke-width="1.7" stroke-linecap="round"/>'
-        + '<path d="M48.3 -9.6 l1.6 .6 M46.7 -5.2 l1.6 .6" stroke="#8a6a35" stroke-width=".8"/>'
-        + `<circle cx="52" cy="-24" r="8.6" fill="#fbf6e6" ${INK}/>`
-        + '<path d="M50.2 -15.6 L43.5 -25.5 M50.2 -15.6 L44.6 -28.3 M50.2 -15.6 L46.5 -30.6 M50.2 -15.6 L49.1 -32.1 M50.2 -15.6 L52.0 -32.6 M50.2 -15.6 L54.9 -32.1 M50.2 -15.6 L57.5 -30.6 M50.2 -15.6 L59.4 -28.3 M50.2 -15.6 L60.5 -25.5" stroke="#e2d4ae" stroke-width=".5"/>'
-        + '<path d="M45.5 -20.5 q2 -1.2 4 0 q2 1.2 4 0 M50 -18.6 q2 -1.2 4 0 q2 1.2 4 0" stroke="#7aa3c9" stroke-width=".8" fill="none" stroke-linecap="round"/>'
-        + '<g transform="translate(-2.6 1.2)"><path d="M56.8 -27.6 l2.6 -2 l-.4 2.6 l.4 2.6 l-2.6 -2z" fill="#e0503a" stroke="#2a2622" stroke-width=".5"/>'
-        + '<ellipse cx="54" cy="-27.6" rx="3.1" ry="1.9" fill="#e0503a" stroke="#2a2622" stroke-width=".6"/><circle cx="52.3" cy="-28" r=".45" fill="#2a2622"/></g>'
-        + '<path d="M50.4 -15.2 l-1.6 -1.4 l3.4 -.2z" fill="#c9a35c" stroke="#2a2622" stroke-width=".6"/></g>' },
+      svg: '<g transform="translate(49 -1.4) rotate(12) scale(1.3) translate(-49 1.4)">'   // leaning against the cushion
+        + '<rect x="48.4" y="-15.4" width="1.2" height="14" fill="#c9a35c" stroke="#2a2622" stroke-width=".6"/>'                  // a thin bamboo handle
+        + '<path d="M49 -15.4 L40.4 -24.0 M49 -15.4 L40.9 -26.9 M49 -15.4 L42.4 -29.5 M49 -15.4 L44.7 -31.4 M49 -15.4 L47.5 -32.5 M49 -15.4 L50.5 -32.5 M49 -15.4 L53.3 -31.4 M49 -15.4 L55.6 -29.5 M49 -15.4 L57.1 -26.9 M49 -15.4 L57.6 -24.0" stroke="#b8904a" stroke-width=".45"/>'                                                                    // ribs fanning out from it…
+        + `<path d="M41.32 -20.13 A8.6 8.6 0 1 1 56.68 -20.13 Z" fill="#fbf6e6" ${INK}/>`                                                                              // …under the paper, bare where the paper stops
+        + '<path d="M42.8 -22.2 q1.8 -1.1 3.6 0 q1.8 1.1 3.6 0 M47.4 -21 q1.8 -1.1 3.6 0 q1.8 1.1 3.6 0" stroke="#7aa3c9" stroke-width=".8" fill="none" stroke-linecap="round"/>'
+        + '<path d="M51.2 -27.2 l2.6 -2 l-.4 2.6 l.4 2.6 l-2.6 -2z" fill="#e0503a" stroke="#2a2622" stroke-width=".5"/>'
+        + '<ellipse cx="48.4" cy="-27.2" rx="3.1" ry="1.9" fill="#e0503a" stroke="#2a2622" stroke-width=".6"/><circle cx="46.7" cy="-27.6" r=".45" fill="#2a2622"/>'
+        + '<rect x="47.9" y="-16.4" width="2.2" height="1.6" fill="#8a6a35" stroke="#2a2622" stroke-width=".5"/></g>' },
     { id: 'cat', slot: 'extra', place: 'side', name: tr('小貓'), gift: tr('這隻小貓'), how: tr('一炷都沒被打,累計 20 炷'), need: s => [s.still, 20, tr('炷')],
       svg: '<path d="M59.5 -4.5 q6 1.5 2.5 5 q-3.5 2.6 -11 1.2" stroke="#2a2622" stroke-width="4.4" stroke-linecap="round" fill="none"/><path d="M59.5 -4.5 q6 1.5 2.5 5 q-3.5 2.6 -11 1.2" stroke="#e8b07a" stroke-width="2.2" stroke-linecap="round" fill="none"/>'                                   // the tail grows from behind the body…
         + `<ellipse cx="50" cy="-5" rx="11" ry="6" fill="#e8b07a" ${INK}/>`
