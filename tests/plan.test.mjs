@@ -55,7 +55,7 @@ test('the plan can be changed one setting at a time, from the recap and from the
 
 test('略過開場 with a plan from last time says which plan is used', async () => {
   const { p, ctx } = await openApp(browser, server.url, { seen: [], storage: {
-    'keisaku-tour-v1': 'true', 'keisaku-rules-asked-v1': 'true', 'keisaku-leave-told-v1': 'true',
+    'keisaku-tour-v1': 'true', 'keisaku-rules-asked-v1': 'true', 'keisaku-leave-told-v1': 'true', 'keisaku-tip-collect-v1': 'true',
     'keisaku-last-v1': { task: '寫作', focusMin: 40, rounds: 2, breakMin: 10 } } });
   await waitForLine(p, '今天想做什麼');
   assert.equal(await skipVisible(p), false, 'the menu is not part of the opening');

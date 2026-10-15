@@ -26,7 +26,7 @@ test('first visit: introduction, then a tour that has to be tapped and opens eac
   assert.match(first, /堂規/);
   await p.mouse.click(200, 700);                                   // outside the lit spot: nothing happens
   assert.equal(await tourText(p), first);
-  for (const [sheet, next] of [['help', '坐禪帳'], ['journal', '齒輪'], ['settings', null]]) {
+  for (const [sheet, next] of [['help', '坐禪帳'], ['journal', '收藏冊'], ['collect', '齒輪'], ['settings', null]]) {
     await tapRing(p);
     await p.waitForFunction(id => document.getElementById(id).open, sheet);
     assert.equal(await p.evaluate(() => document.getElementById('tourCard').hidden), true, 'the tour steps aside while a sheet is open');

@@ -46,6 +46,7 @@ test('after the first stamped round the ledger is pointed out, and the tap opens
   await forward(p, 15 * 60000 + 1000);
   await p.waitForFunction(() => !document.getElementById('result').hidden, null, { timeout: 15000 });
   await p.locator('#closeResult').click();
+  await pick(p, '先收著'); await pick(p, '先收著');                // the first round also earns a scroll and a leaf
   await p.waitForFunction(() => !document.getElementById('tourCard').hidden);
   assert.match(await tourText(p), /蓋好章了/);
   await tapRing(p);

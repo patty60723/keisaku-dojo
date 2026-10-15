@@ -94,6 +94,29 @@
    </div>
   </dialog>
 
+  <dialog class="sheet scroll" id="collect" aria-labelledby="collectTitle">
+   <div class="scroll-wrap">
+   <span class="roller left" aria-hidden="true"></span>
+   <span class="roller right" aria-hidden="true"></span>
+   <div class="collect scroll-paper">
+    <div class="help-head">
+      <h2 id="collectTitle">收藏冊</h2>
+      <button type="button" class="sheet-close" id="collectClose" aria-label="關閉">✕</button>
+    </div>
+    <p class="collect-sum" id="collectSum"></p>
+    <div class="tabs tabs-3" role="tablist" aria-label="收藏冊">
+      <button type="button" role="tab" id="tabScrolls" aria-selected="true" aria-controls="scrollView">掛軸</button>
+      <button type="button" role="tab" id="tabSeasons" aria-selected="false" aria-controls="seasonView">四季</button>
+      <button type="button" role="tab" id="tabAccs" aria-selected="false" aria-controls="accView">配件</button>
+    </div>
+    <p class="collect-note" id="collectNote" hidden>坐禪中只能看,報到或休息時才能換。</p>
+    <div id="scrollView" class="tab-view" role="tabpanel" aria-labelledby="tabScrolls"><ul class="c-grid c-scrolls" id="scrollList"></ul></div>
+    <div id="seasonView" class="tab-view" role="tabpanel" aria-labelledby="tabSeasons" hidden><ul class="c-seasons" id="seasonList"></ul></div>
+    <div id="accView" class="tab-view" role="tabpanel" aria-labelledby="tabAccs" hidden><ul class="c-grid c-accs" id="accList"></ul></div>
+   </div>
+   </div>
+  </dialog>
+
   <dialog class="sheet scroll" id="settings" aria-labelledby="settingsTitle">
    <div class="scroll-wrap">
    <span class="roller left" aria-hidden="true"></span>
@@ -194,9 +217,11 @@
     <div class="bubble" id="bubble" hidden><span id="bubbleText"></span></div>
     <div class="pow" id="pow" aria-hidden="true">啪!</div>
     <div class="stars" id="stars" aria-hidden="true"></div>
-    <!-- the notice board and the ledger in the picture are the way into 堂規 and 坐禪帳 -->
+    <!-- the notice board, the hanging scroll and the ledger in the picture are the way into 堂規, 收藏冊 and 坐禪帳 -->
     <button type="button" class="hotspot" id="helpBtn" aria-haspopup="dialog" aria-label="堂規" title="堂規" style="--x:12;--y:36;--w:52;--h:86"></button>
-    <button type="button" class="hotspot" id="journalBtn" aria-haspopup="dialog" aria-label="坐禪帳" title="坐禪帳" style="--x:348;--y:36;--w:52;--h:90"><span class="streak-badge" id="streakBadge" hidden></span></button>
+    <button type="button" class="hotspot" id="collectBtn" aria-haspopup="dialog" aria-label="收藏冊" title="收藏冊" style="--x:172;--y:42;--w:56;--h:108"></button>
+    <button type="button" class="hotspot" id="windowBtn" aria-label="方窗(迷之窗)" title="迷之窗" style="--x:278;--y:60;--w:58;--h:76"></button>
+    <button type="button" class="hotspot" id="journalBtn" aria-haspopup="dialog" aria-label="坐禪帳" title="坐禪帳" style="--x:336;--y:36;--w:52;--h:90"><span class="streak-badge" id="streakBadge" hidden></span></button>
     <button type="button" class="ask-btn" id="askBtn" hidden><span aria-hidden="true">🙏</span>合掌請打</button>
     <p class="toast" id="toast" aria-live="polite" hidden></p>
       <div class="result" id="result" hidden>
@@ -206,6 +231,7 @@
         <p id="resultLine1"></p>
         <p id="resultLine2"></p>
         <p class="goal-met" id="resultGoal" hidden></p>
+        <p class="result-new" id="resultNew" hidden></p>
         <p class="koan" id="koan"></p>
         <div class="result-btns">
           <button type="button" class="btn ghost" id="shareResult">分享</button>
