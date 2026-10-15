@@ -277,7 +277,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 .sense { display: block; font-size: .88rem; color: var(--shu); }
 .sense summary { cursor: pointer; font-weight: 700; min-height: 32px; display: flex; align-items: center; list-style: none; }
 .sense summary::-webkit-details-marker { display: none; }
-.sense summary::after { content: "為什麼?"; font-weight: 400; color: var(--muted); margin-left: 8px; text-decoration: underline; text-underline-offset: 3px; }
+.sense summary::after { content: var(--why, "為什麼?"); font-weight: 400; color: var(--muted); margin-left: 8px; text-decoration: underline; text-underline-offset: 3px; }
 .sense[open] summary::after { content: "收起"; }
 .sense p { margin: 2px 0 0; color: var(--muted); }
 
@@ -671,3 +671,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
 
 .seg-4 { grid-template-columns: repeat(4, 1fr); }
 .seg-4 span { padding-inline: 2px; font-size: .88rem; }
+
+/* English: the wide letter-spacing that suits Chinese and Japanese makes Latin words fall apart */
+html:lang(en) * { letter-spacing: normal !important; }
+.c-item .c-mean { font-style: italic; color: var(--ink); }

@@ -65,7 +65,7 @@ test('the phone language decides: Japanese is 警策道場, English is Keisaku D
 test('choosing a language in settings overrides the phone and applies at once', async () => {
   const { p, ctx } = await openApp(browser, server.url);
   await p.locator('#settingsBtn').click();
-  await p.locator('input[name="lang"][value="ja"]').check({ force: true });
+  await p.locator('.seg label', { hasText: '日本語' }).click();          // the page reloads in Japanese
   await p.waitForFunction(() => document.title === '警策道場');
   await waitForLine(p, '警策道場');                     // the monk's welcome, now in Japanese
   await ctx.close();

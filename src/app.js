@@ -15,11 +15,13 @@
     return 'en';
   })();
   const DICT = (typeof I18N !== 'undefined' && I18N[LANG]) || {};
-  // tr('第 {0} 炷', n): look the Chinese up, then fill in {0}, {1}…
+  // tr('第 {0} 炷', n): look the Chinese up, then fill in {0}, {1}… ({0|round|rounds} picks the word by the number)
   function tr(s, ...a) {
     let r = DICT[s];
     if (r == null) { r = s; if (LANG !== 'zh' && window.__i18nMiss) window.__i18nMiss.add(s); }
-    return a.length ? r.replace(/\{(\d)\}/g, (m, i) => a[i]) : r;
+    if (!a.length) return r;
+    return r.replace(/\{(\d)\|([^|}]*)\|([^}]*)\}/g, (m, i, one, many) => +a[i] === 1 ? one : many)   // {0|round|rounds}
+      .replace(/\{(\d)\}/g, (m, i) => a[i]);
   }
   // the page's own text: an element whose words sit among inline tags (<b>, <small>…) is translated whole,
   // so word order can change; otherwise each piece of text on its own. Attributes people hear or see too.
@@ -42,7 +44,7 @@
       if (direct) el.childNodes.forEach(n => {
         if (n.nodeType !== 3 || !HAS_CJK.test(n.nodeValue)) return;
         const k = norm(n.nodeValue), v = tr(k);
-        if (v !== k) n.nodeValue = v;
+        if (v !== k) n.nodeValue = n.nodeValue.match(/^\s*/)[0] + v + n.nodeValue.match(/\s*$/)[0];   // keep the spaces around it
       });
       translateDom(el);
     }
@@ -51,6 +53,7 @@
     document.documentElement.lang = LANG;
     document.title = tr('香板禪堂');
     translateDom(document.body);
+    document.documentElement.style.setProperty('--why', JSON.stringify(tr('為什麼?')));   // the 「為什麼?」 after the detection warning is CSS text
   }
   const monkEl = $('#monk'), stickEl = $('#stick'), stickLayer = $('#stickLayer'), sitterEl = $('#sitter');
   const bubbleEl = $('#bubble'), bubbleText = $('#bubbleText');
@@ -2172,20 +2175,20 @@
   }
   // need(stats) -> [have, need, unit]
   const SCROLLS = [
-    { id: '靜', how: tr('一開始就掛著'), need: () => [1, 1] },
-    { id: '忍', how: tr('第一次坐滿一炷'), need: s => [s.rounds, 1, tr('炷')] },
-    { id: '心', how: tr('累計坐滿 10 炷'), need: s => [s.rounds, 10, tr('炷')] },
-    { id: '喫茶去', how: tr('一天坐滿 2 炷、休息沒超時,累計 5 天'), need: s => [s.onTime, 5, tr('天')] },
-    { id: '莫妄想', how: tr('一炷都沒被打,累計 5 炷'), need: s => [s.still, 5, tr('炷')] },
-    { id: '放下著', how: tr('用過暫離,回來還是坐滿'), need: s => [s.leave, 1, tr('炷')] },
-    { id: '一期一會', how: tr('同一天坐滿 4 炷'), need: s => [s.bigDay, 4, tr('炷')] },
-    { id: '日日是好日', how: tr('連續 7 天都有坐滿'), need: s => [s.streak, 7, tr('天')] },
-    { id: '無', how: tr('累計坐滿 50 炷'), need: s => [s.rounds, 50, tr('炷')] },
-    { id: '本來無一物', how: tr('累計坐滿 100 炷'), need: s => [s.rounds, 100, tr('炷')] },
-    { id: '花開', how: tr('春天坐滿 10 炷'), season: 'spring', need: s => [s.season.spring, 10, tr('炷')] },
-    { id: '清風', how: tr('夏天坐滿 10 炷'), season: 'summer', need: s => [s.season.summer, 10, tr('炷')] },
-    { id: '明月', how: tr('秋天坐滿 10 炷'), season: 'autumn', need: s => [s.season.autumn, 10, tr('炷')] },
-    { id: '雪', how: tr('冬天坐滿 10 炷'), season: 'winter', need: s => [s.season.winter, 10, tr('炷')] },
+    { id: '靜', en: 'Stillness', how: tr('一開始就掛著'), need: () => [1, 1] },
+    { id: '忍', en: 'Patience', how: tr('第一次坐滿一炷'), need: s => [s.rounds, 1, tr('炷')] },
+    { id: '心', en: 'Heart', how: tr('累計坐滿 10 炷'), need: s => [s.rounds, 10, tr('炷')] },
+    { id: '喫茶去', en: 'Go have some tea', how: tr('一天坐滿 2 炷、休息沒超時,累計 5 天'), need: s => [s.onTime, 5, tr('天')] },
+    { id: '莫妄想', en: 'No idle thoughts', how: tr('一炷都沒被打,累計 5 炷'), need: s => [s.still, 5, tr('炷')] },
+    { id: '放下著', en: 'Let it go', how: tr('用過暫離,回來還是坐滿'), need: s => [s.leave, 1, tr('炷')] },
+    { id: '一期一會', en: 'One time, one meeting', how: tr('同一天坐滿 4 炷'), need: s => [s.bigDay, 4, tr('炷')] },
+    { id: '日日是好日', en: 'Every day is a good day', how: tr('連續 7 天都有坐滿'), need: s => [s.streak, 7, tr('天')] },
+    { id: '無', en: 'Nothing', how: tr('累計坐滿 50 炷'), need: s => [s.rounds, 50, tr('炷')] },
+    { id: '本來無一物', en: 'From the start, not a thing', how: tr('累計坐滿 100 炷'), need: s => [s.rounds, 100, tr('炷')] },
+    { id: '花開', en: 'Flowers open', how: tr('春天坐滿 10 炷'), season: 'spring', need: s => [s.season.spring, 10, tr('炷')] },
+    { id: '清風', en: 'Clear breeze', how: tr('夏天坐滿 10 炷'), season: 'summer', need: s => [s.season.summer, 10, tr('炷')] },
+    { id: '明月', en: 'Bright moon', how: tr('秋天坐滿 10 炷'), season: 'autumn', need: s => [s.season.autumn, 10, tr('炷')] },
+    { id: '雪', en: 'Snow', how: tr('冬天坐滿 10 炷'), season: 'winter', need: s => [s.season.winter, 10, tr('炷')] },
   ];
   const INK = 'stroke="#2a2622" stroke-width="1.3"';
   const blossom = (x, y, c, r = 2.6) => [0, 72, 144, 216, 288].map(a => { const t = a * Math.PI / 180; return `<circle cx="${(x + Math.cos(t) * r * .8).toFixed(1)}" cy="${(y + Math.sin(t) * r * .8).toFixed(1)}" r="${(r * .62).toFixed(2)}" fill="${c}"/>`; }).join('') + `<circle cx="${x}" cy="${y}" r="${(r * .35).toFixed(2)}" fill="#e8b84a"/>`;
@@ -2276,7 +2279,7 @@
       const label = kind === 's' ? tr(item.id) : item.name;
       return `<li><button type="button" class="c-item${ok ? '' : ' locked'}${on ? ' on' : ''}" data-kind="${kind}" data-id="${item.id}"`
         + ` aria-pressed="${on}" ${ok && !locked ? '' : 'aria-disabled="true"'} aria-label="${label}${ok ? (on ? tr(',使用中') : '') : tr(',還沒拿到:') + item.how}">`
-        + inner + `<b>${label}</b>` + (on ? tr('<span class="c-on">使用中</span>') : ok ? '' : `<small>${item.how}</small><small class="c-left">${progressText(item, stats)}</small>`)
+        + inner + `<b>${label}</b>` + (LANG === 'en' && item.en ? `<small class="c-mean">${item.en}</small>` : '') + (on ? tr('<span class="c-on">使用中</span>') : ok ? '' : `<small>${item.how}</small><small class="c-left">${progressText(item, stats)}</small>`)
         + '</button></li>';
     };
     $('#scrollList').innerHTML = SCROLLS.map(x => card('s', x, `<span class="c-paper" data-n="${[...tr(x.id)].length}" aria-hidden="true">${[...tr(x.id)].map(c => `<i>${c}</i>`).join('')}</span>`)).join('');
