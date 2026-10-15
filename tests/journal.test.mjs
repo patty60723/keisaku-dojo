@@ -95,7 +95,7 @@ test('統計 counts strikes even when no round was sat in full', async () => {
   await openStats(p);
   const hits = await p.locator('.ledger div').nth(2).textContent();
   assert.equal(hits, '被打6下', 'a count, and no per-round average without a full round');
-  assert.equal(await verdict(p), '施主才剛開始,已經坐了 10 分鐘。下次試著撐到放禪鐘響吧。');
+  assert.equal(await verdict(p), '施主才剛開始,已經坐了 10 分鐘。下次試著撐到開靜吧。');
   await ctx.close();
 });
 
@@ -130,7 +130,7 @@ test('malformed entries already in storage do not break the 統計 tab', async (
   await ctx.close();
 });
 
-test('a backup only brings in sensible entries and plans, and keeps 告假 / late / goal', async () => {
+test('a backup only brings in sensible entries and plans, and keeps 暫離 / late / goal', async () => {
   const backup = {
     app: 'keisaku-dojo', version: 2,
     log: [
@@ -160,7 +160,7 @@ test('a backup only brings in sensible entries and plans, and keeps 告假 / lat
 test('a broken plan from last time is ignored instead of used', async () => {
   const { p, ctx, errors } = await openApp(browser, server.url, { storage: {
     'keisaku-log-v2': [entry(1)], 'keisaku-last-v1': { task: '讀書', focusMin: 25, rounds: 1e9, breakMin: 5 } } });
-  await waitForLine(p, '今日想做的事');
+  await waitForLine(p, '今天想做什麼');
   assert.equal(await p.locator('#rounds i').count() <= 8, true, 'no flood of incense sticks');
   assert.ok(!(await p.evaluate(() => [...document.querySelectorAll('.choice')].some(c => c.textContent.startsWith('跟上次一樣')))));
   assert.deepEqual(errors, []);

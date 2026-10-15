@@ -330,7 +330,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 .top h1 small { white-space: nowrap; }
 @media (max-width: 370px) { .top-btns .help-btn { padding: 0 10px; } }
 
-/* ---------- 告假 and break notifications ---------- */
+/* ---------- 暫離 and break notifications ---------- */
 .foot-btns { display: flex; gap: 14px; align-items: center; }
 .back-btn { width: 100%; min-height: 48px; }
 .back-btn[hidden] { display: none; }

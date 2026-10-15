@@ -5,26 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#e9ecdf" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#141816" media="(prefers-color-scheme: dark)">
-<meta name="description" content="可愛的番茄鐘專注 App。拿起手機,住持就會拿警策「啪」你一下。">
+<meta name="description" content="可愛的番茄鐘專注 App。坐禪時拿起手機,住持就會拿香板打你一下。">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-v2.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon-v2.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="警策道場">
+<meta name="apple-mobile-web-app-title" content="香板禪堂">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="警策道場">
+<meta property="og:site_name" content="香板禪堂">
 <meta property="og:locale" content="zh_TW">
-<meta property="og:title" content="警策道場|番茄鐘・不准滑手機">
-<meta property="og:description" content="可愛的番茄鐘專注 App。拿起手機,住持就會拿警策「啪」你一下。">
+<meta property="og:title" content="香板禪堂|番茄鐘・不准滑手機">
+<meta property="og:description" content="可愛的番茄鐘專注 App。坐禪時拿起手機,住持就會拿香板打你一下。">
 <meta property="og:url" content="https://patty60723.github.io/keisaku-dojo/">
-<meta property="og:image" content="https://patty60723.github.io/keisaku-dojo/icons/og-v1.png">
+<meta property="og:image" content="https://patty60723.github.io/keisaku-dojo/icons/og-v2.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="禪堂裡,麻糬在蒲團上打坐,住持拿著警策站在後面">
+<meta property="og:image:alt" content="禪堂裡,麻糬在蒲團上打坐,住持拿著香板站在後面">
 <meta name="twitter:card" content="summary_large_image">
-<title>警策道場</title>
+<title>香板禪堂</title>
 <script>
 /* apply a saved light/dark choice before first paint, so the page doesn't flash the other theme */
 try { const t = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).theme; if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
@@ -631,7 +631,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 .top h1 small { white-space: nowrap; }
 @media (max-width: 370px) { .top-btns .help-btn { padding: 0 10px; } }
 
-/* ---------- 告假 and break notifications ---------- */
+/* ---------- 暫離 and break notifications ---------- */
 .foot-btns { display: flex; gap: 14px; align-items: center; }
 .back-btn { width: 100%; min-height: 48px; }
 .back-btn[hidden] { display: none; }
@@ -915,7 +915,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
 <main class="app">
   <header class="top">
     <div class="top-row">
-      <h1>警策道場<small>番茄鐘・不准滑手機</small></h1>
+      <h1>香板禪堂<small>番茄鐘・不准滑手機</small></h1>
       <div class="top-btns">
         <button type="button" class="icon-btn" id="settingsBtn" aria-haspopup="dialog" aria-label="設定" title="設定">
           <svg class="glyph-gear" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.19 9.53 L22.05 10.23 L22.05 13.77 L19.19 14.47 L18.83 15.33 L20.36 17.85 L17.85 20.36 L15.33 18.83 L14.47 19.19 L13.77 22.05 L10.23 22.05 L9.53 19.19 L8.67 18.83 L6.15 20.36 L3.64 17.85 L5.17 15.33 L4.81 14.47 L1.95 13.77 L1.95 10.23 L4.81 9.53 L5.17 8.67 L3.64 6.15 L6.15 3.64 L8.67 5.17 L9.53 4.81 L10.23 1.95 L13.77 1.95 L14.47 4.81 L15.33 5.17 L17.85 3.64 L20.36 6.15 L18.83 8.67 Z"/><circle cx="12" cy="12" r="3.2"/></svg>
@@ -986,21 +986,21 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
    <span class="roller right" aria-hidden="true"></span>
    <div class="help scroll-paper">
     <div class="help-head">
-      <h2 id="helpTitle">道場規約</h2>
+      <h2 id="helpTitle">堂規</h2>
       <button type="button" class="sheet-close" id="helpClose" aria-label="關閉">✕</button>
     </div>
     <ul>
-      <li>開始前先跟住持報到:要做的事、每炷多久、坐幾炷、休息多久。可以存成常用,下次直接選。</li>
-      <li>按「準備好了」後,3 秒內把手機平放在桌上(螢幕朝上朝下都行),或立在手機架上。</li>
-      <li>坐禪中<b>拿起手機</b>,或<b>切到別的 App、分頁超過 2 秒</b>,住持就會用警策啪你一下。</li>
-      <li>拿起來的手機要放回原位才算回座;一直不放,每 20 秒再補一下。</li>
-      <li>每炷開始敲<b>止靜三鐘</b>,結束敲<b>放禪一鐘</b>,休息結束敲兩鐘叫你回座。</li>
-      <li>休息時住持去喝茶,手機隨便用。可以在設定打開通知,休息結束時叫你回座(App 在背景時不一定準時)。</li>
-      <li>坐禪中臨時有事(接電話、有人敲門),可以按「<b>告假</b>」暫停計時,每炷一次。回來按「回座」,把手機放好就繼續,不算被打。</li>
-      <li>坐禪中螢幕會保持亮著。手機朝下放也可以,靠鐘聲知道時間到了。</li>
-      <li>想提振精神時可以按「合掌請打」,自己請住持打一下,不算扣分。這是真正禪堂裡也有的規矩。</li>
-      <li>在設定裡可以訂<b>每日目標</b>(一天坐滿幾炷),達成的日子坐禪帳會蓋上「達」。坐禪帳的「統計」可以看近 7 天、30 天和全部的紀錄。</li>
-      <li>一輪坐完後,按「分享」可以把結算卡存成圖片。</li>
+      <li>開始前先跟住持說好:要做什麼、每炷坐多久、坐幾炷、中間休息多久。常用的安排可以存起來,下次一鍵選。</li>
+      <li>按下「準備好了」後,3 秒內把手機平放在桌上(正面反面都可以),或立在手機架上。</li>
+      <li>坐禪時只要<b>拿起手機</b>,或<b>切到別的 App、分頁超過 2 秒</b>,住持就會拿香板打你一下。</li>
+      <li>手機要放回原位才算回座;一直拿著不放,每 20 秒會再補一下。</li>
+      <li>每炷開始時敲三聲鐘(<b>止靜</b>),結束時敲一聲(<b>開靜</b>);休息結束敲兩聲,提醒你回座。</li>
+      <li>休息時住持去喝茶,手機可以隨意用。在設定打開通知,休息結束時會提醒你(App 在背景時不一定準時)。</li>
+      <li>坐禪時臨時有事(接電話、有人敲門),可以按「<b>暫離</b>」暫停計時,每炷可以用一次,不會挨打。回來後按「回座」,把手機放好就會接著計時。</li>
+      <li>坐禪時螢幕會一直亮著。手機也可以螢幕朝下放,聽鐘聲就知道時間到了。</li>
+      <li>想提神時可以按「合掌請打」,請住持打你一下,這一下不會記進被打次數。真正的禪堂裡也有這個規矩。</li>
+      <li>在設定裡可以訂<b>每日目標</b>(一天要坐滿幾炷),達成的那天,坐禪帳會多蓋一個「達」。坐禪帳的「統計」可以看最近七天、三十天和全部的紀錄。</li>
+      <li>一輪坐完,按「分享」可以把結算卡存成圖片。</li>
       <li>紀錄只存在這台手機裡,不會上傳到任何地方。平衡儀只用來判斷手機有沒有被拿起來,數值不會被保存。</li>
       <li>iPhone 第一次開始時,要允許存取「動作與方向」,住持才看得到你有沒有拿起手機。</li>
     </ul>
@@ -1045,28 +1045,28 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
         <label><input type="radio" name="ambient" value="forest"><span>森林</span></label>
         <label><input type="radio" name="ambient" value="chimes"><span>風鈴</span></label>
       </div>
-      <label class="amb-music" for="ambMusic"><input type="checkbox" id="ambMusic"> 加上輕柔的和音 <small>幾個慢慢換的和弦,偶爾一兩聲高音;可以單獨播,也可以疊在上面的聲音上</small></label>
+      <label class="amb-music" for="ambMusic"><input type="checkbox" id="ambMusic"> 加上輕柔的和弦 <small>和弦慢慢變換,偶爾點綴一兩個高音;可以單獨播,也能疊在上面的聲音上</small></label>
       <div class="amb-row">
         <label for="ambVol" class="amb-vol">音量 <input type="range" id="ambVol" min="5" max="100" value="100"></label>
         <button type="button" class="small-btn" id="ambPreview" aria-pressed="false">試聽</button>
       </div>
-      <p class="amb-note">止靜三鐘敲完才慢慢淡入,放禪時淡出;休息時不播。手機開了靜音模式可能會聽不到。</p>
+      <p class="amb-note">止靜的鐘聲敲完後才慢慢出現,開靜時淡出,休息時不播。手機開靜音模式時可能聽不到。</p>
     </fieldset>
     <div class="toggles">
       <label for="optMotion"><input type="checkbox" id="optMotion" checked> 用平衡儀偵測拿起手機 <small>手機平放或立在架上都可以,開始時會記住它的角度</small></label>
       <label for="optSound"><input type="checkbox" id="optSound" checked> 鐘聲與音效</label>
-      <label for="optNotify" id="optNotifyRow" hidden><input type="checkbox" id="optNotify"> 休息結束時跳通知 <small>切到別的 App 時,手機可能會晚幾分鐘才叫你,甚至沒叫到</small></label>
+      <label for="optNotify" id="optNotifyRow" hidden><input type="checkbox" id="optNotify"> 休息結束時發通知 <small>如果切到別的 App,通知可能會晚幾分鐘,甚至沒有</small></label>
     </div>
     <div class="dojo-links">
-      <h3>道場</h3>
+      <h3>禪堂</h3>
       <div class="backup-btns">
-        <button type="button" class="small-btn" id="openRules">道場規約</button>
+        <button type="button" class="small-btn" id="openRules">堂規</button>
         <button type="button" class="small-btn" id="openJournal">坐禪帳</button>
         <button type="button" class="small-btn" id="replayTour">重看導覽</button>
       </div>
     </div>
     <div class="install" id="installBox" hidden>
-      <button type="button" class="btn ghost" id="installBtn" hidden>把道場裝到主畫面</button>
+      <button type="button" class="btn ghost" id="installBtn" hidden>安裝到主畫面</button>
       <p id="iosTip" hidden>iPhone 要裝到主畫面:在 Safari 按下方的「分享」,再選「加入主畫面」。</p>
     </div>
     <div class="backup">
@@ -1094,17 +1094,17 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
       <h3>隱私</h3>
       <p>紀錄和設定只存在這台手機的瀏覽器裡,不會上傳到任何地方,也沒有追蹤或廣告。平衡儀(動作感測器)只用來判斷手機有沒有被拿起來,讀到的數值不會被保存。</p>
       <div class="about-row">
-        <span class="version">警策道場 <b id="appVersion">v14</b></span>
+        <span class="version">香板禪堂 <b id="appVersion">v15</b></span>
         <a class="small-btn" id="feedbackLink" href="https://github.com/patty60723/keisaku-dojo/issues/new" target="_blank" rel="noopener">回報問題</a>
       </div>
-      <p class="about-note">回報問題會開 GitHub,需要登入。版本和裝置資訊會自動帶入,只要寫發生了什麼事就好。</p>
+      <p class="about-note">回報問題會開啟 GitHub(需要登入),版本和裝置資訊會自動填好,只要寫下發生了什麼事。</p>
     </div>
    </div>
    </div>
   </dialog>
 
   <section class="stage-wrap" id="stageWrap">
-    <svg id="stage" viewBox="0 0 400 280" role="img" aria-label="禪堂裡,一顆麻糬坐在蒲團上打坐,一位小和尚拿著警策來回巡堂">
+    <svg id="stage" viewBox="0 0 400 280" role="img" aria-label="禪堂裡,一顆麻糬坐在蒲團上打坐,一位住持拿著香板來回巡堂">
       <defs>
         <pattern id="weave" width="400" height="3" patternUnits="userSpaceOnUse">
           <line x1="0" y1="1.5" x2="400" y2="1.5" class="s-weave" stroke-width=".6"/>
@@ -1142,13 +1142,13 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
       </g>
       <circle cx="86" cy="98" r="33" class="s-wood" stroke-width="5"/>
 
-      <!-- 規約: a wooden notice board hung on the left wall -->
+      <!-- 堂規: a wooden notice board hung on the left wall -->
       <g id="rulesBoard">
         <path d="M38 42 L29 55 M38 42 L47 55" stroke="#2a2622" stroke-width=".7" fill="none"/>
         <circle cx="38" cy="42" r="1.4" class="f-wood"/>
         <rect class="f-stick" x="27" y="55" width="22" height="58" rx="1.5" stroke="#5d4230" stroke-width="1.2"/>
-        <text class="scroll-char f-sink" x="38" y="79" font-size="12" text-anchor="middle">規</text>
-        <text class="scroll-char f-sink" x="38" y="96" font-size="12" text-anchor="middle">約</text>
+        <text class="scroll-char f-sink" x="38" y="79" font-size="12" text-anchor="middle">堂</text>
+        <text class="scroll-char f-sink" x="38" y="96" font-size="12" text-anchor="middle">規</text>
       </g>
 
       <!-- hanging scroll -->
@@ -1317,15 +1317,15 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     <div class="bubble" id="bubble" hidden><span id="bubbleText"></span></div>
     <div class="pow" id="pow" aria-hidden="true">啪!</div>
     <div class="stars" id="stars" aria-hidden="true"></div>
-    <!-- the notice board and the ledger in the picture are the way into 規約 and 坐禪帳 -->
-    <button type="button" class="hotspot" id="helpBtn" aria-haspopup="dialog" aria-label="道場規約" title="道場規約" style="--x:12;--y:36;--w:52;--h:86"></button>
+    <!-- the notice board and the ledger in the picture are the way into 堂規 and 坐禪帳 -->
+    <button type="button" class="hotspot" id="helpBtn" aria-haspopup="dialog" aria-label="堂規" title="堂規" style="--x:12;--y:36;--w:52;--h:86"></button>
     <button type="button" class="hotspot" id="journalBtn" aria-haspopup="dialog" aria-label="坐禪帳" title="坐禪帳" style="--x:348;--y:36;--w:52;--h:90"><span class="streak-badge" id="streakBadge" hidden></span></button>
     <button type="button" class="ask-btn" id="askBtn" hidden><span aria-hidden="true">🙏</span>合掌請打</button>
     <p class="toast" id="toast" aria-live="polite" hidden></p>
       <div class="result" id="result" hidden>
       <div class="result-card">
         <div class="seal"><span id="seal"><i>不</i><i>動</i></span></div>
-        <h2 id="resultTitle">放禪</h2>
+        <h2 id="resultTitle">開靜</h2>
         <p id="resultLine1"></p>
         <p id="resultLine2"></p>
         <p class="goal-met" id="resultGoal" hidden></p>
@@ -1367,13 +1367,13 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     <button type="button" class="btn primary back-btn" id="backBtn" hidden>回座</button>
     <button type="button" class="notify-ask" id="notifyAsk" hidden>🔔 休息結束時用通知叫我</button>
     <details class="sense" id="sense" hidden>
-      <summary>⚠ 只能偵測切出畫面</summary>
+      <summary>⚠ 只能偵測是否切出畫面</summary>
       <p id="senseMode"></p>
     </details>
     <div class="panel-foot">
       <p class="today" id="today">今日坐禪 <b id="stToday">0</b> 分<span id="todayGoal" hidden></span><span id="todayHitsWrap" hidden> · 被打 <b class="hitnum" id="stTodayHits">0</b> 下</span></p>
       <div class="foot-btns">
-        <button type="button" class="quiet-btn" id="leaveBtn" hidden>告假</button>
+        <button type="button" class="quiet-btn" id="leaveBtn" hidden>暫離</button>
         <button type="button" class="quiet-btn" id="mainBtn" hidden>出堂・結束</button>
       </div>
     </div>
@@ -2099,12 +2099,12 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
   let cfg = { ...DEFAULT_CFG };
 
   const RULES = [
-    '坐禪的時候,手機放在桌上別碰。我會一直在堂裡巡。',
-    '拿起手機,或切到別的畫面超過兩秒,我就用這支警策啪你一下。',
-    '每炷香開始敲三聲鐘,結束敲一聲。手機朝下也聽得到。',
-    '休息時我去喝茶,手機隨你用。休息完敲兩聲,叫你回座。',
-    '坐禪中臨時有事,可以按「告假」暫停計時,一炷一次,不會被打。',
-    '想提振精神,也可以按「合掌請打」,自己請我打一下,不算扣分。'
+    '坐禪時,手機放在桌上不要碰。我會在堂裡來回巡視。',
+    '只要拿起手機,或切到別的畫面超過兩秒,我就用這支香板打你一下。',
+    '每炷香開始時敲三聲鐘,結束時敲一聲。手機螢幕朝下也聽得到。',
+    '休息時我去喝茶,手機隨你用。休息結束我敲兩聲,你就回來坐。',
+    '臨時有事的話,可以按「暫離」暫停計時。每炷可以用一次,不會挨打。',
+    '想提神的話,可以按「合掌請打」,請我打你一下。這一下不會記進被打次數。'
   ];
   async function explainRules() {
     for (let i = 0; i < RULES.length; i++) {
@@ -2144,19 +2144,19 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     const hello = streak >= 2 ? `施主已經連續來了 ${streak} 天。` : gap != null && gap >= 3 ? '好幾天沒見了,歡迎回來。' : '施主又來了。';
     const goal = goalNow();
     const progress = !goal || !P.todayRounds ? '' : P.todayRounds >= goal ? `今日目標 ${goal} 炷已經達成了。` : `今日目標 ${goal} 炷,還差 ${goal - P.todayRounds} 炷。`;
-    const greet = introduced ? '那麼,施主今日想做的事是什麼?'          // the welcome was just said
-      : again ? `施主還要再坐一輪嗎?${progress}今日想做的事是什麼?`
-      : hasSat ? hello + progress + '今日想做的事是什麼?'
-      : '歡迎來到警策道場。施主,今日想做的事是什麼?';
+    const greet = introduced ? '那麼,施主今天想做什麼呢?'          // the welcome was just said
+      : again ? `施主還要再坐一輪嗎?${progress}今天想做什麼呢?`
+      : hasSat ? hello + progress + '今天想做什麼呢?'
+      : '歡迎來到香板禪堂。施主今天想做什麼呢?';
     try {
       let firstLine = null;
-      if (introduced) firstLine = '那麼,施主今日想做的事是什麼?';
+      if (introduced) firstLine = '那麼,施主今天想做什麼呢?';
       else if (!hasSat && !rulesAsked && !again) {
-        const v = await ask('歡迎來到警策道場。施主是第一次來吧?要先聽聽道場的規矩嗎?', [
+        const v = await ask('歡迎來到香板禪堂。施主是第一次來吧?要先聽聽禪堂的規矩嗎?', [
           { label: '請說明', value: 'help', primary: true }, { label: '略過說明', value: 'skip' }
         ]).finally(() => store.set('keisaku-rules-asked-v1', true));
         if (v === 'help') await explainRules();
-        firstLine = '那麼,施主今日想做的事是什麼?';
+        firstLine = '那麼,施主今天想做什麼呢?';
       }
       let next = 'new';
       for (;;) {
@@ -2178,7 +2178,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
         applyCfg();
         return readyCheck(`好,一樣是「${cfg.task}」,${cfg.focusMin} 分 × ${cfg.rounds} 炷。`);
       }
-      await planNew(firstLine || (lastCfg || !presetsEmpty() ? '那麼,今日想做什麼呢?' : greet));
+      await planNew(firstLine || (lastCfg || !presetsEmpty() ? '那麼,今天想做什麼呢?' : greet));
     } catch (e) {
       if (e !== SKIP) throw e;
       cfg = { ...(loadLast() || lastCfg || DEFAULT_CFG) };
@@ -2192,7 +2192,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
   // one question per setting, so the plan can be made in order or changed one piece at a time
   async function askTask(line) {
     let task = await ask(line, [...TASKS.map(t => ({ label: t, value: t })), { label: '自訂…', value: '*' }]);
-    if (task === '*') task = await ask('要做什麼呢?寫下來給住持看。', [{ label: '不說了', value: '' }], { input: { placeholder: '例如:背單字' } });
+    if (task === '*') task = await ask('要做什麼呢?寫下來給我看看。', [{ label: '先不說', value: '' }], { input: { placeholder: '例如:背單字' } });
     return task || '專注';
   }
   async function askFocus(line) {
@@ -2210,18 +2210,18 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     return v === '*' ? askNumber('要坐幾炷?', 1, 8, '炷', 4) : v;
   }
   async function askBreak() {
-    const v = await ask('炷與炷之間要休息多久?', [
+    const v = await ask('每炷之間要休息多久?', [
       { label: '5 分', value: 5, primary: true }, { label: '10 分', value: 10 },
       { label: '15 分', value: 15 }, { label: '自訂…', value: '*' }
     ]);
     return v === '*' ? askNumber('休息幾分鐘?', 1, 30, '分', 5) : v;
   }
-  const recapLine = c => `好。施主今日要「${c.task}」,坐 ${c.rounds} 炷香,每炷 ${c.focusMin} 分` +
-    (c.rounds > 1 ? `,中間休息 ${c.breakMin} 分` : '') + `,總共約 ${totalMin(c)} 分鐘。`;
+  const recapLine = c => `好。施主今天要「${c.task}」,坐 ${c.rounds} 炷香,每炷 ${c.focusMin} 分鐘` +
+    (c.rounds > 1 ? `,中間休息 ${c.breakMin} 分鐘` : '') + `,一共大約 ${totalMin(c)} 分鐘。`;
 
   async function planNew(openingLine) {
     const task = await askTask(openingLine);
-    const focusMin = await askFocus(`「${task}」啊,好。每炷香要坐多久?`);
+    const focusMin = await askFocus(`「${task}」啊,好。每炷香要坐多久呢?`);
     const rounds = await askRounds();
     const breakMin = rounds > 1 ? await askBreak() : 0;
     cfg = { task, focusMin, rounds, breakMin };
@@ -2305,7 +2305,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
       : '這次請別切走畫面喔。聽到三聲鐘響就開始,一聲就是休息。';
     let delays = 0;
     if (!store.get('keisaku-leave-told-v1', false)) {
-      await ask('對了,坐禪中臨時有事,可以按計時下面的「告假」暫停一下。一炷一次,不會被打。', [{ label: '知道了', value: 1, primary: true }]);
+      await ask('對了,坐禪時如果臨時有事,可以按計時下方的「暫離」先暫停。每炷可以用一次,不會挨打。', [{ label: '知道了', value: 1, primary: true }]);
       store.set('keisaku-leave-told-v1', true);
     }
     for (;;) {
@@ -2385,7 +2385,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     if (P.phase !== 'focus' || P.leaveUsed || store.get('keisaku-tip-leave-v1', false)) return;
     store.set('keisaku-tip-leave-v1', true);
     tour([{ target: '#leaveBtn', act: true, skipLabel: '知道了',
-      text: '如果是有事要用手機,先按「告假」,計時會暫停,就不會被打了。一炷可以告假一次。', hint: '👆 現在就要告假的話,點一下「告假」' }]);
+      text: '如果真的有事要用手機,先按「暫離」,計時會暫停,就不會挨打了。每炷可以用一次。', hint: '👆 現在就要暫離的話,點一下「暫離」' }]);
   }
   function onPutDown() {
     setStatus(`坐禪中・第 ${P.round} 炷`, 'on');
@@ -2522,7 +2522,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     else renderSense(Mo.permission === 'denied' ? '平衡儀的權限被拒絕了,' : '這台裝置讀不到平衡儀,');
   }
 
-  /* ---------- 告假: step away once per round without being struck ---------- */
+  /* ---------- 暫離: step away once per round without being struck ---------- */
   function startLeave() {
     if (P.phase !== 'focus' || P.leaveUsed) return;
     P.left = Math.max(0, P.end - Date.now());
@@ -2530,7 +2530,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     Mo.base = null; Mo.picked = false;
     stopBackground(1.2); letSleep(); renderSense(null);
     sitterEl.dataset.face = 'peek'; standUp();
-    setStatus('告假中', '');
+    setStatus('暫離中', '');
     setMain('出堂・結束');
     bubble('去吧,快去快回。'); P.leaveBubble = setTimeout(() => bubble(null), 2400);
     toast('計時暫停。回來按「回座」繼續。', false, 4200);
@@ -2590,7 +2590,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     sitterEl.dataset.face = 'happy'; standUp();
     setStatus('休息', '');
     setMain('跳過休息');
-    toast(goalMet ? `今日目標 ${goalNow()} 炷達成!休息 ${cfg.breakMin} 分鐘。` : `放禪。這炷被打 ${P.roundHits} 下,休息 ${cfg.breakMin} 分鐘,手機可以用了。`);
+    toast(goalMet ? `今日目標 ${goalNow()} 炷達成!休息 ${cfg.breakMin} 分鐘。` : `開靜。這炷被打 ${P.roundHits} 下,休息 ${cfg.breakMin} 分鐘,手機可以用了。`);
     enqueue(returnStick);
     renderRounds(); settleMonk();
   }
@@ -2668,7 +2668,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     else { seal = '喝'; line2 = `被打了 ${P.hits} 下,肩膀辛苦了。`; }
     sitterEl.dataset.face = 'happy';
     $('#seal').replaceChildren(...[...seal].map(ch => Object.assign(document.createElement('i'), { textContent: ch })));
-    $('#resultTitle').textContent = early ? '提早出堂' : `${cfg.rounds} 炷坐滿`;
+    $('#resultTitle').textContent = early ? '提早出堂' : `坐滿 ${cfg.rounds} 炷`;
     $('#resultLine1').textContent = `「${cfg.task}」共坐了 ${P.focusTotal} 分鐘` + (P.asks ? `,自己請打 ${P.asks} 下` : '');
     $('#resultLine2').textContent = line2;
     $('#koan').textContent = KOANS[Math.floor(Math.random() * KOANS.length)];
@@ -3013,7 +3013,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     const ul = box.querySelector('ul');
     for (const [task, t] of a.tasks) {
       const li = document.createElement('li');
-      li.textContent = `${task} ${t.rounds} 炷・${t.min} 分・被打 ${t.hits} 下` + (t.leave ? `・告假 ${t.leave} 次` : '')
+      li.textContent = `${task} ${t.rounds} 炷・${t.min} 分・被打 ${t.hits} 下` + (t.leave ? `・暫離 ${t.leave} 次` : '')
         + (t.late ? `・休息超時 ${t.late} 分` : '') + (t.partial ? `(另有 ${t.partial} 次沒坐完)` : '');
       ul.appendChild(li);
     }
@@ -3057,7 +3057,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
   let pendingImport = null;
   function prepareImport(text) {
     let data;
-    try { data = JSON.parse(text); } catch { backupStatus('這不是警策道場的備份,讀不出來。'); return; }
+    try { data = JSON.parse(text); } catch { backupStatus('這不是香板禪堂的備份,讀不出來。'); return; }
     const incoming = (Array.isArray(data) ? data : data && data.log || []).filter(validEntry);
     if (!incoming.length) { backupStatus('備份裡沒有任何紀錄。'); return; }
     const have = new Set(readLog().map(e => e.t + '|' + e.d));
@@ -3141,13 +3141,13 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
   $('#tourSkip').addEventListener('click', () => Tour.skip());
   // what the dojo is, said once on the first visit before the tour
   const INTRO = [
-    ['歡迎來到警策道場。我是這裡的住持。', '你好'],
-    ['這裡是讓施主專心的地方。手機放下,一次坐一炷香,像番茄鐘一樣,坐完就休息。', '然後呢?'],
-    ['坐禪的時候我會在堂裡巡。施主一拿起手機、或切去別的畫面,我就用這支警策輕輕啪你一下。', '我會專心的', true],
-    ['先帶施主看看道場裡的東西。', '好'],
+    ['歡迎來到香板禪堂,我是這裡的住持。', '你好'],
+    ['這裡是讓人專心的地方:把手機放下,一次坐一炷香,就像番茄鐘,坐完再休息。', '然後呢?'],
+    ['坐禪時我會在堂裡巡視。施主只要拿起手機,或切到別的畫面,我就用這支香板輕輕打你一下。', '我會專心的', true],
+    ['先帶施主看看禪堂裡的東西。', '好'],
   ];
   const introSteps = returning => [
-    { target: '#helpBtn', sheet: '#help', text: (returning ? '道場重新布置過了,我帶施主看一下。' : '') + '道場的規矩寫在左邊這塊「規約」木牌上。點它看看,看完收起來就好。', hint: '👆 點一下「規約」木牌' },
+    { target: '#helpBtn', sheet: '#help', text: (returning ? '禪堂重新布置過了,我帶施主看一下。' : '') + '禪堂的規矩寫在左邊這塊「堂規」木牌上,點開看看,看完收起來就好。', hint: '👆 點一下「堂規」木牌' },
     { target: '#journalBtn', sheet: '#journal', text: '右邊柱子上掛的是坐禪帳。每坐完一炷,我就在上面蓋一個章。點開看看。', hint: '👆 點一下坐禪帳' },
     { target: '#settingsBtn', sheet: '#settings', text: '背景聲音、每日目標、深色淺色,都在這個齒輪裡調。', hint: '👆 點一下齒輪' },
   ];
@@ -3231,7 +3231,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     if (range === 'all') {
       const first = log.reduce((acc, e) => e.d < acc ? e.d : acc, dayKey()).split('-');
       const since = +first[0] === new Date().getFullYear() ? `${+first[1]} 月` : `${first[0]} 年 ${+first[1]} 月`;
-      if (!cur.rounds) return `施主從 ${since}開始來,還沒坐滿過一炷呢。下次撐到放禪鐘響,我幫你蓋章。`;
+      if (!cur.rounds) return `施主從 ${since}開始來,還沒坐滿過一炷呢。下次撐到開靜的鐘聲,我幫你蓋章。`;
       const top = [...cur.tasks].sort((a, b) => b[1].min - a[1].min)[0];
       return `施主從 ${since}開始來,一共坐了 ${talkMin(cur.min)}。` +
         (cur.tasks.size > 1 ? `花最多時間的是「${top[0]}」。` : `都在「${top[0]}」上,很專一。`);
@@ -3254,7 +3254,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
         : gentle ? `這${label}坐得少一些。不要緊,今天來坐一炷就好。`
         : `這${label}跟前${label}差不多,穩穩的,很好。`;
     }
-    if (!cur.rounds) return line + '下次試著撐到放禪鐘響吧。';
+    if (!cur.rounds) return line + '下次試著撐到開靜吧。';
     const a = cur.hits / cur.rounds, b = prev.rounds ? prev.hits / prev.rounds : null;
     if (!cur.hits) line += '一下都沒被打,如山不動。';
     else if (hasHistory && b != null && a < b - .1) line += '被打的也少了,有進步。';
@@ -3394,7 +3394,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     const seal = $('#seal').textContent, title = $('#resultTitle').textContent;
     const l1 = $('#resultLine1').textContent, l2 = $('#resultLine2').textContent, koan = $('#koan').textContent;
     const goal = $('#resultGoal').hidden ? '' : $('#resultGoal').textContent;
-    const all = seal + title + l1 + l2 + koan + goal + '警策道場0123456789年月日';
+    const all = seal + title + l1 + l2 + koan + goal + '香板禪堂0123456789年月日';
     try { await Promise.all([document.fonts.load(`700 60px ${disp}`, all), document.fonts.load(`400 40px ${disp}`, all)]); } catch {}
 
     g.fillStyle = v('--bg'); g.fillRect(0, 0, W, H);
@@ -3432,7 +3432,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
     g.font = `400 30px ${bodyF}`; g.fillStyle = v('--muted'); g.textAlign = 'left';
     g.fillText(`${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`, 100, H - 100);
     g.textAlign = 'right'; g.fillStyle = v('--ink'); g.font = `700 40px ${disp}`;
-    g.fillText('警策道場', W - 100, H - 100);
+    g.fillText('香板禪堂', W - 100, H - 100);
     return c;
   }
   function prepareShare() {

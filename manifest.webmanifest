@@ -1,7 +1,7 @@
 {
-  "name": "警策道場",
-  "short_name": "警策道場",
-  "description": "可愛的番茄鐘專注 App。拿起手機,住持就會拿警策「啪」你一下。",
+  "name": "香板禪堂",
+  "short_name": "香板禪堂",
+  "description": "可愛的番茄鐘專注 App。坐禪時拿起手機,住持就會拿香板打你一下。",
   "lang": "zh-Hant",
   "id": "/keisaku-dojo/",
   "start_url": "./",

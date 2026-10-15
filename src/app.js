@@ -704,12 +704,12 @@
   let cfg = { ...DEFAULT_CFG };
 
   const RULES = [
-    '坐禪的時候,手機放在桌上別碰。我會一直在堂裡巡。',
-    '拿起手機,或切到別的畫面超過兩秒,我就用這支警策啪你一下。',
-    '每炷香開始敲三聲鐘,結束敲一聲。手機朝下也聽得到。',
-    '休息時我去喝茶,手機隨你用。休息完敲兩聲,叫你回座。',
-    '坐禪中臨時有事,可以按「告假」暫停計時,一炷一次,不會被打。',
-    '想提振精神,也可以按「合掌請打」,自己請我打一下,不算扣分。'
+    '坐禪時,手機放在桌上不要碰。我會在堂裡來回巡視。',
+    '只要拿起手機,或切到別的畫面超過兩秒,我就用這支香板打你一下。',
+    '每炷香開始時敲三聲鐘,結束時敲一聲。手機螢幕朝下也聽得到。',
+    '休息時我去喝茶,手機隨你用。休息結束我敲兩聲,你就回來坐。',
+    '臨時有事的話,可以按「暫離」暫停計時。每炷可以用一次,不會挨打。',
+    '想提神的話,可以按「合掌請打」,請我打你一下。這一下不會記進被打次數。'
   ];
   async function explainRules() {
     for (let i = 0; i < RULES.length; i++) {
@@ -749,19 +749,19 @@
     const hello = streak >= 2 ? `施主已經連續來了 ${streak} 天。` : gap != null && gap >= 3 ? '好幾天沒見了,歡迎回來。' : '施主又來了。';
     const goal = goalNow();
     const progress = !goal || !P.todayRounds ? '' : P.todayRounds >= goal ? `今日目標 ${goal} 炷已經達成了。` : `今日目標 ${goal} 炷,還差 ${goal - P.todayRounds} 炷。`;
-    const greet = introduced ? '那麼,施主今日想做的事是什麼?'          // the welcome was just said
-      : again ? `施主還要再坐一輪嗎?${progress}今日想做的事是什麼?`
-      : hasSat ? hello + progress + '今日想做的事是什麼?'
-      : '歡迎來到警策道場。施主,今日想做的事是什麼?';
+    const greet = introduced ? '那麼,施主今天想做什麼呢?'          // the welcome was just said
+      : again ? `施主還要再坐一輪嗎?${progress}今天想做什麼呢?`
+      : hasSat ? hello + progress + '今天想做什麼呢?'
+      : '歡迎來到香板禪堂。施主今天想做什麼呢?';
     try {
       let firstLine = null;
-      if (introduced) firstLine = '那麼,施主今日想做的事是什麼?';
+      if (introduced) firstLine = '那麼,施主今天想做什麼呢?';
       else if (!hasSat && !rulesAsked && !again) {
-        const v = await ask('歡迎來到警策道場。施主是第一次來吧?要先聽聽道場的規矩嗎?', [
+        const v = await ask('歡迎來到香板禪堂。施主是第一次來吧?要先聽聽禪堂的規矩嗎?', [
           { label: '請說明', value: 'help', primary: true }, { label: '略過說明', value: 'skip' }
         ]).finally(() => store.set('keisaku-rules-asked-v1', true));
         if (v === 'help') await explainRules();
-        firstLine = '那麼,施主今日想做的事是什麼?';
+        firstLine = '那麼,施主今天想做什麼呢?';
       }
       let next = 'new';
       for (;;) {
@@ -783,7 +783,7 @@
         applyCfg();
         return readyCheck(`好,一樣是「${cfg.task}」,${cfg.focusMin} 分 × ${cfg.rounds} 炷。`);
       }
-      await planNew(firstLine || (lastCfg || !presetsEmpty() ? '那麼,今日想做什麼呢?' : greet));
+      await planNew(firstLine || (lastCfg || !presetsEmpty() ? '那麼,今天想做什麼呢?' : greet));
     } catch (e) {
       if (e !== SKIP) throw e;
       cfg = { ...(loadLast() || lastCfg || DEFAULT_CFG) };
@@ -797,7 +797,7 @@
   // one question per setting, so the plan can be made in order or changed one piece at a time
   async function askTask(line) {
     let task = await ask(line, [...TASKS.map(t => ({ label: t, value: t })), { label: '自訂…', value: '*' }]);
-    if (task === '*') task = await ask('要做什麼呢?寫下來給住持看。', [{ label: '不說了', value: '' }], { input: { placeholder: '例如:背單字' } });
+    if (task === '*') task = await ask('要做什麼呢?寫下來給我看看。', [{ label: '先不說', value: '' }], { input: { placeholder: '例如:背單字' } });
     return task || '專注';
   }
   async function askFocus(line) {
@@ -815,18 +815,18 @@
     return v === '*' ? askNumber('要坐幾炷?', 1, 8, '炷', 4) : v;
   }
   async function askBreak() {
-    const v = await ask('炷與炷之間要休息多久?', [
+    const v = await ask('每炷之間要休息多久?', [
       { label: '5 分', value: 5, primary: true }, { label: '10 分', value: 10 },
       { label: '15 分', value: 15 }, { label: '自訂…', value: '*' }
     ]);
     return v === '*' ? askNumber('休息幾分鐘?', 1, 30, '分', 5) : v;
   }
-  const recapLine = c => `好。施主今日要「${c.task}」,坐 ${c.rounds} 炷香,每炷 ${c.focusMin} 分` +
-    (c.rounds > 1 ? `,中間休息 ${c.breakMin} 分` : '') + `,總共約 ${totalMin(c)} 分鐘。`;
+  const recapLine = c => `好。施主今天要「${c.task}」,坐 ${c.rounds} 炷香,每炷 ${c.focusMin} 分鐘` +
+    (c.rounds > 1 ? `,中間休息 ${c.breakMin} 分鐘` : '') + `,一共大約 ${totalMin(c)} 分鐘。`;
 
   async function planNew(openingLine) {
     const task = await askTask(openingLine);
-    const focusMin = await askFocus(`「${task}」啊,好。每炷香要坐多久?`);
+    const focusMin = await askFocus(`「${task}」啊,好。每炷香要坐多久呢?`);
     const rounds = await askRounds();
     const breakMin = rounds > 1 ? await askBreak() : 0;
     cfg = { task, focusMin, rounds, breakMin };
@@ -910,7 +910,7 @@
       : '這次請別切走畫面喔。聽到三聲鐘響就開始,一聲就是休息。';
     let delays = 0;
     if (!store.get('keisaku-leave-told-v1', false)) {
-      await ask('對了,坐禪中臨時有事,可以按計時下面的「告假」暫停一下。一炷一次,不會被打。', [{ label: '知道了', value: 1, primary: true }]);
+      await ask('對了,坐禪時如果臨時有事,可以按計時下方的「暫離」先暫停。每炷可以用一次,不會挨打。', [{ label: '知道了', value: 1, primary: true }]);
       store.set('keisaku-leave-told-v1', true);
     }
     for (;;) {
@@ -990,7 +990,7 @@
     if (P.phase !== 'focus' || P.leaveUsed || store.get('keisaku-tip-leave-v1', false)) return;
     store.set('keisaku-tip-leave-v1', true);
     tour([{ target: '#leaveBtn', act: true, skipLabel: '知道了',
-      text: '如果是有事要用手機,先按「告假」,計時會暫停,就不會被打了。一炷可以告假一次。', hint: '👆 現在就要告假的話,點一下「告假」' }]);
+      text: '如果真的有事要用手機,先按「暫離」,計時會暫停,就不會挨打了。每炷可以用一次。', hint: '👆 現在就要暫離的話,點一下「暫離」' }]);
   }
   function onPutDown() {
     setStatus(`坐禪中・第 ${P.round} 炷`, 'on');
@@ -1127,7 +1127,7 @@
     else renderSense(Mo.permission === 'denied' ? '平衡儀的權限被拒絕了,' : '這台裝置讀不到平衡儀,');
   }
 
-  /* ---------- 告假: step away once per round without being struck ---------- */
+  /* ---------- 暫離: step away once per round without being struck ---------- */
   function startLeave() {
     if (P.phase !== 'focus' || P.leaveUsed) return;
     P.left = Math.max(0, P.end - Date.now());
@@ -1135,7 +1135,7 @@
     Mo.base = null; Mo.picked = false;
     stopBackground(1.2); letSleep(); renderSense(null);
     sitterEl.dataset.face = 'peek'; standUp();
-    setStatus('告假中', '');
+    setStatus('暫離中', '');
     setMain('出堂・結束');
     bubble('去吧,快去快回。'); P.leaveBubble = setTimeout(() => bubble(null), 2400);
     toast('計時暫停。回來按「回座」繼續。', false, 4200);
@@ -1195,7 +1195,7 @@
     sitterEl.dataset.face = 'happy'; standUp();
     setStatus('休息', '');
     setMain('跳過休息');
-    toast(goalMet ? `今日目標 ${goalNow()} 炷達成!休息 ${cfg.breakMin} 分鐘。` : `放禪。這炷被打 ${P.roundHits} 下,休息 ${cfg.breakMin} 分鐘,手機可以用了。`);
+    toast(goalMet ? `今日目標 ${goalNow()} 炷達成!休息 ${cfg.breakMin} 分鐘。` : `開靜。這炷被打 ${P.roundHits} 下,休息 ${cfg.breakMin} 分鐘,手機可以用了。`);
     enqueue(returnStick);
     renderRounds(); settleMonk();
   }
@@ -1273,7 +1273,7 @@
     else { seal = '喝'; line2 = `被打了 ${P.hits} 下,肩膀辛苦了。`; }
     sitterEl.dataset.face = 'happy';
     $('#seal').replaceChildren(...[...seal].map(ch => Object.assign(document.createElement('i'), { textContent: ch })));
-    $('#resultTitle').textContent = early ? '提早出堂' : `${cfg.rounds} 炷坐滿`;
+    $('#resultTitle').textContent = early ? '提早出堂' : `坐滿 ${cfg.rounds} 炷`;
     $('#resultLine1').textContent = `「${cfg.task}」共坐了 ${P.focusTotal} 分鐘` + (P.asks ? `,自己請打 ${P.asks} 下` : '');
     $('#resultLine2').textContent = line2;
     $('#koan').textContent = KOANS[Math.floor(Math.random() * KOANS.length)];
@@ -1618,7 +1618,7 @@
     const ul = box.querySelector('ul');
     for (const [task, t] of a.tasks) {
       const li = document.createElement('li');
-      li.textContent = `${task} ${t.rounds} 炷・${t.min} 分・被打 ${t.hits} 下` + (t.leave ? `・告假 ${t.leave} 次` : '')
+      li.textContent = `${task} ${t.rounds} 炷・${t.min} 分・被打 ${t.hits} 下` + (t.leave ? `・暫離 ${t.leave} 次` : '')
         + (t.late ? `・休息超時 ${t.late} 分` : '') + (t.partial ? `(另有 ${t.partial} 次沒坐完)` : '');
       ul.appendChild(li);
     }
@@ -1662,7 +1662,7 @@
   let pendingImport = null;
   function prepareImport(text) {
     let data;
-    try { data = JSON.parse(text); } catch { backupStatus('這不是警策道場的備份,讀不出來。'); return; }
+    try { data = JSON.parse(text); } catch { backupStatus('這不是香板禪堂的備份,讀不出來。'); return; }
     const incoming = (Array.isArray(data) ? data : data && data.log || []).filter(validEntry);
     if (!incoming.length) { backupStatus('備份裡沒有任何紀錄。'); return; }
     const have = new Set(readLog().map(e => e.t + '|' + e.d));
@@ -1746,13 +1746,13 @@
   $('#tourSkip').addEventListener('click', () => Tour.skip());
   // what the dojo is, said once on the first visit before the tour
   const INTRO = [
-    ['歡迎來到警策道場。我是這裡的住持。', '你好'],
-    ['這裡是讓施主專心的地方。手機放下,一次坐一炷香,像番茄鐘一樣,坐完就休息。', '然後呢?'],
-    ['坐禪的時候我會在堂裡巡。施主一拿起手機、或切去別的畫面,我就用這支警策輕輕啪你一下。', '我會專心的', true],
-    ['先帶施主看看道場裡的東西。', '好'],
+    ['歡迎來到香板禪堂,我是這裡的住持。', '你好'],
+    ['這裡是讓人專心的地方:把手機放下,一次坐一炷香,就像番茄鐘,坐完再休息。', '然後呢?'],
+    ['坐禪時我會在堂裡巡視。施主只要拿起手機,或切到別的畫面,我就用這支香板輕輕打你一下。', '我會專心的', true],
+    ['先帶施主看看禪堂裡的東西。', '好'],
   ];
   const introSteps = returning => [
-    { target: '#helpBtn', sheet: '#help', text: (returning ? '道場重新布置過了,我帶施主看一下。' : '') + '道場的規矩寫在左邊這塊「規約」木牌上。點它看看,看完收起來就好。', hint: '👆 點一下「規約」木牌' },
+    { target: '#helpBtn', sheet: '#help', text: (returning ? '禪堂重新布置過了,我帶施主看一下。' : '') + '禪堂的規矩寫在左邊這塊「堂規」木牌上,點開看看,看完收起來就好。', hint: '👆 點一下「堂規」木牌' },
     { target: '#journalBtn', sheet: '#journal', text: '右邊柱子上掛的是坐禪帳。每坐完一炷,我就在上面蓋一個章。點開看看。', hint: '👆 點一下坐禪帳' },
     { target: '#settingsBtn', sheet: '#settings', text: '背景聲音、每日目標、深色淺色,都在這個齒輪裡調。', hint: '👆 點一下齒輪' },
   ];
@@ -1836,7 +1836,7 @@
     if (range === 'all') {
       const first = log.reduce((acc, e) => e.d < acc ? e.d : acc, dayKey()).split('-');
       const since = +first[0] === new Date().getFullYear() ? `${+first[1]} 月` : `${first[0]} 年 ${+first[1]} 月`;
-      if (!cur.rounds) return `施主從 ${since}開始來,還沒坐滿過一炷呢。下次撐到放禪鐘響,我幫你蓋章。`;
+      if (!cur.rounds) return `施主從 ${since}開始來,還沒坐滿過一炷呢。下次撐到開靜的鐘聲,我幫你蓋章。`;
       const top = [...cur.tasks].sort((a, b) => b[1].min - a[1].min)[0];
       return `施主從 ${since}開始來,一共坐了 ${talkMin(cur.min)}。` +
         (cur.tasks.size > 1 ? `花最多時間的是「${top[0]}」。` : `都在「${top[0]}」上,很專一。`);
@@ -1859,7 +1859,7 @@
         : gentle ? `這${label}坐得少一些。不要緊,今天來坐一炷就好。`
         : `這${label}跟前${label}差不多,穩穩的,很好。`;
     }
-    if (!cur.rounds) return line + '下次試著撐到放禪鐘響吧。';
+    if (!cur.rounds) return line + '下次試著撐到開靜吧。';
     const a = cur.hits / cur.rounds, b = prev.rounds ? prev.hits / prev.rounds : null;
     if (!cur.hits) line += '一下都沒被打,如山不動。';
     else if (hasHistory && b != null && a < b - .1) line += '被打的也少了,有進步。';
@@ -1999,7 +1999,7 @@
     const seal = $('#seal').textContent, title = $('#resultTitle').textContent;
     const l1 = $('#resultLine1').textContent, l2 = $('#resultLine2').textContent, koan = $('#koan').textContent;
     const goal = $('#resultGoal').hidden ? '' : $('#resultGoal').textContent;
-    const all = seal + title + l1 + l2 + koan + goal + '警策道場0123456789年月日';
+    const all = seal + title + l1 + l2 + koan + goal + '香板禪堂0123456789年月日';
     try { await Promise.all([document.fonts.load(`700 60px ${disp}`, all), document.fonts.load(`400 40px ${disp}`, all)]); } catch {}
 
     g.fillStyle = v('--bg'); g.fillRect(0, 0, W, H);
@@ -2037,7 +2037,7 @@
     g.font = `400 30px ${bodyF}`; g.fillStyle = v('--muted'); g.textAlign = 'left';
     g.fillText(`${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`, 100, H - 100);
     g.textAlign = 'right'; g.fillStyle = v('--ink'); g.font = `700 40px ${disp}`;
-    g.fillText('警策道場', W - 100, H - 100);
+    g.fillText('香板禪堂', W - 100, H - 100);
     return c;
   }
   function prepareShare() {
