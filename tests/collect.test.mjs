@@ -21,7 +21,7 @@ test('the hanging scroll opens the 收藏冊, which works out from the log what 
   for (const id of ['靜', '忍', '心', '莫妄想', '日日是好日', SEASON_SCROLL[seasonNow()]]) assert.equal(await locked(id), false, id);
   for (const id of ['無', '一期一會', '放下著']) assert.equal(await locked(id), true, id);
   assert.match(await card(p, '無').textContent(), /還差 40 炷/);
-  assert.match(await p.locator('#collectSum').textContent(), /已經收到 \d+ \/ 23 樣/);
+  assert.match(await p.locator('#collectSum').textContent(), /已經收到 \d+ \/ 35 樣/);
   await p.locator('#tabAccs').click();
   assert.equal(await locked('leaf'), false);
   assert.equal(await locked('hat'), true);
@@ -103,7 +103,7 @@ test('the windows show this season, and the square one has a story', async () =>
 });
 
 test('a backup carries what was on show into a plain zendo', async () => {
-  const backup = { app: 'keisaku-dojo', version: 2, log: tenDays(), presets: [], collect: { scroll: '心', acc: 'leaf' } };
+  const backup = { app: 'keisaku-dojo', version: 2, log: tenDays(), presets: [], collect: { scroll: '心', acc: 'leaf' } };     // a backup from before v18: one accessory
   const { p, ctx } = await openApp(browser, server.url);
   await p.locator('#settingsBtn').click(); await p.waitForFunction(() => document.getElementById('settings').open);
   await p.locator('#pasteBtn').click();
@@ -112,7 +112,43 @@ test('a backup carries what was on show into a plain zendo', async () => {
   await p.locator('#importYes').click();
   assert.equal(await scrollText(p), '心');
   const stored = await p.evaluate(() => JSON.parse(localStorage.getItem('keisaku-collect-v1')));
-  assert.equal(stored.acc, 'leaf');
+  assert.equal(stored.wear.head, 'leaf', 'the old single accessory lands in its slot');
   assert.ok(stored.seen.includes('s:心'), 'restored rounds are not news');
+  await ctx.close();
+});
+
+test('one thing on the head, one on the body and one extra can be worn together; tapping again takes it off', async () => {
+  const log = [...Array(40)].map((_, i) => entry(i, { min: 50, hits: 0, task: ['讀書', '工作', '寫作'][i % 3] }));
+  const { p, ctx, errors } = await openApp(browser, server.url, { storage: { 'keisaku-log-v2': log } });
+  await openBook(p);
+  await p.locator('#tabAccs').click();
+  assert.equal(await p.locator('.c-slot').count(), 3);
+  for (const id of ['hat', 'mino', 'cat']) await card(p, id).click();     // head, body, extra (beside the cushion)
+  const worn = () => p.evaluate(() => ({
+    front: [...document.querySelectorAll('#mochiAcc .acc')].map(g => g.classList[1]),
+    back: [...document.querySelectorAll('#mochiAccBack .acc')].map(g => g.classList[1]),
+    side: [...document.querySelectorAll('#accSide .acc')].map(g => g.classList[1]) }));
+  assert.deepEqual(await worn(), { front: ['acc-hat'], back: ['acc-mino'], side: ['acc-cat'] });
+  await card(p, 'leaf').click();                                         // same slot as the hat: it replaces it
+  assert.deepEqual((await worn()).front, ['acc-leaf']);
+  await card(p, 'leaf').click();                                         // and comes off again
+  assert.deepEqual((await worn()).front, []);
+  const stored = await p.evaluate(() => JSON.parse(localStorage.getItem('keisaku-collect-v1')));
+  assert.deepEqual(stored.wear, { head: null, body: 'mino', extra: 'cat' });
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});
+
+test('when struck, a hat hides the bump and what is worn reacts', async () => {
+  const log = [...Array(40)].map((_, i) => entry(i, { min: 50 }));
+  const { p, ctx } = await openApp(browser, server.url, { storage: { 'keisaku-log-v2': log, 'keisaku-collect-v1': { scroll: '靜', wear: { head: 'hat', body: null, extra: null }, seen: [] } } });
+  await sit(p);
+  // the monk ignores a request while he is still fetching the keisaku, so ask until he comes
+  for (let i = 0; i < 8; i++) {
+    await p.locator('#askBtn').click();
+    if (await p.waitForFunction(() => document.getElementById('sitter').dataset.face === 'ouch', null, { timeout: 2500 }).then(() => true, () => false)) break;
+  }
+  assert.equal(await p.evaluate(() => getComputedStyle(document.querySelector('#sitter .bump')).display), 'none');
+  assert.equal(await p.evaluate(() => document.querySelector('#mochiAcc .acc-hat').classList.contains('react')), true);
   await ctx.close();
 });

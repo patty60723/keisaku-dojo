@@ -586,7 +586,8 @@
     await tween(0, 1, reduceMotion ? 1 : 620, t => placeMochi(fx + (tx - fx) * t, fy + (ty - fy) * t - Math.sin(Math.PI * t) * 24), easeInOut);
     standing = !toSit;
     sitterEl.classList.toggle('standing', standing);
-    sitterEl.classList.remove('ouch'); void sitterEl.getBoundingClientRect(); sitterEl.classList.add('ouch');   // little squash on landing
+    sitterEl.classList.remove('ouch'); void sitterEl.getBoundingClientRect(); sitterEl.classList.add('ouch');
+    document.querySelectorAll('#sitter .acc').forEach(a => { a.classList.remove('react'); void a.getBoundingClientRect(); a.classList.add('react'); });   // little squash on landing
     setTimeout(() => sitterEl.classList.remove('ouch'), 500);
   }
   const sitDown = () => hop(true), standUp = () => hop(false);
@@ -1702,7 +1703,7 @@
   // backup: a JSON file, or the same JSON as text for phones that can't save files easily
   const backupStatus = t => { $('#backupStatus').textContent = t; };
   const backupText = () => JSON.stringify({ app: 'keisaku-dojo', version: 2, exported: new Date().toISOString(),
-    log: readLog(), presets: loadPresets(), collect: { scroll: C.scroll, acc: C.acc } });
+    log: readLog(), presets: loadPresets(), collect: { scroll: C.scroll, wear: C.wear } });
   $('#exportBtn').addEventListener('click', () => {
     try {
       const url = URL.createObjectURL(new Blob([backupText()], { type: 'application/json' }));
@@ -1749,9 +1750,11 @@
     const { fresh, presets, collect: wear } = pendingImport; pendingImport = null;
     writeLog(readLog().concat(fresh.map(cleanEntry)));
     if (presets.length && !loadPresets().length) store.set('keisaku-presets-v1', presets.slice(0, MAX_PRESETS));
-    if (wear && typeof wear === 'object' && C.scroll === '靜' && C.acc === 'none') {      // only dress up a zendo that is still plain
+    const plain = C.scroll === '靜' && !C.wear.head && !C.wear.body && !C.wear.extra;
+    if (wear && typeof wear === 'object' && plain) {                      // only dress up a zendo that is still plain
       if (SCROLLS.some(x => x.id === wear.scroll)) C.scroll = wear.scroll;
-      if (ACCS.some(x => x.id === wear.acc)) C.acc = wear.acc;
+      const ids = wear.wear && typeof wear.wear === 'object' ? Object.values(wear.wear) : [wear.acc];   // v18 backups, or an older single one
+      for (const id of ids) { const it = ACCS.find(x => x.id === id); if (it) C.wear[it.slot] = it.id; }
     }
     C.seen = [...new Set([...C.seen, ...unlockedIds(readLog())])]; saveCollect(); renderScene();   // restored rounds are not "new"
     $('#importConfirm').hidden = true; $('#pasteBox').hidden = true;
@@ -2171,6 +2174,9 @@
       bigDay: Math.max(0, ...[...days.values()].map(a => a.full)),
       onTime: [...days.values()].filter(a => a.full >= 2 && !a.late).length,
       streak: best, season,
+      early: full.filter(e => { const h = new Date(e.t).getHours(); return h >= 3 && h < 7; }).length,   // finished before 7 in the morning
+      night: full.filter(e => { const h = new Date(e.t).getHours(); return h >= 22 || h < 3; }).length,  // after 10 at night
+      tasks: new Set(full.map(e => e.task)).size,
     };
   }
   // need(stats) -> [have, need, unit]
@@ -2194,27 +2200,67 @@
   const blossom = (x, y, c, r = 2.6) => [0, 72, 144, 216, 288].map(a => { const t = a * Math.PI / 180; return `<circle cx="${(x + Math.cos(t) * r * .8).toFixed(1)}" cy="${(y + Math.sin(t) * r * .8).toFixed(1)}" r="${(r * .62).toFixed(2)}" fill="${c}"/>`; }).join('') + `<circle cx="${x}" cy="${y}" r="${(r * .35).toFixed(2)}" fill="#e8b84a"/>`;
   const MAPLE = 'M0 -5 L1.2 -2 L4 -3 L2.6 0 L4.6 1.4 L1.4 1.6 L0.8 4 L0 2.4 L-0.8 4 L-1.4 1.6 L-4.6 1.4 L-2.6 0 L-4 -3 L-1.2 -2 Z';
   const maple = (x, y, c, s = 1.15, rot = 0) => `<path transform="translate(${x} ${y}) rotate(${rot}) scale(${s})" fill="${c}" d="${MAPLE}"/>`;
+  // slot: head / body / extra. Body things are drawn behind the arms; extra things sit on the face, in the hands,
+  // or (place: 'side') on the mat beside the cushion. react: what the thing does when the keisaku lands.
+  const DROP = (shape) => `<g class="acc-drop">${shape}</g>`;
   const ACCS = [
-    { id: 'none', name: tr('不戴'), how: '', need: () => [1, 1], svg: '' },
-    { id: 'leaf', name: tr('葉子'), gift: tr('這片葉子'), how: tr('第一次坐滿一炷'), need: s => [s.rounds, 1, tr('炷')],
+    { id: 'leaf', slot: 'head', name: tr('葉子'), gift: tr('這片葉子'), how: tr('第一次坐滿一炷'), need: s => [s.rounds, 1, tr('炷')],
       svg: `<path d="M2 -68 q-2 -10 6 -14 q4 8 -6 14z" fill="#86b061" ${INK}/><path d="M2 -68 q2 -6 5 -11" stroke="#2a2622" stroke-width=".8" fill="none"/>` },
-    { id: 'sakura', name: tr('櫻花'), gift: tr('這朵櫻花'), how: tr('春天坐滿 5 炷'), season: 'spring', need: s => [s.season.spring, 5, tr('炷')],
-      svg: `<g transform="translate(-15 -58)">${blossom(0, 0, '#f4b6c4', 4.4)}</g>` },
-    { id: 'hachimaki', name: tr('頭巾'), gift: tr('這條頭巾'), how: tr('坐滿一炷 45 分鐘以上'), need: s => [s.long, 1, tr('炷')],
+    { id: 'bird', slot: 'head', name: tr('小鳥'), gift: tr('這隻小鳥'), how: tr('連續 3 天都有坐滿'), need: s => [s.streak, 3, tr('天')],
+      svg: `<path d="M-12 -71 l-6 -3 l1 5z" fill="#7aa3c9" ${INK}/><ellipse cx="-6" cy="-73.5" rx="6.5" ry="5" fill="#9cc0e0" ${INK}/>`
+        + '<path d="M-9.5 -73 q3 3 6 0" fill="none" stroke="#2a2622" stroke-width=".8"/><circle cx="-3" cy="-75" r=".9" fill="#2a2622"/>'
+        + '<path d="M.3 -74.8 l3.2 .9 l-3.2 1z" fill="#e8a33a" stroke="#2a2622" stroke-width=".5"/><path d="M-7.5 -68.7 v1.5 M-4.5 -68.7 v1.5" stroke="#e8a33a" stroke-width="1"/>' },
+    { id: 'hachimaki', slot: 'head', name: tr('頭巾'), gift: tr('這條頭巾'), how: tr('坐滿一炷 45 分鐘以上'), need: s => [s.long, 1, tr('炷')],
       svg: `<path d="M-27 -54 Q0 -62 27 -54 L28 -49 Q0 -57 -28 -49Z" fill="#f8f5ec" ${INK}/><circle cx="0" cy="-54" r="3.4" fill="#c8434b"/><path d="M27 -53 l9 -4 l-1 6z M27 -52 l8 3 l-3 4z" fill="#f8f5ec" ${INK}/>` },
-    { id: 'hat', name: tr('斗笠'), gift: tr('這頂斗笠'), how: tr('累計坐滿 30 炷'), need: s => [s.rounds, 30, tr('炷')],
+    { id: 'hat', slot: 'head', name: tr('斗笠'), gift: tr('這頂斗笠'), how: tr('累計坐滿 30 炷'), need: s => [s.rounds, 30, tr('炷')], hidesBump: true,
       svg: `<path d="M-36 -60 Q0 -96 36 -60 Q0 -66 -36 -60Z" fill="#d9b56b" ${INK}/><path d="M-20 -70 Q0 -74 20 -70" stroke="#a5813e" stroke-width="1" fill="none"/>` },
-    { id: 'beanie', name: tr('毛帽'), gift: tr('這頂毛帽'), how: tr('冬天坐滿 5 炷'), season: 'winter', need: s => [s.season.winter, 5, tr('炷')],
+    { id: 'sakura', slot: 'head', name: tr('櫻花'), gift: tr('這朵櫻花'), how: tr('春天坐滿 5 炷'), season: 'spring', need: s => [s.season.spring, 5, tr('炷')],
+      svg: `<g transform="translate(-15 -58)">${blossom(0, 0, '#f4b6c4', 4.4)}</g>` + DROP('<ellipse cx="-12" cy="-56" rx="2" ry="1.3" fill="#f4b6c4"/>') },
+    { id: 'lotus', slot: 'head', name: tr('蓮花'), gift: tr('這朵蓮花'), how: tr('夏天坐滿 5 炷'), season: 'summer', need: s => [s.season.summer, 5, tr('炷')],
+      svg: '<g transform="translate(-3 -69)"><ellipse cx="0" cy="0" rx="8" ry="2.2" fill="#86b061" stroke="#2a2622" stroke-width=".8"/>'
+        + [-52, -18, 18, 52].map(a => `<ellipse cx="0" cy="-4.5" rx="2.6" ry="5.4" fill="#f4b3c8" stroke="#2a2622" stroke-width=".8" transform="rotate(${a})"/>`).join('')
+        + '<ellipse cx="0" cy="-5" rx="2.6" ry="5.8" fill="#f7c6d6" stroke="#2a2622" stroke-width=".8"/></g>' + DROP('<ellipse cx="2" cy="-72" rx="1.6" ry="3" fill="#f4b3c8"/>') },
+    { id: 'maple', slot: 'head', name: tr('紅葉'), gift: tr('這片紅葉'), how: tr('秋天坐滿 5 炷'), season: 'autumn', need: s => [s.season.autumn, 5, tr('炷')],
+      svg: maple(-15, -59, '#d4572e', 1.6, -20) + DROP(maple(-12, -56, '#e39a2f', .9, 30)) },
+    { id: 'beanie', slot: 'head', name: tr('毛帽'), gift: tr('這頂毛帽'), how: tr('冬天坐滿 5 炷'), season: 'winter', need: s => [s.season.winter, 5, tr('炷')], hidesBump: true,
       svg: `<path d="M-24 -56 Q-22 -78 0 -79 Q22 -78 24 -56 Q0 -61 -24 -56Z" fill="#7d8fb3" ${INK}/><path d="M-25 -57 Q0 -62 25 -57 L25 -52 Q0 -57 -25 -52Z" fill="#5f6f94" ${INK}/><circle cx="0" cy="-81" r="4.5" fill="#eef0f4" ${INK}/>` },
-    { id: 'scarf', back: true, name: tr('圍巾'), gift: tr('這條圍巾'), how: tr('連續 14 天都有坐滿'), need: s => [s.streak, 14, tr('天')],
+
+    { id: 'mino', slot: 'body', name: tr('蓑衣'), gift: tr('這件蓑衣'), how: tr('累計坐滿 20 炷'), need: s => [s.rounds, 20, tr('炷')],
+      svg: `<path d="M-31 -31 Q0 -25 31 -31 L35 -13 Q0 -7 -35 -13Z" fill="#c9a85c" ${INK}/><path d="M-24 -29 l-2 15 M-14 -27.5 l-1 15 M-4 -27 v15 M6 -27 v15 M16 -27.5 l1 15 M26 -29 l2 15" stroke="#9c7d3a" stroke-width=".9"/>` },
+    { id: 'yukata', slot: 'body', name: tr('浴衣'), gift: tr('這件浴衣'), how: tr('夏天坐滿 10 炷'), season: 'summer', need: s => [s.season.summer, 10, tr('炷')],
+      svg: `<path d="M-31.5 -28 Q0 -22 31.5 -28 L32 -14 Q0 -9 -32 -14Z" fill="#5b7bb5" ${INK}/><path d="M-10 -27 L0 -16 L10 -27" fill="none" stroke="#f8f5ec" stroke-width="2.2"/>`
+        + [[-22, -21], [-16, -16], [17, -21], [23, -16], [-27, -16], [27, -21]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.3" fill="#f8f5ec"/>`).join('') },
+    { id: 'blanket', slot: 'body', name: tr('膝上毯'), gift: tr('這條膝上毯'), how: tr('冬天坐滿 10 炷'), season: 'winter', need: s => [s.season.winter, 10, tr('炷')],
+      svg: `<path d="M-37 -18 Q0 -25 37 -18 L39 -6 Q0 1 -39 -6Z" fill="#b5654a" ${INK}/><path d="M-37 -12 Q0 -18 37 -12 M-20 -21 v18 M0 -22 v20 M20 -21 v18" stroke="#e7c9a0" stroke-width=".9" fill="none"/>` },
+    { id: 'scarf', slot: 'body', name: tr('圍巾'), gift: tr('這條圍巾'), how: tr('連續 14 天都有坐滿'), need: s => [s.streak, 14, tr('天')],
       svg: `<path d="M-30 -27 Q0 -19 30 -27 L31 -21 Q0 -13 -31 -21Z" fill="#c8434b" ${INK}/><path d="M18 -22 l4 14 l7 -2 l-3 -13z" fill="#c8434b" ${INK}/><path d="M20 -12 h7 M21 -15 h6" stroke="#f8e2c8" stroke-width="1"/>` },
-    { id: 'glasses', name: tr('眼鏡'), gift: tr('這副眼鏡'), how: tr('累計坐禪 25 小時'), need: s => [Math.floor(s.hours), 25, tr('小時')],
-      svg: `<g fill="none" stroke="#2a2622" stroke-width="1.3"><circle cx="-9" cy="-43" r="5.5"/><circle cx="9" cy="-43" r="5.5"/><path d="M-3.5 -43 h7 M-14.5 -44 l-8 -2 M14.5 -44 l8 -2"/></g>` },
-    { id: 'beads', name: tr('念珠'), gift: tr('這串念珠'), how: tr('累計坐禪 50 小時'), need: s => [Math.floor(s.hours), 50, tr('小時')],
-      svg: [...Array(9)].map((_, i) => { const a = Math.PI * i / 8; return `<circle cx="${(-Math.cos(a) * 9).toFixed(1)}" cy="${(-13.5 + Math.sin(a) * 6.5).toFixed(1)}" r="1.9" fill="#6b3f2a" stroke="#2a2622" stroke-width=".6"/>`; }).join('') + '<path d="M0 -6.5 v5" stroke="#b44a3a" stroke-width="2"/>' },
-    { id: 'kesa', back: true, name: tr('小袈裟'), gift: tr('這件小袈裟'), how: tr('累計坐滿 100 炷'), need: s => [s.rounds, 100, tr('炷')],
+    { id: 'kesa', slot: 'body', name: tr('小袈裟'), gift: tr('這件小袈裟'), how: tr('累計坐滿 100 炷'), need: s => [s.rounds, 100, tr('炷')],
       svg: `<path d="M-29 -36 Q-6 -30 26 -14 L16 -11 Q-8 -24 -31 -26Z" fill="#8a5d34" ${INK}/><path d="M-22 -32 l3 6 M-12 -28 l3 6 M-2 -24 l3 6 M8 -20 l3 6" stroke="#5d3f22" stroke-width=".8"/>` },
+    { id: 'samue', slot: 'body', name: tr('作務衣'), gift: tr('這件作務衣'), how: tr('累計坐滿 200 炷'), need: s => [s.rounds, 200, tr('炷')],
+      svg: `<path d="M-31.5 -29 Q0 -23 31.5 -29 L32 -14 Q0 -9 -32 -14Z" fill="#3e4f6e" ${INK}/><path d="M-12 -28 L5 -15 M12 -28 L-1 -18" stroke="#e9e3d3" stroke-width="2"/><path d="M9 -21 l4 5 M9 -21 l-1 6" stroke="#e9e3d3" stroke-width="1"/>` },
+
+    { id: 'glasses', slot: 'extra', name: tr('眼鏡'), gift: tr('這副眼鏡'), how: tr('累計坐禪 25 小時'), need: s => [Math.floor(s.hours), 25, tr('小時')],
+      svg: '<g fill="none" stroke="#2a2622" stroke-width="1.3"><circle cx="-9" cy="-43" r="5.5"/><circle cx="9" cy="-43" r="5.5"/><path d="M-3.5 -43 h7 M-14.5 -44 l-8 -2 M14.5 -44 l8 -2"/></g>' },
+    { id: 'beads', slot: 'extra', name: tr('念珠'), gift: tr('這串念珠'), how: tr('累計坐禪 50 小時'), need: s => [Math.floor(s.hours), 50, tr('小時')],
+      svg: [...Array(9)].map((_, i) => { const a = Math.PI * i / 8; return `<circle cx="${(-Math.cos(a) * 9).toFixed(1)}" cy="${(-13.5 + Math.sin(a) * 6.5).toFixed(1)}" r="1.9" fill="#6b3f2a" stroke="#2a2622" stroke-width=".6"/>`; }).join('') + '<path d="M0 -6.5 v5" stroke="#b44a3a" stroke-width="2"/>' },
+    { id: 'chawan', slot: 'extra', place: 'side', name: tr('茶碗'), gift: tr('這只茶碗'), how: tr('一天坐滿 2 炷、休息沒超時,累計 10 天'), need: s => [s.onTime, 10, tr('天')],
+      svg: `<path d="M38 -9 h15 q-1 8 -7.5 8 q-6.5 0 -7.5 -8z" fill="#7c9a74" ${INK}/><path class="smoke" d="M43 -12 q-2 -3 0 -6 M48 -12 q2 -3 0 -6" stroke-width=".9"/>` },
+    { id: 'uchiwa', slot: 'extra', place: 'side', name: tr('團扇'), gift: tr('這把團扇'), how: tr('在 3 種不同的事上坐滿過'), need: s => [s.tasks, 3, tr('種')],
+      svg: `<path d="M44 -2 L49 -15" stroke="#8a5d34" stroke-width="1.6" stroke-linecap="round"/><circle cx="51" cy="-22" r="8" fill="#f3e2b3" ${INK}/><path d="M45 -24 q6 -5 12 1" stroke="#d4572e" stroke-width="1.3" fill="none"/>` },
+    { id: 'cat', slot: 'extra', place: 'side', name: tr('小貓'), gift: tr('這隻小貓'), how: tr('一炷都沒被打,累計 20 炷'), need: s => [s.still, 20, tr('炷')],
+      svg: `<path d="M60 -4 q5 3 -1 7" stroke="#2a2622" stroke-width="1.3" fill="none"/><ellipse cx="50" cy="-5" rx="11" ry="6" fill="#e8b07a" ${INK}/>`
+        + '<path d="M48 -10.5 l1 3 M53 -10.5 l1 3" stroke="#b9774a" stroke-width="1"/>'
+        + `<path d="M36.5 -11 l-.6 -5.5 l3.8 3.2 M41.6 -12.6 l2.6 -4.6 l1 4.8" fill="#e8b07a" ${INK}/><circle cx="40" cy="-8" r="5.2" fill="#e8b07a" ${INK}/>`
+        + '<path d="M37.4 -8 q1 .8 2 0 M41 -8 q1 .8 2 0" stroke="#2a2622" stroke-width=".8" fill="none"/>' },
+    { id: 'mokugyo', slot: 'extra', place: 'side', name: tr('木魚'), gift: tr('這個木魚'), how: tr('早上 7 點前坐滿一炷'), need: s => [s.early, 1, tr('炷')],
+      svg: `<path d="M56 -3 L62 -13" stroke="#8a5d34" stroke-width="1.6" stroke-linecap="round"/><circle cx="62.5" cy="-14" r="2.2" fill="#d9b56b" ${INK}/>`
+        + `<ellipse cx="47" cy="-7" rx="10" ry="6.5" fill="#a5582f" ${INK}/><path d="M39 -6 q8 3 16 0" stroke="#2a2622" stroke-width="1" fill="none"/><circle cx="52" cy="-9" r="1.2" fill="#2a2622"/>` },
+    { id: 'lantern', slot: 'extra', place: 'side', name: tr('小提燈'), gift: tr('這盞小提燈'), how: tr('晚上 10 點後坐滿一炷'), need: s => [s.night, 1, tr('炷')],
+      svg: '<circle class="night" cx="47" cy="-17" r="18" fill="url(#andonGlow)"/><path d="M47 -7.5 v6.5" stroke="#5d4230" stroke-width="1.2"/>'
+        + `<rect x="43" y="-27.5" width="8" height="2" fill="#5d4230"/><ellipse cx="47" cy="-17" rx="6.5" ry="8.5" fill="#f4e3c1" ${INK}/>`
+        + '<path d="M40.6 -20 h12.8 M40.6 -14 h12.8" stroke="#c9a85c" stroke-width=".7"/><rect x="43" y="-9.5" width="8" height="2" fill="#5d4230"/>' },
   ];
+  const SLOTS = [['head', tr('頭')], ['body', tr('身體')], ['extra', tr('配飾')]];
   const unlocked = (item, s) => { const [have, need] = item.need(s); return have >= need; };
   const unlockedIds = log => { const s = collectStats(log); return [...SCROLLS.filter(x => unlocked(x, s)).map(x => 's:' + x.id), ...ACCS.filter(x => unlocked(x, s)).map(x => 'a:' + x.id)]; };
 
@@ -2246,38 +2292,47 @@
       + `<rect class="f-shu" x="${cx + 8}" y="${cy + 32}" width="4" height="4" rx=".8"/>`;
   }
   const C = (() => {
-    const v = store.get(COLLECT_KEY, null);
-    return v && typeof v === 'object' ? { scroll: String(v.scroll || '靜'), acc: String(v.acc || 'none'), seen: Array.isArray(v.seen) ? v.seen.filter(x => typeof x === 'string') : null }
-      : { scroll: '靜', acc: 'none', seen: null };
+    const v = store.get(COLLECT_KEY, null) || {}, wear = { head: null, body: null, extra: null };
+    const put = id => { const it = ACCS.find(x => x.id === id); if (it) wear[it.slot] = it.id; };
+    if (v.wear && typeof v.wear === 'object') Object.values(v.wear).forEach(put);
+    else if (typeof v.acc === 'string') put(v.acc);                        // before v18 there was one accessory
+    return { scroll: typeof v.scroll === 'string' ? v.scroll : '靜', wear, seen: Array.isArray(v.seen) ? v.seen.filter(x => typeof x === 'string') : null };
   })();
-  const saveCollect = () => store.set(COLLECT_KEY, { scroll: C.scroll, acc: C.acc, seen: C.seen });
+  const saveCollect = () => store.set(COLLECT_KEY, { scroll: C.scroll, wear: C.wear, seen: C.seen });
   if (!C.seen) { C.seen = unlockedIds(readLog()); saveCollect(); }   // what was earned before the 收藏冊 existed is not "new"
   function renderScene() {
     const stats = collectStats(readLog());
     if (!SCROLLS.some(x => x.id === C.scroll && unlocked(x, stats))) C.scroll = '靜';
-    if (!ACCS.some(x => x.id === C.acc && unlocked(x, stats))) C.acc = 'none';
+    for (const [slot] of SLOTS) if (C.wear[slot] && !ACCS.some(x => x.id === C.wear[slot] && unlocked(x, stats))) C.wear[slot] = null;
     const season = seasonOf(), art = SEASON_ART[season]();
     $('#stage').dataset.season = season;
     $('#winView').innerHTML = art; $('#sqView').innerHTML = art;
     $('#scrollText').innerHTML = scrollSvg(tr(C.scroll));         // the scroll's words, in this language's characters
-    const acc = ACCS.find(x => x.id === C.acc);
-    $('#mochiAcc').innerHTML = acc.back ? '' : acc.svg;
-    $('#mochiAccBack').innerHTML = acc.back ? acc.svg : '';
+    const worn = slot => ACCS.find(x => x.id === C.wear[slot]);
+    const g = it => it ? `<g class="acc acc-${it.id}">${it.svg}</g>` : '';
+    const head = worn('head'), body = worn('body'), extra = worn('extra');
+    $('#mochiAccBack').innerHTML = g(body);                                   // under the arms
+    $('#mochiAcc').innerHTML = g(head) + (extra && extra.place !== 'side' ? g(extra) : '');
+    $('#accSide').innerHTML = extra && extra.place === 'side' ? g(extra) : '';   // on the mat beside the cushion
+    sitterEl.dataset.head = head ? head.id : '';
+    sitterEl.classList.toggle('no-bump', !!(head && head.hidesBump));      // a hat or beanie hides the bump
   }
   const sittingNow = () => ['settle', 'focus', 'leave'].includes(P.phase) || P.resuming;
   const progressText = (item, s) => { const [have, need, unit] = item.need(s); return have >= need ? '' : tr('還差 {0} {1}', need - have, unit); };
-  const MOCHI = '<path d="M-31 -14 C-34 -40 -20 -68 0 -68 C20 -68 34 -40 31 -14 C22 -9 -22 -9 -31 -14 Z" fill="#fffdf7" stroke="#2a2622" stroke-width="1.6"/>'
-    + '<ellipse fill="#f2a49a" cx="-17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/><ellipse fill="#f2a49a" cx="17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/>'
-    + '<g fill="none" stroke="#2a2622" stroke-width="1.5" stroke-linecap="round"><path d="M-13 -44 q4 3.2 8 0"/><path d="M5 -44 q4 3.2 8 0"/><path d="M-2 -35 q2 1.4 4 0"/></g>';
+  const MOCHI_BODY = '<path d="M-31 -14 C-34 -40 -20 -68 0 -68 C20 -68 34 -40 31 -14 C22 -9 -22 -9 -31 -14 Z" fill="#fffdf7" stroke="#2a2622" stroke-width="1.6"/>'
+    + '<ellipse fill="#f2a49a" cx="-17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/><ellipse fill="#f2a49a" cx="17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/>';
+  const MOCHI_HANDS = '<path d="M-26 -33 Q-23 -21 -9 -18.5 M26 -33 Q23 -21 9 -18.5" fill="none" stroke="#2a2622" stroke-width="1.3" stroke-linecap="round"/>'
+    + '<ellipse fill="#fffdf7" cx="0" cy="-17" rx="10" ry="4.6" stroke="#2a2622" stroke-width="1.3"/>';
+  const MOCHI_FACE = '<g fill="none" stroke="#2a2622" stroke-width="1.5" stroke-linecap="round"><path d="M-13 -44 q4 3.2 8 0"/><path d="M5 -44 q4 3.2 8 0"/><path d="M-2 -35 q2 1.4 4 0"/></g>';
   const WIN = '<circle cx="86" cy="98" r="33" class="f-window"/>';
   const LATTICE = '<g class="s-wood" stroke-width="1.6" clip-path="url(#winClip)"><line x1="70" y1="60" x2="70" y2="140"/><line x1="86" y1="60" x2="86" y2="140"/><line x1="102" y1="60" x2="102" y2="140"/><line x1="50" y1="82" x2="120" y2="82"/><line x1="50" y1="98" x2="120" y2="98"/><line x1="50" y1="114" x2="120" y2="114"/></g><circle cx="86" cy="98" r="33" class="s-wood" fill="none" stroke-width="5"/>';
   function renderCollect() {
     const stats = collectStats(readLog()), locked = sittingNow(), now = seasonOf();
-    const got = [...SCROLLS, ...ACCS.slice(1)].filter(x => unlocked(x, stats)).length;
-    $('#collectSum').textContent = tr('已經收到 {0} / {1} 樣。坐滿的炷越多,能換的就越多。', got, SCROLLS.length + ACCS.length - 1);
+    const got = [...SCROLLS, ...ACCS].filter(x => unlocked(x, stats)).length;
+    $('#collectSum').textContent = tr('已經收到 {0} / {1} 樣。坐滿的炷越多,能換的就越多。', got, SCROLLS.length + ACCS.length);
     $('#collectNote').hidden = !locked;
     const card = (kind, item, inner) => {
-      const ok = unlocked(item, stats), on = kind === 's' ? C.scroll === item.id : C.acc === item.id;
+      const ok = unlocked(item, stats), on = kind === 's' ? C.scroll === item.id : C.wear[item.slot] === item.id;
       const label = kind === 's' ? tr(item.id) : item.name;
       return `<li><button type="button" class="c-item${ok ? '' : ' locked'}${on ? ' on' : ''}" data-kind="${kind}" data-id="${item.id}"`
         + ` aria-pressed="${on}" ${ok && !locked ? '' : 'aria-disabled="true"'} aria-label="${label}${ok ? (on ? tr(',使用中') : '') : tr(',還沒拿到:') + item.how}">`
@@ -2285,7 +2340,11 @@
         + '</button></li>';
     };
     $('#scrollList').innerHTML = SCROLLS.map(x => card('s', x, `<span class="c-paper" data-n="${[...tr(x.id)].length}" aria-hidden="true">${[...tr(x.id)].map(c => `<i>${c}</i>`).join('')}</span>`)).join('');
-    $('#accList').innerHTML = ACCS.map(x => card('a', x, `<svg class="c-mochi" viewBox="-40 -90 80 84" aria-hidden="true">${MOCHI}${x.svg}</svg>`)).join('');
+    // a small mochi wearing just this one thing; things beside the cushion get a wider picture
+    const mini = x => `<svg class="c-mochi${x.place === 'side' ? ' wide' : ''}" viewBox="${x.place === 'side' ? '-36 -90 104 92' : '-40 -90 80 84'}" aria-hidden="true">`
+      + MOCHI_BODY + (x.slot === 'body' ? x.svg : '') + MOCHI_HANDS + MOCHI_FACE + (x.slot !== 'body' ? x.svg : '') + '</svg>';
+    $('#accList').innerHTML = SLOTS.map(([slot, label]) => `<li class="c-slot"><h3>${label}</h3><ul class="c-grid c-accs">`
+      + ACCS.filter(x => x.slot === slot).map(x => card('a', x, mini(x))).join('') + '</ul></li>').join('');
     $('#seasonList').innerHTML = SEASONS.map(se => {
       const items = [...SCROLLS, ...ACCS].filter(x => x.season === se.id);
       return `<li class="c-season${se.id === now ? ' now' : ''}"><svg viewBox="50 62 72 72" aria-hidden="true">${WIN}<g clip-path="url(#winClip)">${SEASON_ART[se.id]()}</g>${LATTICE}</svg>`
@@ -2294,14 +2353,15 @@
         + '</ul></div></li>';
     }).join('');
   }
-  function equip(kind, id) {
-    if (kind === 's') C.scroll = id; else C.acc = id;
+  function equip(kind, id, toggle = false) {
+    if (kind === 's') C.scroll = id;
+    else { const slot = ACCS.find(x => x.id === id).slot; C.wear[slot] = toggle && C.wear[slot] === id ? null : id; }
     saveCollect(); renderScene();
   }
   ['scrollList', 'accList'].forEach(l => $('#' + l).addEventListener('click', e => {
     const b = e.target.closest('.c-item');
     if (!b || b.getAttribute('aria-disabled') === 'true') return;
-    equip(b.dataset.kind, b.dataset.id); renderCollect();
+    equip(b.dataset.kind, b.dataset.id, true); renderCollect();
   }));
   function showCollectTab(which) {
     [['tabScrolls', 'scrollView'], ['tabSeasons', 'seasonView'], ['tabAccs', 'accView']].forEach(([t, v]) => {
