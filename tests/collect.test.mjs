@@ -143,12 +143,15 @@ test('when struck, a hat hides the bump and what is worn reacts', async () => {
   const log = [...Array(40)].map((_, i) => entry(i, { min: 50 }));
   const { p, ctx } = await openApp(browser, server.url, { storage: { 'keisaku-log-v2': log, 'keisaku-collect-v1': { scroll: '靜', wear: { head: 'hat', body: null, extra: null }, seen: [] } } });
   await sit(p);
+  await p.waitForTimeout(800);
+  assert.equal(await p.evaluate(() => document.querySelector('#mochiAcc .acc-hat').dataset.react), undefined, 'sitting down is not a strike');
   // the monk ignores a request while he is still fetching the keisaku, so ask until he comes
   for (let i = 0; i < 8; i++) {
     await p.locator('#askBtn').click();
     if (await p.waitForFunction(() => document.getElementById('sitter').dataset.face === 'ouch', null, { timeout: 2500 }).then(() => true, () => false)) break;
   }
   assert.equal(await p.evaluate(() => getComputedStyle(document.querySelector('#sitter .bump')).display), 'none');
-  assert.equal(await p.evaluate(() => document.querySelector('#mochiAcc .acc-hat').classList.contains('react')), true);
+  await p.waitForTimeout(150);
+  assert.match(await p.evaluate(() => document.querySelector('#mochiAcc .acc-hat').getAttribute('transform') || ''), /rotate/, 'the hat is moving');
   await ctx.close();
 });

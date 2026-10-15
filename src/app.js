@@ -591,7 +591,6 @@
     standing = !toSit;
     sitterEl.classList.toggle('standing', standing);
     sitterEl.classList.remove('ouch'); void sitterEl.getBoundingClientRect(); sitterEl.classList.add('ouch');
-    document.querySelectorAll('#sitter .acc').forEach(a => { a.classList.remove('react'); void a.getBoundingClientRect(); a.classList.add('react'); });   // little squash on landing
     setTimeout(() => sitterEl.classList.remove('ouch'), 500);
   }
   const sitDown = () => hop(true), standUp = () => hop(false);
@@ -680,6 +679,7 @@
     const pow = $('#pow'); pow.style.left = (mochiX() + 24) / 4 + '%'; pow.classList.remove('go'); void pow.offsetWidth; pow.classList.add('go');
     sitterEl.dataset.face = 'ouch';
     sitterEl.classList.remove('ouch'); void sitterEl.getBoundingClientRect(); sitterEl.classList.add('ouch');
+    document.querySelectorAll('#sitter .acc').forEach(reactAcc);       // whatever is worn reacts to the strike
     setTimeout(() => { if (sitterEl.dataset.face === 'ouch') sitterEl.dataset.face = restFace(); sitterEl.classList.remove('ouch'); }, 1300);
     const stars = $('#stars');
     for (let i = 0; i < 6; i++) {
@@ -689,6 +689,56 @@
       s.style.setProperty('--dx', Math.cos(a) * 46 + 'px'); s.style.setProperty('--dy', Math.sin(a) * 34 + 'px');
       stars.appendChild(s); setTimeout(() => s.remove(), 750);
     }
+  }
+
+  /* ---------- what the mochi is wearing does when the keisaku lands ---------- */
+  // Moved frame by frame through the transform attribute, like the monk: CSS animations on SVG pieces are not
+  // redrawn on iPhone until something else moves. Every strike rolls new numbers, so no two look the same.
+  // A plan is { dur, at: 'centre' | 'base', keys: [[t, dx, dy, deg, sx, sy], …] } plus optional wing / drop parts.
+  const rnd2 = (a, b) => a + Math.random() * (b - a);
+  const lerpKeys = (keys, t) => {
+    let i = 1; while (i < keys.length - 1 && keys[i][0] < t) i++;
+    const a = keys[i - 1], b = keys[i], u = Math.min(1, Math.max(0, (t - a[0]) / ((b[0] - a[0]) || 1)));
+    const e = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+    return [1, 2, 3, 4, 5].map(k => (a[k] ?? (k > 3 ? 1 : 0)) + ((b[k] ?? (k > 3 ? 1 : 0)) - (a[k] ?? (k > 3 ? 1 : 0))) * e);
+  };
+  const REACT = {
+    leaf: s => ({ dur: rnd2(900, 1300), at: 'centre', keys: [[0, 0, 0, 0], [.32, s * rnd2(4, 10), -rnd2(16, 28), s * rnd2(150, 260)], [.68, s * rnd2(1, 4), -rnd2(6, 12), s * rnd2(300, 350)], [1, 0, 0, s * 360]] }),
+    bird: s => { const up = rnd2(26, 46), out = rnd2(18, 30);
+      return { dur: rnd2(1600, 2200), at: 'base', wing: true, keys: [[0, 0, 0, 0], [.08, 0, -rnd2(4, 8), 0], [.3, s * out, -up * .65, -s * 12], [.5, s * out * .5, -up, 0, -1], [.72, -s * out * .55, -up * .55, s * 8, -1], [.9, 0, -3, 0], [1, 0, 0, 0]] }; },
+    sakura: s => ({ dur: rnd2(500, 700), at: 'base', drop: true, keys: [[0, 0, 0, 0], [.25, 0, 0, -s * rnd2(9, 15)], [.6, 0, 0, s * rnd2(6, 11)], [1, 0, 0, 0]] }),
+    hat: s => ({ dur: rnd2(800, 1100), at: 'base', keys: [[0, 0, 0, 0], [.25, s * rnd2(2, 5), -rnd2(7, 13), -s * rnd2(10, 20)], [.6, s * rnd2(1, 3), -rnd2(2, 4), -s * rnd2(4, 9)], [1, 0, 0, 0]] }),
+    beanie: s => { const d = rnd2(7, 10), tilt = s * rnd2(0, 6);
+      return { dur: rnd2(1300, 1800), at: 'base', keys: [[0, 0, 0, 0], [.18, 0, d, tilt], [.72, 0, d, tilt], [1, 0, 0, 0]] }; },
+    cat: () => ({ dur: rnd2(450, 650), at: 'base', keys: [[0, 0, 0, 0], [.4, 0, -rnd2(4, 8), 0, 1.04, .94], [.75, 0, 0, 0, 1.06, .9], [1, 0, 0, 0]] }),
+    wobble: s => ({ dur: rnd2(500, 750), at: 'base', keys: [[0, 0, 0, 0], [.25, 0, 0, -s * rnd2(6, 11)], [.6, 0, 0, s * rnd2(4, 8)], [1, 0, 0, 0]] }),
+  };
+  REACT.lotus = REACT.maple = REACT.sakura;
+  REACT.chawan = REACT.uchiwa = REACT.lantern = REACT.wobble;
+  function reactAcc(g) {
+    const id = g.classList[1].slice(4), plan = REACT[id] && REACT[id](Math.random() < .5 ? -1 : 1);
+    if (!plan || reduceMotion) return;
+    const bb = g.getBBox(), ox = bb.x + bb.width / 2, oy = plan.at === 'base' ? bb.y + bb.height : bb.y + bb.height / 2;
+    const wing = plan.wing && g.querySelector('.bird-wing'), drop = plan.drop && g.querySelector('.acc-drop');
+    const fall = { dx: rnd2(-14, 18), dy: rnd2(40, 56), spin: rnd2(-200, 200) };
+    const t0 = performance.now(), token = (g.dataset.react = String(t0));
+    (function step(now) {
+      if (g.dataset.react !== token || !g.isConnected) return;     // a newer strike took over, or it was taken off
+      const t = Math.min(1, (now - t0) / plan.dur), [dx, dy, deg, sx, sy] = lerpKeys(plan.keys, t);
+      g.setAttribute('transform', `translate(${(ox + dx).toFixed(2)} ${(oy + dy).toFixed(2)}) rotate(${deg.toFixed(1)}) scale(${sx.toFixed(3)} ${sy.toFixed(3)}) translate(${-ox} ${-oy})`);
+      if (wing) {                                                   // flapping while it is in the air
+        const wb = wing.getBBox(), fly = t > .05 && t < .92;
+        wing.setAttribute('transform', fly ? `rotate(${(Math.sin(now / 38) * 32 - 10).toFixed(1)} ${wb.x + wb.width} ${wb.y + wb.height / 2})` : '');
+      }
+      if (drop) {                                                   // one petal or leaf drifts down and fades
+        const f = Math.min(1, (now - t0) / 1400), db = drop.getBBox();
+        drop.style.opacity = f < 1 ? String(1 - f) : '';
+        drop.setAttribute('transform', `translate(${(fall.dx * f + Math.sin(f * 9) * 3).toFixed(2)} ${(fall.dy * f * f).toFixed(2)}) rotate(${(fall.spin * f).toFixed(1)} ${db.x + db.width / 2} ${db.y + db.height / 2})`);
+      }
+      if (t < 1 || (drop && now - t0 < 1400)) requestAnimationFrame(step);
+      else { g.removeAttribute('transform'); if (wing) wing.removeAttribute('transform'); if (drop) { drop.removeAttribute('transform'); drop.style.opacity = ''; } }
+    })(t0);
+    g.classList.add('react');
   }
 
   /* ---------- RPG dialogue ---------- */
