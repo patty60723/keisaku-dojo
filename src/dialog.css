@@ -668,3 +668,6 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
 .firefly { animation: blink 3.2s ease-in-out var(--delay) infinite; }
 @keyframes blink { 0%, 100% { opacity: .15; } 45%, 60% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .drift { display: none; } .firefly { animation: none; } }
+
+.seg-4 { grid-template-columns: repeat(4, 1fr); }
+.seg-4 span { padding-inline: 2px; font-size: .88rem; }

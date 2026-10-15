@@ -30,8 +30,8 @@
   --cushion: #6a4b78;
   --mat: #3f3a35;
 
-  --f-display: "LXGW WenKai TC", "Kaiti TC", "BiauKai", "STKaiti", serif;
-  --f-body: "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --f-display: "LXGW WenKai TC", "Klee One", "Kaiti TC", "BiauKai", "STKaiti", serif;
+  --f-body: "LXGW WenKai TC", "Klee One", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   --f-num: "Fredoka", ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) {

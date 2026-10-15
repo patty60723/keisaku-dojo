@@ -12,7 +12,7 @@ body=src('body.html').replace('{{SVG}}',src('svg.html').rstrip('\n')).replace('{
 if preview:
     body = body.replace('<main class="app">', '<main class="app">\n  <a class="preview-tag" href="./">預覽版 · 回正式版</a>', 1)
     style += '.preview-tag{align-self:flex-start;font-size:.78rem;color:#fff;background:var(--kesa);padding:2px 10px;border-radius:999px;text-decoration:none}\n'
-script=src('app.js')
+script=src('i18n.js')+src('app.js')
 head='''<title>香板禪堂</title>
 <script>
 /* apply a saved light/dark choice before first paint, so the page doesn't flash the other theme */
@@ -20,7 +20,7 @@ try { const t = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).them
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Klee+One:wght@400;600&family=Fredoka:wght@500;600&display=swap">
 <style>
 '''+style+'''</style>
 '''

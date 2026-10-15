@@ -65,6 +65,7 @@ textarea {{ width:100%; font:.8rem ui-monospace,monospace; border-radius:10px; b
   let ac = null;
   function audio() {{ if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); return ac; }}
   let current = null;
+  const tr = s => s;                                   // the lab is Chinese only
   {engine}
   const DEFAULTS = JSON.parse(JSON.stringify(SND));
   const knobs = [...document.querySelectorAll('input[data-k]')];

@@ -38,7 +38,7 @@ export const entry = (offset, fields) => ({ t: Date.now() - offset * 864e5 + Mat
  * and window.__notes collects notifications instead of showing them.
  */
 export async function openApp(browser, base, { seen = SEEN, storage = {}, path: page = 'index.html', dark = false, width = 390 } = {}) {
-  const ctx = await browser.newContext({ viewport: { width, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true,
+  const ctx = await browser.newContext({ locale: 'zh-TW', viewport: { width, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true,
     colorScheme: dark ? 'dark' : 'light', acceptDownloads: true });
   const p = await ctx.newPage();
   const errors = [];
