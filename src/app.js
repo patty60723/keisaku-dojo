@@ -79,10 +79,14 @@
       })(s);
     });
   }
+  // debug.html (python3 build.py debug) unlocks the whole 收藏冊 and keeps its own records apart from the real ones
+  const DEBUG = window.KEISAKU_DEBUG === true;
+  const KEY = k => DEBUG ? 'debug:' + k : k;
   const store = {
-    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
-    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+    get(k, d) { try { const v = localStorage.getItem(KEY(k)); return v ? JSON.parse(v) : d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(KEY(k), JSON.stringify(v)); } catch {} }
   };
+  if (DEBUG) ['keisaku-tour-v1', 'keisaku-rules-asked-v1', 'keisaku-leave-told-v1', 'keisaku-tip-leave-v1', 'keisaku-tip-journal-v1', 'keisaku-tip-collect-v1'].forEach(k => store.set(k, true));
   const isInt = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
   // a plan read back from storage or a backup is only used if every part of it is in range
   // (a preset of a billion rounds would otherwise try to draw a billion incense sticks)
@@ -2151,9 +2155,12 @@
     { id: 'autumn', name: tr('秋'), months: tr('8–10 月'), view: tr('紅葉,一片一片落下') },
     { id: 'winter', name: tr('冬'), months: tr('11–1 月'), view: tr('梅花和雪') },
   ];
-  const seasonOf = (t = Date.now()) => SEASONS[Math.floor(((new Date(t).getMonth() + 11) % 12) / 3)].id;
+  const DBG = { season: null };
+  const seasonOf = (t = Date.now()) => DBG.season || SEASONS[Math.floor(((new Date(t).getMonth() + 11) % 12) / 3)].id;
   // tallies the conditions read from: full rounds, days, streaks, minutes
   function collectStats(log) {
+    if (DEBUG) return { rounds: 999, still: 999, leave: 9, long: 9, hours: 999, bigDay: 9, onTime: 99, streak: 99, early: 9, night: 9, tasks: 9,
+      season: { spring: 99, summer: 99, autumn: 99, winter: 99 } };
     const full = log.filter(e => e.full), days = new Map();
     for (const e of log) {
       const a = days.get(e.d) || { full: 0, late: 0 };
@@ -2415,6 +2422,25 @@
     text: (returning ? tr('禪堂多了一本收藏冊,就是中間這幅掛軸。') : tr('中間的掛軸是收藏冊。')) + tr('坐滿的炷越多,能換的掛軸和麻糬的配件就越多。點開看看。'),
     hint: tr('👆 點一下中間的掛軸') });
   renderScene();
+
+  if (DEBUG) {                                       // a small floating panel: season, day / night, strike, sit / stand
+    const bar = document.createElement('div');
+    bar.className = 'debug-bar';
+    bar.innerHTML = '<b>除錯</b>' + SEASONS.map(x => `<button type="button" data-season="${x.id}">${x.name}</button>`).join('')
+      + '<button type="button" data-act="night">日／夜</button><button type="button" data-act="hit">打一下</button>'
+      + '<button type="button" data-act="sit">坐／站</button><button type="button" data-act="book">收藏冊</button>';
+    document.body.appendChild(bar);
+    const mark = () => bar.querySelectorAll('[data-season]').forEach(b => b.classList.toggle('on', b.dataset.season === seasonOf()));
+    bar.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.season) { DBG.season = b.dataset.season; renderScene(); mark(); }
+      else if (b.dataset.act === 'night') applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+      else if (b.dataset.act === 'hit') impact();
+      else if (b.dataset.act === 'sit') { if (standing) sitDown(); else standUp(); }
+      else if (b.dataset.act === 'book') $('#collectBtn').click();
+    });
+    mark();
+  }
 
   // the journal button carries the current streak (2 days or more) like a small seal
   function renderStreakBadge(streak) {
