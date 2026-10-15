@@ -2571,7 +2571,7 @@ const I18N = { ja: {}, en: {} };
   }
   function onPutDown() {
     setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on');
-    toast('回座了,繼續專心。');
+    toast(tr('回座了,繼續專心。'));
   }
   // only shown when pick-ups can't be caught; the details say why
   function renderSense(why) {
@@ -2695,7 +2695,7 @@ const I18N = { ja: {}, en: {} };
         count--; P.settleTimer = setTimeout(step, 1000); return;
       }
       if (!Mo.seen) { done(false); return; }             // no sensor: fall back to screen-only
-      if (Mo.still < .8) { toast('手機還在動,放好別碰它…'); P.settleTimer = setTimeout(step, 700); return; }
+      if (Mo.still < .8) { toast(tr('手機還在動,放好別碰它…')); P.settleTimer = setTimeout(step, 700); return; }
       done(true);
     };
     step();
@@ -2716,7 +2716,7 @@ const I18N = { ja: {}, en: {} };
     setStatus(tr('暫離中'), '');
     setMain(tr('出堂・結束'));
     bubble(tr('去吧,快去快回。')); P.leaveBubble = setTimeout(() => bubble(null), 2400);
-    toast('計時暫停。回來按「回座」繼續。', false, 4200);
+    toast(tr('計時暫停。回來按「回座」繼續。'), false, 4200);
     tick();
   }
   async function endLeave() {
@@ -2741,7 +2741,7 @@ const I18N = { ja: {}, en: {} };
     setMain(tr('出堂・結束'));
     bell(0, .2);
     Amb.timers.push(setTimeout(() => { if (P.phase === 'focus') startBackground(); }, 1500));
-    toast('回座了,繼續。');
+    toast(tr('回座了,繼續。'));
   }
   leaveBtn.addEventListener('click', () => { audio(); startLeave(); });
   backBtn.addEventListener('click', endLeave);
@@ -3033,7 +3033,7 @@ const I18N = { ja: {}, en: {} };
   ['optMotion', 'optSound'].forEach(id => $('#' + id).addEventListener('change', saveOpts));
   $('#optNotify').addEventListener('change', async e => {
     if (!e.target.checked) { saveOpts(); return; }
-    if (await enableNotify() === 'denied') toast('通知被封鎖了,要到手機的 App 設定裡打開。', false, 4200);
+    if (await enableNotify() === 'denied') toast(tr('通知被封鎖了,要到手機的 App 設定裡打開。'), false, 4200);
   });
   $('#notifyAsk').addEventListener('click', async () => {
     const perm = await enableNotify();
@@ -3147,10 +3147,10 @@ const I18N = { ja: {}, en: {} };
     const inner = kind === 'full' ? HANDS : tr('<text x="50" y="65" text-anchor="middle" class="scroll-char" font-size="34" fill="var(--shu)">坐</text>');
     return `<svg viewBox="0 0 100 100"><g filter="url(#ink)" opacity="${OPACITY[kind]}" transform="translate(${j.x} ${j.y}) rotate(${j.a} 50 52)">${rings}${inner}</g></svg>`;
   }
-  const KIND_LABEL = { light: tr('未滿 25 分'), mid: '25–74 分', full: tr('75 分以上'), still: tr('坐滿、0 下'), dot: tr('沒坐滿一炷') };
+  const KIND_LABEL = { light: tr('未滿 25 分'), mid: tr('25–74 分'), full: tr('75 分以上'), still: tr('坐滿、0 下'), dot: tr('沒坐滿一炷') };
   // what the big stamp in the day detail means, in words
   const KIND_MEANING = {
-    light: tr('淡淡的「坐」章:這天坐了不到 25 分鐘。'), mid: '「坐」章:這天坐了 25 到 74 分鐘。',
+    light: tr('淡淡的「坐」章:這天坐了不到 25 分鐘。'), mid: tr('「坐」章:這天坐了 25 到 74 分鐘。'),
     full: tr('合掌章:這天坐了 75 分鐘以上。'), still: tr('「不動」章:坐滿一炷以上,一下都沒被打。'),
     dot: tr('小紅點:這天有來坐,但還沒坐滿一炷。')
   };
@@ -3631,7 +3631,7 @@ const I18N = { ja: {}, en: {} };
     g.font = `400 30px ${bodyF}`; g.fillStyle = v('--muted'); g.textAlign = 'left';
     g.fillText(tr('{0} 年 {1} 月 {2} 日', d.getFullYear(), d.getMonth() + 1, d.getDate()), 100, H - 100);
     g.textAlign = 'right'; g.fillStyle = v('--ink'); g.font = `700 40px ${disp}`;
-    g.fillText('香板禪堂', W - 100, H - 100);
+    g.fillText(tr('香板禪堂'), W - 100, H - 100);
     return c;
   }
   function prepareShare() {
@@ -3643,12 +3643,12 @@ const I18N = { ja: {}, en: {} };
     const a = Object.assign(document.createElement('a'), { href: url, download: file.name });
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
-    toast('圖片存好了。');
+    toast(tr('圖片存好了。'));
   }
   $('#shareResult').addEventListener('click', async () => {
     audio();
     const blob = await (P.sharePromise || prepareShare());
-    if (!blob) { toast('圖片做不出來,截圖分享吧。'); return; }
+    if (!blob) { toast(tr('圖片做不出來,截圖分享吧。')); return; }
     const file = new File([blob], `keisaku-${dayKey()}.png`, { type: 'image/png' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try { await navigator.share({ files: [file], text: tr('{0}・{1}', $('#resultTitle').textContent, $('#resultLine1').textContent) }); }
@@ -3773,12 +3773,12 @@ const I18N = { ja: {}, en: {} };
   if (!C.seen) { C.seen = unlockedIds(readLog()); saveCollect(); }   // what was earned before the 收藏冊 existed is not "new"
   function renderScene() {
     const stats = collectStats(readLog());
-    if (!SCROLLS.some(x => x.id === C.scroll && unlocked(x, stats))) C.scroll = tr('靜');
+    if (!SCROLLS.some(x => x.id === C.scroll && unlocked(x, stats))) C.scroll = '靜';
     if (!ACCS.some(x => x.id === C.acc && unlocked(x, stats))) C.acc = 'none';
     const season = seasonOf(), art = SEASON_ART[season]();
     $('#stage').dataset.season = season;
     $('#winView').innerHTML = art; $('#sqView').innerHTML = art;
-    $('#scrollText').innerHTML = scrollSvg(C.scroll);
+    $('#scrollText').innerHTML = scrollSvg(tr(C.scroll));         // the scroll's words, in this language's characters
     $('#mochiAcc').innerHTML = ACCS.find(x => x.id === C.acc).svg;
   }
   const sittingNow = () => ['settle', 'focus', 'leave'].includes(P.phase) || P.resuming;
@@ -3795,19 +3795,19 @@ const I18N = { ja: {}, en: {} };
     $('#collectNote').hidden = !locked;
     const card = (kind, item, inner) => {
       const ok = unlocked(item, stats), on = kind === 's' ? C.scroll === item.id : C.acc === item.id;
-      const label = kind === 's' ? item.id : item.name;
+      const label = kind === 's' ? tr(item.id) : item.name;
       return `<li><button type="button" class="c-item${ok ? '' : ' locked'}${on ? ' on' : ''}" data-kind="${kind}" data-id="${item.id}"`
         + ` aria-pressed="${on}" ${ok && !locked ? '' : 'aria-disabled="true"'} aria-label="${label}${ok ? (on ? tr(',使用中') : '') : tr(',還沒拿到:') + item.how}">`
         + inner + `<b>${label}</b>` + (on ? tr('<span class="c-on">使用中</span>') : ok ? '' : `<small>${item.how}</small><small class="c-left">${progressText(item, stats)}</small>`)
         + '</button></li>';
     };
-    $('#scrollList').innerHTML = SCROLLS.map(x => card('s', x, `<span class="c-paper" data-n="${[...x.id].length}" aria-hidden="true">${[...x.id].map(c => `<i>${c}</i>`).join('')}</span>`)).join('');
+    $('#scrollList').innerHTML = SCROLLS.map(x => card('s', x, `<span class="c-paper" data-n="${[...tr(x.id)].length}" aria-hidden="true">${[...tr(x.id)].map(c => `<i>${c}</i>`).join('')}</span>`)).join('');
     $('#accList').innerHTML = ACCS.map(x => card('a', x, `<svg class="c-mochi" viewBox="-40 -90 80 84" aria-hidden="true">${MOCHI}${x.svg}</svg>`)).join('');
     $('#seasonList').innerHTML = SEASONS.map(se => {
       const items = [...SCROLLS, ...ACCS].filter(x => x.season === se.id);
       return `<li class="c-season${se.id === now ? ' now' : ''}"><svg viewBox="50 62 72 72" aria-hidden="true">${WIN}<g clip-path="url(#winClip)">${SEASON_ART[se.id]()}</g>${LATTICE}</svg>`
         + `<div><h3>${se.name}<small>${se.months}</small>${se.id === now ? tr('<span class="c-on">現在</span>') : ''}</h3><p>${se.view}</p><ul>`
-        + items.map(x => `<li>${x.name ? tr('配件') : tr('掛軸')}「${x.name || x.id}」:${unlocked(x, stats) ? tr('已收到') : x.how + ',' + progressText(x, stats)}</li>`).join('')
+        + items.map(x => '<li>' + tr('{0}「{1}」:{2}', x.name ? tr('配件') : tr('掛軸'), x.name || tr(x.id), unlocked(x, stats) ? tr('已收到') : tr('{0},{1}', x.how, progressText(x, stats))) + '</li>').join('')
         + '</ul></div></li>';
     }).join('');
   }
@@ -3839,13 +3839,13 @@ const I18N = { ja: {}, en: {} };
     P.newItems = (P.newItems || []).concat(fresh);
   }
   const itemOf = id => id[0] === 's' ? SCROLLS.find(x => 's:' + x.id === id) : ACCS.find(x => 'a:' + x.id === id);
-  const newItemsLine = ids => tr('收藏冊多了:') + ids.map(id => id[0] === 's' ? tr('掛軸「{0}」', itemOf(id).id) : tr('配件「{0}」', itemOf(id).name)).join('、');
+  const newItemsLine = ids => tr('收藏冊多了:') + ids.map(id => id[0] === 's' ? tr('掛軸「{0}」', tr(itemOf(id).id)) : tr('配件「{0}」', itemOf(id).name)).join(tr('、'));
   // the monk hands over the first new scroll and the first new thing to wear
   async function offerNewItems() {
     const ids = P.newItems || []; P.newItems = [];
     const s = ids.find(id => id[0] === 's'), a = ids.find(id => id[0] === 'a');
     if (s) {
-      const v = await ask(tr('施主坐得不錯。這幅「{0}」送你,要掛起來嗎?', itemOf(s).id), [{ label: tr('掛上去'), value: 1, primary: true }, { label: tr('先收著'), value: 0 }]);
+      const v = await ask(tr('施主坐得不錯。這幅「{0}」送你,要掛起來嗎?', tr(itemOf(s).id)), [{ label: tr('掛上去'), value: 1, primary: true }, { label: tr('先收著'), value: 0 }]);
       if (v) equip('s', itemOf(s).id);
     }
     if (a) {
