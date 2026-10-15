@@ -92,13 +92,15 @@ test('people who took the tour before are shown the 收藏冊 once, and old roun
   await ctx.close();
 });
 
-test('the windows show this season, and the square one has a story', async () => {
+test('the windows show this season, and each has a story', async () => {
   const { p, ctx } = await openApp(browser, server.url);
   assert.equal(await p.evaluate(() => document.getElementById('stage').dataset.season), seasonNow());
   assert.ok(await p.evaluate(() => document.getElementById('winView').childElementCount > 0 && document.getElementById('sqView').childElementCount > 0));
   await p.locator('#windowBtn').click();
   await p.waitForFunction(() => !document.getElementById('bubble').hidden);
   assert.match(await p.locator('#bubbleText').textContent(), /迷之窗/);
+  await p.locator('#roundWinBtn').click();
+  await p.waitForFunction(() => /^圓的叫「悟之窗」/.test(document.getElementById('bubbleText').textContent));
   await ctx.close();
 });
 

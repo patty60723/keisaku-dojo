@@ -675,6 +675,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
 /* English: the wide letter-spacing that suits Chinese and Japanese makes Latin words fall apart */
 html:lang(en) * { letter-spacing: normal !important; }
 .c-item .c-mean { font-style: italic; color: var(--ink); }
+.c-item .c-yomi { color: var(--ink); word-break: keep-all; }   /* a reading breaks only between its words */
 
 /* ---------- 配件: three slots, and what each thing does when the keisaku lands ---------- */
 .collect-hint { margin: 0; font-size: .82rem; color: var(--muted); }
