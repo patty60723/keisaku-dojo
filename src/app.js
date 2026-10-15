@@ -2253,14 +2253,15 @@
         + '<path d="M46.5 -10.6 q1.6 2.4 .6 5 M50.5 -11 q1.7 2.5 .7 5.2 M54.5 -10.4 q1.5 2.3 .6 4.8 M58 -8.6 q1.1 1.7 .4 3.6" stroke="#c07a45" stroke-width="1.1" stroke-linecap="round" fill="none"/>'
         + '<path d="M58.6 1.9 Q55.5 2.5 51 1.7" stroke="#2a2622" stroke-width="4.4" fill="none"/><circle cx="51" cy="1.7" r="2.2" fill="#2a2622"/><path d="M58.6 1.9 Q55.5 2.5 51 1.7" stroke="#e8b07a" stroke-width="2.2" fill="none"/><circle cx="51" cy="1.7" r="1.1" fill="#e8b07a"/>'                                         // …and its end curls round in front
         + '<path d="M55.4 1.4 l.6 1.6 M53 1.2 l.5 1.5" stroke="#c07a45" stroke-width=".9" stroke-linecap="round"/>'
-        + '<ellipse cx="38.3" cy="-2.1" rx="1.8" ry="1.1" fill="#f6e3cc" stroke="#2a2622" stroke-width=".8"/><ellipse cx="41.9" cy="-2" rx="1.8" ry="1.1" fill="#f6e3cc" stroke="#2a2622" stroke-width=".8"/>'   // two paws tucked under the chin
+        + '<ellipse cx="38.3" cy="0" rx="1.8" ry="1.1" fill="#f6e3cc" stroke="#2a2622" stroke-width=".8"/><ellipse cx="41.9" cy="0" rx="1.8" ry="1.1" fill="#f6e3cc" stroke="#2a2622" stroke-width=".8"/>'   // two paws tucked under the chin
+        + '<g transform="translate(0 1.9)">'                                 // the head, lowered so the chin rests on the paws
         + '<path d="M35.4 -10.4 L35.9 -16.4 L39.6 -12.8 Z M44.6 -10.4 L44.1 -16.4 L40.4 -12.8 Z" fill="#e8b07a" stroke="#2a2622" stroke-width="1.1" stroke-linejoin="round"/>'
         + '<path d="M36.6 -12.3 l.3 -2.2 l1.5 1.4 Z M43.4 -12.3 l-.3 -2.2 l-1.5 1.4 Z" fill="#f2b9b0"/>'
         + `<circle cx="40" cy="-8" r="5.2" fill="#e8b07a" ${INK}/>`
         + '<path d="M38.7 -12.2 v1.6 M40 -12.6 v2 M41.3 -12.2 v1.6" stroke="#c07a45" stroke-width=".9" stroke-linecap="round"/>'
         + '<path d="M37.3 -8.3 q1 .9 2 0 M40.7 -8.3 q1 .9 2 0" stroke="#2a2622" stroke-width=".8" stroke-linecap="round" fill="none"/>'
         + '<path d="M39.5 -6.9 h1 l-.5 .6 Z" fill="#d9777a"/>'
-        + '<path d="M38.6 -5.9 q.7 .9 1.4 0 q.7 .9 1.4 0" stroke="#2a2622" stroke-width=".7" stroke-linecap="round" fill="none"/>' },
+        + '<path d="M38.6 -5.9 q.7 .9 1.4 0 q.7 .9 1.4 0" stroke="#2a2622" stroke-width=".7" stroke-linecap="round" fill="none"/></g>' },
     { id: 'mokugyo', slot: 'extra', place: 'side', name: tr('木魚'), gift: tr('這個木魚'), how: tr('早上 7 點前坐滿一炷'), need: s => [s.early, 1, tr('炷')],
       svg: `<path d="M56 -3 L62 -13" stroke="#8a5d34" stroke-width="1.6" stroke-linecap="round"/><circle cx="62.5" cy="-14" r="2.2" fill="#d9b56b" ${INK}/>`
         + `<ellipse cx="47" cy="-7" rx="10" ry="6.5" fill="#a5582f" ${INK}/><path d="M39 -6 q8 3 16 0" stroke="#2a2622" stroke-width="1" fill="none"/><circle cx="52" cy="-9" r="1.2" fill="#2a2622"/>` },
