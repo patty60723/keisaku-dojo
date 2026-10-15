@@ -5,7 +5,7 @@
   /* ---------- language: the Chinese text is the key; 日本語 and English come from I18N (src/i18n.js) ---------- */
   const LANG = (() => {
     let pick = 'auto';
-    try { pick = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).lang || 'auto'; } catch (e) {}
+    try { pick = (JSON.parse(localStorage.getItem((window.KEISAKU_DEBUG ? 'debug:' : '') + 'keisaku-opts-v1')) || {}).lang || 'auto'; } catch (e) {}
     if (['zh', 'ja', 'en'].includes(pick)) return pick;
     for (const l of navigator.languages || [navigator.language || '']) {
       if (/^zh/i.test(l)) return 'zh';
@@ -562,12 +562,14 @@
   }
 
   function placeBubble() {
-    bubbleEl.style.left = Math.min(80, Math.max(20, M.x / 400 * 100)) + '%';
-    bubbleEl.style.top = `calc(var(--u) * ${M.y - 92})`;   // scene units: the floor below can grow without moving it
+    const edge = bubbleEl.classList.contains('long') ? 33 : 20;   // keep a wrapped bubble wholly inside the scene
+    bubbleEl.style.left = Math.min(100 - edge, Math.max(edge, M.x / 400 * 100)) + '%';
+    const u = $('#stage').getBoundingClientRect().width / 400;   // scene units: the floor below can grow without moving it
+    bubbleEl.style.top = Math.max((M.y - 92) * u, bubbleEl.offsetHeight + 4) + 'px';   // a tall bubble stays inside the scene
   }
   function bubble(text) {
     if (text == null) { bubbleEl.hidden = true; return; }
-    bubbleText.textContent = text; bubbleEl.hidden = false; placeBubble();
+    bubbleText.textContent = text; bubbleEl.classList.toggle('long', text.length > 16); bubbleEl.hidden = false; placeBubble();
   }
   let toastTimer = 0;
   function toast(text, hit = false, ms = 3200) {
