@@ -50,7 +50,7 @@ self.addEventListener('fetch', event => {
   // The page: network-first so updates show up, cache when offline.
   if (req.mode === 'navigate') {
     event.respondWith(
-      fetch(req)
+      fetch(req, { cache: 'no-cache' })                  // ask the server every time; the browser's own cache can hold an old page for minutes
         .then(res => {
           // cache each page under its own URL, so opening preview.html or soundlab.html never replaces the app
           if (res.ok) { const copy = res.clone(); caches.open(SHELL).then(c => c.put(req, copy)); }

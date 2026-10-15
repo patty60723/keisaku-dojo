@@ -56,4 +56,4 @@ open(os.path.join(ROOT, 'debug.html' if debug else 'preview.html' if preview els
 <meta name="twitter:card" content="summary_large_image">
 '''+head+'''</head>
 <body>
-'''+body+'\n<script>\n'+('window.KEISAKU_DEBUG = true;\n' if debug else '')+script+'</script>\n<script>\nif (\'serviceWorker\' in navigator && location.protocol.startsWith(\'http\')) {\n  addEventListener(\'load\', () => navigator.serviceWorker.register(\'sw.js\').catch(() => {}));\n}\n</script>\n</body>\n</html>\n')
+'''+body+'\n<script>\n'+("window.KEISAKU_DEBUG = true; window.KEISAKU_BUILT = '" + __import__('datetime').datetime.now().strftime('%m/%d %H:%M') + "';\n" if debug else '')+script+'</script>\n<script>\nif (\'serviceWorker\' in navigator && location.protocol.startsWith(\'http\')) {\n  addEventListener(\'load\', () => navigator.serviceWorker.register(\'sw.js\').catch(() => {}));\n}\n</script>\n</body>\n</html>\n')

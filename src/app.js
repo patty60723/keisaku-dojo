@@ -2483,7 +2483,7 @@
   if (DEBUG) {                                       // a small floating panel: season, day / night, strike, sit / stand
     const bar = document.createElement('div');
     bar.className = 'debug-bar';
-    bar.innerHTML = '<b>除錯</b>' + SEASONS.map(x => `<button type="button" data-season="${x.id}">${x.name}</button>`).join('')
+    bar.innerHTML = `<b>除錯 ${window.KEISAKU_BUILT || ''}</b>` + SEASONS.map(x => `<button type="button" data-season="${x.id}">${x.name}</button>`).join('')
       + '<button type="button" data-act="night">日／夜</button><button type="button" data-act="hit">打一下</button>'
       + '<button type="button" data-act="sit">坐／站</button><button type="button" data-act="book">收藏冊</button>';
     document.body.appendChild(bar);
