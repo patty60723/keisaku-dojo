@@ -6,7 +6,7 @@
   const toastEl = $('#toast'), clockEl = $('#clock'), statusEl = $('#status');
   const mainBtn = $('#mainBtn'), askBtn = $('#askBtn'), leaveBtn = $('#leaveBtn'), backBtn = $('#backBtn');
   const PIVOT = '12 -38';
-  const SITTER_X = 200, TEA_X = 242, HOST_X = 72, RACK_X = 375;
+  const SITTER_X = 200, TEA_X = 190, HOST_X = 72, RACK_X = 375;
   const STAND = { x: -66, y: 14 };            // where the mochi stands (relative to the cushion) while checking in
   const DEFAULT_CFG = { task: '專注', focusMin: 25, rounds: 4, breakMin: 5 };
   const MAX_PRESETS = 3;
@@ -559,7 +559,7 @@
       M.ty = 215;
       walkTo(TEA_X, 40).then(() => {
         if (M.mode !== 'rest') return;
-        M.face = 1; bubble('喫茶去~');
+        M.face = -1; bubble('喫茶去~');                  // the tea is on the table to his left
         clearTimeout(teaTalk); teaTalk = setTimeout(() => bubble(null), 2600);
       });
     } else if (want === 'host') {
