@@ -1,4 +1,4 @@
-// During a round: strikes, the incense, 告假 and where things on the stage sit.
+// During a round: strikes, the incense, 暫離 and where things on the stage sit.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { startServer, launch, openApp, sit, status, clock, forward, tourText, tapRing, SEEN, shot } from './helpers.mjs';
@@ -49,25 +49,25 @@ test('round numbers use the status line\'s own font', async () => {
   await ctx.close();
 });
 
-test('告假 freezes the clock, 回座 carries on from there, and it can be used once a round', async () => {
+test('暫離 freezes the clock, 回座 carries on from there, and it can be used once a round', async () => {
   const { p, ctx, errors } = await openApp(browser, server.url);
   await sit(p);
   await forward(p, 5 * 60000); await p.waitForTimeout(400);
   await p.locator('#leaveBtn').click();
-  assert.equal(await status(p), '告假中');
+  assert.equal(await status(p), '暫離中');
   const frozen = await clock(p);
   await forward(p, 3 * 60000); await p.waitForTimeout(400);
-  assert.equal(await clock(p), frozen, 'the clock does not run during 告假');
+  assert.equal(await clock(p), frozen, 'the clock does not run during 暫離');
   await p.locator('#backBtn').click();
   await p.waitForFunction(() => document.getElementById('status').textContent === '坐禪中', null, { timeout: 15000 });
   const [fm, fs] = frozen.split(':').map(Number), [m, s] = (await clock(p)).split(':').map(Number);
   assert.ok(fm * 60 + fs - (m * 60 + s) <= 6, 'continues from where it stopped');
-  assert.equal(await p.locator('#leaveBtn').isHidden(), true, 'one 告假 per round');
+  assert.equal(await p.locator('#leaveBtn').isHidden(), true, 'one 暫離 per round');
   assert.deepEqual(errors, []);
   await ctx.close();
 });
 
-test('leaving the sitting during 告假 still saves the minutes already sat', async () => {
+test('leaving the sitting during 暫離 still saves the minutes already sat', async () => {
   const { p, ctx } = await openApp(browser, server.url);
   await sit(p);
   await forward(p, 7 * 60000); await p.waitForTimeout(400);
@@ -79,15 +79,15 @@ test('leaving the sitting during 告假 still saves the minutes already sat', as
   await ctx.close();
 });
 
-test('the first time they are caught, 告假 is pointed out and tapping it takes the leave', async () => {
+test('the first time they are caught, 暫離 is pointed out and tapping it takes the leave', async () => {
   const { p, ctx, errors } = await openApp(browser, server.url, { seen: SEEN.filter(k => k !== 'keisaku-tip-leave-v1') });
   await sit(p);
   await p.evaluate(() => { window.__hide(true); window.__skew += 5000; window.__hide(false); });
   await p.waitForFunction(() => !document.getElementById('tourCard').hidden, null, { timeout: 15000 });
-  assert.match(await tourText(p), /告假/);
+  assert.match(await tourText(p), /暫離/);
   assert.equal(await p.evaluate(() => document.getElementById('tourCard').classList.contains('at-top')), true, 'the card moves up so it does not cover the button');
   await tapRing(p);
-  await p.waitForFunction(() => document.getElementById('status').textContent === '告假中');
+  await p.waitForFunction(() => document.getElementById('status').textContent === '暫離中');
   assert.deepEqual(errors, []);
   await ctx.close();
 });

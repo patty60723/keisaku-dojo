@@ -31,7 +31,7 @@ test('the header keeps only the settings gear; the streak badge stays inside the
 for (const [dark, width] of [[false, 360], [true, 390]]) {
   test(`${dark ? 'dark' : 'light'} theme at ${width}px: no errors, nothing wider than the screen`, async () => {
     const { p, ctx, errors } = await openApp(browser, server.url, { dark, width });
-    await waitForLine(p, '今日想做的事');
+    await waitForLine(p, '今天想做什麼');
     assert.equal(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await shot(p, `home-${dark ? 'dark' : 'light'}-${width}`);
     assert.deepEqual(errors, []);
@@ -59,7 +59,7 @@ test('link preview tags point at a 1200×630 image that exists', async () => {
   const { readFileSync, existsSync } = await import('node:fs');
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   const meta = name => (html.match(new RegExp(`<meta property="${name}" content="([^"]+)"`)) || [])[1];
-  assert.equal(meta('og:title'), '警策道場|番茄鐘・不准滑手機');
+  assert.equal(meta('og:title'), '香板禪堂|番茄鐘・不准滑手機');
   const img = meta('og:image');
   assert.match(img, /^https:\/\/patty60723\.github\.io\/keisaku-dojo\/icons\/og-v\d+\.png$/);
   const file = new URL('../' + img.split('/keisaku-dojo/')[1], import.meta.url);

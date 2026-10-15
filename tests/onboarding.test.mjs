@@ -11,10 +11,10 @@ const sheetOpen = (p, id) => p.evaluate(id => document.getElementById(id).open, 
 
 test('first visit: introduction, then a tour that has to be tapped and opens each thing, then the plan', async () => {
   const { p, ctx, errors } = await openApp(browser, server.url, { seen: [] });
-  await waitForLine(p, '歡迎來到警策道場。我是這裡的住持。');
+  await waitForLine(p, '歡迎來到香板禪堂,我是這裡的住持。');
   assert.equal(await skipVisible(p), true, '略過開場 is offered during the introduction');
   await pick(p, '你好'); await pick(p, '然後呢?');
-  await waitForLine(p, '這支警策');
+  await waitForLine(p, '這支香板');
   await p.waitForFunction(() => getComputedStyle(document.getElementById('rackStick')).visibility === 'hidden');
   assert.equal(await p.evaluate(() => getComputedStyle(document.getElementById('stickLayer')).visibility), 'visible', 'the monk holds the keisaku while talking about it');
   await pick(p, '我會專心的');
@@ -23,7 +23,7 @@ test('first visit: introduction, then a tour that has to be tapped and opens eac
 
   await p.waitForFunction(() => !document.getElementById('tourCard').hidden);
   const first = await tourText(p);
-  assert.match(first, /規約/);
+  assert.match(first, /堂規/);
   await p.mouse.click(200, 700);                                   // outside the lit spot: nothing happens
   assert.equal(await tourText(p), first);
   for (const [sheet, next] of [['help', '坐禪帳'], ['journal', '齒輪'], ['settings', null]]) {
@@ -33,7 +33,7 @@ test('first visit: introduction, then a tour that has to be tapped and opens eac
     await p.locator(`#${sheet}Close`).click();
     if (next) await p.waitForFunction(t => !document.getElementById('tourCard').hidden && document.getElementById('tourText').textContent.includes(t), next);
   }
-  await waitForLine(p, '那麼,施主今日想做的事是什麼?');
+  await waitForLine(p, '那麼,施主今天想做什麼呢?');
   assert.equal(await skipVisible(p), false, 'choosing the plan is not part of the opening');
   await pick(p, '讀書');
   await waitForLine(p, '每炷香要坐多久');
@@ -44,12 +44,12 @@ test('first visit: introduction, then a tour that has to be tapped and opens eac
 
 test('略過開場 skips the introduction but still runs the tour', async () => {
   const { p, ctx } = await openApp(browser, server.url, { seen: [] });
-  await waitForLine(p, '歡迎來到警策道場');
+  await waitForLine(p, '歡迎來到香板禪堂');
   await p.locator('#dlgSkip').click();
   await p.waitForFunction(() => !document.getElementById('tourCard').hidden);
-  assert.match(await tourText(p), /規約/);
+  assert.match(await tourText(p), /堂規/);
   await p.locator('#tourSkip').click();
-  await waitForLine(p, '那麼,施主今日想做的事是什麼?');
+  await waitForLine(p, '那麼,施主今天想做什麼呢?');
   await ctx.close();
 });
 
@@ -64,19 +64,19 @@ test('the tour can be followed with the keyboard', async () => {
 test('a returning visitor who has not seen the tour hears that the dojo was rearranged', async () => {
   const { p, ctx } = await openApp(browser, server.url, { seen: ['keisaku-rules-asked-v1'], storage: { 'keisaku-log-v2': [entry(1)] } });
   await p.waitForFunction(() => !document.getElementById('tourCard').hidden);
-  assert.match(await tourText(p), /^道場重新布置過了/);
+  assert.match(await tourText(p), /^禪堂重新布置過了/);
   await shot(p, 'tour-returning');
   await p.locator('#tourSkip').click();
-  await waitForLine(p, '今日想做的事');
+  await waitForLine(p, '今天想做什麼');
   assert.match(await dialogText(p), /^施主又來了/);
   await ctx.close();
 });
 
 test('the board and the ledger in the zendo open their sheets; settings offers a way back to both', async () => {
   const { p, ctx } = await openApp(browser, server.url);
-  await waitForLine(p, '今日想做的事');
+  await waitForLine(p, '今天想做什麼');
   await p.locator('#helpBtn').click(); await p.waitForFunction(() => document.getElementById('help').open);
-  assert.equal(await p.locator('#helpTitle').textContent(), '道場規約');
+  assert.equal(await p.locator('#helpTitle').textContent(), '堂規');
   await p.locator('#helpClose').click(); await p.waitForFunction(() => !document.getElementById('help').open);
   await p.locator('#journalBtn').click(); assert.equal(await sheetOpen(p, 'journal'), true);
   await p.locator('#journalClose').click(); await p.waitForFunction(() => !document.getElementById('journal').open);
