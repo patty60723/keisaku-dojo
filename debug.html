@@ -978,6 +978,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
 /* English: the wide letter-spacing that suits Chinese and Japanese makes Latin words fall apart */
 html:lang(en) * { letter-spacing: normal !important; }
 .c-item .c-mean { font-style: italic; color: var(--ink); }
+.c-item .c-yomi { color: var(--ink); word-break: keep-all; }   /* a reading breaks only between its words */
 
 /* ---------- 配件: three slots, and what each thing does when the keisaku lands ---------- */
 .collect-hint { margin: 0; font-size: .82rem; color: var(--muted); }
@@ -1264,8 +1265,8 @@ html:lang(en) * { letter-spacing: normal !important; }
 
       <!-- round window -->
       <circle class="f-window" cx="86" cy="98" r="33"/>
+      <circle class="moon" cx="98" cy="86" r="9"/>   <!-- behind the branches: a twig may cross it -->
       <g id="winView" clip-path="url(#winClip)"></g>   <!-- the season outside, drawn by the script -->
-      <circle class="moon" cx="98" cy="86" r="9"/>
       <g clip-path="url(#winClip)" class="s-wood" stroke-width="1.6">
         <line x1="70" y1="60" x2="70" y2="140"/><line x1="86" y1="60" x2="86" y2="140"/><line x1="102" y1="60" x2="102" y2="140"/>
         <line x1="50" y1="82" x2="120" y2="82"/><line x1="50" y1="98" x2="120" y2="98"/><line x1="50" y1="114" x2="120" y2="114"/>
@@ -1470,6 +1471,7 @@ html:lang(en) * { letter-spacing: normal !important; }
     <!-- the notice board, the hanging scroll and the ledger in the picture are the way into 堂規, 收藏冊 and 坐禪帳 -->
     <button type="button" class="hotspot" id="helpBtn" aria-haspopup="dialog" aria-label="堂規" title="堂規" style="--x:12;--y:36;--w:52;--h:86"></button>
     <button type="button" class="hotspot" id="collectBtn" aria-haspopup="dialog" aria-label="收藏冊" title="收藏冊" style="--x:172;--y:42;--w:56;--h:108"></button>
+    <button type="button" class="hotspot" id="roundWinBtn" aria-label="圓窗(悟之窗)" title="悟之窗" style="--x:64;--y:64;--w:56;--h:68"></button>
     <button type="button" class="hotspot" id="windowBtn" aria-label="方窗(迷之窗)" title="迷之窗" style="--x:278;--y:60;--w:58;--h:76"></button>
     <button type="button" class="hotspot" id="journalBtn" aria-haspopup="dialog" aria-label="坐禪帳" title="坐禪帳" style="--x:336;--y:36;--w:52;--h:90"><span class="streak-badge" id="streakBadge" hidden></span></button>
     <button type="button" class="ask-btn" id="askBtn" hidden><span aria-hidden="true">🙏</span>合掌請打</button>
@@ -1546,7 +1548,7 @@ html:lang(en) * { letter-spacing: normal !important; }
 </main>
 
 <script>
-window.KEISAKU_DEBUG = true; window.KEISAKU_BUILT = '10/15 18:03';
+window.KEISAKU_DEBUG = true; window.KEISAKU_BUILT = '10/15 18:23';
 // 日本語 and English for 香板禪堂 (警策道場 / Keisaku Dojo). Keys are the Chinese text in app.js and the page;
 // {0}, {1}… are filled in by tr(). Anything missing falls back to Chinese.
 const I18N = {
@@ -2030,6 +2032,9 @@ const I18N = {
     "禪": "禅",
     "帳": "帳",
     "啪!": "パシッ!",
+    "圓的叫「悟之窗」,圓圓的沒有缺角,是悟後圓滿的心。對面方的是「迷之窗」。": "丸いのは「悟りの窓」。欠けたところのない円は、悟った心の姿です。向かいの四角いのが「迷いの窓」。",
+    "圓窗(悟之窗)": "丸い窓(悟りの窓)",
+    "悟之窗": "悟りの窓",
     "方窗(迷之窗)": "四角い窓(迷いの窓)",
     "迷之窗": "迷いの窓",
     "<span aria-hidden=\"true\">🙏</span>合掌請打": "<span aria-hidden=\"true\">🙏</span>警策をいただく",
@@ -2552,6 +2557,9 @@ const I18N = {
     "禪": "禪",
     "帳": "帳",
     "啪!": "Whack! ",
+    "圓的叫「悟之窗」,圓圓的沒有缺角,是悟後圓滿的心。對面方的是「迷之窗」。": "The round one is the Window of Enlightenment: a circle has no corners missing, like a mind at peace. The square one across is the Window of Confusion.",
+    "圓窗(悟之窗)": "Round window (Window of Enlightenment)",
+    "悟之窗": "Window of Enlightenment",
     "方窗(迷之窗)": "Square window (Window of Confusion)",
     "迷之窗": "Window of Confusion",
     "<span aria-hidden=\"true\">🙏</span>合掌請打": "<span aria-hidden=\"true\">🙏</span>Ask for a tap",
@@ -4835,22 +4843,22 @@ const I18N = {
       tasks: new Set(full.map(e => e.task)).size,
     };
   }
-  // need(stats) -> [have, need, unit]
+  // need(stats) -> [have, need, unit]; under each scroll English shows what it means, Japanese how it is read
   const SCROLLS = [
-    { id: '靜', en: 'Stillness', how: tr('一開始就掛著'), need: () => [1, 1] },
-    { id: '忍', en: 'Patience', how: tr('第一次坐滿一炷'), need: s => [s.rounds, 1, tr('炷')] },
-    { id: '心', en: 'Heart', how: tr('累計坐滿 10 炷'), need: s => [s.rounds, 10, tr('炷')] },
-    { id: '喫茶去', en: 'Go have some tea', how: tr('一天坐滿 2 炷、休息沒超時,累計 5 天'), need: s => [s.onTime, 5, tr('天')] },
-    { id: '莫妄想', en: 'No idle thoughts', how: tr('一炷都沒被打,累計 5 炷'), need: s => [s.still, 5, tr('炷')] },
-    { id: '放下著', en: 'Let it go', how: tr('用過暫離,回來還是坐滿'), need: s => [s.leave, 1, tr('炷')] },
-    { id: '一期一會', en: 'One time, one meeting', how: tr('同一天坐滿 4 炷'), need: s => [s.bigDay, 4, tr('炷')] },
-    { id: '日日是好日', en: 'Every day is a good day', how: tr('連續 7 天都有坐滿'), need: s => [s.streak, 7, tr('天')] },
-    { id: '無', en: 'Nothing', how: tr('累計坐滿 50 炷'), need: s => [s.rounds, 50, tr('炷')] },
-    { id: '本來無一物', en: 'From the start, not a thing', how: tr('累計坐滿 100 炷'), need: s => [s.rounds, 100, tr('炷')] },
-    { id: '花開', en: 'Flowers open', how: tr('春天坐滿 10 炷'), season: 'spring', need: s => [s.season.spring, 10, tr('炷')] },
-    { id: '清風', en: 'Clear breeze', how: tr('夏天坐滿 10 炷'), season: 'summer', need: s => [s.season.summer, 10, tr('炷')] },
-    { id: '明月', en: 'Bright moon', how: tr('秋天坐滿 10 炷'), season: 'autumn', need: s => [s.season.autumn, 10, tr('炷')] },
-    { id: '雪', en: 'Snow', how: tr('冬天坐滿 10 炷'), season: 'winter', need: s => [s.season.winter, 10, tr('炷')] },
+    { id: '靜', yomi: 'せい', en: 'Stillness', how: tr('一開始就掛著'), need: () => [1, 1] },
+    { id: '忍', yomi: 'にん', en: 'Patience', how: tr('第一次坐滿一炷'), need: s => [s.rounds, 1, tr('炷')] },
+    { id: '心', yomi: 'しん', en: 'Heart', how: tr('累計坐滿 10 炷'), need: s => [s.rounds, 10, tr('炷')] },
+    { id: '喫茶去', yomi: 'きっさこ', en: 'Go have some tea', how: tr('一天坐滿 2 炷、休息沒超時,累計 5 天'), need: s => [s.onTime, 5, tr('天')] },
+    { id: '莫妄想', yomi: 'まく もうぞう', en: 'No idle thoughts', how: tr('一炷都沒被打,累計 5 炷'), need: s => [s.still, 5, tr('炷')] },
+    { id: '放下著', yomi: 'ほうげ じゃく', en: 'Let it go', how: tr('用過暫離,回來還是坐滿'), need: s => [s.leave, 1, tr('炷')] },
+    { id: '一期一會', yomi: 'いちご いちえ', en: 'One time, one meeting', how: tr('同一天坐滿 4 炷'), need: s => [s.bigDay, 4, tr('炷')] },
+    { id: '日日是好日', yomi: 'にちにち これ こうじつ', en: 'Every day is a good day', how: tr('連續 7 天都有坐滿'), need: s => [s.streak, 7, tr('天')] },
+    { id: '無', yomi: 'む', en: 'Nothing', how: tr('累計坐滿 50 炷'), need: s => [s.rounds, 50, tr('炷')] },
+    { id: '本來無一物', yomi: 'ほんらい むいちもつ', en: 'From the start, not a thing', how: tr('累計坐滿 100 炷'), need: s => [s.rounds, 100, tr('炷')] },
+    { id: '花開', yomi: 'はなひらく', en: 'Flowers open', how: tr('春天坐滿 10 炷'), season: 'spring', need: s => [s.season.spring, 10, tr('炷')] },
+    { id: '清風', yomi: 'せいふう', en: 'Clear breeze', how: tr('夏天坐滿 10 炷'), season: 'summer', need: s => [s.season.summer, 10, tr('炷')] },
+    { id: '明月', yomi: 'めいげつ', en: 'Bright moon', how: tr('秋天坐滿 10 炷'), season: 'autumn', need: s => [s.season.autumn, 10, tr('炷')] },
+    { id: '雪', yomi: 'ゆき', en: 'Snow', how: tr('冬天坐滿 10 炷'), season: 'winter', need: s => [s.season.winter, 10, tr('炷')] },
   ];
   const INK = 'stroke="#2a2622" stroke-width="1.3"';
   const blossom = (x, y, c, r = 2.6) => [0, 72, 144, 216, 288].map(a => { const t = a * Math.PI / 180; return `<circle cx="${(x + Math.cos(t) * r * .8).toFixed(1)}" cy="${(y + Math.sin(t) * r * .8).toFixed(1)}" r="${(r * .62).toFixed(2)}" fill="${c}"/>`; }).join('') + `<circle cx="${x}" cy="${y}" r="${(r * .35).toFixed(2)}" fill="#e8b84a"/>`;
@@ -4958,7 +4966,7 @@ const I18N = {
     summer: () => '<g stroke-linecap="round">' + [[66, '#7aa35a'], [78, '#8fb76a'], [108, '#6f9a52']].map(([x, c]) => `<path d="M${x} 140 V58" stroke="${c}" stroke-width="3.2"/><path d="M${x - 1.5} 120 h3 M${x - 1.5} 96 h3 M${x - 1.5} 74 h3" stroke="#5c7f44" stroke-width="1"/>`).join('')
       + [[66, 96, -1], [78, 80, 1], [108, 90, -1], [78, 110, 1], [108, 70, 1]].map(([x, y, d]) => `<path d="M${x} ${y} q${d * 8} -3 ${d * 14} 2 q${-d * 7} 2 ${-d * 14} -2z" fill="#86b061"/>`).join('') + '</g>'
       + '<g class="night">' + [[70, 100, 0], [96, 84, 1.3], [106, 112, 2.1], [84, 122, .7], [116, 96, 2.8]].map(([x, y, dl]) => `<g class="firefly" style="--delay:-${dl}s"><circle cx="${x}" cy="${y}" r="4" fill="#f3e48a" opacity=".25"/><circle cx="${x}" cy="${y}" r="1.6" fill="#f3e48a"/></g>`).join('') + '</g>',
-    autumn: () => '<path d="M124 64 Q104 74 92 70 Q80 66 66 76 M100 72 Q98 84 104 92" stroke="#6b4a33" stroke-width="2" fill="none" stroke-linecap="round"/>'
+    autumn: () => '<path d="M124 64 Q104 74 92 70 Q80 66 66 76 M100 72 Q105 79 113 82" stroke="#6b4a33" stroke-width="2" fill="none" stroke-linecap="round"/>'
       + [[92, 72, '#d4572e', 0], [80, 70, '#e07a2f', 20], [68, 78, '#c8432b', -15], [100, 74, '#cf4f2c', 35], [70, 124, '#d4572e', -40]].map(([x, y, c, r]) => maple(x, y, c, 1.15, r)).join('')
       + drift('leaf', maple(0, 0, '#e07a2f', .9), 3, 12),
     winter: () => '<path d="M50 128 Q86 116 122 126 V140 H50Z" fill="#f4f6f8"/><path d="M58 126 Q70 100 86 90 M70 108 Q62 98 64 88" stroke="#5a4030" stroke-width="2" fill="none" stroke-linecap="round"/>'
@@ -5019,7 +5027,7 @@ const I18N = {
       const label = kind === 's' ? tr(item.id) : item.name;
       return `<li><button type="button" class="c-item${ok ? '' : ' locked'}${on ? ' on' : ''}" data-kind="${kind}" data-id="${item.id}"`
         + ` aria-pressed="${on}" ${ok && !locked ? '' : 'aria-disabled="true"'} aria-label="${label}${ok ? (on ? tr(',使用中') : '') : tr(',還沒拿到:') + item.how}">`
-        + inner + `<b>${label}</b>` + (LANG === 'en' && item.en ? `<small class="c-mean">${item.en}</small>` : '') + (on ? tr('<span class="c-on">使用中</span>') : ok ? '' : `<small>${item.how}</small><small class="c-left">${progressText(item, stats)}</small>`)
+        + inner + `<b>${label}</b>` + (LANG === 'en' && item.en ? `<small class="c-mean">${item.en}</small>` : LANG === 'ja' && item.yomi ? `<small class="c-yomi">${item.yomi}</small>` : '') + (on ? tr('<span class="c-on">使用中</span>') : ok ? '' : `<small>${item.how}</small><small class="c-left">${progressText(item, stats)}</small>`)
         + '</button></li>';
     };
     $('#scrollList').innerHTML = SCROLLS.map(x => card('s', x, `<span class="c-paper" data-n="${[...tr(x.id)].length}" aria-hidden="true">${[...tr(x.id)].map(c => `<i>${c}</i>`).join('')}</span>`)).join('');
@@ -5053,10 +5061,9 @@ const I18N = {
   }
   ['tabScrolls', 'tabSeasons', 'tabAccs'].forEach(t => $('#' + t).addEventListener('click', () => showCollectTab(t)));
   $('#collectBtn').addEventListener('click', () => { renderCollect(); showCollectTab('tabScrolls'); openSheet($('#collect')); });
-  $('#windowBtn').addEventListener('click', () => {
-    bubble(tr('方的叫「迷之窗」,四個角是生老病死。圓的叫「悟之窗」。京都的源光庵就是這樣開窗的。'));
-    clearTimeout(P.bubbleTimer); P.bubbleTimer = setTimeout(() => bubble(null), 5200);
-  });
+  const windowTale = text => { bubble(text); clearTimeout(P.bubbleTimer); P.bubbleTimer = setTimeout(() => bubble(null), 5200); };
+  $('#windowBtn').addEventListener('click', () => windowTale(tr('方的叫「迷之窗」,四個角是生老病死。圓的叫「悟之窗」。京都的源光庵就是這樣開窗的。')));
+  $('#roundWinBtn').addEventListener('click', () => windowTale(tr('圓的叫「悟之窗」,圓圓的沒有缺角,是悟後圓滿的心。對面方的是「迷之窗」。')));
   // after a full round: anything newly earned is kept for the result card
   function collectAfterRound(log) {
     const fresh = unlockedIds(log).filter(id => !C.seen.includes(id));
