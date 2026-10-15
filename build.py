@@ -5,10 +5,14 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 def src(name): return open(os.path.join(ROOT, 'src', name), encoding='utf-8').read()
 import sys
 preview = 'preview' in sys.argv[1:]   # build preview.html instead of index.html
+debug = 'debug' in sys.argv[1:]       # build debug.html: everything in the 收藏冊 unlocked, its own records, a debug panel
 style=src('style.css')+src('extra.css')+src('dialog.css')
 import re
 VERSION = re.search(r"const VERSION = '([^']+)'", open(os.path.join(ROOT, 'sw.js'), encoding='utf-8').read()).group(1)   # shown in 設定
 body=src('body.html').replace('{{SVG}}',src('svg.html').rstrip('\n')).replace('{{VERSION}}', VERSION)
+if debug:
+    body = body.replace('<main class="app">', '<main class="app">\n  <a class="preview-tag" href="./">除錯版 · 全部解鎖 · 回正式版</a>', 1)
+    style += '.preview-tag{align-self:flex-start;font-size:.78rem;color:#fff;background:#8e3b2e;padding:2px 10px;border-radius:999px;text-decoration:none}\n'
 if preview:
     body = body.replace('<main class="app">', '<main class="app">\n  <a class="preview-tag" href="./">預覽版 · 回正式版</a>', 1)
     style += '.preview-tag{align-self:flex-start;font-size:.78rem;color:#fff;background:var(--kesa);padding:2px 10px;border-radius:999px;text-decoration:none}\n'
@@ -24,7 +28,7 @@ try { const t = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).them
 <style>
 '''+style+'''</style>
 '''
-open(os.path.join(ROOT, 'preview.html' if preview else 'index.html'),'w').write('''<!doctype html>
+open(os.path.join(ROOT, 'debug.html' if debug else 'preview.html' if preview else 'index.html'),'w').write('''<!doctype html>
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
@@ -52,4 +56,4 @@ open(os.path.join(ROOT, 'preview.html' if preview else 'index.html'),'w').write(
 <meta name="twitter:card" content="summary_large_image">
 '''+head+'''</head>
 <body>
-'''+body+'\n<script>\n'+script+'</script>\n<script>\nif (\'serviceWorker\' in navigator && location.protocol.startsWith(\'http\')) {\n  addEventListener(\'load\', () => navigator.serviceWorker.register(\'sw.js\').catch(() => {}));\n}\n</script>\n</body>\n</html>\n')
+'''+body+'\n<script>\n'+("window.KEISAKU_DEBUG = true; window.KEISAKU_BUILT = '" + __import__('datetime').datetime.now().strftime('%m/%d %H:%M') + "';\n" if debug else '')+script+'</script>\n<script>\nif (\'serviceWorker\' in navigator && location.protocol.startsWith(\'http\')) {\n  addEventListener(\'load\', () => navigator.serviceWorker.register(\'sw.js\').catch(() => {}));\n}\n</script>\n</body>\n</html>\n')

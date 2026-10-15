@@ -37,8 +37,8 @@
 
       <!-- round window -->
       <circle class="f-window" cx="86" cy="98" r="33"/>
+      <circle class="moon" cx="98" cy="86" r="9"/>   <!-- behind the branches: a twig may cross it -->
       <g id="winView" clip-path="url(#winClip)"></g>   <!-- the season outside, drawn by the script -->
-      <circle class="moon" cx="98" cy="86" r="9"/>
       <g clip-path="url(#winClip)" class="s-wood" stroke-width="1.6">
         <line x1="70" y1="60" x2="70" y2="140"/><line x1="86" y1="60" x2="86" y2="140"/><line x1="102" y1="60" x2="102" y2="140"/>
         <line x1="50" y1="82" x2="120" y2="82"/><line x1="50" y1="98" x2="120" y2="98"/><line x1="50" y1="114" x2="120" y2="114"/>
@@ -195,6 +195,8 @@
       <g id="sitter" class="standing" data-face="peek" transform="translate(200 240)">
         <rect class="f-mat" x="-48" y="-5" width="96" height="11" rx="3"/>
         <ellipse class="f-cushion" cx="0" cy="-8" rx="36" ry="10" stroke="#2a2622" stroke-width="1.3"/>
+        <g id="accCushion"></g>   <!-- the lap blanket, folded here while the mochi stands -->
+        <g id="accSide" transform="translate(6 0)"></g>   <!-- a tea bowl, a fan, a cat… on the mat beside the cushion -->
         <!-- the mochi stands beside the cushion while checking in, and hops on to sit -->
         <g id="mochi" transform="translate(-66 14)">
         <g class="feet">

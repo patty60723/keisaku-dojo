@@ -675,3 +675,22 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
 /* English: the wide letter-spacing that suits Chinese and Japanese makes Latin words fall apart */
 html:lang(en) * { letter-spacing: normal !important; }
 .c-item .c-mean { font-style: italic; color: var(--ink); }
+.c-item .c-yomi { color: var(--ink); word-break: keep-all; }   /* a reading breaks only between its words */
+
+/* ---------- 配件: three slots, and what each thing does when the keisaku lands ---------- */
+.collect-hint { margin: 0; font-size: .82rem; color: var(--muted); }
+.c-slots { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.c-slot h3 { margin: 0 0 8px; font-family: var(--f-display); font-size: 1.05rem; letter-spacing: .1em; }
+#sitter.no-bump .bump { display: none !important; }
+.acc-drop { opacity: 0; }   /* the petal or leaf that falls when struck; reactAcc() moves it */
+
+/* debug.html only */
+.debug-bar { position: fixed; z-index: 50; left: 50%; transform: translateX(-50%); bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; align-items: center; max-width: calc(100% - 16px);
+  padding: 6px 8px; border-radius: 14px; background: rgba(42, 38, 34, .88); color: #fff; font-size: .8rem; }
+.debug-bar b { padding: 0 4px; }
+.debug-bar button { font: inherit; color: #fff; background: transparent; border: 1px solid rgba(255,255,255,.4); border-radius: 8px; padding: 4px 8px; cursor: pointer; }
+.debug-bar button.on { background: #fff; color: #2a2622; }
+
+/* the lap blanket is on the lap only while sitting; standing, it lies folded on the cushion */
+#sitter.standing #mochiAccBack .acc-blanket, #sitter:not(.standing) #accCushion { display: none; }

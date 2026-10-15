@@ -125,6 +125,8 @@ body {
   white-space: nowrap; display: flex; flex-direction: column; align-items: center; gap: 6px;
   box-shadow: 0 2px 0 var(--ink);
 }
+/* a longer line wraps inside the scene instead of running off both edges */
+.bubble.long { white-space: normal; width: max-content; max-width: 62%; text-align: center; }
 .bubble::after {
   content: ""; position: absolute; left: 50%; bottom: -7px; width: 10px; height: 10px;
   background: var(--surface); border-right: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink);

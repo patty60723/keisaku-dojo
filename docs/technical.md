@@ -19,7 +19,7 @@
   | `src/app.js` | 全部程式,包在一個 IIFE 裡 |
 
 - `build.py` 會從 `sw.js` 讀出快取版本 `VERSION`,填進設定最下面顯示的版本號,所以版本只要在 `sw.js` 改一個地方。
-- `python3 build.py` 產生 `index.html`;`python3 build.py preview` 產生 `preview.html`(左上角多一個「預覽版」標籤,其餘相同)。
+- `python3 build.py` 產生 `index.html`;`python3 build.py preview` 產生 `preview.html`(左上角多一個「預覽版」標籤,其餘相同)。`python3 build.py debug` 產生 `debug.html`:注入 `window.KEISAKU_DEBUG = true` 和建置時間,所有儲存的 key 前面加 `debug:`(不會動到正式版的紀錄和設定),收藏全部解鎖、導覽視為看過,畫面下方的浮動面板可以切季節、日夜、打一下、坐站、開收藏冊。
 - `python3 build_lab.py` 從 `app.js` 裡 `/*SND-START*/ … /*SND-END*/` 之間的聲音引擎產生 `soundlab.html`,所以試聽台跟 App 永遠用同一份聲音程式。
 - `<head>` 裡有一小段同步 script,在第一次繪製前把存好的深淺色套到 `<html data-theme>`,避免閃一下另一個主題。
 
@@ -159,7 +159,7 @@ idle(報到對話)→ settle(放手機的 3 秒)→ focus → break → ready(�
 | `keisaku-opts-v1` | `{ motion, sound, notify, goal, theme, ambient, ambVol, music }` |
 | `keisaku-rules-asked-v1`、`keisaku-tour-v1`、`keisaku-leave-told-v1` | 開場說明、導覽、暫離說明是否已經講過 |
 | `keisaku-tip-journal-v1`、`keisaku-tip-leave-v1`、`keisaku-tip-collect-v1` | 「去坐禪帳看看」「可以暫離」「禪堂多了收藏冊」三個一次性提示是否出現過 |
-| `keisaku-collect-v1` | 收藏冊:`{ scroll, acc, seen }`,目前掛的掛軸、戴的配件、已經通知過的收藏(見第 13 節) |
+| `keisaku-collect-v1` | 收藏冊:`{ scroll, wear: { head, body, extra }, seen }`,目前掛的掛軸、三格各戴的配件、已經通知過的收藏(見第 13 節)。v17 以前的 `acc` 會依配件的格子搬進 `wear` |
 | `keisaku-notify-asked`、`keisaku-persist-asked` | 是否問過通知權限、是否申請過持久儲存 |
 
 紀錄一筆:
@@ -175,7 +175,7 @@ idle(報到對話)→ settle(放手機的 3 秒)→ focus → break → ready(�
 ```
 
 - **沒存的情況:** 分鐘數為 0 而且沒被打的一炷不存。
-- **備份格式:** `{ app: 'keisaku-dojo', version: 2, exported, log, presets, collect }`。`collect` 只有 `{ scroll, acc }`;匯入時只在手機上還是預設(「靜」、不戴)時才套用,而且只收清單裡有的名稱。
+- **備份格式:** `{ app: 'keisaku-dojo', version: 2, exported, log, presets, collect }`。`collect` 只有 `{ scroll, wear }`(v17 以前的備份是 `acc`,一樣收);匯入時只在手機上還是預設(「靜」、不戴)時才套用,而且只收清單裡有的名稱。
   - 匯入時用 `validEntry` 只收合理的紀錄:`t` 是數字、`d` 是 `YYYY-MM-DD`、`min` 是 0–240 的整數、`hits` 是 0–999 的整數、`task` 是文字(或沒有)、`full` 是是非值(或沒有)。收進來時由 `cleanEntry` 整理,事項名稱截到 12 字,並保留合理的 `leave`、`late`、`goal`。
   - 常用設定(備份裡的、或手機裡存的上次設定和常用設定)一律經過 `validCfg`:事項名稱 1–12 字、每炷 5–120 分、1–8 炷、休息 0–30 分,不合理的就不用。例如寫著「10 億炷」的常用設定,如果沒擋,畫炷香圖示時會讓 App 卡死。
   - 畫面上用到 `innerHTML` 的地方,事項名稱都先經過 `escapeHtml(String(…))`,就算儲存裡有格式錯的資料,也不會當掉或被插入 HTML。
@@ -234,13 +234,15 @@ idle(報到對話)→ settle(放手機的 3 秒)→ focus → break → ready(�
 - **「新」的判定:** `seen` 記著已經通知過的項目。第一次載入時把當下已達成的全部標成看過,所以不會一次跳出一堆。之後每坐滿一炷,`collectAfterRound` 比對出新達成的,放進 `P.newItems`;結算卡上寫一行,按「好」之後住持各問一次要不要掛上第一幅新掛軸、戴上第一件新配件。匯入備份時,補進來的紀錄達成的項目也直接標成看過。
 - **坐禪中不能換:** 收藏冊在 `settle`、`focus`、`leave` 階段只能看,按鈕標成 `aria-disabled`。
 - **保底:** 存著的掛軸或配件如果不在清單裡、或條件已經不成立(例如紀錄被清掉),畫面上退回「靜」和不戴。
+- **配件三格:** 每件配件有 `slot`(`head` / `body` / `extra`),每格同時只戴一件,點已經戴著的會拿下來(`equip`)。畫的圖層:身體類在 `#mochiAccBack`(手臂後面),頭和臉上、手上的配飾在 `#mochiAcc`,放在蒲團旁的配飾(`place: 'side'`,小貓、團扇、木魚、提燈、茶碗)在 `#accSide`;膝上毯站起來時改畫成摺好放在蒲團上(`#accCushion`)。
+- **被打時的反應:** `impact()` 對每件戴著的配件呼叫 `reactAcc`,依 `REACT` 裡的種類(帽子歪掉、小鳥飛一圈、花掉一片、搖一搖…)隨機挑方向、幅度和時間。用 `requestAnimationFrame` 一格一格改 SVG 的 `transform` 屬性,因為 iOS Safari 對 SVG 元素上的 CSS 動畫不一定會重畫。帽子類(`hidesBump`)戴著時不畫腫包。
 
 ## 14. 多語系(中文 / 日本語 / English)
 
 - **語言:** 設定裡存了 `lang`(`zh` / `ja` / `en`)就用它;選「自動」時看 `navigator.languages`,`zh*` 中文、`ja*` 日文,其他一律英文。換語言時直接重新載入頁面(坐禪中就等下次打開)。
 - **中文就是 key:** 程式裡畫面上的中文都包在 `tr('…')` 裡,`tr()` 到 `I18N[LANG]` 查譯文,查不到就用中文原文。變數用 `{0}`、`{1}` 填入,英文的單複數寫成 `{0|round|rounds}`,依數字是不是 1 選字。
 - **頁面上的字:** `body.html` 和 SVG 裡寫死的中文由 `translateDom()` 在啟動時換掉。元素裡的字如果夾著 `<b>`、`<small>` 這類行內標籤,就整段 `innerHTML` 一起翻,日文、英文才能調換語序;不然就一段一段文字節點翻。`aria-label`、`title`、`placeholder` 也會翻。
-- **例外:** 掛軸、印章、木牌上的漢字是畫面的一部分,英文版照樣用漢字(收藏冊裡另附英文意思),日文版換成新字體(静、一期一会)。CSS `content` 裡的「為什麼?」由 CSS 變數 `--why` 帶入。英文版把中日文用的字距拿掉。
+- **例外:** 掛軸、印章、木牌上的漢字是畫面的一部分,英文版照樣用漢字(收藏冊裡另附英文意思),日文版換成新字體(静、一期一会),收藏冊裡附讀音(`yomi`)。CSS `content` 裡的「為什麼?」由 CSS 變數 `--why` 帶入。英文版把中日文用的字距拿掉。
 - **使用者自己的資料不翻:** 存在紀錄裡的事項名稱(例如「工作」)是使用者輸入的,換語言也照原樣顯示。
 - **不變的:** 主畫面上的 App 名稱(`manifest.webmanifest` 只能有一種)和分享預覽都是中文。
 
@@ -256,7 +258,7 @@ idle(報到對話)→ settle(放手機的 3 秒)→ focus → break → ready(�
 | `sitting.test.mjs` | 請打時泡泡和「啪!」的位置、煙跟著香、數字字體、暫離暫停與續算、暫離中出堂、第一次被打的暫離提示 |
 | `break.test.mjs` | 在背景時休息結束會發通知、回來時說超時幾分鐘 |
 | `journal.test.mjs` | 每日目標達成、分享圖是 1080 × 1350 的 PNG、第一次蓋章的提示、圖例對齊、統計的線香與籤紙、只有未坐滿紀錄時的被打數、各種情況的住持評語 |
-| `collect.test.mjs` | 從紀錄算出已拿到的收藏、還差多少;換掛軸和配件會畫進禪堂並在重新整理後保留;坐禪中不能換;第一炷坐滿得到「忍」和葉子並由住持送出;老使用者只導覽一次收藏冊;窗景跟著季節、方窗彩蛋;備份帶著掛軸和配件 |
+| `collect.test.mjs` | 從紀錄算出已拿到的收藏、還差多少;換掛軸和配件會畫進禪堂並在重新整理後保留;坐禪中不能換;第一炷坐滿得到「忍」和葉子並由住持送出;老使用者只導覽一次收藏冊;窗景跟著季節、兩扇窗的彩蛋;備份帶著掛軸和配件(含 v17 以前的單一配件);三格配件同時戴、再點拿下;被打時配件才有反應、帽子蓋住腫包 |
 | `i18n.test.mjs` | 程式裡每個 `tr()` 都有日文、英文,而且 `{0}` 和 HTML 標籤一致;日文、英文模式下打開每個面板都沒有剩下中文;依手機語言自動選、設定裡手動切換 |
 | `ui.test.mjs` | 沒有點按高亮和選字、標題列只有齒輪、天數章不被切掉、淺色 / 深色和窄螢幕不出錯也不超出畫面 |
 
