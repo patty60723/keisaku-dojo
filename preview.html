@@ -4852,7 +4852,7 @@ const I18N = {
     { id: 'cat', slot: 'extra', place: 'side', name: tr('小貓'), gift: tr('這隻小貓'), how: tr('一炷都沒被打,累計 20 炷'), need: s => [s.still, 20, tr('炷')],
       svg: `<path d="M60 -4 q5 3 -1 7" stroke="#2a2622" stroke-width="1.3" fill="none"/><ellipse cx="50" cy="-5" rx="11" ry="6" fill="#e8b07a" ${INK}/>`
         + '<path d="M48 -10.5 l1 3 M53 -10.5 l1 3" stroke="#b9774a" stroke-width="1"/>'
-        + `<path d="M36.5 -11 l-.6 -5.5 l3.8 3.2 M41.6 -12.6 l2.6 -4.6 l1 4.8" fill="#e8b07a" ${INK}/><circle cx="40" cy="-8" r="5.2" fill="#e8b07a" ${INK}/>`
+        + `<path d="M35.4 -10.4 L35.9 -16.4 L39.6 -12.8 Z M44.6 -10.4 L44.1 -16.4 L40.4 -12.8 Z" fill="#e8b07a" stroke="#2a2622" stroke-width="1.1" stroke-linejoin="round"/><circle cx="40" cy="-8" r="5.2" fill="#e8b07a" ${INK}/>`
         + '<path d="M37.4 -8 q1 .8 2 0 M41 -8 q1 .8 2 0" stroke="#2a2622" stroke-width=".8" fill="none"/>' },
     { id: 'mokugyo', slot: 'extra', place: 'side', name: tr('木魚'), gift: tr('這個木魚'), how: tr('早上 7 點前坐滿一炷'), need: s => [s.early, 1, tr('炷')],
       svg: `<path d="M56 -3 L62 -13" stroke="#8a5d34" stroke-width="1.6" stroke-linecap="round"/><circle cx="62.5" cy="-14" r="2.2" fill="#d9b56b" ${INK}/>`
@@ -4943,7 +4943,7 @@ const I18N = {
     };
     $('#scrollList').innerHTML = SCROLLS.map(x => card('s', x, `<span class="c-paper" data-n="${[...tr(x.id)].length}" aria-hidden="true">${[...tr(x.id)].map(c => `<i>${c}</i>`).join('')}</span>`)).join('');
     // a small mochi wearing just this one thing; things beside the cushion get a wider picture
-    const mini = x => `<svg class="c-mochi${x.place === 'side' ? ' wide' : ''}" viewBox="${x.place === 'side' ? '-36 -90 104 92' : '-40 -90 80 84'}" aria-hidden="true">`
+    const mini = x => `<svg class="c-mochi${x.place === 'side' ? ' wide' : ''}" viewBox="${x.place === 'side' ? '-36 -90 104 96' : '-40 -90 80 84'}" aria-hidden="true">`
       + MOCHI_BODY + (x.slot === 'body' ? x.svg : '') + MOCHI_HANDS + MOCHI_FACE + (x.slot !== 'body' ? x.svg : '') + '</svg>';
     $('#accList').innerHTML = SLOTS.map(([slot, label]) => `<li class="c-slot"><h3>${label}</h3><ul class="c-grid c-accs">`
       + ACCS.filter(x => x.slot === slot).map(x => card('a', x, mini(x))).join('') + '</ul></li>').join('');
