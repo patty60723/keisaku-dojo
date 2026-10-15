@@ -196,10 +196,10 @@ dialog.sheet.closing::backdrop { animation: backdropOut 1.5s ease-in-out forward
 .theme-pick { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .theme-pick legend { padding: 0; margin-bottom: 6px; font-weight: 700; font-size: .95rem; }
 .seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1.5px solid var(--accent); border-radius: 12px; overflow: hidden; }
-.seg label { position: relative; cursor: pointer; }
+.seg label { position: relative; cursor: pointer; display: flex; }   /* every option is as tall as the tallest one in its row */
 .seg label + label { border-left: 1.5px solid var(--accent); }
 .seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
-.seg span { display: block; text-align: center; padding: 7px 4px; font-size: .92rem; color: var(--accent); }
+.seg span { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 7px 4px; font-size: .92rem; color: var(--accent); }
 .seg input:checked + span { background: var(--accent); color: var(--on-accent); font-weight: 700; }
 .seg input:focus-visible + span { outline: 2.5px solid var(--accent); outline-offset: -5px; }
 
@@ -277,7 +277,7 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 .sense { display: block; font-size: .88rem; color: var(--shu); }
 .sense summary { cursor: pointer; font-weight: 700; min-height: 32px; display: flex; align-items: center; list-style: none; }
 .sense summary::-webkit-details-marker { display: none; }
-.sense summary::after { content: "為什麼?"; font-weight: 400; color: var(--muted); margin-left: 8px; text-decoration: underline; text-underline-offset: 3px; }
+.sense summary::after { content: var(--why, "為什麼?"); font-weight: 400; color: var(--muted); margin-left: 8px; text-decoration: underline; text-underline-offset: 3px; }
 .sense[open] summary::after { content: "收起"; }
 .sense p { margin: 2px 0 0; color: var(--muted); }
 
@@ -668,3 +668,10 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
 .firefly { animation: blink 3.2s ease-in-out var(--delay) infinite; }
 @keyframes blink { 0%, 100% { opacity: .15; } 45%, 60% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .drift { display: none; } .firefly { animation: none; } }
+
+.seg-4 { grid-template-columns: repeat(4, 1fr); }
+.seg-4 span { padding-inline: 2px; font-size: .88rem; }
+
+/* English: the wide letter-spacing that suits Chinese and Japanese makes Latin words fall apart */
+html:lang(en) * { letter-spacing: normal !important; }
+.c-item .c-mean { font-style: italic; color: var(--ink); }

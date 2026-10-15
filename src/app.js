@@ -1,6 +1,60 @@
 (() => {
   const $ = s => document.querySelector(s);
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- language: the Chinese text is the key; 日本語 and English come from I18N (src/i18n.js) ---------- */
+  const LANG = (() => {
+    let pick = 'auto';
+    try { pick = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).lang || 'auto'; } catch (e) {}
+    if (['zh', 'ja', 'en'].includes(pick)) return pick;
+    for (const l of navigator.languages || [navigator.language || '']) {
+      if (/^zh/i.test(l)) return 'zh';
+      if (/^ja/i.test(l)) return 'ja';
+      if (/^en/i.test(l)) return 'en';
+    }
+    return 'en';
+  })();
+  const DICT = (typeof I18N !== 'undefined' && I18N[LANG]) || {};
+  // tr('第 {0} 炷', n): look the Chinese up, then fill in {0}, {1}… ({0|round|rounds} picks the word by the number)
+  function tr(s, ...a) {
+    let r = DICT[s];
+    if (r == null) { r = s; if (LANG !== 'zh' && window.__i18nMiss) window.__i18nMiss.add(s); }
+    if (!a.length) return r;
+    return r.replace(/\{(\d)\|([^|}]*)\|([^}]*)\}/g, (m, i, one, many) => +a[i] === 1 ? one : many)   // {0|round|rounds}
+      .replace(/\{(\d)\}/g, (m, i) => a[i]);
+  }
+  // the page's own text: an element whose words sit among inline tags (<b>, <small>…) is translated whole,
+  // so word order can change; otherwise each piece of text on its own. Attributes people hear or see too.
+  const INLINE = new Set(['b', 'i', 'small', 'br', 'strong', 'em', 'span', 'a', 'code', 'kbd']);
+  const HAS_CJK = /[\u3400-\u9fff]/;
+  const norm = s => s.replace(/\s+/g, ' ').trim();
+  function translateDom(node) {
+    for (const el of node.children) {
+      if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE') continue;
+      for (const a of ['aria-label', 'title', 'placeholder', 'alt']) {
+        const v = el.getAttribute(a);
+        if (v && HAS_CJK.test(v)) el.setAttribute(a, tr(norm(v)));
+      }
+      const direct = [...el.childNodes].some(n => n.nodeType === 3 && HAS_CJK.test(n.nodeValue));
+      if (direct && el.children.length && [...el.children].every(c => INLINE.has(c.tagName.toLowerCase()) && !c.id)) {
+        const k = norm(el.innerHTML), v = tr(k);
+        if (v !== k) el.innerHTML = v;
+        continue;
+      }
+      if (direct) el.childNodes.forEach(n => {
+        if (n.nodeType !== 3 || !HAS_CJK.test(n.nodeValue)) return;
+        const k = norm(n.nodeValue), v = tr(k);
+        if (v !== k) n.nodeValue = n.nodeValue.match(/^\s*/)[0] + v + n.nodeValue.match(/\s*$/)[0];   // keep the spaces around it
+      });
+      translateDom(el);
+    }
+  }
+  if (LANG !== 'zh') {
+    document.documentElement.lang = LANG;
+    document.title = tr('香板禪堂');
+    translateDom(document.body);
+    document.documentElement.style.setProperty('--why', JSON.stringify(tr('為什麼?')));   // the 「為什麼?」 after the detection warning is CSS text
+  }
   const monkEl = $('#monk'), stickEl = $('#stick'), stickLayer = $('#stickLayer'), sitterEl = $('#sitter');
   const bubbleEl = $('#bubble'), bubbleText = $('#bubbleText');
   const toastEl = $('#toast'), clockEl = $('#clock'), statusEl = $('#status');
@@ -8,7 +62,7 @@
   const PIVOT = '12 -38';
   const SITTER_X = 200, TEA_X = 190, HOST_X = 72, RACK_X = 375;
   const STAND = { x: -66, y: 14 };            // where the mochi stands (relative to the cushion) while checking in
-  const DEFAULT_CFG = { task: '專注', focusMin: 25, rounds: 4, breakMin: 5 };
+  const DEFAULT_CFG = { task: tr('專注'), focusMin: 25, rounds: 4, breakMin: 5 };
   const MAX_PRESETS = 3;
 
   /* ---------- helpers ---------- */
@@ -37,7 +91,7 @@
   const loadLast = () => { const c = store.get('keisaku-last-v1', null); return validCfg(c) ? c : null; };
   const loadPresets = () => { const v = store.get('keisaku-presets-v1', []); return Array.isArray(v) ? v.filter(validCfg) : []; };
   const sameCfg = (a, b) => a && b && a.task === b.task && a.focusMin === b.focusMin && a.rounds === b.rounds && a.breakMin === b.breakMin;
-  const cfgShort = c => `${c.task}・${c.focusMin} 分 × ${c.rounds} 炷`;
+  const cfgShort = c => tr('{0}・{1} 分 × {2} 炷', c.task, c.focusMin, c.rounds);
   const totalMin = c => c.focusMin * c.rounds + c.breakMin * (c.rounds - 1);
 
   /* ---------- sound (synthesized with Web Audio) ---------- */
@@ -86,7 +140,7 @@
     leafVol: .03, frogVol: .04,
     chimeRing: .35, chimeVerb: .48, gustChance: .34, gustKnocksMin: 4, gustKnocksMax: 17, chimeOctave: 2
   };
-  const AMBIENT_LABEL = { none: '不播放', rain: '雨聲', waves: '海浪', forest: '森林', chimes: '風鈴' };
+  const AMBIENT_LABEL = { none: tr('不播放'), rain: tr('雨聲'), waves: tr('海浪'), forest: tr('森林'), chimes: tr('風鈴') };
   const noiseCache = {};
   // a few seconds of white / pink / brown noise, looped
   function noiseBuffer(a, color) {
@@ -559,7 +613,7 @@
       M.ty = 215;
       walkTo(TEA_X, 40).then(() => {
         if (M.mode !== 'rest') return;
-        M.face = -1; bubble('喫茶去~');                  // the tea is on the table to his left
+        M.face = -1; bubble(tr('喫茶去~'));                  // the tea is on the table to his left
         clearTimeout(teaTalk); teaTalk = setTimeout(() => bubble(null), 2600);
       });
     } else if (want === 'host') {
@@ -595,7 +649,7 @@
     await walkTo(mochiX() + 72, 150);
     M.face = -1;
     monkEl.dataset.mood = counted ? 'stern' : 'calm';
-    bubble(counted ? '喝!' : '請。'); await sleep(420);
+    bubble(counted ? tr('喝!') : tr('請。')); await sleep(420);
     await tween(M.stick, -48, 380, v => M.stick = v, easeOut);
     await sleep(160);
     await tween(-48, 95, 85, v => M.stick = v);
@@ -674,7 +728,7 @@
       pendingAsk = { reject: e => { clearTimeout(timer); pendingAsk = null; skipRequested = false; dlgChoices.replaceChildren(); reject(e); } };
       if (input) {
         const row = document.createElement('form'); row.className = 'dlg-input';
-        row.innerHTML = '<input id="dlgInput" maxlength="12" autocomplete="off"><button type="submit" class="choice primary">確定</button>';
+        row.innerHTML = tr('<input id="dlgInput" maxlength="12" autocomplete="off"><button type="submit" class="choice primary">確定</button>');
         const field = row.querySelector('input'); field.placeholder = input.placeholder || '';
         if (input.number) {
           row.noValidate = true;                      // the monk explains out-of-range numbers, not the browser
@@ -700,22 +754,22 @@
   }
 
   /* ---------- onboarding script ---------- */
-  const TASKS = ['讀書', '工作', '寫作'];
+  const TASKS = [tr('讀書'), tr('工作'), tr('寫作')];
   let cfg = { ...DEFAULT_CFG };
 
   const RULES = [
-    '坐禪時,手機放在桌上不要碰。我會在堂裡來回巡視。',
-    '只要拿起手機,或切到別的畫面超過兩秒,我就用這支香板打你一下。',
-    '每炷香開始時敲三聲鐘,結束時敲一聲。手機螢幕朝下也聽得到。',
-    '休息時我去喝茶,手機隨你用。休息結束我敲兩聲,你就回來坐。',
-    '臨時有事的話,可以按「暫離」暫停計時。每炷可以用一次,不會挨打。',
-    '想提神的話,可以按「合掌請打」,請我打你一下。這一下不會記進被打次數。'
+    tr('坐禪時,手機放在桌上不要碰。我會在堂裡來回巡視。'),
+    tr('只要拿起手機,或切到別的畫面超過兩秒,我就用這支香板打你一下。'),
+    tr('每炷香開始時敲三聲鐘,結束時敲一聲。手機螢幕朝下也聽得到。'),
+    tr('休息時我去喝茶,手機隨你用。休息結束我敲兩聲,你就回來坐。'),
+    tr('臨時有事的話,可以按「暫離」暫停計時。每炷可以用一次,不會挨打。'),
+    tr('想提神的話,可以按「合掌請打」,請我打你一下。這一下不會記進被打次數。')
   ];
   async function explainRules() {
     for (let i = 0; i < RULES.length; i++) {
       const v = await ask(RULES[i], [
-        { label: i < RULES.length - 1 ? '繼續' : '明白了', value: 'next', primary: true },
-        ...(i < RULES.length - 1 ? [{ label: '略過說明', value: 'skip' }] : [])
+        { label: i < RULES.length - 1 ? tr('繼續') : tr('明白了'), value: 'next', primary: true },
+        ...(i < RULES.length - 1 ? [{ label: tr('略過說明'), value: 'skip' }] : [])
       ]);
       if (v === 'skip') return;
     }
@@ -750,33 +804,33 @@
       await tour([collectStep(true)]);
     }
     const { streak, gap } = streakInfo(dayMap(log));
-    const hello = streak >= 2 ? `施主已經連續來了 ${streak} 天。` : gap != null && gap >= 3 ? '好幾天沒見了,歡迎回來。' : '施主又來了。';
+    const hello = streak >= 2 ? tr('施主已經連續來了 {0} 天。', streak) : gap != null && gap >= 3 ? tr('好幾天沒見了,歡迎回來。') : tr('施主又來了。');
     const goal = goalNow();
-    const progress = !goal || !P.todayRounds ? '' : P.todayRounds >= goal ? `今日目標 ${goal} 炷已經達成了。` : `今日目標 ${goal} 炷,還差 ${goal - P.todayRounds} 炷。`;
-    const greet = introduced ? '那麼,施主今天想做什麼呢?'          // the welcome was just said
-      : again ? `施主還要再坐一輪嗎?${progress}今天想做什麼呢?`
-      : hasSat ? hello + progress + '今天想做什麼呢?'
-      : '歡迎來到香板禪堂。施主今天想做什麼呢?';
+    const progress = !goal || !P.todayRounds ? '' : P.todayRounds >= goal ? tr('今日目標 {0} 炷已經達成了。', goal) : tr('今日目標 {0} 炷,還差 {1} 炷。', goal, goal - P.todayRounds);
+    const greet = introduced ? tr('那麼,施主今天想做什麼呢?')          // the welcome was just said
+      : again ? tr('施主還要再坐一輪嗎?{0}今天想做什麼呢?', progress)
+      : hasSat ? hello + progress + tr('今天想做什麼呢?')
+      : tr('歡迎來到香板禪堂。施主今天想做什麼呢?');
     try {
       let firstLine = null;
-      if (introduced) firstLine = '那麼,施主今天想做什麼呢?';
+      if (introduced) firstLine = tr('那麼,施主今天想做什麼呢?');
       else if (!hasSat && !rulesAsked && !again) {
-        const v = await ask('歡迎來到香板禪堂。施主是第一次來吧?要先聽聽禪堂的規矩嗎?', [
-          { label: '請說明', value: 'help', primary: true }, { label: '略過說明', value: 'skip' }
+        const v = await ask(tr('歡迎來到香板禪堂。施主是第一次來吧?要先聽聽禪堂的規矩嗎?'), [
+          { label: tr('請說明'), value: 'help', primary: true }, { label: tr('略過說明'), value: 'skip' }
         ]).finally(() => store.set('keisaku-rules-asked-v1', true));
         if (v === 'help') await explainRules();
-        firstLine = '那麼,施主今天想做什麼呢?';
+        firstLine = tr('那麼,施主今天想做什麼呢?');
       }
       let next = 'new';
       for (;;) {
         const presets = loadPresets();
         if (!lastCfg && !presets.length) break;
         const opts = [];
-        if (lastCfg) opts.push({ label: '跟上次一樣', sub: cfgShort(lastCfg), value: { use: lastCfg }, primary: true });
-        presets.forEach(p => { if (!sameCfg(p, lastCfg)) opts.push({ label: '★ ' + p.task, sub: `${p.focusMin} 分 × ${p.rounds} 炷`, value: { use: p } }); });
-        opts.push({ label: '新的安排', value: 'new' });
-        if (presets.length) opts.push({ label: '整理常用', value: 'manage' });
-        opts.push({ label: '聽說明', value: 'help' });
+        if (lastCfg) opts.push({ label: tr('跟上次一樣'), sub: cfgShort(lastCfg), value: { use: lastCfg }, primary: true });
+        presets.forEach(p => { if (!sameCfg(p, lastCfg)) opts.push({ label: '★ ' + p.task, sub: tr('{0} 分 × {1} 炷', p.focusMin, p.rounds), value: { use: p } }); });
+        opts.push({ label: tr('新的安排'), value: 'new' });
+        if (presets.length) opts.push({ label: tr('整理常用'), value: 'manage' });
+        opts.push({ label: tr('聽說明'), value: 'help' });
         next = await ask(greet, opts);
         if (next === 'manage') { await managePresets(); continue; }
         if (next === 'help') { await explainRules(); continue; }
@@ -785,14 +839,14 @@
       if (next !== 'new') {
         cfg = { ...next.use };
         applyCfg();
-        return readyCheck(`好,一樣是「${cfg.task}」,${cfg.focusMin} 分 × ${cfg.rounds} 炷。`);
+        return readyCheck(tr('好,一樣是「{0}」,{1} 分 × {2} 炷。', cfg.task, cfg.focusMin, cfg.rounds));
       }
-      await planNew(firstLine || (lastCfg || !presetsEmpty() ? '那麼,今天想做什麼呢?' : greet));
+      await planNew(firstLine || (lastCfg || !presetsEmpty() ? tr('那麼,今天想做什麼呢?') : greet));
     } catch (e) {
       if (e !== SKIP) throw e;
       cfg = { ...(loadLast() || lastCfg || DEFAULT_CFG) };
       applyCfg();
-      return readyCheck(`好,就照「${cfg.task}」,${cfg.focusMin} 分 × ${cfg.rounds} 炷。`);
+      return readyCheck(tr('好,就照「{0}」,{1} 分 × {2} 炷。', cfg.task, cfg.focusMin, cfg.rounds));
     }
     return readyCheck('');
   }
@@ -800,37 +854,37 @@
 
   // one question per setting, so the plan can be made in order or changed one piece at a time
   async function askTask(line) {
-    let task = await ask(line, [...TASKS.map(t => ({ label: t, value: t })), { label: '自訂…', value: '*' }]);
-    if (task === '*') task = await ask('要做什麼呢?寫下來給我看看。', [{ label: '先不說', value: '' }], { input: { placeholder: '例如:背單字' } });
-    return task || '專注';
+    let task = await ask(line, [...TASKS.map(t => ({ label: t, value: t })), { label: tr('自訂…'), value: '*' }]);
+    if (task === '*') task = await ask(tr('要做什麼呢?寫下來給我看看。'), [{ label: tr('先不說'), value: '' }], { input: { placeholder: tr('例如:背單字') } });
+    return task || tr('專注');
   }
   async function askFocus(line) {
     const v = await ask(line, [
-      { label: '15 分', sub: '小坐', value: 15 }, { label: '25 分', sub: '番茄', value: 25, primary: true },
-      { label: '40 分', sub: '一炷香', value: 40 }, { label: '50 分', sub: '長坐', value: 50 },
-      { label: '自訂…', value: '*', wide: true }
+      { label: tr('15 分'), sub: tr('小坐'), value: 15 }, { label: tr('25 分'), sub: tr('番茄'), value: 25, primary: true },
+      { label: tr('40 分'), sub: tr('一炷香'), value: 40 }, { label: tr('50 分'), sub: tr('長坐'), value: 50 },
+      { label: tr('自訂…'), value: '*', wide: true }
     ]);
-    return v === '*' ? askNumber('每炷要坐幾分鐘?', 5, 120, '分', 25) : v;
+    return v === '*' ? askNumber(tr('每炷要坐幾分鐘?'), 5, 120, tr('分'), 25) : v;
   }
   async function askRounds() {
-    const v = await ask('要坐幾炷?', [
-      ...[1, 2, 3, 4].map(n => ({ label: `${n} 炷`, value: n, primary: n === 4 })), { label: '自訂…', value: '*', wide: true }
+    const v = await ask(tr('要坐幾炷?'), [
+      ...[1, 2, 3, 4].map(n => ({ label: tr('{0} 炷', n), value: n, primary: n === 4 })), { label: tr('自訂…'), value: '*', wide: true }
     ]);
-    return v === '*' ? askNumber('要坐幾炷?', 1, 8, '炷', 4) : v;
+    return v === '*' ? askNumber(tr('要坐幾炷?'), 1, 8, tr('炷'), 4) : v;
   }
   async function askBreak() {
-    const v = await ask('每炷之間要休息多久?', [
-      { label: '5 分', value: 5, primary: true }, { label: '10 分', value: 10 },
-      { label: '15 分', value: 15 }, { label: '自訂…', value: '*' }
+    const v = await ask(tr('每炷之間要休息多久?'), [
+      { label: tr('5 分'), value: 5, primary: true }, { label: tr('10 分'), value: 10 },
+      { label: tr('15 分'), value: 15 }, { label: tr('自訂…'), value: '*' }
     ]);
-    return v === '*' ? askNumber('休息幾分鐘?', 1, 30, '分', 5) : v;
+    return v === '*' ? askNumber(tr('休息幾分鐘?'), 1, 30, tr('分'), 5) : v;
   }
-  const recapLine = c => `好。施主今天要「${c.task}」,坐 ${c.rounds} 炷香,每炷 ${c.focusMin} 分鐘` +
-    (c.rounds > 1 ? `,中間休息 ${c.breakMin} 分鐘` : '') + `,一共大約 ${totalMin(c)} 分鐘。`;
+  const recapLine = c => tr('好。施主今天要「{0}」,坐 {1} 炷香,每炷 {2} 分鐘', c.task, c.rounds, c.focusMin) +
+    (c.rounds > 1 ? tr(',中間休息 {0} 分鐘', c.breakMin) : '') + tr(',一共大約 {0} 分鐘。', totalMin(c));
 
   async function planNew(openingLine) {
     const task = await askTask(openingLine);
-    const focusMin = await askFocus(`「${task}」啊,好。每炷香要坐多久呢?`);
+    const focusMin = await askFocus(tr('「{0}」啊,好。每炷香要坐多久呢?', task));
     const rounds = await askRounds();
     const breakMin = rounds > 1 ? await askBreak() : 0;
     cfg = { task, focusMin, rounds, breakMin };
@@ -838,9 +892,9 @@
     for (;;) {
       const saved = loadPresets().some(p => sameCfg(p, cfg));
       const ok = await ask(recapLine(cfg), [
-        { label: '沒錯', value: 'ok', primary: true },
-        ...(saved ? [] : [{ label: '沒錯,存成常用', value: 'save' }]),
-        { label: '我要改', value: 'edit' }
+        { label: tr('沒錯'), value: 'ok', primary: true },
+        ...(saved ? [] : [{ label: tr('沒錯,存成常用'), value: 'save' }]),
+        { label: tr('我要改'), value: 'edit' }
       ]);
       if (ok === 'edit') { await editPlan(); continue; }
       if (ok === 'save') await savePreset(cfg);
@@ -850,16 +904,16 @@
   // change one setting at a time; each row shows what it is now
   async function editPlan() {
     for (;;) {
-      const what = await ask('要改哪裡?', [
-        { label: '要做的事', sub: cfg.task, value: 'task' },
-        { label: '每炷多久', sub: `${cfg.focusMin} 分`, value: 'focus' },
-        { label: '坐幾炷', sub: `${cfg.rounds} 炷`, value: 'rounds' },
-        ...(cfg.rounds > 1 ? [{ label: '休息多久', sub: `${cfg.breakMin} 分`, value: 'break' }] : []),
-        { label: '改好了', value: 'done', primary: true, wide: true }
+      const what = await ask(tr('要改哪裡?'), [
+        { label: tr('要做的事'), sub: cfg.task, value: 'task' },
+        { label: tr('每炷多久'), sub: tr('{0} 分', cfg.focusMin), value: 'focus' },
+        { label: tr('坐幾炷'), sub: tr('{0} 炷', cfg.rounds), value: 'rounds' },
+        ...(cfg.rounds > 1 ? [{ label: tr('休息多久'), sub: tr('{0} 分', cfg.breakMin), value: 'break' }] : []),
+        { label: tr('改好了'), value: 'done', primary: true, wide: true }
       ]);
       if (what === 'done') return;
-      if (what === 'task') cfg.task = await askTask('要做什麼呢?');
-      if (what === 'focus') cfg.focusMin = await askFocus('每炷香要坐多久?');
+      if (what === 'task') cfg.task = await askTask(tr('要做什麼呢?'));
+      if (what === 'focus') cfg.focusMin = await askFocus(tr('每炷香要坐多久?'));
       if (what === 'rounds') {
         cfg.rounds = await askRounds();
         if (cfg.rounds > 1 && !cfg.breakMin) cfg.breakMin = await askBreak();   // a break is needed once there are two
@@ -873,33 +927,33 @@
   // a number typed into the dialogue box; 算了 falls back to the usual choice
   async function askNumber(text, min, max, unit, fallback) {
     for (;;) {
-      const v = await ask(text, [{ label: '算了', value: '' }], { input: { placeholder: `${min}–${max}`, number: { min, max }, unit } });
+      const v = await ask(text, [{ label: tr('算了'), value: '' }], { input: { placeholder: `${min}–${max}`, number: { min, max }, unit } });
       if (v === '') return fallback;
       const n = Math.round(Number(v));
       if (Number.isFinite(n) && n >= min && n <= max) return n;
-      text = `要 ${min} 到 ${max} ${unit}之間喔。${text}`;
+      text = tr('要 {0} 到 {1} {2}之間喔。{3}', min, max, unit, text);
     }
   }
 
   async function savePreset(c) {
     let presets = loadPresets().filter(p => !sameCfg(p, c));
-    let line = `記下了。下次選「★ ${c.task}」就好。`;
+    let line = tr('記下了。下次選「★ {0}」就好。', c.task);
     if (presets.length >= MAX_PRESETS) {
       const dropped = presets.shift();
-      line = `記下了。常用最多 ${MAX_PRESETS} 組,最舊的「${dropped.task}」先拿掉了。`;
+      line = tr('記下了。常用最多 {0} 組,最舊的「{1}」先拿掉了。', MAX_PRESETS, dropped.task);
     }
     presets.push({ ...c });
     store.set('keisaku-presets-v1', presets);
-    await ask(line, [{ label: '好', value: 1, primary: true }]);
+    await ask(line, [{ label: tr('好'), value: 1, primary: true }]);
   }
 
   async function managePresets() {
     for (;;) {
       const presets = loadPresets();
-      if (!presets.length) { await ask('常用都清空了。', [{ label: '好', value: 1, primary: true }]); return; }
-      const pick = await ask('要拿掉哪一組常用?', [
-        ...presets.map((p, i) => ({ label: '拿掉 ★ ' + p.task, sub: `${p.focusMin} 分 × ${p.rounds} 炷`, value: i })),
-        { label: '整理好了', value: -1, primary: true }
+      if (!presets.length) { await ask(tr('常用都清空了。'), [{ label: tr('好'), value: 1, primary: true }]); return; }
+      const pick = await ask(tr('要拿掉哪一組常用?'), [
+        ...presets.map((p, i) => ({ label: tr('拿掉 ★ ') + p.task, sub: tr('{0} 分 × {1} 炷', p.focusMin, p.rounds), value: i })),
+        { label: tr('整理好了'), value: -1, primary: true }
       ]);
       if (pick === -1) return;
       presets.splice(pick, 1); store.set('keisaku-presets-v1', presets);
@@ -910,32 +964,32 @@
   async function readyCheck(prefix) {
     const phoneLike = matchMedia('(pointer: coarse)').matches && motionWanted();
     const howTo = phoneLike
-      ? '請把手機螢幕朝下平放在桌上。聽到三聲鐘響就開始,一聲就是休息。'
-      : '這次請別切走畫面喔。聽到三聲鐘響就開始,一聲就是休息。';
+      ? tr('請把手機螢幕朝下平放在桌上。聽到三聲鐘響就開始,一聲就是休息。')
+      : tr('這次請別切走畫面喔。聽到三聲鐘響就開始,一聲就是休息。');
     let delays = 0;
     if (!store.get('keisaku-leave-told-v1', false)) {
-      await ask('對了,坐禪時如果臨時有事,可以按計時下方的「暫離」先暫停。每炷可以用一次,不會挨打。', [{ label: '知道了', value: 1, primary: true }]);
+      await ask(tr('對了,坐禪時如果臨時有事,可以按計時下方的「暫離」先暫停。每炷可以用一次,不會挨打。'), [{ label: tr('知道了'), value: 1, primary: true }]);
       store.set('keisaku-leave-told-v1', true);
     }
     for (;;) {
       const beforeFirst = P.phase === 'idle';         // the plan can still change before the first stick is lit
-      const v = await ask(`${prefix}準備好了嗎?${howTo}`, [
-        { label: '準備好了', value: 'go', primary: true, onPick: askMotionPermission },
-        { label: '再等一下', value: 'wait' },
-        ...(beforeFirst ? [{ label: '改設定', sub: cfgShort(cfg), value: 'edit', wide: true }] : [])
+      const v = await ask(tr('{0}準備好了嗎?{1}', prefix, howTo), [
+        { label: tr('準備好了'), value: 'go', primary: true, onPick: askMotionPermission },
+        { label: tr('再等一下'), value: 'wait' },
+        ...(beforeFirst ? [{ label: tr('改設定'), sub: cfgShort(cfg), value: 'edit', wide: true }] : [])
       ]);
       if (v === 'go') break;
-      if (v === 'edit') { await editPlan(); prefix = `好,改成「${cfg.task}」,${cfg.focusMin} 分 × ${cfg.rounds} 炷。`; continue; }
+      if (v === 'edit') { await editPlan(); prefix = tr('好,改成「{0}」,{1} 分 × {2} 炷。', cfg.task, cfg.focusMin, cfg.rounds); continue; }
       delays++;
-      const line = delays >= 3 ? '施主,拖延也是一種妄想喔。……好吧,我去喝杯茶,一分鐘後回來。'
-        : '不急,去倒杯水、上個廁所吧。我一分鐘後回來問你。';
+      const line = delays >= 3 ? tr('施主,拖延也是一種妄想喔。……好吧,我去喝杯茶,一分鐘後回來。')
+        : tr('不急,去倒杯水、上個廁所吧。我一分鐘後回來問你。');
       hostAway = true; settleMonk();
-      await ask(line, [{ label: '我好了', value: 'back', primary: true }], { timeout: 60000, timeoutValue: 'timeout' });
+      await ask(line, [{ label: tr('我好了'), value: 'back', primary: true }], { timeout: 60000, timeoutValue: 'timeout' });
       hostAway = false; settleMonk();
-      prefix = delays >= 3 ? '回來了。' : '';
+      prefix = delays >= 3 ? tr('回來了。') : '';
     }
     sitterEl.dataset.face = 'happy';
-    await Promise.all([ask('那麼,止靜。', [], { timeout: 900 }), sitDown()]);
+    await Promise.all([ask(tr('那麼,止靜。'), [], { timeout: 900 }), sitDown()]);
     sitterEl.dataset.face = 'calm';
     closeDialog();
     beginSettle();
@@ -980,31 +1034,31 @@
       Mo.base = Mo.lp.slice(); Mo.picked = false; onPutDown();
     } else if (Date.now() - Mo.lastNag > 20000) {
       Mo.lastNag = Date.now();
-      enqueue(() => strike({ reason: '啪!還在滑?把手機放回去。', counted: true }));
+      enqueue(() => strike({ reason: tr('啪!還在滑?把手機放回去。'), counted: true }));
     }
   });
   function onPickUp() {
-    setStatus('拿起手機了', 'hit');
+    setStatus(tr('拿起手機了'), 'hit');
     sitterEl.dataset.face = 'peek';
-    enqueue(() => strike({ reason: '啪!手機拿起來了。放回原位才能繼續。', counted: true }));
+    enqueue(() => strike({ reason: tr('啪!手機拿起來了。放回原位才能繼續。'), counted: true }));
     enqueue(leaveTip);
   }
   // caught for the first time: if it was something that couldn't wait, this is the button for next time
   async function leaveTip() {
     if (P.phase !== 'focus' || P.leaveUsed || store.get('keisaku-tip-leave-v1', false)) return;
     store.set('keisaku-tip-leave-v1', true);
-    tour([{ target: '#leaveBtn', act: true, skipLabel: '知道了',
-      text: '如果真的有事要用手機,先按「暫離」,計時會暫停,就不會挨打了。每炷可以用一次。', hint: '👆 現在就要暫離的話,點一下「暫離」' }]);
+    tour([{ target: '#leaveBtn', act: true, skipLabel: tr('知道了'),
+      text: tr('如果真的有事要用手機,先按「暫離」,計時會暫停,就不會挨打了。每炷可以用一次。'), hint: tr('👆 現在就要暫離的話,點一下「暫離」') }]);
   }
   function onPutDown() {
-    setStatus(`坐禪中・第 ${P.round} 炷`, 'on');
-    toast('回座了,繼續專心。');
+    setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on');
+    toast(tr('回座了,繼續專心。'));
   }
   // only shown when pick-ups can't be caught; the details say why
   function renderSense(why) {
     const box = $('#sense');
     box.hidden = !why; box.open = false;
-    if (why) $('#senseMode').textContent = why + '拿起手機不會被發現,但切到別的 App 或分頁還是會被打。';
+    if (why) $('#senseMode').textContent = why + tr('拿起手機不會被發現,但切到別的 App 或分頁還是會被打。');
   }
 
   /* ---------- pomodoro phases ---------- */
@@ -1045,7 +1099,7 @@
     tg.hidden = !goal;
     if (goal) {
       const met = P.todayRounds >= goal;
-      tg.innerHTML = ` · <b>${P.todayRounds}</b>/${goal} 炷` + (met ? ' <span class="met-mark" aria-label="達成">達</span>' : '');
+      tg.innerHTML = tr(' · <b>{0}</b>/{1} 炷', P.todayRounds, goal) + (met ? tr(' <span class="met-mark" aria-label="達成">達</span>') : '');
       tg.classList.toggle('met', met);
     }
   }
@@ -1059,8 +1113,8 @@
       el.className = !started ? '' : n < P.round || (n === P.round && P.phase === 'break') ? 'done' : n === P.round ? 'now' : '';
     });
     $('#roundLabel').innerHTML = started
-      ? `${escapeHtml(cfg.task)}・第 <b>${P.round}</b>/${cfg.rounds} 炷`
-      : `${escapeHtml(cfg.task)}・<b>${cfg.focusMin}</b> 分 × ${cfg.rounds} 炷`;
+      ? tr('{0}・第 <b>{1}</b>/{2} 炷', escapeHtml(cfg.task), P.round, cfg.rounds)
+      : tr('{0}・<b>{1}</b> 分 × {2} 炷', escapeHtml(cfg.task), cfg.focusMin, cfg.rounds);
   }
   const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   function setStatus(text, state) {
@@ -1077,7 +1131,7 @@
   }
   function renderAll() {
     renderRounds(); renderStats(); tick();
-    if (P.phase === 'idle') { setStatus('報到中', ''); setMain(null); }
+    if (P.phase === 'idle') { setStatus(tr('報到中'), ''); setMain(null); }
   }
   function fmt(ms) {
     const s = Math.max(0, Math.ceil(ms / 1000));
@@ -1105,8 +1159,8 @@
     $('#result').hidden = true;
     renderRounds(); renderStats(); keepAwake(); settleMonk();
     sitterEl.dataset.face = 'calm';
-    setStatus('落座中', 'on');
-    setMain('取消');
+    setStatus(tr('落座中'), 'on');
+    setMain(tr('取消'));
     settleCountdown(cfg.focusMin * 60000, beginFocus);
   }
   // give the phone three seconds to be put down, then remember how it lies
@@ -1117,19 +1171,19 @@
       if (P.phase !== 'settle') return;
       if (!useMotion) { done(false); return; }
       if (count > 0) {
-        toast(`手機放好別動… ${count}`);
+        toast(tr('手機放好別動… {0}', count));
         clockEl.textContent = fmt(showMs);
         count--; P.settleTimer = setTimeout(step, 1000); return;
       }
       if (!Mo.seen) { done(false); return; }             // no sensor: fall back to screen-only
-      if (Mo.still < .8) { toast('手機還在動,放好別碰它…'); P.settleTimer = setTimeout(step, 700); return; }
+      if (Mo.still < .8) { toast(tr('手機還在動,放好別碰它…')); P.settleTimer = setTimeout(step, 700); return; }
       done(true);
     };
     step();
   }
   function senseFor(withMotion) {
     if (withMotion || !motionWanted()) renderSense(null);
-    else renderSense(Mo.permission === 'denied' ? '平衡儀的權限被拒絕了,' : '這台裝置讀不到平衡儀,');
+    else renderSense(Mo.permission === 'denied' ? tr('平衡儀的權限被拒絕了,') : tr('這台裝置讀不到平衡儀,'));
   }
 
   /* ---------- 暫離: step away once per round without being struck ---------- */
@@ -1140,10 +1194,10 @@
     Mo.base = null; Mo.picked = false;
     stopBackground(1.2); letSleep(); renderSense(null);
     sitterEl.dataset.face = 'peek'; standUp();
-    setStatus('暫離中', '');
-    setMain('出堂・結束');
-    bubble('去吧,快去快回。'); P.leaveBubble = setTimeout(() => bubble(null), 2400);
-    toast('計時暫停。回來按「回座」繼續。', false, 4200);
+    setStatus(tr('暫離中'), '');
+    setMain(tr('出堂・結束'));
+    bubble(tr('去吧,快去快回。')); P.leaveBubble = setTimeout(() => bubble(null), 2400);
+    toast(tr('計時暫停。回來按「回座」繼續。'), false, 4200);
     tick();
   }
   async function endLeave() {
@@ -1153,8 +1207,8 @@
     P.phase = 'settle'; P.resuming = true;
     audio(); askMotionPermission();
     sitterEl.dataset.face = 'calm';
-    setStatus('回座中', 'on');
-    setMain('出堂・結束');
+    setStatus(tr('回座中'), 'on');
+    setMain(tr('出堂・結束'));
     keepAwake();
     await sitDown();
     settleCountdown(P.left, resumeFocus);
@@ -1164,11 +1218,11 @@
     P.end = Date.now() + P.left;
     Mo.base = withMotion ? Mo.lp.slice() : null; Mo.picked = false; Mo.score = 0;
     senseFor(withMotion);
-    setStatus(`坐禪中・第 ${P.round} 炷`, 'on');
-    setMain('出堂・結束');
+    setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on');
+    setMain(tr('出堂・結束'));
     bell(0, .2);
     Amb.timers.push(setTimeout(() => { if (P.phase === 'focus') startBackground(); }, 1500));
-    toast('回座了,繼續。');
+    toast(tr('回座了,繼續。'));
   }
   leaveBtn.addEventListener('click', () => { audio(); startLeave(); });
   backBtn.addEventListener('click', endLeave);
@@ -1178,12 +1232,12 @@
     P.start = Date.now(); P.end = P.start + cfg.focusMin * 60000;
     Mo.base = withMotion ? Mo.lp.slice() : null; Mo.picked = false; Mo.score = 0;
     senseFor(withMotion);
-    setStatus(`坐禪中・第 ${P.round} 炷`, 'on');
-    setMain('出堂・結束');
+    setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on');
+    setMain(tr('出堂・結束'));
     renderRounds();
     bells(3);
     Amb.timers.push(setTimeout(() => { if (P.phase === 'focus') startBackground(); }, 3800));
-    toast(P.round === 1 ? '止靜。住持開始巡堂了。' : `第 ${P.round} 炷,止靜。`);
+    toast(P.round === 1 ? tr('止靜。住持開始巡堂了。') : tr('第 {0} 炷,止靜。', P.round));
   }
 
   function endFocus() {
@@ -1198,9 +1252,9 @@
     Mo.base = null; Mo.picked = false;
     letSleep(); renderSense(null);
     sitterEl.dataset.face = 'happy'; standUp();
-    setStatus('休息', '');
-    setMain('跳過休息');
-    toast(goalMet ? `今日目標 ${goalNow()} 炷達成!休息 ${cfg.breakMin} 分鐘。` : `開靜。這炷被打 ${P.roundHits} 下,休息 ${cfg.breakMin} 分鐘,手機可以用了。`);
+    setStatus(tr('休息'), '');
+    setMain(tr('跳過休息'));
+    toast(goalMet ? tr('今日目標 {0} 炷達成!休息 {1} 分鐘。', goalNow(), cfg.breakMin) : tr('開靜。這炷被打 {0} 下,休息 {1} 分鐘,手機可以用了。', P.roundHits, cfg.breakMin));
     enqueue(returnStick);
     renderRounds(); settleMonk();
   }
@@ -1211,7 +1265,7 @@
     P.round++;
     P.phase = 'ready';
     sitterEl.dataset.face = 'peek';
-    setStatus('該回座了', 'on');
+    setStatus(tr('該回座了'), 'on');
     setMain(null);
     renderRounds(); tick();
     if (document.hidden) { P.awaitReturn = true; notifyBreakOver(); return; }   // wait until they come back
@@ -1222,7 +1276,7 @@
     P.awaitReturn = false;
     const late = Date.now() - P.breakEnd;
     P.lateMin = late >= 60000 ? Math.round(late / 60000) : 0;
-    readyCheck(P.lateMin ? `休息超過 ${P.lateMin} 分鐘了喔。第 ${P.round} 炷,` : `休息結束。第 ${P.round} 炷,`);
+    readyCheck(P.lateMin ? tr('休息超過 {0} 分鐘了喔。第 {1} 炷,', P.lateMin, P.round) : tr('休息結束。第 {0} 炷,', P.round));
   }
 
   /* ---------- break-over notification (best effort: the page may be frozen in the background) ---------- */
@@ -1230,11 +1284,11 @@
   const notifyAskable = () => canNotify() && Notification.permission === 'default' && !store.get('keisaku-notify-asked', false);
   async function notifyBreakOver() {
     if (!canNotify() || !$('#optNotify').checked || Notification.permission !== 'granted') return;
-    const body = `第 ${P.round} 炷要開始了,回來坐禪吧。`;
+    const body = tr('第 {0} 炷要開始了,回來坐禪吧。', P.round);
     try {
       const reg = await navigator.serviceWorker.ready;
-      await reg.showNotification('休息結束,該回座了', { body, tag: 'keisaku-break', renotify: true, icon: 'icons/icon-192-v2.png', badge: 'icons/icon-192-v2.png', vibrate: [120, 80, 120] });
-    } catch { try { new Notification('休息結束,該回座了', { body, tag: 'keisaku-break' }); } catch {} }
+      await reg.showNotification(tr('休息結束,該回座了'), { body, tag: 'keisaku-break', renotify: true, icon: 'icons/icon-192-v2.png', badge: 'icons/icon-192-v2.png', vibrate: [120, 80, 120] });
+    } catch { try { new Notification(tr('休息結束,該回座了'), { body, tag: 'keisaku-break' }); } catch {} }
   }
   async function enableNotify() {
     store.set('keisaku-notify-asked', true);
@@ -1251,7 +1305,7 @@
     const hadFocus = P.focusTotal > 0 || P.hits > 0;
     P.phase = 'idle'; P.round = 1; P.resuming = false; P.awaitReturn = false; P.lateMin = 0;
     letSleep(); Mo.base = null; Mo.picked = false; standUp();
-    setMain(null); setStatus('報到中', '');
+    setMain(null); setStatus(tr('報到中'), '');
     renderSense(null);
     enqueue(returnStick);
     renderRounds(); settleMonk();
@@ -1269,22 +1323,22 @@
     finishCycle(true);
   }
 
-  const KOANS = ['日日是好日。', '喫茶去。', '步步是道場。', '莫妄想。', '一期一會。', '行住坐臥,皆是禪。', '放下著。'];
+  const KOANS = [tr('日日是好日。'), tr('喫茶去。'), tr('步步是道場。'), tr('莫妄想。'), tr('一期一會。'), tr('行住坐臥,皆是禪。'), tr('放下著。')];
   function showResult(early) {
     let seal, line2;
     const perRound = P.hits / Math.max(1, cfg.rounds);
-    if (P.hits === 0) { seal = '不動'; line2 = '一下都沒被打,如山不動。'; }
-    else if (perRound <= 1) { seal = '精進'; line2 = `被打了 ${P.hits} 下,還算專心。`; }
-    else { seal = '喝'; line2 = `被打了 ${P.hits} 下,肩膀辛苦了。`; }
+    if (P.hits === 0) { seal = tr('不動'); line2 = tr('一下都沒被打,如山不動。'); }
+    else if (perRound <= 1) { seal = tr('精進'); line2 = tr('被打了 {0} 下,還算專心。', P.hits); }
+    else { seal = tr('喝'); line2 = tr('被打了 {0} 下,肩膀辛苦了。', P.hits); }
     sitterEl.dataset.face = 'happy';
     $('#seal').replaceChildren(...[...seal].map(ch => Object.assign(document.createElement('i'), { textContent: ch })));
-    $('#resultTitle').textContent = early ? '提早出堂' : `坐滿 ${cfg.rounds} 炷`;
-    $('#resultLine1').textContent = `「${cfg.task}」共坐了 ${P.focusTotal} 分鐘` + (P.asks ? `,自己請打 ${P.asks} 下` : '');
+    $('#resultTitle').textContent = early ? tr('提早出堂') : tr('坐滿 {0} 炷', cfg.rounds);
+    $('#resultLine1').textContent = tr('「{0}」共坐了 {1} 分鐘', cfg.task, P.focusTotal) + (P.asks ? tr(',自己請打 {0} 下', P.asks) : '');
     $('#resultLine2').textContent = line2;
     $('#koan').textContent = KOANS[Math.floor(Math.random() * KOANS.length)];
     const goal = goalNow(), metToday = goal && P.todayRounds >= goal;
     $('#resultGoal').hidden = !metToday;
-    $('#resultGoal').textContent = P.showGoal ? `今日目標 ${goal} 炷,達成。` : metToday ? `今日目標 ${goal} 炷已達成,今天坐了 ${P.todayRounds} 炷。` : '';
+    $('#resultGoal').textContent = P.showGoal ? tr('今日目標 {0} 炷,達成。', goal) : metToday ? tr('今日目標 {0} 炷已達成,今天坐了 {1} 炷。', goal, P.todayRounds) : '';
     P.showGoal = false;
     $('#resultNew').hidden = !(P.newItems || []).length;
     $('#resultNew').textContent = (P.newItems || []).length ? newItemsLine(P.newItems) : '';
@@ -1321,12 +1375,12 @@
     const away = Math.min(Date.now(), P.end) - P.hiddenAt; P.hiddenAt = 0;
     if (away < 2000) { tick(); return; }
     const secs = Math.round(away / 1000);
-    const label = secs >= 60 ? `${Math.floor(secs / 60)} 分 ${secs % 60} 秒` : `${secs} 秒`;
+    const label = secs >= 60 ? tr('{0} 分 {1} 秒', Math.floor(secs / 60), secs % 60) : tr('{0} 秒', secs);
     sitterEl.dataset.face = 'peek';
-    setStatus('被抓到了', 'hit');
-    enqueue(() => strike({ reason: `啪!離開畫面 ${label}。`, counted: true }));
-    if (secs >= 90) enqueue(() => strike({ reason: '啪!離開太久,再補一下。', counted: true }));
-    enqueue(async () => { if (P.phase === 'focus') setStatus(`坐禪中・第 ${P.round} 炷`, 'on'); });
+    setStatus(tr('被抓到了'), 'hit');
+    enqueue(() => strike({ reason: tr('啪!離開畫面 {0}。', label), counted: true }));
+    if (secs >= 90) enqueue(() => strike({ reason: tr('啪!離開太久,再補一下。'), counted: true }));
+    enqueue(async () => { if (P.phase === 'focus') setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on'); });
     enqueue(leaveTip);
     tick();
   });
@@ -1339,15 +1393,15 @@
       case 'focus':
         if (Date.now() - P.confirmEnd < 3000) { quitEarly(); break; }
         P.confirmEnd = Date.now();
-        setMain('確定要出堂?', { warn: true });
-        setTimeout(() => { if (P.phase === 'focus') setMain('出堂・結束'); }, 3000);
+        setMain(tr('確定要出堂?'), { warn: true });
+        setTimeout(() => { if (P.phase === 'focus') setMain(tr('出堂・結束')); }, 3000);
         break;
     }
   });
   askBtn.addEventListener('click', () => {
     audio();
     if (busy) return;
-    enqueue(() => strike({ reason: '啪!精神一振,謝謝師父。', counted: false }));
+    enqueue(() => strike({ reason: tr('啪!精神一振,謝謝師父。'), counted: false }));
   });
   // Install to home screen: Chrome/Android fire beforeinstallprompt; iOS Safari needs the share menu.
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
@@ -1412,8 +1466,16 @@
   const goalNow = () => +((document.querySelector('input[name="goal"]:checked') || {}).value || 0);
   if ([2, 4, 6, 8].includes(opts.goal)) document.querySelector(`input[name="goal"][value="${opts.goal}"]`).checked = true;
   document.querySelectorAll('input[name="goal"]').forEach(r => r.addEventListener('change', () => { saveOpts(); renderStats(); }));
+  const langNow = () => (document.querySelector('input[name="lang"]:checked') || {}).value || 'auto';
+  if (['zh', 'ja', 'en'].includes(opts.lang)) document.querySelector(`input[name="lang"][value="${opts.lang}"]`).checked = true;
+  // a new language needs a fresh page; mid-sitting it waits for the next visit
+  document.querySelectorAll('input[name="lang"]').forEach(r => r.addEventListener('change', () => {
+    saveOpts();
+    if (P.phase === 'idle' || P.phase === 'ready') location.reload();
+    else toast(tr('下次打開時換成新的語言。'));
+  }));
   const themeNow = () => (document.querySelector('input[name="theme"]:checked') || {}).value || 'system';
-  const saveOpts = () => store.set('keisaku-opts-v1', { motion: $('#optMotion').checked, sound: $('#optSound').checked, notify: $('#optNotify').checked, goal: goalNow(), theme: themeNow(),
+  const saveOpts = () => store.set('keisaku-opts-v1', { motion: $('#optMotion').checked, sound: $('#optSound').checked, notify: $('#optNotify').checked, goal: goalNow(), theme: themeNow(), lang: langNow(),
     ambient: ambientChoice(), ambVol: +$('#ambVol').value, music: musicOn() });
   if (typeof opts.music === 'boolean') $('#ambMusic').checked = opts.music;
   if (AMBIENT_LABEL[opts.ambient]) document.querySelector(`input[name="ambient"][value="${opts.ambient}"]`).checked = true;
@@ -1422,7 +1484,7 @@
   let previewing = false;
   function setPreview(on) {
     previewing = on;
-    previewBtn.textContent = on ? '停止試聽' : '試聽';
+    previewBtn.textContent = on ? tr('停止試聽') : tr('試聽');
     previewBtn.setAttribute('aria-pressed', String(on));
     if (on || P.phase === 'focus') startBackground();   // when a sitting is on, go back to what it was playing
     else stopBackground(.8);
@@ -1452,12 +1514,12 @@
   ['optMotion', 'optSound'].forEach(id => $('#' + id).addEventListener('change', saveOpts));
   $('#optNotify').addEventListener('change', async e => {
     if (!e.target.checked) { saveOpts(); return; }
-    if (await enableNotify() === 'denied') toast('通知被封鎖了,要到手機的 App 設定裡打開。', false, 4200);
+    if (await enableNotify() === 'denied') toast(tr('通知被封鎖了,要到手機的 App 設定裡打開。'), false, 4200);
   });
   $('#notifyAsk').addEventListener('click', async () => {
     const perm = await enableNotify();
     $('#notifyAsk').hidden = true;
-    toast(perm === 'granted' ? '好,休息結束時會用通知叫你。' : '沒關係,休息結束時聽鐘聲回座。', false, 3600);
+    toast(perm === 'granted' ? tr('好,休息結束時會用通知叫你。') : tr('沒關係,休息結束時聽鐘聲回座。'), false, 3600);
   });
 
   // appearance: follow the phone, or force light / dark (the tokens already handle [data-theme])
@@ -1482,7 +1544,7 @@
     && isInt(e.min, 0, 240) && isInt(e.hits, 0, 999)
     && (e.task === undefined || typeof e.task === 'string') && (e.full === undefined || typeof e.full === 'boolean');
   const cleanEntry = e => {
-    const c = { t: e.t, d: e.d, task: (e.task || '專注').slice(0, 12), min: e.min, hits: e.hits, full: !!e.full };
+    const c = { t: e.t, d: e.d, task: (e.task || tr('專注')).slice(0, 12), min: e.min, hits: e.hits, full: !!e.full };
     if (e.leave === 1) c.leave = 1;
     if (isInt(e.late, 1, 1440)) c.late = e.late;
     if (isInt(e.goal, 1, 8)) c.goal = e.goal;
@@ -1493,7 +1555,7 @@
     if (!Array.isArray(log)) {
       // v1 kept 30 days with toDateString() dates and no "full" flag
       log = store.get('keisaku-log-v1', []).filter(e => e && typeof e.t === 'number')
-        .map(e => ({ t: e.t, d: dayKey(e.t), task: e.task || '專注', min: e.min || 0, hits: e.hits || 0, full: (e.min || 0) >= 15 }));
+        .map(e => ({ t: e.t, d: dayKey(e.t), task: e.task || tr('專注'), min: e.min || 0, hits: e.hits || 0, full: (e.min || 0) >= 15 }));
       store.set(LOG_KEY, log);
     }
     return log;
@@ -1558,20 +1620,20 @@
     const j = jitter(key);
     if (kind === 'still') {
       return `<svg viewBox="0 0 100 100"><g filter="url(#ink)" transform="translate(${j.x} ${j.y}) rotate(${j.a - 3} 50 54)"><rect x="17" y="20" width="66" height="66" rx="7" fill="var(--shu)"/>` +
-        '<text x="50" y="49" text-anchor="middle" class="scroll-char" font-size="26" fill="#fff7ef">不</text><text x="50" y="77" text-anchor="middle" class="scroll-char" font-size="26" fill="#fff7ef">動</text></g></svg>';
+        tr('<text x="50" y="49" text-anchor="middle" class="scroll-char" font-size="26" fill="#fff7ef">不</text><text x="50" y="77" text-anchor="middle" class="scroll-char" font-size="26" fill="#fff7ef">動</text></g></svg>');
     }
     const rings = kind === 'full'
       ? '<circle cx="50" cy="52" r="36" fill="none" stroke="var(--shu)" stroke-width="5"/><circle cx="50" cy="52" r="28" fill="none" stroke="var(--shu)" stroke-width="2"/>'
       : '<circle cx="50" cy="52" r="34" fill="none" stroke="var(--shu)" stroke-width="5"/>';
-    const inner = kind === 'full' ? HANDS : '<text x="50" y="65" text-anchor="middle" class="scroll-char" font-size="34" fill="var(--shu)">坐</text>';
+    const inner = kind === 'full' ? HANDS : tr('<text x="50" y="65" text-anchor="middle" class="scroll-char" font-size="34" fill="var(--shu)">坐</text>');
     return `<svg viewBox="0 0 100 100"><g filter="url(#ink)" opacity="${OPACITY[kind]}" transform="translate(${j.x} ${j.y}) rotate(${j.a} 50 52)">${rings}${inner}</g></svg>`;
   }
-  const KIND_LABEL = { light: '未滿 25 分', mid: '25–74 分', full: '75 分以上', still: '坐滿、0 下', dot: '沒坐滿一炷' };
+  const KIND_LABEL = { light: tr('未滿 25 分'), mid: tr('25–74 分'), full: tr('75 分以上'), still: tr('坐滿、0 下'), dot: tr('沒坐滿一炷') };
   // what the big stamp in the day detail means, in words
   const KIND_MEANING = {
-    light: '淡淡的「坐」章:這天坐了不到 25 分鐘。', mid: '「坐」章:這天坐了 25 到 74 分鐘。',
-    full: '合掌章:這天坐了 75 分鐘以上。', still: '「不動」章:坐滿一炷以上,一下都沒被打。',
-    dot: '小紅點:這天有來坐,但還沒坐滿一炷。'
+    light: tr('淡淡的「坐」章:這天坐了不到 25 分鐘。'), mid: tr('「坐」章:這天坐了 25 到 74 分鐘。'),
+    full: tr('合掌章:這天坐了 75 分鐘以上。'), still: tr('「不動」章:坐滿一炷以上,一下都沒被打。'),
+    dot: tr('小紅點:這天有來坐,但還沒坐滿一炷。')
   };
 
   const J = { y: 0, m: 0, sel: '' };          // shown month (m: 0-11) and selected day
@@ -1579,18 +1641,18 @@
   function renderJournal() {
     const log = readLog(), m = dayMap(log), todayK = dayKey();
     const { streak } = streakInfo(m);
-    $('#streak').textContent = streak >= 1 ? `連續 ${streak} 日` : '';
+    $('#streak').textContent = streak >= 1 ? tr('連續 {0} 日', streak) : '';
     renderStreakBadge(streak);
-    $('#monthTitle').textContent = `${J.y} 年 ${J.m + 1} 月`;
+    $('#monthTitle').textContent = tr('{0} 年 {1} 月', J.y, J.m + 1);
     const now = new Date();
     $('#nextMonth').disabled = J.y > now.getFullYear() || (J.y === now.getFullYear() && J.m >= now.getMonth());
     const prefix = `${J.y}-${pad2(J.m + 1)}-`;
     let days = 0, mins = 0, hits = 0;
     for (const [k, a] of m) if (k.startsWith(prefix)) { if (a.full) days++; mins += a.min; hits += a.hits; }
-    $('#monthSum').textContent = `本月坐禪 ${days} 日・共 ${mins} 分・被打 ${hits} 下`;
+    $('#monthSum').textContent = tr('本月坐禪 {0} 日・共 {1} 分・被打 {2} 下', days, mins, hits);
 
     const cal = $('#cal'); cal.replaceChildren();
-    '日一二三四五六'.split('').forEach(w => cal.appendChild(Object.assign(document.createElement('div'), { className: 'dow', textContent: w })));
+    tr('日一二三四五六').split('').forEach(w => cal.appendChild(Object.assign(document.createElement('div'), { className: 'dow', textContent: w })));
     const first = new Date(J.y, J.m, 1).getDay(), count = new Date(J.y, J.m + 1, 0).getDate();
     for (let i = 0; i < first; i++) cal.appendChild(document.createElement('div'));
     for (let d = 1; d <= count; d++) {
@@ -1599,34 +1661,34 @@
       b.className = 'cell' + (key === todayK ? ' today' : '') + (key === J.sel ? ' sel' : '') + (key > todayK ? ' future' : '');
       b.disabled = key > todayK;
       const met = a && a.goal && a.full >= a.goal;
-      b.setAttribute('aria-label', `${J.m + 1} 月 ${d} 日` + (a ? `,坐 ${a.min} 分,被打 ${a.hits} 下` : '') + (met ? ',達成每日目標' : ''));
-      b.innerHTML = `<span class="d">${d}</span>` + stampSvg(kind, key) + (met ? '<span class="met-mark" aria-hidden="true">達</span>' : '');
+      b.setAttribute('aria-label', tr('{0} 月 {1} 日', J.m + 1, d) + (a ? tr(',坐 {0} 分,被打 {1} 下', a.min, a.hits) : '') + (met ? tr(',達成每日目標') : ''));
+      b.innerHTML = `<span class="d">${d}</span>` + stampSvg(kind, key) + (met ? tr('<span class="met-mark" aria-hidden="true">達</span>') : '');
       b.addEventListener('click', () => { J.sel = key; renderJournal(); });
       cal.appendChild(b);
     }
     $('#calLegend').innerHTML = ['light', 'mid', 'full', 'still', 'dot']
       .map(k => `<span><b class="key">${stampSvg(k, 'legend')}</b>${KIND_LABEL[k]}</span>`).join('')
-      + (log.some(e => e.goal) ? '<span><b class="key"><i class="met-mark">達</i></b>達成每日目標</span>' : '');
+      + (log.some(e => e.goal) ? tr('<span><b class="key"><i class="met-mark">達</i></b>達成每日目標</span>') : '');
     renderDay(m);
   }
   function renderDay(m) {
     const box = $('#dayDetail'), key = J.sel, a = m.get(key);
     const dt = new Date(key + 'T12:00');
-    const title = `${dt.getMonth() + 1} 月 ${dt.getDate()} 日(${'日一二三四五六'[dt.getDay()]})`;
+    const title = tr('{0} 月 {1} 日({2})', dt.getMonth() + 1, dt.getDate(), tr('日一二三四五六')[dt.getDay()]);
     if (!a) {
       box.innerHTML = `<div class="big"></div><h3></h3><p class="empty"></p>`;
       box.querySelector('h3').textContent = title;
-      box.querySelector('.empty').textContent = key === dayKey() ? '今天還沒有坐禪。' : '這天沒有來坐禪。';
+      box.querySelector('.empty').textContent = key === dayKey() ? tr('今天還沒有坐禪。') : tr('這天沒有來坐禪。');
       return;
     }
     box.innerHTML = `<div class="big">${stampSvg(stampKind(a), key)}</div><h3></h3><p class="kind"></p><ul></ul>`;
     box.querySelector('.kind').textContent = KIND_MEANING[stampKind(a)] || '';
-    box.querySelector('h3').textContent = `${title}・共 ${a.min} 分・被打 ${a.hits} 下` + (a.goal ? (a.full >= a.goal ? `・目標 ${a.goal} 炷達成` : `・目標 ${a.full}/${a.goal} 炷`) : '');
+    box.querySelector('h3').textContent = tr('{0}・共 {1} 分・被打 {2} 下', title, a.min, a.hits) + (a.goal ? (a.full >= a.goal ? tr('・目標 {0} 炷達成', a.goal) : tr('・目標 {0}/{1} 炷', a.full, a.goal)) : '');
     const ul = box.querySelector('ul');
     for (const [task, t] of a.tasks) {
       const li = document.createElement('li');
-      li.textContent = `${task} ${t.rounds} 炷・${t.min} 分・被打 ${t.hits} 下` + (t.leave ? `・暫離 ${t.leave} 次` : '')
-        + (t.late ? `・休息超時 ${t.late} 分` : '') + (t.partial ? `(另有 ${t.partial} 次沒坐完)` : '');
+      li.textContent = tr('{0} {1} 炷・{2} 分・被打 {3} 下', task, t.rounds, t.min, t.hits) + (t.leave ? tr('・暫離 {0} 次', t.leave) : '')
+        + (t.late ? tr('・休息超時 {0} 分', t.late) : '') + (t.partial ? tr('(另有 {0} 次沒坐完)', t.partial) : '');
       ul.appendChild(li);
     }
   }
@@ -1647,37 +1709,37 @@
       const a = Object.assign(document.createElement('a'), { href: url, download: `keisaku-backup-${dayKey()}.json` });
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 2000);
-      backupStatus(`已匯出 ${readLog().length} 筆紀錄。`);
-    } catch { backupStatus('這裡沒辦法存檔,請改用「複製備份文字」。'); }
+      backupStatus(tr('已匯出 {0} 筆紀錄。', readLog().length));
+    } catch { backupStatus(tr('這裡沒辦法存檔,請改用「複製備份文字」。')); }
   });
   $('#copyBtn').addEventListener('click', () => {
     const text = backupText();
     const fallback = () => {
       $('#pasteBox').hidden = false; const ta = $('#pasteText'); ta.value = text; ta.select();
-      backupStatus('沒辦法自動複製,文字已經選取好了,請手動複製。');
+      backupStatus(tr('沒辦法自動複製,文字已經選取好了,請手動複製。'));
     };
-    try { navigator.clipboard.writeText(text).then(() => backupStatus('已複製備份文字,可以貼到記事本保存。'), fallback); } catch { fallback(); }
+    try { navigator.clipboard.writeText(text).then(() => backupStatus(tr('已複製備份文字,可以貼到記事本保存。')), fallback); } catch { fallback(); }
   });
   $('#importBtn').addEventListener('click', () => $('#importFile').click());
   $('#importFile').addEventListener('change', e => {
     const f = e.target.files && e.target.files[0]; e.target.value = '';
     if (!f) return;
-    f.text().then(prepareImport, () => backupStatus('讀不到這個檔案。'));
+    f.text().then(prepareImport, () => backupStatus(tr('讀不到這個檔案。')));
   });
   $('#pasteBtn').addEventListener('click', () => { $('#pasteBox').hidden = false; $('#pasteText').value = ''; $('#pasteText').focus(); });
   $('#pasteGo').addEventListener('click', () => prepareImport($('#pasteText').value));
   let pendingImport = null;
   function prepareImport(text) {
     let data;
-    try { data = JSON.parse(text); } catch { backupStatus('這不是香板禪堂的備份,讀不出來。'); return; }
+    try { data = JSON.parse(text); } catch { backupStatus(tr('這不是香板禪堂的備份,讀不出來。')); return; }
     const incoming = (Array.isArray(data) ? data : data && data.log || []).filter(validEntry);
-    if (!incoming.length) { backupStatus('備份裡沒有任何紀錄。'); return; }
+    if (!incoming.length) { backupStatus(tr('備份裡沒有任何紀錄。')); return; }
     const have = new Set(readLog().map(e => e.t + '|' + e.d));
     const fresh = incoming.filter(e => !have.has(e.t + '|' + e.d));
     pendingImport = { fresh, presets: Array.isArray(data.presets) ? data.presets.filter(validCfg) : [], collect: data && data.collect };
     $('#importMsg').textContent = fresh.length
-      ? `備份裡有 ${incoming.length} 筆紀錄,其中 ${fresh.length} 筆是新的。要匯入嗎?`
-      : `備份裡的 ${incoming.length} 筆紀錄都已經在了,不用匯入。`;
+      ? tr('備份裡有 {0} 筆紀錄,其中 {1} 筆是新的。要匯入嗎?', incoming.length, fresh.length)
+      : tr('備份裡的 {0} 筆紀錄都已經在了,不用匯入。', incoming.length);
     $('#importYes').hidden = !fresh.length;
     $('#importConfirm').hidden = false; backupStatus('');
   }
@@ -1694,7 +1756,7 @@
     C.seen = [...new Set([...C.seen, ...unlockedIds(readLog())])]; saveCollect(); renderScene();   // restored rounds are not "new"
     $('#importConfirm').hidden = true; $('#pasteBox').hidden = true;
     loadToday(); renderStats(); renderJournal();
-    backupStatus(`匯入了 ${fresh.length} 筆紀錄。`);
+    backupStatus(tr('匯入了 {0} 筆紀錄。', fresh.length));
     askPersist();
   });
 
@@ -1719,9 +1781,9 @@
         const s = steps[i];
         $(s.target).scrollIntoView({ block: 'nearest' });
         $('#tourText').textContent = s.text;
-        $('#tourHint').textContent = s.hint || '👆 點一下亮起來的地方';
-        $('#tourSkip').textContent = s.skipLabel || '略過導覽';
-        $('#tourNext').textContent = s.nextLabel || '下一步';
+        $('#tourHint').textContent = s.hint || tr('👆 點一下亮起來的地方');
+        $('#tourSkip').textContent = s.skipLabel || tr('略過導覽');
+        $('#tourNext').textContent = s.nextLabel || tr('下一步');
         place(); setTimeout(place, 300);
         // keep the card out of the way: when the lit spot is low on the screen, the card goes to the top
         card.classList.toggle('at-top', $(s.target).getBoundingClientRect().top > innerHeight / 2);
@@ -1758,29 +1820,29 @@
   $('#tourSkip').addEventListener('click', () => Tour.skip());
   // what the dojo is, said once on the first visit before the tour
   const INTRO = [
-    ['歡迎來到香板禪堂,我是這裡的住持。', '你好'],
-    ['這裡是讓人專心的地方:把手機放下,一次坐一炷香,就像番茄鐘,坐完再休息。', '然後呢?'],
-    ['坐禪時我會在堂裡巡視。施主只要拿起手機,或切到別的畫面,我就用這支香板輕輕打你一下。', '我會專心的', true],
-    ['先帶施主看看禪堂裡的東西。', '好'],
+    [tr('歡迎來到香板禪堂,我是這裡的住持。'), tr('你好')],
+    [tr('這裡是讓人專心的地方:把手機放下,一次坐一炷香,就像番茄鐘,坐完再休息。'), tr('然後呢?')],
+    [tr('坐禪時我會在堂裡巡視。施主只要拿起手機,或切到別的畫面,我就用這支香板輕輕打你一下。'), tr('我會專心的'), true],
+    [tr('先帶施主看看禪堂裡的東西。'), tr('好')],
   ];
   const introSteps = returning => [
-    { target: '#helpBtn', sheet: '#help', text: (returning ? '禪堂重新布置過了,我帶施主看一下。' : '') + '禪堂的規矩寫在左邊這塊「堂規」木牌上,點開看看,看完收起來就好。', hint: '👆 點一下「堂規」木牌' },
-    { target: '#journalBtn', sheet: '#journal', text: '右邊柱子上掛的是坐禪帳。每坐完一炷,我就在上面蓋一個章。點開看看。', hint: '👆 點一下坐禪帳' },
+    { target: '#helpBtn', sheet: '#help', text: (returning ? tr('禪堂重新布置過了,我帶施主看一下。') : '') + tr('禪堂的規矩寫在左邊這塊「堂規」木牌上,點開看看,看完收起來就好。'), hint: tr('👆 點一下「堂規」木牌') },
+    { target: '#journalBtn', sheet: '#journal', text: tr('右邊柱子上掛的是坐禪帳。每坐完一炷,我就在上面蓋一個章。點開看看。'), hint: tr('👆 點一下坐禪帳') },
     collectStep(false),
-    { target: '#settingsBtn', sheet: '#settings', text: '背景聲音、每日目標、深色淺色,都在這個齒輪裡調。', hint: '👆 點一下齒輪' },
+    { target: '#settingsBtn', sheet: '#settings', text: tr('背景聲音、每日目標、深色淺色,都在這個齒輪裡調。'), hint: tr('👆 點一下齒輪') },
   ];
   // the first time a round is stamped, point at the ledger, and this time the tap opens it
   function journalTip() {
     if (store.get('keisaku-tip-journal-v1', false) || !readLog().some(e => e.full)) return;
     store.set('keisaku-tip-journal-v1', true);
-    tour([{ target: '#journalBtn', text: '蓋好章了。點坐禪帳,看看今天的章吧。', hint: '👆 點一下坐禪帳', skipLabel: '等一下再看', go: () => $('#journalBtn').click() }]);
+    tour([{ target: '#journalBtn', text: tr('蓋好章了。點坐禪帳,看看今天的章吧。'), hint: tr('👆 點一下坐禪帳'), skipLabel: tr('等一下再看'), go: () => $('#journalBtn').click() }]);
   }
   $('#feedbackLink').addEventListener('click', e => {
     const installed = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
     const dark = document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
-    const body = ['## 發生了什麼事', '', '', '## 怎麼做會出現', '', '', '---',
-      `版本:${$('#appVersion').textContent}`, `裝置:${navigator.userAgent}`,
-      `開啟方式:${installed ? '已安裝的 App' : '瀏覽器'}`, `外觀:${dark ? '深色' : '淺色'}`].join('\n');
+    const body = [tr('## 發生了什麼事'), '', '', tr('## 怎麼做會出現'), '', '', '---',
+      tr('版本:{0}', $('#appVersion').textContent), tr('裝置:{0}', navigator.userAgent),
+      tr('開啟方式:{0}', installed ? tr('已安裝的 App') : tr('瀏覽器')), tr('外觀:{0}', dark ? tr('深色') : tr('淺色'))].join('\n');
     e.currentTarget.href = 'https://github.com/patty60723/keisaku-dojo/issues/new?body=' + encodeURIComponent(body);
   });
   $('#openRules').addEventListener('click', () => openSheet(helpBox));
@@ -1803,8 +1865,8 @@
     renderStatView();
   }));
 
-  const WEEKDAY = '日一二三四五六';
-  const fmtMin = m => m >= 60 ? `${Math.floor(m / 60)} 小時${m % 60 ? ` ${m % 60} 分` : ''}` : `${m} 分`;
+  const WEEKDAY = tr('日一二三四五六');
+  const fmtMin = m => m >= 60 ? tr('{0} 小時{1}', Math.floor(m / 60), m % 60 ? tr(' {0} 分', m % 60) : '') : tr('{0} 分', m);
   // one bucket per day for the last 7 / 30 days, or one per month for everything
   function statBuckets(log, range) {
     const m = dayMap(log), out = [];
@@ -1812,7 +1874,7 @@
       const n = +range, d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - (n - 1));
       for (let i = 0; i < n; i++) {
         const k = dayKey(d), a = m.get(k), last = i === n - 1;
-        out.push({ from: k, to: k, label: last ? '今' : n === 7 ? WEEKDAY[d.getDay()] : (n - 1 - i) % 7 === 0 ? `${d.getMonth() + 1}/${d.getDate()}` : '',
+        out.push({ from: k, to: k, label: last ? tr('今') : n === 7 ? WEEKDAY[d.getDay()] : (n - 1 - i) % 7 === 0 ? `${d.getMonth() + 1}/${d.getDate()}` : '',
           title: `${d.getMonth() + 1}/${d.getDate()}(${WEEKDAY[d.getDay()]})`, min: a?.min || 0, rounds: a?.full || 0, hits: a?.hits || 0 });
         d.setDate(d.getDate() + 1);
       }
@@ -1828,7 +1890,7 @@
       const p = `${y}-${pad2(mo + 1)}-`;
       let min = 0, rounds = 0, hits = 0;
       for (const [k, a] of m) if (k.startsWith(p)) { min += a.min; rounds += a.full; hits += a.hits; }
-      out.push({ from: p + '01', to: p + '31', label: `${mo + 1}月`, title: `${y} 年 ${mo + 1} 月`, min, rounds, hits });
+      out.push({ from: p + '01', to: p + '31', label: tr('{0}月', mo + 1), title: tr('{0} 年 {1} 月', y, mo + 1), min, rounds, hits });
     }
     return out;
   }
@@ -1839,44 +1901,44 @@
   }
   // durations the way the monk would say them
   function talkMin(m) {
-    if (m < 60) return `${m} 分鐘`;
+    if (m < 60) return tr('{0} 分鐘', m);
     const h = Math.round(m / 30) / 2, whole = Math.floor(h);
-    return h === whole ? `${whole} 小時` : whole ? `${whole} 小時半` : '半小時';
+    return h === whole ? tr('{0} 小時', whole) : whole ? tr('{0} 小時半', whole) : tr('半小時');
   }
   // the monk's words for this page: spoken to the visitor, picking the one or two things worth saying
   function monkVerdict(log, range, cur) {
-    if (!log.length) return '坐禪帳還是空的。施主坐完第一炷,我就幫你記上。';
+    if (!log.length) return tr('坐禪帳還是空的。施主坐完第一炷,我就幫你記上。');
     if (range === 'all') {
       const first = log.reduce((acc, e) => e.d < acc ? e.d : acc, dayKey()).split('-');
-      const since = +first[0] === new Date().getFullYear() ? `${+first[1]} 月` : `${first[0]} 年 ${+first[1]} 月`;
-      if (!cur.rounds) return `施主從 ${since}開始來,還沒坐滿過一炷呢。下次撐到開靜的鐘聲,我幫你蓋章。`;
+      const since = +first[0] === new Date().getFullYear() ? tr('{0} 月', +first[1]) : tr('{0} 年 {1} 月', first[0], +first[1]);
+      if (!cur.rounds) return tr('施主從 {0}開始來,還沒坐滿過一炷呢。下次撐到開靜的鐘聲,我幫你蓋章。', since);
       const top = [...cur.tasks].sort((a, b) => b[1].min - a[1].min)[0];
-      return `施主從 ${since}開始來,一共坐了 ${talkMin(cur.min)}。` +
-        (cur.tasks.size > 1 ? `花最多時間的是「${top[0]}」。` : `都在「${top[0]}」上,很專一。`);
+      return tr('施主從 {0}開始來,一共坐了 {1}。', since, talkMin(cur.min)) +
+        (cur.tasks.size > 1 ? tr('花最多時間的是「{0}」。', top[0]) : tr('都在「{0}」上,很專一。', top[0]));
     }
-    const n = +range, label = n === 7 ? '七日' : '三十日';
+    const n = +range, label = n === 7 ? tr('七日') : tr('三十日');
     const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - (n - 1));
     const from = dayKey(d); d.setDate(d.getDate() - n); const prevFrom = dayKey(d);
     const prevLog = log.filter(e => e.d >= prevFrom && e.d < from);
     const prev = { min: prevLog.reduce((a, e) => a + e.min, 0), rounds: prevLog.filter(e => e.full).length, hits: prevLog.reduce((a, e) => a + e.hits, 0) };
     const hasHistory = log.some(e => e.d < from);
-    if (!cur.min) return prev.min ? '這幾天沒見到施主。不要緊,想到了就回來坐一炷吧。' : '這段時間還沒來坐過。想到了就來坐一炷吧。';
+    if (!cur.min) return prev.min ? tr('這幾天沒見到施主。不要緊,想到了就回來坐一炷吧。') : tr('這段時間還沒來坐過。想到了就來坐一炷吧。');
 
     let line, gentle = false;                  // gentle: they sat less, so no nagging after it
-    if (!hasHistory) line = !cur.rounds ? `施主才剛開始,已經坐了 ${talkMin(cur.min)}。`
-      : n === 7 ? `施主這${label}坐了 ${talkMin(cur.min)}。好的開始。` : `施主這${label}坐了 ${talkMin(cur.min)}。`;
+    if (!hasHistory) line = !cur.rounds ? tr('施主才剛開始,已經坐了 {0}。', talkMin(cur.min))
+      : n === 7 ? tr('施主這{0}坐了 {1}。好的開始。', label, talkMin(cur.min)) : tr('施主這{0}坐了 {1}。', label, talkMin(cur.min));
     else {
       const diff = cur.min - prev.min;
       gentle = diff <= -30;
-      line = diff >= 30 ? `施主這${label}比前${label}多坐了 ${talkMin(diff)},了不起。`
-        : gentle ? `這${label}坐得少一些。不要緊,今天來坐一炷就好。`
-        : `這${label}跟前${label}差不多,穩穩的,很好。`;
+      line = diff >= 30 ? tr('施主這{0}比前{1}多坐了 {2},了不起。', label, label, talkMin(diff))
+        : gentle ? tr('這{0}坐得少一些。不要緊,今天來坐一炷就好。', label)
+        : tr('這{0}跟前{1}差不多,穩穩的,很好。', label, label);
     }
-    if (!cur.rounds) return line + '下次試著撐到開靜吧。';
+    if (!cur.rounds) return line + tr('下次試著撐到開靜吧。');
     const a = cur.hits / cur.rounds, b = prev.rounds ? prev.hits / prev.rounds : null;
-    if (!cur.hits) line += '一下都沒被打,如山不動。';
-    else if (hasHistory && b != null && a < b - .1) line += '被打的也少了,有進步。';
-    else if (a > 1.2 && !gentle) line += '最近常被打喔,手機放遠一點吧。';
+    if (!cur.hits) line += tr('一下都沒被打,如山不動。');
+    else if (hasHistory && b != null && a < b - .1) line += tr('被打的也少了,有進步。');
+    else if (a > 1.2 && !gentle) line += tr('最近常被打喔,手機放遠一點吧。');
     return line;
   }
   // the words appear the way the monk speaks in the zendo
@@ -1906,21 +1968,21 @@
 
     // ledger: numbers big, units small
     const u = (n, unit) => `${n}<small>${unit}</small>`;
-    const time = cur.min >= 60 ? u(Math.floor(cur.min / 60), '時') + (cur.min % 60 ? u(cur.min % 60, '分') : '') : u(cur.min, '分');
+    const time = cur.min >= 60 ? u(Math.floor(cur.min / 60), tr('時')) + (cur.min % 60 ? u(cur.min % 60, tr('分')) : '') : u(cur.min, tr('分'));
     // hits as a plain count (it always has a value); the per-round average only once a round has been sat in full
-    const avg = cur.rounds ? `<span class="sub">平均每炷 ${(cur.hits / cur.rounds).toFixed(1)} 下</span>` : '';
-    $('#statSum').innerHTML = [['坐禪', time], ['坐滿', u(cur.rounds, '炷')], ['被打', u(cur.hits, '下') + avg]]
+    const avg = cur.rounds ? tr('<span class="sub">平均每炷 {0} 下</span>', (cur.hits / cur.rounds).toFixed(1)) : '';
+    $('#statSum').innerHTML = [[tr('坐禪'), time], [tr('坐滿'), u(cur.rounds, tr('炷'))], [tr('被打'), u(cur.hits, tr('下')) + avg]]
       .map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
 
     // incense: one stick per day (or month); today's is lit
     const box = $('#dailyBars'), hint = $('#dailyHint');
-    $('#dailyTitle').textContent = statRange === 'all' ? '每月坐了多久' : '每天坐了多久';
+    $('#dailyTitle').textContent = statRange === 'all' ? tr('每月坐了多久') : tr('每天坐了多久');
     const max = Math.max(0, ...buckets.map(b => b.min));
     box.style.setProperty('--n', buckets.length);
     box.style.setProperty('--sw', statRange === '30' ? '4px' : statRange === '7' ? '6px' : '8px');
     box.replaceChildren();
     if (!max) {
-      box.innerHTML = '<p class="chart-empty">這段時間還沒有點過香。</p>';
+      box.innerHTML = tr('<p class="chart-empty">這段時間還沒有點過香。</p>');
       hint.hidden = true;
     } else {
       hint.hidden = false;
@@ -1931,14 +1993,14 @@
       buckets.forEach((b, i) => {
         const col = document.createElement('button'); col.type = 'button'; col.className = 'col';
         const lit = b.min && b.from <= todayK && b.to >= todayK;     // today, or this month
-        const desc = `${b.title}・${fmtMin(b.min)}・坐滿 ${b.rounds} 炷・被打 ${b.hits} 下`;
+        const desc = tr('{0}・{1}・坐滿 {2} 炷・被打 {3} 下', b.title, fmtMin(b.min), b.rounds, b.hits);
         col.setAttribute('aria-label', desc);
         const h = (b.min / top).toFixed(4);
         col.innerHTML = `<span class="track">${lit ? `<svg class="wisp" style="--wh:${h}" viewBox="0 0 10 24" aria-hidden="true"><path d="M5 24 q-4 -6 0 -12 q4 -6 0 -12"/></svg>` : ''}` +
           `<i class="${b.min ? 'stick' : 'ash'}${lit ? ' lit' : ''}" style="--h:${h}"></i></span><span class="lbl">${b.label}</span>`;
         const show = () => {
           box.querySelectorAll('.col.on').forEach(x => x.classList.remove('on')); col.classList.add('on');
-          slip.innerHTML = `<b>${b.title}</b><span>${fmtMin(b.min)}・${b.rounds} 炷・被打 ${b.hits}</span>`;
+          slip.innerHTML = tr('<b>{0}</b><span>{1}・{2} 炷・被打 {3}</span>', b.title, fmtMin(b.min), b.rounds, b.hits);
           slip.hidden = false;
           // sit the slip over the stick, kept inside the chart
           const x = col.offsetLeft + col.offsetWidth / 2, w = slip.offsetWidth, W = box.clientWidth;
@@ -1952,25 +2014,25 @@
         box.appendChild(col);
       });
       box.appendChild(slip);
-      hint.textContent = statRange === 'all' ? '點一炷香,看那個月坐了多久。' : '點一炷香,看那天坐了多久。';
+      hint.textContent = statRange === 'all' ? tr('點一炷香,看那個月坐了多久。') : tr('點一炷香,看那天坐了多久。');
     }
 
     // per task: one ink stroke each
     let rows = [...tasks].sort((a, b) => b[1].min - a[1].min);
     if (rows.length > 6) {
       const rest = rows.slice(5).reduce((a, [, t]) => ({ min: a.min + t.min, rounds: a.rounds + t.rounds, hits: a.hits + t.hits }), { min: 0, rounds: 0, hits: 0 });
-      rows = [...rows.slice(0, 5), ['其他', rest]];
+      rows = [...rows.slice(0, 5), [tr('其他'), rest]];
     }
     const tmax = Math.max(1, ...rows.map(([, t]) => t.min));
     $('#taskBars').innerHTML = rows.length ? rows.map(([name, t]) =>
-      `<div class="hrow"><span class="hname">${escapeHtml(name)}<small>${t.rounds} 炷・被打 ${t.hits} 下</small></span>` +
+      tr('<div class="hrow"><span class="hname">{0}<small>{1} 炷・被打 {2} 下</small></span>', escapeHtml(name), t.rounds, t.hits) +
       `<span class="htrack"><i style="--w:${(t.min / tmax).toFixed(4)}"></i></span><b class="hval">${fmtMin(t.min)}</b></div>`).join('')
-      : '<p class="chart-empty">這段時間還沒有紀錄。</p>';
+      : tr('<p class="chart-empty">這段時間還沒有紀錄。</p>');
 
     // the same numbers as a table, for screen readers only (the calendar shows each day on screen)
     const filled = buckets.filter(b => b.min || b.hits);
     $('#statTable').innerHTML = filled.length
-      ? `<table><caption>${$('#dailyTitle').textContent}</caption><thead><tr><th>${statRange === 'all' ? '月份' : '日期'}</th><th>分鐘</th><th>坐滿</th><th>被打</th></tr></thead><tbody>` +
+      ? tr('<table><caption>{0}</caption><thead><tr><th>{1}</th><th>分鐘</th><th>坐滿</th><th>被打</th></tr></thead><tbody>', $('#dailyTitle').textContent, statRange === 'all' ? tr('月份') : tr('日期')) +
         filled.map(b => `<tr><td>${b.title}</td><td>${b.min}</td><td>${b.rounds}</td><td>${b.hits}</td></tr>`).join('') + '</tbody></table>'
       : '';
   }
@@ -2012,7 +2074,7 @@
     const seal = $('#seal').textContent, title = $('#resultTitle').textContent;
     const l1 = $('#resultLine1').textContent, l2 = $('#resultLine2').textContent, koan = $('#koan').textContent;
     const goal = $('#resultGoal').hidden ? '' : $('#resultGoal').textContent;
-    const all = seal + title + l1 + l2 + koan + goal + '香板禪堂0123456789年月日';
+    const all = seal + title + l1 + l2 + koan + goal + tr('香板禪堂0123456789年月日');
     try { await Promise.all([document.fonts.load(`700 60px ${disp}`, all), document.fonts.load(`400 40px ${disp}`, all)]); } catch {}
 
     g.fillStyle = v('--bg'); g.fillRect(0, 0, W, H);
@@ -2048,9 +2110,9 @@
 
     const d = new Date();
     g.font = `400 30px ${bodyF}`; g.fillStyle = v('--muted'); g.textAlign = 'left';
-    g.fillText(`${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`, 100, H - 100);
+    g.fillText(tr('{0} 年 {1} 月 {2} 日', d.getFullYear(), d.getMonth() + 1, d.getDate()), 100, H - 100);
     g.textAlign = 'right'; g.fillStyle = v('--ink'); g.font = `700 40px ${disp}`;
-    g.fillText('香板禪堂', W - 100, H - 100);
+    g.fillText(tr('香板禪堂'), W - 100, H - 100);
     return c;
   }
   function prepareShare() {
@@ -2062,15 +2124,15 @@
     const a = Object.assign(document.createElement('a'), { href: url, download: file.name });
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
-    toast('圖片存好了。');
+    toast(tr('圖片存好了。'));
   }
   $('#shareResult').addEventListener('click', async () => {
     audio();
     const blob = await (P.sharePromise || prepareShare());
-    if (!blob) { toast('圖片做不出來,截圖分享吧。'); return; }
+    if (!blob) { toast(tr('圖片做不出來,截圖分享吧。')); return; }
     const file = new File([blob], `keisaku-${dayKey()}.png`, { type: 'image/png' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ files: [file], text: `${$('#resultTitle').textContent}・${$('#resultLine1').textContent}` }); }
+      try { await navigator.share({ files: [file], text: tr('{0}・{1}', $('#resultTitle').textContent, $('#resultLine1').textContent) }); }
       catch (e) { if (e.name !== 'AbortError') saveImage(file); }
       return;
     }
@@ -2081,10 +2143,10 @@
   // everything is worked out from the log, so a restored backup brings the collection back; only what is on show is stored
   const COLLECT_KEY = 'keisaku-collect-v1';
   const SEASONS = [
-    { id: 'spring', name: '春', months: '2–4 月', view: '窗外的櫻花,花瓣慢慢飄下來' },
-    { id: 'summer', name: '夏', months: '5–7 月', view: '竹林;夜裡有螢火蟲' },
-    { id: 'autumn', name: '秋', months: '8–10 月', view: '紅葉,一片一片落下' },
-    { id: 'winter', name: '冬', months: '11–1 月', view: '梅花和雪' },
+    { id: 'spring', name: tr('春'), months: tr('2–4 月'), view: tr('窗外的櫻花,花瓣慢慢飄下來') },
+    { id: 'summer', name: tr('夏'), months: tr('5–7 月'), view: tr('竹林;夜裡有螢火蟲') },
+    { id: 'autumn', name: tr('秋'), months: tr('8–10 月'), view: tr('紅葉,一片一片落下') },
+    { id: 'winter', name: tr('冬'), months: tr('11–1 月'), view: tr('梅花和雪') },
   ];
   const seasonOf = (t = Date.now()) => SEASONS[Math.floor(((new Date(t).getMonth() + 11) % 12) / 3)].id;
   // tallies the conditions read from: full rounds, days, streaks, minutes
@@ -2113,44 +2175,44 @@
   }
   // need(stats) -> [have, need, unit]
   const SCROLLS = [
-    { id: '靜', how: '一開始就掛著', need: () => [1, 1] },
-    { id: '忍', how: '第一次坐滿一炷', need: s => [s.rounds, 1, '炷'] },
-    { id: '心', how: '累計坐滿 10 炷', need: s => [s.rounds, 10, '炷'] },
-    { id: '喫茶去', how: '一天坐滿 2 炷、休息沒超時,累計 5 天', need: s => [s.onTime, 5, '天'] },
-    { id: '莫妄想', how: '一炷都沒被打,累計 5 炷', need: s => [s.still, 5, '炷'] },
-    { id: '放下著', how: '用過暫離,回來還是坐滿', need: s => [s.leave, 1, '炷'] },
-    { id: '一期一會', how: '同一天坐滿 4 炷', need: s => [s.bigDay, 4, '炷'] },
-    { id: '日日是好日', how: '連續 7 天都有坐滿', need: s => [s.streak, 7, '天'] },
-    { id: '無', how: '累計坐滿 50 炷', need: s => [s.rounds, 50, '炷'] },
-    { id: '本來無一物', how: '累計坐滿 100 炷', need: s => [s.rounds, 100, '炷'] },
-    { id: '花開', how: '春天坐滿 10 炷', season: 'spring', need: s => [s.season.spring, 10, '炷'] },
-    { id: '清風', how: '夏天坐滿 10 炷', season: 'summer', need: s => [s.season.summer, 10, '炷'] },
-    { id: '明月', how: '秋天坐滿 10 炷', season: 'autumn', need: s => [s.season.autumn, 10, '炷'] },
-    { id: '雪', how: '冬天坐滿 10 炷', season: 'winter', need: s => [s.season.winter, 10, '炷'] },
+    { id: '靜', en: 'Stillness', how: tr('一開始就掛著'), need: () => [1, 1] },
+    { id: '忍', en: 'Patience', how: tr('第一次坐滿一炷'), need: s => [s.rounds, 1, tr('炷')] },
+    { id: '心', en: 'Heart', how: tr('累計坐滿 10 炷'), need: s => [s.rounds, 10, tr('炷')] },
+    { id: '喫茶去', en: 'Go have some tea', how: tr('一天坐滿 2 炷、休息沒超時,累計 5 天'), need: s => [s.onTime, 5, tr('天')] },
+    { id: '莫妄想', en: 'No idle thoughts', how: tr('一炷都沒被打,累計 5 炷'), need: s => [s.still, 5, tr('炷')] },
+    { id: '放下著', en: 'Let it go', how: tr('用過暫離,回來還是坐滿'), need: s => [s.leave, 1, tr('炷')] },
+    { id: '一期一會', en: 'One time, one meeting', how: tr('同一天坐滿 4 炷'), need: s => [s.bigDay, 4, tr('炷')] },
+    { id: '日日是好日', en: 'Every day is a good day', how: tr('連續 7 天都有坐滿'), need: s => [s.streak, 7, tr('天')] },
+    { id: '無', en: 'Nothing', how: tr('累計坐滿 50 炷'), need: s => [s.rounds, 50, tr('炷')] },
+    { id: '本來無一物', en: 'From the start, not a thing', how: tr('累計坐滿 100 炷'), need: s => [s.rounds, 100, tr('炷')] },
+    { id: '花開', en: 'Flowers open', how: tr('春天坐滿 10 炷'), season: 'spring', need: s => [s.season.spring, 10, tr('炷')] },
+    { id: '清風', en: 'Clear breeze', how: tr('夏天坐滿 10 炷'), season: 'summer', need: s => [s.season.summer, 10, tr('炷')] },
+    { id: '明月', en: 'Bright moon', how: tr('秋天坐滿 10 炷'), season: 'autumn', need: s => [s.season.autumn, 10, tr('炷')] },
+    { id: '雪', en: 'Snow', how: tr('冬天坐滿 10 炷'), season: 'winter', need: s => [s.season.winter, 10, tr('炷')] },
   ];
   const INK = 'stroke="#2a2622" stroke-width="1.3"';
   const blossom = (x, y, c, r = 2.6) => [0, 72, 144, 216, 288].map(a => { const t = a * Math.PI / 180; return `<circle cx="${(x + Math.cos(t) * r * .8).toFixed(1)}" cy="${(y + Math.sin(t) * r * .8).toFixed(1)}" r="${(r * .62).toFixed(2)}" fill="${c}"/>`; }).join('') + `<circle cx="${x}" cy="${y}" r="${(r * .35).toFixed(2)}" fill="#e8b84a"/>`;
   const MAPLE = 'M0 -5 L1.2 -2 L4 -3 L2.6 0 L4.6 1.4 L1.4 1.6 L0.8 4 L0 2.4 L-0.8 4 L-1.4 1.6 L-4.6 1.4 L-2.6 0 L-4 -3 L-1.2 -2 Z';
   const maple = (x, y, c, s = 1.15, rot = 0) => `<path transform="translate(${x} ${y}) rotate(${rot}) scale(${s})" fill="${c}" d="${MAPLE}"/>`;
   const ACCS = [
-    { id: 'none', name: '不戴', how: '', need: () => [1, 1], svg: '' },
-    { id: 'leaf', name: '葉子', gift: '這片葉子', how: '第一次坐滿一炷', need: s => [s.rounds, 1, '炷'],
+    { id: 'none', name: tr('不戴'), how: '', need: () => [1, 1], svg: '' },
+    { id: 'leaf', name: tr('葉子'), gift: tr('這片葉子'), how: tr('第一次坐滿一炷'), need: s => [s.rounds, 1, tr('炷')],
       svg: `<path d="M2 -68 q-2 -10 6 -14 q4 8 -6 14z" fill="#86b061" ${INK}/><path d="M2 -68 q2 -6 5 -11" stroke="#2a2622" stroke-width=".8" fill="none"/>` },
-    { id: 'sakura', name: '櫻花', gift: '這朵櫻花', how: '春天坐滿 5 炷', season: 'spring', need: s => [s.season.spring, 5, '炷'],
+    { id: 'sakura', name: tr('櫻花'), gift: tr('這朵櫻花'), how: tr('春天坐滿 5 炷'), season: 'spring', need: s => [s.season.spring, 5, tr('炷')],
       svg: `<g transform="translate(-15 -58)">${blossom(0, 0, '#f4b6c4', 4.4)}</g>` },
-    { id: 'hachimaki', name: '頭巾', gift: '這條頭巾', how: '坐滿一炷 45 分鐘以上', need: s => [s.long, 1, '炷'],
+    { id: 'hachimaki', name: tr('頭巾'), gift: tr('這條頭巾'), how: tr('坐滿一炷 45 分鐘以上'), need: s => [s.long, 1, tr('炷')],
       svg: `<path d="M-27 -54 Q0 -62 27 -54 L28 -49 Q0 -57 -28 -49Z" fill="#f8f5ec" ${INK}/><circle cx="0" cy="-54" r="3.4" fill="#c8434b"/><path d="M27 -53 l9 -4 l-1 6z M27 -52 l8 3 l-3 4z" fill="#f8f5ec" ${INK}/>` },
-    { id: 'hat', name: '斗笠', gift: '這頂斗笠', how: '累計坐滿 30 炷', need: s => [s.rounds, 30, '炷'],
+    { id: 'hat', name: tr('斗笠'), gift: tr('這頂斗笠'), how: tr('累計坐滿 30 炷'), need: s => [s.rounds, 30, tr('炷')],
       svg: `<path d="M-36 -60 Q0 -96 36 -60 Q0 -66 -36 -60Z" fill="#d9b56b" ${INK}/><path d="M-20 -70 Q0 -74 20 -70" stroke="#a5813e" stroke-width="1" fill="none"/>` },
-    { id: 'beanie', name: '毛帽', gift: '這頂毛帽', how: '冬天坐滿 5 炷', season: 'winter', need: s => [s.season.winter, 5, '炷'],
+    { id: 'beanie', name: tr('毛帽'), gift: tr('這頂毛帽'), how: tr('冬天坐滿 5 炷'), season: 'winter', need: s => [s.season.winter, 5, tr('炷')],
       svg: `<path d="M-24 -56 Q-22 -78 0 -79 Q22 -78 24 -56 Q0 -61 -24 -56Z" fill="#7d8fb3" ${INK}/><path d="M-25 -57 Q0 -62 25 -57 L25 -52 Q0 -57 -25 -52Z" fill="#5f6f94" ${INK}/><circle cx="0" cy="-81" r="4.5" fill="#eef0f4" ${INK}/>` },
-    { id: 'scarf', name: '圍巾', gift: '這條圍巾', how: '連續 14 天都有坐滿', need: s => [s.streak, 14, '天'],
+    { id: 'scarf', back: true, name: tr('圍巾'), gift: tr('這條圍巾'), how: tr('連續 14 天都有坐滿'), need: s => [s.streak, 14, tr('天')],
       svg: `<path d="M-30 -27 Q0 -19 30 -27 L31 -21 Q0 -13 -31 -21Z" fill="#c8434b" ${INK}/><path d="M18 -22 l4 14 l7 -2 l-3 -13z" fill="#c8434b" ${INK}/><path d="M20 -12 h7 M21 -15 h6" stroke="#f8e2c8" stroke-width="1"/>` },
-    { id: 'glasses', name: '眼鏡', gift: '這副眼鏡', how: '累計坐禪 25 小時', need: s => [Math.floor(s.hours), 25, '小時'],
+    { id: 'glasses', name: tr('眼鏡'), gift: tr('這副眼鏡'), how: tr('累計坐禪 25 小時'), need: s => [Math.floor(s.hours), 25, tr('小時')],
       svg: `<g fill="none" stroke="#2a2622" stroke-width="1.3"><circle cx="-9" cy="-43" r="5.5"/><circle cx="9" cy="-43" r="5.5"/><path d="M-3.5 -43 h7 M-14.5 -44 l-8 -2 M14.5 -44 l8 -2"/></g>` },
-    { id: 'beads', name: '念珠', gift: '這串念珠', how: '累計坐禪 50 小時', need: s => [Math.floor(s.hours), 50, '小時'],
-      svg: [...Array(11)].map((_, i) => { const a = Math.PI * i / 10; return `<circle cx="${(-Math.cos(a) * 14).toFixed(1)}" cy="${(-12 + Math.sin(a) * 5).toFixed(1)}" r="2.1" fill="#6b3f2a" stroke="#2a2622" stroke-width=".6"/>`; }).join('') + '<path d="M0 -7 v5" stroke="#b44a3a" stroke-width="2"/>' },
-    { id: 'kesa', name: '小袈裟', gift: '這件小袈裟', how: '累計坐滿 100 炷', need: s => [s.rounds, 100, '炷'],
+    { id: 'beads', name: tr('念珠'), gift: tr('這串念珠'), how: tr('累計坐禪 50 小時'), need: s => [Math.floor(s.hours), 50, tr('小時')],
+      svg: [...Array(9)].map((_, i) => { const a = Math.PI * i / 8; return `<circle cx="${(-Math.cos(a) * 9).toFixed(1)}" cy="${(-13.5 + Math.sin(a) * 6.5).toFixed(1)}" r="1.9" fill="#6b3f2a" stroke="#2a2622" stroke-width=".6"/>`; }).join('') + '<path d="M0 -6.5 v5" stroke="#b44a3a" stroke-width="2"/>' },
+    { id: 'kesa', back: true, name: tr('小袈裟'), gift: tr('這件小袈裟'), how: tr('累計坐滿 100 炷'), need: s => [s.rounds, 100, tr('炷')],
       svg: `<path d="M-29 -36 Q-6 -30 26 -14 L16 -11 Q-8 -24 -31 -26Z" fill="#8a5d34" ${INK}/><path d="M-22 -32 l3 6 M-12 -28 l3 6 M-2 -24 l3 6 M8 -20 l3 6" stroke="#5d3f22" stroke-width=".8"/>` },
   ];
   const unlocked = (item, s) => { const [have, need] = item.need(s); return have >= need; };
@@ -2197,11 +2259,13 @@
     const season = seasonOf(), art = SEASON_ART[season]();
     $('#stage').dataset.season = season;
     $('#winView').innerHTML = art; $('#sqView').innerHTML = art;
-    $('#scrollText').innerHTML = scrollSvg(C.scroll);
-    $('#mochiAcc').innerHTML = ACCS.find(x => x.id === C.acc).svg;
+    $('#scrollText').innerHTML = scrollSvg(tr(C.scroll));         // the scroll's words, in this language's characters
+    const acc = ACCS.find(x => x.id === C.acc);
+    $('#mochiAcc').innerHTML = acc.back ? '' : acc.svg;
+    $('#mochiAccBack').innerHTML = acc.back ? acc.svg : '';
   }
   const sittingNow = () => ['settle', 'focus', 'leave'].includes(P.phase) || P.resuming;
-  const progressText = (item, s) => { const [have, need, unit] = item.need(s); return have >= need ? '' : `還差 ${need - have} ${unit}`; };
+  const progressText = (item, s) => { const [have, need, unit] = item.need(s); return have >= need ? '' : tr('還差 {0} {1}', need - have, unit); };
   const MOCHI = '<path d="M-31 -14 C-34 -40 -20 -68 0 -68 C20 -68 34 -40 31 -14 C22 -9 -22 -9 -31 -14 Z" fill="#fffdf7" stroke="#2a2622" stroke-width="1.6"/>'
     + '<ellipse fill="#f2a49a" cx="-17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/><ellipse fill="#f2a49a" cx="17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/>'
     + '<g fill="none" stroke="#2a2622" stroke-width="1.5" stroke-linecap="round"><path d="M-13 -44 q4 3.2 8 0"/><path d="M5 -44 q4 3.2 8 0"/><path d="M-2 -35 q2 1.4 4 0"/></g>';
@@ -2210,23 +2274,23 @@
   function renderCollect() {
     const stats = collectStats(readLog()), locked = sittingNow(), now = seasonOf();
     const got = [...SCROLLS, ...ACCS.slice(1)].filter(x => unlocked(x, stats)).length;
-    $('#collectSum').textContent = `已經收到 ${got} / ${SCROLLS.length + ACCS.length - 1} 樣。坐滿的炷越多,能換的就越多。`;
+    $('#collectSum').textContent = tr('已經收到 {0} / {1} 樣。坐滿的炷越多,能換的就越多。', got, SCROLLS.length + ACCS.length - 1);
     $('#collectNote').hidden = !locked;
     const card = (kind, item, inner) => {
       const ok = unlocked(item, stats), on = kind === 's' ? C.scroll === item.id : C.acc === item.id;
-      const label = kind === 's' ? item.id : item.name;
+      const label = kind === 's' ? tr(item.id) : item.name;
       return `<li><button type="button" class="c-item${ok ? '' : ' locked'}${on ? ' on' : ''}" data-kind="${kind}" data-id="${item.id}"`
-        + ` aria-pressed="${on}" ${ok && !locked ? '' : 'aria-disabled="true"'} aria-label="${label}${ok ? (on ? ',使用中' : '') : ',還沒拿到:' + item.how}">`
-        + inner + `<b>${label}</b>` + (on ? '<span class="c-on">使用中</span>' : ok ? '' : `<small>${item.how}</small><small class="c-left">${progressText(item, stats)}</small>`)
+        + ` aria-pressed="${on}" ${ok && !locked ? '' : 'aria-disabled="true"'} aria-label="${label}${ok ? (on ? tr(',使用中') : '') : tr(',還沒拿到:') + item.how}">`
+        + inner + `<b>${label}</b>` + (LANG === 'en' && item.en ? `<small class="c-mean">${item.en}</small>` : '') + (on ? tr('<span class="c-on">使用中</span>') : ok ? '' : `<small>${item.how}</small><small class="c-left">${progressText(item, stats)}</small>`)
         + '</button></li>';
     };
-    $('#scrollList').innerHTML = SCROLLS.map(x => card('s', x, `<span class="c-paper" data-n="${[...x.id].length}" aria-hidden="true">${[...x.id].map(c => `<i>${c}</i>`).join('')}</span>`)).join('');
+    $('#scrollList').innerHTML = SCROLLS.map(x => card('s', x, `<span class="c-paper" data-n="${[...tr(x.id)].length}" aria-hidden="true">${[...tr(x.id)].map(c => `<i>${c}</i>`).join('')}</span>`)).join('');
     $('#accList').innerHTML = ACCS.map(x => card('a', x, `<svg class="c-mochi" viewBox="-40 -90 80 84" aria-hidden="true">${MOCHI}${x.svg}</svg>`)).join('');
     $('#seasonList').innerHTML = SEASONS.map(se => {
       const items = [...SCROLLS, ...ACCS].filter(x => x.season === se.id);
       return `<li class="c-season${se.id === now ? ' now' : ''}"><svg viewBox="50 62 72 72" aria-hidden="true">${WIN}<g clip-path="url(#winClip)">${SEASON_ART[se.id]()}</g>${LATTICE}</svg>`
-        + `<div><h3>${se.name}<small>${se.months}</small>${se.id === now ? '<span class="c-on">現在</span>' : ''}</h3><p>${se.view}</p><ul>`
-        + items.map(x => `<li>${x.name ? '配件' : '掛軸'}「${x.name || x.id}」:${unlocked(x, stats) ? '已收到' : x.how + ',' + progressText(x, stats)}</li>`).join('')
+        + `<div><h3>${se.name}<small>${se.months}</small>${se.id === now ? tr('<span class="c-on">現在</span>') : ''}</h3><p>${se.view}</p><ul>`
+        + items.map(x => '<li>' + tr('{0}「{1}」:{2}', x.name ? tr('配件') : tr('掛軸'), x.name || tr(x.id), unlocked(x, stats) ? tr('已收到') : tr('{0},{1}', x.how, progressText(x, stats))) + '</li>').join('')
         + '</ul></div></li>';
     }).join('');
   }
@@ -2247,7 +2311,7 @@
   ['tabScrolls', 'tabSeasons', 'tabAccs'].forEach(t => $('#' + t).addEventListener('click', () => showCollectTab(t)));
   $('#collectBtn').addEventListener('click', () => { renderCollect(); showCollectTab('tabScrolls'); openSheet($('#collect')); });
   $('#windowBtn').addEventListener('click', () => {
-    bubble('方的叫「迷之窗」,四個角是生老病死。圓的叫「悟之窗」。京都的源光庵就是這樣開窗的。');
+    bubble(tr('方的叫「迷之窗」,四個角是生老病死。圓的叫「悟之窗」。京都的源光庵就是這樣開窗的。'));
     clearTimeout(P.bubbleTimer); P.bubbleTimer = setTimeout(() => bubble(null), 5200);
   });
   // after a full round: anything newly earned is kept for the result card
@@ -2258,30 +2322,30 @@
     P.newItems = (P.newItems || []).concat(fresh);
   }
   const itemOf = id => id[0] === 's' ? SCROLLS.find(x => 's:' + x.id === id) : ACCS.find(x => 'a:' + x.id === id);
-  const newItemsLine = ids => '收藏冊多了:' + ids.map(id => id[0] === 's' ? `掛軸「${itemOf(id).id}」` : `配件「${itemOf(id).name}」`).join('、');
+  const newItemsLine = ids => tr('收藏冊多了:') + ids.map(id => id[0] === 's' ? tr('掛軸「{0}」', tr(itemOf(id).id)) : tr('配件「{0}」', itemOf(id).name)).join(tr('、'));
   // the monk hands over the first new scroll and the first new thing to wear
   async function offerNewItems() {
     const ids = P.newItems || []; P.newItems = [];
     const s = ids.find(id => id[0] === 's'), a = ids.find(id => id[0] === 'a');
     if (s) {
-      const v = await ask(`施主坐得不錯。這幅「${itemOf(s).id}」送你,要掛起來嗎?`, [{ label: '掛上去', value: 1, primary: true }, { label: '先收著', value: 0 }]);
+      const v = await ask(tr('施主坐得不錯。這幅「{0}」送你,要掛起來嗎?', tr(itemOf(s).id)), [{ label: tr('掛上去'), value: 1, primary: true }, { label: tr('先收著'), value: 0 }]);
       if (v) equip('s', itemOf(s).id);
     }
     if (a) {
-      const v = await ask(`${s ? '還有' : '施主坐得不錯。'}${itemOf(a).gift}也送你,要幫麻糬戴上嗎?`, [{ label: '戴上', value: 1, primary: true }, { label: '先收著', value: 0 }]);
+      const v = await ask(tr('{0}{1}也送你,要幫麻糬戴上嗎?', s ? tr('還有') : tr('施主坐得不錯。'), itemOf(a).gift), [{ label: tr('戴上'), value: 1, primary: true }, { label: tr('先收著'), value: 0 }]);
       if (v) equip('a', itemOf(a).id);
     }
   }
   const collectStep = returning => ({ target: '#collectBtn', sheet: '#collect',
-    text: (returning ? '禪堂多了一本收藏冊,就是中間這幅掛軸。' : '中間的掛軸是收藏冊。') + '坐滿的炷越多,能換的掛軸和麻糬的配件就越多。點開看看。',
-    hint: '👆 點一下中間的掛軸' });
+    text: (returning ? tr('禪堂多了一本收藏冊,就是中間這幅掛軸。') : tr('中間的掛軸是收藏冊。')) + tr('坐滿的炷越多,能換的掛軸和麻糬的配件就越多。點開看看。'),
+    hint: tr('👆 點一下中間的掛軸') });
   renderScene();
 
   // the journal button carries the current streak (2 days or more) like a small seal
   function renderStreakBadge(streak) {
     const badge = $('#streakBadge');
     badge.hidden = streak < 2; badge.textContent = streak;
-    $('#journalBtn').setAttribute('aria-label', streak >= 2 ? `坐禪帳,連續 ${streak} 日` : '坐禪帳');
+    $('#journalBtn').setAttribute('aria-label', streak >= 2 ? tr('坐禪帳,連續 {0} 日', streak) : tr('坐禪帳'));
   }
   renderStreakBadge(streakInfo(dayMap(readLog())).streak);
 
