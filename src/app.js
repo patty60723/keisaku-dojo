@@ -744,6 +744,10 @@
       }
       await tour(introSteps(hasSat));
       store.set('keisaku-tour-v1', true);
+      store.set('keisaku-tip-collect-v1', true);
+    } else if (!again && !store.get('keisaku-tip-collect-v1', false)) {
+      store.set('keisaku-tip-collect-v1', true);
+      await tour([collectStep(true)]);
     }
     const { streak, gap } = streakInfo(dayMap(log));
     const hello = streak >= 2 ? `施主已經連續來了 ${streak} 天。` : gap != null && gap >= 3 ? '好幾天沒見了,歡迎回來。' : '施主又來了。';
@@ -1028,6 +1032,7 @@
     P.lateMin = 0;
     renderStreakBadge(streakInfo(dayMap(log)).streak);
     writeLog(log);
+    if (full) collectAfterRound(log);
     P.todayMin += min;
     askPersist();
   }
@@ -1281,6 +1286,8 @@
     $('#resultGoal').hidden = !metToday;
     $('#resultGoal').textContent = P.showGoal ? `今日目標 ${goal} 炷,達成。` : metToday ? `今日目標 ${goal} 炷已達成,今天坐了 ${P.todayRounds} 炷。` : '';
     P.showGoal = false;
+    $('#resultNew').hidden = !(P.newItems || []).length;
+    $('#resultNew').textContent = (P.newItems || []).length ? newItemsLine(P.newItems) : '';
     prepareShare();
     $('#result').hidden = false; askBtn.hidden = true;
   }
@@ -1633,7 +1640,7 @@
   // backup: a JSON file, or the same JSON as text for phones that can't save files easily
   const backupStatus = t => { $('#backupStatus').textContent = t; };
   const backupText = () => JSON.stringify({ app: 'keisaku-dojo', version: 2, exported: new Date().toISOString(),
-    log: readLog(), presets: loadPresets() });
+    log: readLog(), presets: loadPresets(), collect: { scroll: C.scroll, acc: C.acc } });
   $('#exportBtn').addEventListener('click', () => {
     try {
       const url = URL.createObjectURL(new Blob([backupText()], { type: 'application/json' }));
@@ -1667,7 +1674,7 @@
     if (!incoming.length) { backupStatus('備份裡沒有任何紀錄。'); return; }
     const have = new Set(readLog().map(e => e.t + '|' + e.d));
     const fresh = incoming.filter(e => !have.has(e.t + '|' + e.d));
-    pendingImport = { fresh, presets: Array.isArray(data.presets) ? data.presets.filter(validCfg) : [] };
+    pendingImport = { fresh, presets: Array.isArray(data.presets) ? data.presets.filter(validCfg) : [], collect: data && data.collect };
     $('#importMsg').textContent = fresh.length
       ? `備份裡有 ${incoming.length} 筆紀錄,其中 ${fresh.length} 筆是新的。要匯入嗎?`
       : `備份裡的 ${incoming.length} 筆紀錄都已經在了,不用匯入。`;
@@ -1677,16 +1684,21 @@
   $('#importNo').addEventListener('click', () => { pendingImport = null; $('#importConfirm').hidden = true; });
   $('#importYes').addEventListener('click', () => {
     if (!pendingImport) return;
-    const { fresh, presets } = pendingImport; pendingImport = null;
+    const { fresh, presets, collect: wear } = pendingImport; pendingImport = null;
     writeLog(readLog().concat(fresh.map(cleanEntry)));
     if (presets.length && !loadPresets().length) store.set('keisaku-presets-v1', presets.slice(0, MAX_PRESETS));
+    if (wear && typeof wear === 'object' && C.scroll === '靜' && C.acc === 'none') {      // only dress up a zendo that is still plain
+      if (SCROLLS.some(x => x.id === wear.scroll)) C.scroll = wear.scroll;
+      if (ACCS.some(x => x.id === wear.acc)) C.acc = wear.acc;
+    }
+    C.seen = [...new Set([...C.seen, ...unlockedIds(readLog())])]; saveCollect(); renderScene();   // restored rounds are not "new"
     $('#importConfirm').hidden = true; $('#pasteBox').hidden = true;
     loadToday(); renderStats(); renderJournal();
     backupStatus(`匯入了 ${fresh.length} 筆紀錄。`);
     askPersist();
   });
 
-  $('#closeResult').addEventListener('click', () => { $('#result').hidden = true; onboarding(true); journalTip(); });
+  $('#closeResult').addEventListener('click', async () => { $('#result').hidden = true; await offerNewItems(); onboarding(true); journalTip(); });
 
   /* ---------- guided tour: the monk points at things; the lit spot has to be tapped to go on ---------- */
   const Tour = { active: false, next() {}, skip() {} };
@@ -1754,6 +1766,7 @@
   const introSteps = returning => [
     { target: '#helpBtn', sheet: '#help', text: (returning ? '禪堂重新布置過了,我帶施主看一下。' : '') + '禪堂的規矩寫在左邊這塊「堂規」木牌上,點開看看,看完收起來就好。', hint: '👆 點一下「堂規」木牌' },
     { target: '#journalBtn', sheet: '#journal', text: '右邊柱子上掛的是坐禪帳。每坐完一炷,我就在上面蓋一個章。點開看看。', hint: '👆 點一下坐禪帳' },
+    collectStep(false),
     { target: '#settingsBtn', sheet: '#settings', text: '背景聲音、每日目標、深色淺色,都在這個齒輪裡調。', hint: '👆 點一下齒輪' },
   ];
   // the first time a round is stamped, point at the ledger, and this time the tap opens it
@@ -2063,6 +2076,206 @@
     }
     saveImage(file);
   });
+
+  /* ---------- 收藏冊: scrolls, the seasons outside, things for the mochi to wear ---------- */
+  // everything is worked out from the log, so a restored backup brings the collection back; only what is on show is stored
+  const COLLECT_KEY = 'keisaku-collect-v1';
+  const SEASONS = [
+    { id: 'spring', name: '春', months: '2–4 月', view: '窗外的櫻花,花瓣慢慢飄下來' },
+    { id: 'summer', name: '夏', months: '5–7 月', view: '竹林;夜裡有螢火蟲' },
+    { id: 'autumn', name: '秋', months: '8–10 月', view: '紅葉,一片一片落下' },
+    { id: 'winter', name: '冬', months: '11–1 月', view: '梅花和雪' },
+  ];
+  const seasonOf = (t = Date.now()) => SEASONS[Math.floor(((new Date(t).getMonth() + 11) % 12) / 3)].id;
+  // tallies the conditions read from: full rounds, days, streaks, minutes
+  function collectStats(log) {
+    const full = log.filter(e => e.full), days = new Map();
+    for (const e of log) {
+      const a = days.get(e.d) || { full: 0, late: 0 };
+      if (e.full) a.full++;
+      if (e.late) a.late++;
+      days.set(e.d, a);
+    }
+    let best = 0, run = 0, prev = null;
+    for (const k of [...days.keys()].filter(k => days.get(k).full).sort()) {
+      const gap = prev ? Math.round((new Date(k + 'T12:00') - new Date(prev + 'T12:00')) / 864e5) : 0;
+      run = gap === 1 ? run + 1 : 1; best = Math.max(best, run); prev = k;
+    }
+    const season = {}; SEASONS.forEach(s => { season[s.id] = 0; });
+    full.forEach(e => { season[seasonOf(e.t)]++; });
+    return {
+      rounds: full.length, still: full.filter(e => !e.hits).length, leave: full.filter(e => e.leave).length,
+      long: full.filter(e => e.min >= 45).length, hours: log.reduce((a, e) => a + e.min, 0) / 60,
+      bigDay: Math.max(0, ...[...days.values()].map(a => a.full)),
+      onTime: [...days.values()].filter(a => a.full >= 2 && !a.late).length,
+      streak: best, season,
+    };
+  }
+  // need(stats) -> [have, need, unit]
+  const SCROLLS = [
+    { id: '靜', how: '一開始就掛著', need: () => [1, 1] },
+    { id: '忍', how: '第一次坐滿一炷', need: s => [s.rounds, 1, '炷'] },
+    { id: '心', how: '累計坐滿 10 炷', need: s => [s.rounds, 10, '炷'] },
+    { id: '喫茶去', how: '一天坐滿 2 炷、休息沒超時,累計 5 天', need: s => [s.onTime, 5, '天'] },
+    { id: '莫妄想', how: '一炷都沒被打,累計 5 炷', need: s => [s.still, 5, '炷'] },
+    { id: '放下著', how: '用過暫離,回來還是坐滿', need: s => [s.leave, 1, '炷'] },
+    { id: '一期一會', how: '同一天坐滿 4 炷', need: s => [s.bigDay, 4, '炷'] },
+    { id: '日日是好日', how: '連續 7 天都有坐滿', need: s => [s.streak, 7, '天'] },
+    { id: '無', how: '累計坐滿 50 炷', need: s => [s.rounds, 50, '炷'] },
+    { id: '本來無一物', how: '累計坐滿 100 炷', need: s => [s.rounds, 100, '炷'] },
+    { id: '花開', how: '春天坐滿 10 炷', season: 'spring', need: s => [s.season.spring, 10, '炷'] },
+    { id: '清風', how: '夏天坐滿 10 炷', season: 'summer', need: s => [s.season.summer, 10, '炷'] },
+    { id: '明月', how: '秋天坐滿 10 炷', season: 'autumn', need: s => [s.season.autumn, 10, '炷'] },
+    { id: '雪', how: '冬天坐滿 10 炷', season: 'winter', need: s => [s.season.winter, 10, '炷'] },
+  ];
+  const INK = 'stroke="#2a2622" stroke-width="1.3"';
+  const blossom = (x, y, c, r = 2.6) => [0, 72, 144, 216, 288].map(a => { const t = a * Math.PI / 180; return `<circle cx="${(x + Math.cos(t) * r * .8).toFixed(1)}" cy="${(y + Math.sin(t) * r * .8).toFixed(1)}" r="${(r * .62).toFixed(2)}" fill="${c}"/>`; }).join('') + `<circle cx="${x}" cy="${y}" r="${(r * .35).toFixed(2)}" fill="#e8b84a"/>`;
+  const MAPLE = 'M0 -5 L1.2 -2 L4 -3 L2.6 0 L4.6 1.4 L1.4 1.6 L0.8 4 L0 2.4 L-0.8 4 L-1.4 1.6 L-4.6 1.4 L-2.6 0 L-4 -3 L-1.2 -2 Z';
+  const maple = (x, y, c, s = 1.15, rot = 0) => `<path transform="translate(${x} ${y}) rotate(${rot}) scale(${s})" fill="${c}" d="${MAPLE}"/>`;
+  const ACCS = [
+    { id: 'none', name: '不戴', how: '', need: () => [1, 1], svg: '' },
+    { id: 'leaf', name: '葉子', gift: '這片葉子', how: '第一次坐滿一炷', need: s => [s.rounds, 1, '炷'],
+      svg: `<path d="M2 -68 q-2 -10 6 -14 q4 8 -6 14z" fill="#86b061" ${INK}/><path d="M2 -68 q2 -6 5 -11" stroke="#2a2622" stroke-width=".8" fill="none"/>` },
+    { id: 'sakura', name: '櫻花', gift: '這朵櫻花', how: '春天坐滿 5 炷', season: 'spring', need: s => [s.season.spring, 5, '炷'],
+      svg: `<g transform="translate(-15 -58)">${blossom(0, 0, '#f4b6c4', 4.4)}</g>` },
+    { id: 'hachimaki', name: '頭巾', gift: '這條頭巾', how: '坐滿一炷 45 分鐘以上', need: s => [s.long, 1, '炷'],
+      svg: `<path d="M-27 -54 Q0 -62 27 -54 L28 -49 Q0 -57 -28 -49Z" fill="#f8f5ec" ${INK}/><circle cx="0" cy="-54" r="3.4" fill="#c8434b"/><path d="M27 -53 l9 -4 l-1 6z M27 -52 l8 3 l-3 4z" fill="#f8f5ec" ${INK}/>` },
+    { id: 'hat', name: '斗笠', gift: '這頂斗笠', how: '累計坐滿 30 炷', need: s => [s.rounds, 30, '炷'],
+      svg: `<path d="M-36 -60 Q0 -96 36 -60 Q0 -66 -36 -60Z" fill="#d9b56b" ${INK}/><path d="M-20 -70 Q0 -74 20 -70" stroke="#a5813e" stroke-width="1" fill="none"/>` },
+    { id: 'beanie', name: '毛帽', gift: '這頂毛帽', how: '冬天坐滿 5 炷', season: 'winter', need: s => [s.season.winter, 5, '炷'],
+      svg: `<path d="M-24 -56 Q-22 -78 0 -79 Q22 -78 24 -56 Q0 -61 -24 -56Z" fill="#7d8fb3" ${INK}/><path d="M-25 -57 Q0 -62 25 -57 L25 -52 Q0 -57 -25 -52Z" fill="#5f6f94" ${INK}/><circle cx="0" cy="-81" r="4.5" fill="#eef0f4" ${INK}/>` },
+    { id: 'scarf', name: '圍巾', gift: '這條圍巾', how: '連續 14 天都有坐滿', need: s => [s.streak, 14, '天'],
+      svg: `<path d="M-30 -27 Q0 -19 30 -27 L31 -21 Q0 -13 -31 -21Z" fill="#c8434b" ${INK}/><path d="M18 -22 l4 14 l7 -2 l-3 -13z" fill="#c8434b" ${INK}/><path d="M20 -12 h7 M21 -15 h6" stroke="#f8e2c8" stroke-width="1"/>` },
+    { id: 'glasses', name: '眼鏡', gift: '這副眼鏡', how: '累計坐禪 25 小時', need: s => [Math.floor(s.hours), 25, '小時'],
+      svg: `<g fill="none" stroke="#2a2622" stroke-width="1.3"><circle cx="-9" cy="-43" r="5.5"/><circle cx="9" cy="-43" r="5.5"/><path d="M-3.5 -43 h7 M-14.5 -44 l-8 -2 M14.5 -44 l8 -2"/></g>` },
+    { id: 'beads', name: '念珠', gift: '這串念珠', how: '累計坐禪 50 小時', need: s => [Math.floor(s.hours), 50, '小時'],
+      svg: [...Array(11)].map((_, i) => { const a = Math.PI * i / 10; return `<circle cx="${(-Math.cos(a) * 14).toFixed(1)}" cy="${(-12 + Math.sin(a) * 5).toFixed(1)}" r="2.1" fill="#6b3f2a" stroke="#2a2622" stroke-width=".6"/>`; }).join('') + '<path d="M0 -7 v5" stroke="#b44a3a" stroke-width="2"/>' },
+    { id: 'kesa', name: '小袈裟', gift: '這件小袈裟', how: '累計坐滿 100 炷', need: s => [s.rounds, 100, '炷'],
+      svg: `<path d="M-29 -36 Q-6 -30 26 -14 L16 -11 Q-8 -24 -31 -26Z" fill="#8a5d34" ${INK}/><path d="M-22 -32 l3 6 M-12 -28 l3 6 M-2 -24 l3 6 M8 -20 l3 6" stroke="#5d3f22" stroke-width=".8"/>` },
+  ];
+  const unlocked = (item, s) => { const [have, need] = item.need(s); return have >= need; };
+  const unlockedIds = log => { const s = collectStats(log); return [...SCROLLS.filter(x => unlocked(x, s)).map(x => 's:' + x.id), ...ACCS.filter(x => unlocked(x, s)).map(x => 'a:' + x.id)]; };
+
+  // the view outside: the same picture fills the round window and, mirrored, the square one; drift is the falling part
+  const drift = (cls, shape, n, dur) => [...Array(n)].map((_, i) => {
+    const x = 56 + (i * 61 % 62), d = dur * (.8 + (i * 37 % 10) / 25);
+    return `<g class="drift ${cls}" style="--dur:${d.toFixed(1)}s;--delay:-${(d * i / n).toFixed(1)}s"><g transform="translate(${x} 60)">${shape}</g></g>`;
+  }).join('');
+  const SEASON_ART = {
+    spring: () => '<path d="M50 140 Q66 116 84 104 Q98 94 116 86 M76 110 Q78 96 72 84 M98 96 Q106 104 118 104" stroke="#6b4a33" stroke-width="2" fill="none" stroke-linecap="round"/>'
+      + [[84, 104], [72, 84], [96, 94], [110, 89], [118, 104], [64, 118], [104, 102], [78, 96]].map(([x, y], i) => blossom(x, y, i % 3 ? '#f4c4cf' : '#eea9b8')).join('')
+      + drift('petal', '<ellipse rx="1.6" ry="1" fill="#f4c4cf"/>', 5, 9),
+    summer: () => '<g stroke-linecap="round">' + [[66, '#7aa35a'], [78, '#8fb76a'], [108, '#6f9a52']].map(([x, c]) => `<path d="M${x} 140 V58" stroke="${c}" stroke-width="3.2"/><path d="M${x - 1.5} 120 h3 M${x - 1.5} 96 h3 M${x - 1.5} 74 h3" stroke="#5c7f44" stroke-width="1"/>`).join('')
+      + [[66, 96, -1], [78, 80, 1], [108, 90, -1], [78, 110, 1], [108, 70, 1]].map(([x, y, d]) => `<path d="M${x} ${y} q${d * 8} -3 ${d * 14} 2 q${-d * 7} 2 ${-d * 14} -2z" fill="#86b061"/>`).join('') + '</g>'
+      + '<g class="night">' + [[70, 100, 0], [96, 84, 1.3], [106, 112, 2.1], [84, 122, .7], [116, 96, 2.8]].map(([x, y, dl]) => `<g class="firefly" style="--delay:-${dl}s"><circle cx="${x}" cy="${y}" r="4" fill="#f3e48a" opacity=".25"/><circle cx="${x}" cy="${y}" r="1.6" fill="#f3e48a"/></g>`).join('') + '</g>',
+    autumn: () => '<path d="M124 64 Q104 74 92 70 Q80 66 66 76 M100 72 Q98 84 104 92" stroke="#6b4a33" stroke-width="2" fill="none" stroke-linecap="round"/>'
+      + [[92, 72, '#d4572e', 0], [80, 70, '#e07a2f', 20], [68, 78, '#c8432b', -15], [104, 92, '#e39a2f', 10], [100, 74, '#cf4f2c', 35], [70, 124, '#d4572e', -40]].map(([x, y, c, r]) => maple(x, y, c, 1.15, r)).join('')
+      + drift('leaf', maple(0, 0, '#e07a2f', .9), 3, 12),
+    winter: () => '<path d="M50 128 Q86 116 122 126 V140 H50Z" fill="#f4f6f8"/><path d="M58 126 Q70 100 86 90 M70 108 Q62 98 64 88" stroke="#5a4030" stroke-width="2" fill="none" stroke-linecap="round"/>'
+      + [[86, 90], [64, 88], [76, 100], [66, 112]].map(([x, y]) => blossom(x, y, '#c8434b', 2.3)).join('')
+      + drift('snow', '<circle r="1.3" fill="#fff"/>', 8, 7),
+  };
+  // a hanging scroll holds one to five characters, top to bottom
+  function scrollSvg(text, cx = 200, cy = 96, h = 68) {
+    const ch = [...text], n = ch.length;
+    if (n === 1) return `<text class="scroll-char f-sink" x="${cx}" y="${cy - 4}" font-size="22" text-anchor="middle">${text}</text><rect class="f-shu" x="${cx + 4}" y="${cy + 22}" width="6" height="6" rx="1"/>`;
+    const fs = Math.min(18, h / (n * 1.06)), step = fs * 1.06, top = cy - n * step / 2;
+    return ch.map((c, i) => `<text class="scroll-char f-sink" x="${cx}" y="${(top + i * step + fs * .86).toFixed(1)}" font-size="${fs.toFixed(1)}" text-anchor="middle">${c}</text>`).join('')
+      + `<rect class="f-shu" x="${cx + 8}" y="${cy + 32}" width="4" height="4" rx=".8"/>`;
+  }
+  const C = (() => {
+    const v = store.get(COLLECT_KEY, null);
+    return v && typeof v === 'object' ? { scroll: String(v.scroll || '靜'), acc: String(v.acc || 'none'), seen: Array.isArray(v.seen) ? v.seen.filter(x => typeof x === 'string') : null }
+      : { scroll: '靜', acc: 'none', seen: null };
+  })();
+  const saveCollect = () => store.set(COLLECT_KEY, { scroll: C.scroll, acc: C.acc, seen: C.seen });
+  if (!C.seen) { C.seen = unlockedIds(readLog()); saveCollect(); }   // what was earned before the 收藏冊 existed is not "new"
+  function renderScene() {
+    const stats = collectStats(readLog());
+    if (!SCROLLS.some(x => x.id === C.scroll && unlocked(x, stats))) C.scroll = '靜';
+    if (!ACCS.some(x => x.id === C.acc && unlocked(x, stats))) C.acc = 'none';
+    const season = seasonOf(), art = SEASON_ART[season]();
+    $('#stage').dataset.season = season;
+    $('#winView').innerHTML = art; $('#sqView').innerHTML = art;
+    $('#scrollText').innerHTML = scrollSvg(C.scroll);
+    $('#mochiAcc').innerHTML = ACCS.find(x => x.id === C.acc).svg;
+  }
+  const sittingNow = () => ['settle', 'focus', 'leave'].includes(P.phase) || P.resuming;
+  const progressText = (item, s) => { const [have, need, unit] = item.need(s); return have >= need ? '' : `還差 ${need - have} ${unit}`; };
+  const MOCHI = '<path d="M-31 -14 C-34 -40 -20 -68 0 -68 C20 -68 34 -40 31 -14 C22 -9 -22 -9 -31 -14 Z" fill="#fffdf7" stroke="#2a2622" stroke-width="1.6"/>'
+    + '<ellipse fill="#f2a49a" cx="-17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/><ellipse fill="#f2a49a" cx="17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/>'
+    + '<g fill="none" stroke="#2a2622" stroke-width="1.5" stroke-linecap="round"><path d="M-13 -44 q4 3.2 8 0"/><path d="M5 -44 q4 3.2 8 0"/><path d="M-2 -35 q2 1.4 4 0"/></g>';
+  const WIN = '<circle cx="86" cy="98" r="33" class="f-window"/>';
+  const LATTICE = '<g class="s-wood" stroke-width="1.6" clip-path="url(#winClip)"><line x1="70" y1="60" x2="70" y2="140"/><line x1="86" y1="60" x2="86" y2="140"/><line x1="102" y1="60" x2="102" y2="140"/><line x1="50" y1="82" x2="120" y2="82"/><line x1="50" y1="98" x2="120" y2="98"/><line x1="50" y1="114" x2="120" y2="114"/></g><circle cx="86" cy="98" r="33" class="s-wood" fill="none" stroke-width="5"/>';
+  function renderCollect() {
+    const stats = collectStats(readLog()), locked = sittingNow(), now = seasonOf();
+    const got = [...SCROLLS, ...ACCS.slice(1)].filter(x => unlocked(x, stats)).length;
+    $('#collectSum').textContent = `已經收到 ${got} / ${SCROLLS.length + ACCS.length - 1} 樣。坐滿的炷越多,能換的就越多。`;
+    $('#collectNote').hidden = !locked;
+    const card = (kind, item, inner) => {
+      const ok = unlocked(item, stats), on = kind === 's' ? C.scroll === item.id : C.acc === item.id;
+      const label = kind === 's' ? item.id : item.name;
+      return `<li><button type="button" class="c-item${ok ? '' : ' locked'}${on ? ' on' : ''}" data-kind="${kind}" data-id="${item.id}"`
+        + ` aria-pressed="${on}" ${ok && !locked ? '' : 'aria-disabled="true"'} aria-label="${label}${ok ? (on ? ',使用中' : '') : ',還沒拿到:' + item.how}">`
+        + inner + `<b>${label}</b>` + (on ? '<span class="c-on">使用中</span>' : ok ? '' : `<small>${item.how}</small><small class="c-left">${progressText(item, stats)}</small>`)
+        + '</button></li>';
+    };
+    $('#scrollList').innerHTML = SCROLLS.map(x => card('s', x, `<span class="c-paper" data-n="${[...x.id].length}" aria-hidden="true">${[...x.id].map(c => `<i>${c}</i>`).join('')}</span>`)).join('');
+    $('#accList').innerHTML = ACCS.map(x => card('a', x, `<svg class="c-mochi" viewBox="-40 -90 80 84" aria-hidden="true">${MOCHI}${x.svg}</svg>`)).join('');
+    $('#seasonList').innerHTML = SEASONS.map(se => {
+      const items = [...SCROLLS, ...ACCS].filter(x => x.season === se.id);
+      return `<li class="c-season${se.id === now ? ' now' : ''}"><svg viewBox="50 62 72 72" aria-hidden="true">${WIN}<g clip-path="url(#winClip)">${SEASON_ART[se.id]()}</g>${LATTICE}</svg>`
+        + `<div><h3>${se.name}<small>${se.months}</small>${se.id === now ? '<span class="c-on">現在</span>' : ''}</h3><p>${se.view}</p><ul>`
+        + items.map(x => `<li>${x.name ? '配件' : '掛軸'}「${x.name || x.id}」:${unlocked(x, stats) ? '已收到' : x.how + ',' + progressText(x, stats)}</li>`).join('')
+        + '</ul></div></li>';
+    }).join('');
+  }
+  function equip(kind, id) {
+    if (kind === 's') C.scroll = id; else C.acc = id;
+    saveCollect(); renderScene();
+  }
+  ['scrollList', 'accList'].forEach(l => $('#' + l).addEventListener('click', e => {
+    const b = e.target.closest('.c-item');
+    if (!b || b.getAttribute('aria-disabled') === 'true') return;
+    equip(b.dataset.kind, b.dataset.id); renderCollect();
+  }));
+  function showCollectTab(which) {
+    [['tabScrolls', 'scrollView'], ['tabSeasons', 'seasonView'], ['tabAccs', 'accView']].forEach(([t, v]) => {
+      $('#' + t).setAttribute('aria-selected', String(t === which)); $('#' + v).hidden = t !== which;
+    });
+  }
+  ['tabScrolls', 'tabSeasons', 'tabAccs'].forEach(t => $('#' + t).addEventListener('click', () => showCollectTab(t)));
+  $('#collectBtn').addEventListener('click', () => { renderCollect(); showCollectTab('tabScrolls'); openSheet($('#collect')); });
+  $('#windowBtn').addEventListener('click', () => {
+    bubble('方的叫「迷之窗」,四個角是生老病死。圓的叫「悟之窗」。京都的源光庵就是這樣開窗的。');
+    clearTimeout(P.bubbleTimer); P.bubbleTimer = setTimeout(() => bubble(null), 5200);
+  });
+  // after a full round: anything newly earned is kept for the result card
+  function collectAfterRound(log) {
+    const fresh = unlockedIds(log).filter(id => !C.seen.includes(id));
+    if (!fresh.length) return;
+    C.seen.push(...fresh); saveCollect();
+    P.newItems = (P.newItems || []).concat(fresh);
+  }
+  const itemOf = id => id[0] === 's' ? SCROLLS.find(x => 's:' + x.id === id) : ACCS.find(x => 'a:' + x.id === id);
+  const newItemsLine = ids => '收藏冊多了:' + ids.map(id => id[0] === 's' ? `掛軸「${itemOf(id).id}」` : `配件「${itemOf(id).name}」`).join('、');
+  // the monk hands over the first new scroll and the first new thing to wear
+  async function offerNewItems() {
+    const ids = P.newItems || []; P.newItems = [];
+    const s = ids.find(id => id[0] === 's'), a = ids.find(id => id[0] === 'a');
+    if (s) {
+      const v = await ask(`施主坐得不錯。這幅「${itemOf(s).id}」送你,要掛起來嗎?`, [{ label: '掛上去', value: 1, primary: true }, { label: '先收著', value: 0 }]);
+      if (v) equip('s', itemOf(s).id);
+    }
+    if (a) {
+      const v = await ask(`${s ? '還有' : '施主坐得不錯。'}${itemOf(a).gift}也送你,要幫麻糬戴上嗎?`, [{ label: '戴上', value: 1, primary: true }, { label: '先收著', value: 0 }]);
+      if (v) equip('a', itemOf(a).id);
+    }
+  }
+  const collectStep = returning => ({ target: '#collectBtn', sheet: '#collect',
+    text: (returning ? '禪堂多了一本收藏冊,就是中間這幅掛軸。' : '中間的掛軸是收藏冊。') + '坐滿的炷越多,能換的掛軸和麻糬的配件就越多。點開看看。',
+    hint: '👆 點一下中間的掛軸' });
+  renderScene();
 
   // the journal button carries the current streak (2 days or more) like a small seal
   function renderStreakBadge(streak) {

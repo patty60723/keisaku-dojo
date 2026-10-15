@@ -18,6 +18,7 @@
         <filter id="soft" x="-40%" y="-120%" width="180%" height="340%"><feGaussianBlur stdDeviation="4.5"/></filter>
         <clipPath id="moonPool"><ellipse cx="116" cy="248" rx="60" ry="17"/></clipPath>
         <clipPath id="winClip"><circle cx="86" cy="98" r="33"/></clipPath>
+        <clipPath id="sqClip"><rect x="246" y="66" width="62" height="62"/></clipPath>
       </defs>
 
       <!-- wall & woodwork -->
@@ -29,12 +30,23 @@
 
       <!-- round window -->
       <circle class="f-window" cx="86" cy="98" r="33"/>
+      <g id="winView" clip-path="url(#winClip)"></g>   <!-- the season outside, drawn by the script -->
       <circle class="moon" cx="98" cy="86" r="9"/>
       <g clip-path="url(#winClip)" class="s-wood" stroke-width="1.6">
         <line x1="70" y1="60" x2="70" y2="140"/><line x1="86" y1="60" x2="86" y2="140"/><line x1="102" y1="60" x2="102" y2="140"/>
         <line x1="50" y1="82" x2="120" y2="82"/><line x1="50" y1="98" x2="120" y2="98"/><line x1="50" y1="114" x2="120" y2="114"/>
       </g>
       <circle cx="86" cy="98" r="33" class="s-wood" stroke-width="5"/>
+
+      <!-- square window (迷之窗) to the right of the scroll, after 源光庵 in Kyoto: the same season, seen from further along -->
+      <rect class="f-window" x="246" y="66" width="62" height="62"/>
+      <g clip-path="url(#sqClip)"><g id="sqView" transform="translate(277 97) scale(-1 1) translate(-86 -98)"></g></g>
+      <g class="s-wood" stroke-width="1.6">
+        <line x1="261.5" y1="66" x2="261.5" y2="128"/><line x1="277" y1="66" x2="277" y2="128"/><line x1="292.5" y1="66" x2="292.5" y2="128"/>
+        <line x1="246" y1="81.5" x2="308" y2="81.5"/><line x1="246" y1="97" x2="308" y2="97"/><line x1="246" y1="112.5" x2="308" y2="112.5"/>
+      </g>
+      <rect class="s-wood" x="246" y="66" width="62" height="62" fill="none" stroke-width="5"/>
+      <rect class="f-wood" x="240" y="130" width="74" height="4" rx="1"/>
 
       <!-- 堂規: a wooden notice board hung on the left wall -->
       <g id="rulesBoard">
@@ -49,8 +61,7 @@
       <rect class="f-wood" x="176" y="46" width="48" height="4" rx="2"/>
       <rect class="f-mount" x="180" y="50" width="40" height="92"/>
       <rect class="f-paper" x="185" y="58" width="30" height="76"/>
-      <text class="scroll-char f-sink" x="200" y="92" font-size="22" text-anchor="middle" id="scrollChar">靜</text>
-      <rect class="f-shu" x="204" y="118" width="6" height="6" rx="1"/>
+      <g id="scrollText"><text class="scroll-char f-sink" x="200" y="92" font-size="22" text-anchor="middle">靜</text><rect class="f-shu" x="204" y="118" width="6" height="6" rx="1"/></g>
       <rect class="f-wood" x="174" y="141" width="52" height="5" rx="2.5"/>
 
       <!-- incense table (doubles as the timer) -->
@@ -203,6 +214,7 @@
             <circle cx="-9" cy="-43" r="2" fill="#2a2622"/><circle cx="9" cy="-43" r="2" fill="#2a2622"/>
             <path class="s-ink" d="M-2 -35 h4" stroke-width="1.5"/>
           </g>
+          <g id="mochiAcc"></g>   <!-- what the mochi is wearing, from the 收藏冊 -->
           <path class="bump f-mochi" d="M10 -66 q8 -10 15 -2" stroke="#2a2622" stroke-width="1.4"/>
         </g>
         </g>

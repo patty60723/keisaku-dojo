@@ -23,7 +23,7 @@ export async function startServer() {
 }
 
 // The one-off explanations, so a test can start straight at the part it is about.
-export const SEEN = ['keisaku-tour-v1', 'keisaku-rules-asked-v1', 'keisaku-leave-told-v1', 'keisaku-tip-leave-v1', 'keisaku-tip-journal-v1'];
+export const SEEN = ['keisaku-tour-v1', 'keisaku-rules-asked-v1', 'keisaku-leave-told-v1', 'keisaku-tip-leave-v1', 'keisaku-tip-journal-v1', 'keisaku-tip-collect-v1'];
 
 const day = offset => { const d = new Date(); d.setDate(d.getDate() - offset); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 // a log entry `offset` days ago
