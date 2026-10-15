@@ -1416,6 +1416,7 @@ html:lang(en) * { letter-spacing: normal !important; }
           <path class="f-mochi" d="M-31 -14 C-34 -40 -20 -68 0 -68 C20 -68 34 -40 31 -14 C22 -9 -22 -9 -31 -14 Z" stroke="#2a2622" stroke-width="1.6"/>
           <ellipse class="f-blush" cx="-17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/>
           <ellipse class="f-blush" cx="17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/>
+          <g id="mochiAccBack"></g>   <!-- worn under the arms: the hands stay in front of a scarf or a sash -->
           <g class="lap-hands">
             <path d="M-26 -33 Q-23 -21 -9 -18.5 M26 -33 Q23 -21 9 -18.5" class="s-ink" stroke-width="1.3" stroke-linecap="round"/>
             <ellipse class="f-mochi" cx="0" cy="-17" rx="10" ry="4.6" stroke="#2a2622" stroke-width="1.3"/>
@@ -4701,13 +4702,13 @@ const I18N = {
       svg: `<path d="M-36 -60 Q0 -96 36 -60 Q0 -66 -36 -60Z" fill="#d9b56b" ${INK}/><path d="M-20 -70 Q0 -74 20 -70" stroke="#a5813e" stroke-width="1" fill="none"/>` },
     { id: 'beanie', name: tr('毛帽'), gift: tr('這頂毛帽'), how: tr('冬天坐滿 5 炷'), season: 'winter', need: s => [s.season.winter, 5, tr('炷')],
       svg: `<path d="M-24 -56 Q-22 -78 0 -79 Q22 -78 24 -56 Q0 -61 -24 -56Z" fill="#7d8fb3" ${INK}/><path d="M-25 -57 Q0 -62 25 -57 L25 -52 Q0 -57 -25 -52Z" fill="#5f6f94" ${INK}/><circle cx="0" cy="-81" r="4.5" fill="#eef0f4" ${INK}/>` },
-    { id: 'scarf', name: tr('圍巾'), gift: tr('這條圍巾'), how: tr('連續 14 天都有坐滿'), need: s => [s.streak, 14, tr('天')],
+    { id: 'scarf', back: true, name: tr('圍巾'), gift: tr('這條圍巾'), how: tr('連續 14 天都有坐滿'), need: s => [s.streak, 14, tr('天')],
       svg: `<path d="M-30 -27 Q0 -19 30 -27 L31 -21 Q0 -13 -31 -21Z" fill="#c8434b" ${INK}/><path d="M18 -22 l4 14 l7 -2 l-3 -13z" fill="#c8434b" ${INK}/><path d="M20 -12 h7 M21 -15 h6" stroke="#f8e2c8" stroke-width="1"/>` },
     { id: 'glasses', name: tr('眼鏡'), gift: tr('這副眼鏡'), how: tr('累計坐禪 25 小時'), need: s => [Math.floor(s.hours), 25, tr('小時')],
       svg: `<g fill="none" stroke="#2a2622" stroke-width="1.3"><circle cx="-9" cy="-43" r="5.5"/><circle cx="9" cy="-43" r="5.5"/><path d="M-3.5 -43 h7 M-14.5 -44 l-8 -2 M14.5 -44 l8 -2"/></g>` },
     { id: 'beads', name: tr('念珠'), gift: tr('這串念珠'), how: tr('累計坐禪 50 小時'), need: s => [Math.floor(s.hours), 50, tr('小時')],
-      svg: [...Array(11)].map((_, i) => { const a = Math.PI * i / 10; return `<circle cx="${(-Math.cos(a) * 14).toFixed(1)}" cy="${(-12 + Math.sin(a) * 5).toFixed(1)}" r="2.1" fill="#6b3f2a" stroke="#2a2622" stroke-width=".6"/>`; }).join('') + '<path d="M0 -7 v5" stroke="#b44a3a" stroke-width="2"/>' },
-    { id: 'kesa', name: tr('小袈裟'), gift: tr('這件小袈裟'), how: tr('累計坐滿 100 炷'), need: s => [s.rounds, 100, tr('炷')],
+      svg: [...Array(9)].map((_, i) => { const a = Math.PI * i / 8; return `<circle cx="${(-Math.cos(a) * 9).toFixed(1)}" cy="${(-13.5 + Math.sin(a) * 6.5).toFixed(1)}" r="1.9" fill="#6b3f2a" stroke="#2a2622" stroke-width=".6"/>`; }).join('') + '<path d="M0 -6.5 v5" stroke="#b44a3a" stroke-width="2"/>' },
+    { id: 'kesa', back: true, name: tr('小袈裟'), gift: tr('這件小袈裟'), how: tr('累計坐滿 100 炷'), need: s => [s.rounds, 100, tr('炷')],
       svg: `<path d="M-29 -36 Q-6 -30 26 -14 L16 -11 Q-8 -24 -31 -26Z" fill="#8a5d34" ${INK}/><path d="M-22 -32 l3 6 M-12 -28 l3 6 M-2 -24 l3 6 M8 -20 l3 6" stroke="#5d3f22" stroke-width=".8"/>` },
   ];
   const unlocked = (item, s) => { const [have, need] = item.need(s); return have >= need; };
@@ -4755,7 +4756,9 @@ const I18N = {
     $('#stage').dataset.season = season;
     $('#winView').innerHTML = art; $('#sqView').innerHTML = art;
     $('#scrollText').innerHTML = scrollSvg(tr(C.scroll));         // the scroll's words, in this language's characters
-    $('#mochiAcc').innerHTML = ACCS.find(x => x.id === C.acc).svg;
+    const acc = ACCS.find(x => x.id === C.acc);
+    $('#mochiAcc').innerHTML = acc.back ? '' : acc.svg;
+    $('#mochiAccBack').innerHTML = acc.back ? acc.svg : '';
   }
   const sittingNow = () => ['settle', 'focus', 'leave'].includes(P.phase) || P.resuming;
   const progressText = (item, s) => { const [have, need, unit] = item.need(s); return have >= need ? '' : tr('還差 {0} {1}', need - have, unit); };
