@@ -61,7 +61,7 @@ try { const t = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).them
   --tatami-line: #bdb476;
   --heri: #3d4a2d;
   --window: #f7f5e9;
-  --moon-o: 0; --night-o: 0; --beam-o: 1; --moon-fill: #fbf6df;
+  --moon-o: 0; --night-o: 0; --beam-o: 1; --dusk-o: 0;
   --paper: #f5f1e4;
   --mount: #8c9a7a;
   --scroll-ink: #2a2622;
@@ -99,13 +99,13 @@ try { const t = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).them
   --cushion: #8a699c; --mat: #2a2622;
   color-scheme: dark;
 }
-/* dusk (only when the look follows the time): the light zendo in warm evening light, a low sun in a sunset sky,
-   the andon just lit and no moonlight yet. Also used around sunrise. */
+/* dusk (only when the look follows the time): the zendo in orange evening light, a red sun going down in a sunset sky,
+   the andon just lit and no moon yet. Also used around sunrise. */
 :root[data-theme="dusk"] {
-  --bg: #efe2cf; --surface: #faf3e8; --line: #dfcdb3; --muted: #6f604f;
-  --wall: #e8d5ba; --wood-2: #7c5b44; --tatami: #d9c48a; --tatami-line: #c0aa6f;
-  --window: url(#duskSky); --moon-o: .9; --moon-fill: #fff2cf; --night-o: .6; --beam-o: 0;
-  --scroll-paper: #f6ecd9; --paper: #f2e9d6;
+  --bg: #f1d9bd; --surface: #fcf0e1; --line: #e5c39d; --muted: #75583f;
+  --wall: #eec393; --wood: #5a3b28; --wood-2: #845638; --tatami: #e0bb78; --tatami-line: #c99d5c;
+  --window: url(#duskSky); --night-o: .6; --beam-o: 0; --dusk-o: 1;
+  --scroll-paper: #f8e6cc; --paper: #f5e2c4;
   color-scheme: light;
 }
 
@@ -151,7 +151,8 @@ body {
 .f-kesa{fill:var(--kesa)} .f-stick{fill:var(--stick)} .f-cushion{fill:var(--cushion)} .f-mat{fill:var(--mat)}
 .f-ink{fill:var(--ink)} .f-shu{fill:var(--shu)} .f-sink{fill:var(--scroll-ink)}
 .s-ink{stroke:#2a2622; fill:none} .s-wood{stroke:var(--wood); fill:none} .s-weave{stroke:var(--tatami-line)}
-.moon{fill:var(--moon-fill); opacity:var(--moon-o)}
+.moon{fill:#fbf6df; opacity:var(--moon-o)}
+.dusk{opacity:var(--dusk-o)}
 .scroll-char{font-family:var(--f-display); font-weight:700}
 .smoke{stroke:var(--muted); fill:none; opacity:.45; stroke-linecap:round; animation: smoke 5s ease-in-out infinite;}
 @keyframes smoke { 0%,100%{transform:translateX(0); opacity:.25} 50%{transform:translateX(2px); opacity:.55} }
@@ -1277,6 +1278,15 @@ html:lang(en) * { letter-spacing: normal !important; }
           <stop offset=".45" stop-color="#eaa08a"/>
           <stop offset="1" stop-color="#f8d39a"/>
         </linearGradient>
+        <radialGradient id="sunGlow">
+          <stop offset="0" stop-color="#ffd27a" stop-opacity=".9"/>
+          <stop offset=".45" stop-color="#ff9d52" stop-opacity=".45"/>
+          <stop offset="1" stop-color="#ff8a4a" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="duskWash" x1="0" y1="0" x2="1" y2=".4">
+          <stop offset="0" stop-color="#ff9a4a" stop-opacity=".26"/>
+          <stop offset="1" stop-color="#e8743a" stop-opacity=".14"/>
+        </linearGradient>
         <clipPath id="moonPool"><ellipse cx="116" cy="248" rx="60" ry="17"/></clipPath>
         <clipPath id="winClip"><circle cx="86" cy="98" r="33"/></clipPath>
         <clipPath id="sqClip"><rect x="282" y="66" width="64" height="64"/></clipPath>
@@ -1293,6 +1303,9 @@ html:lang(en) * { letter-spacing: normal !important; }
       <!-- round window -->
       <circle class="f-window" cx="86" cy="98" r="33"/>
       <circle class="moon" cx="98" cy="86" r="9"/>   <!-- behind the branches: a twig may cross it -->
+      <g class="dusk" clip-path="url(#winClip)">   <!-- dusk: a big red sun low in the round window -->
+        <circle cx="94" cy="111" r="24" fill="url(#sunGlow)"/><circle cx="94" cy="111" r="10.5" fill="#e8553a"/>
+      </g>
       <g id="winView" clip-path="url(#winClip)"></g>   <!-- the season outside, drawn by the script -->
       <g clip-path="url(#winClip)" class="s-wood" stroke-width="1.6">
         <line x1="70" y1="60" x2="70" y2="140"/><line x1="86" y1="60" x2="86" y2="140"/><line x1="102" y1="60" x2="102" y2="140"/>
@@ -1385,6 +1398,12 @@ html:lang(en) * { letter-spacing: normal !important; }
             <ellipse cx="40" cy="186" rx="62" ry="12" fill="#ffb874" opacity=".16" filter="url(#soft)"/>
           </g>
         </g>
+      </g>
+
+      <!-- dusk: the low sun throws long orange patches from both windows across the tatami -->
+      <g class="dusk" filter="url(#softer)">
+        <ellipse cx="134" cy="246" rx="80" ry="20" fill="#ff9d4f" opacity=".42"/>
+        <path d="M318 234 H392 L400 264 H306 Z" fill="#ff9d4f" opacity=".38"/>
       </g>
 
       <!-- the andon itself stands there day and night; only at night is its paper lit.
@@ -1491,6 +1510,8 @@ html:lang(en) * { letter-spacing: normal !important; }
         </g>
         </g>
       </g>
+      <!-- dusk: evening light over everything, warmer on the window side -->
+      <rect class="dusk" x="0" y="0" width="400" height="280" fill="url(#duskWash)" style="mix-blend-mode: multiply" pointer-events="none"/>
     </svg>
     <div class="bubble" id="bubble" hidden><span id="bubbleText"></span></div>
     <div class="pow" id="pow" aria-hidden="true">啪!</div>
@@ -1575,7 +1596,7 @@ html:lang(en) * { letter-spacing: normal !important; }
 </main>
 
 <script>
-window.KEISAKU_DEBUG = true; window.KEISAKU_BUILT = '10/16 11:41';
+window.KEISAKU_DEBUG = true; window.KEISAKU_BUILT = '10/16 11:44';
 // 日本語 and English for 香板禪堂 (警策道場 / Keisaku Dojo). Keys are the Chinese text in app.js and the page;
 // {0}, {1}… are filled in by tr(). Anything missing falls back to Chinese.
 const I18N = {

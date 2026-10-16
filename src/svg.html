@@ -27,6 +27,15 @@
           <stop offset=".45" stop-color="#eaa08a"/>
           <stop offset="1" stop-color="#f8d39a"/>
         </linearGradient>
+        <radialGradient id="sunGlow">
+          <stop offset="0" stop-color="#ffd27a" stop-opacity=".9"/>
+          <stop offset=".45" stop-color="#ff9d52" stop-opacity=".45"/>
+          <stop offset="1" stop-color="#ff8a4a" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="duskWash" x1="0" y1="0" x2="1" y2=".4">
+          <stop offset="0" stop-color="#ff9a4a" stop-opacity=".26"/>
+          <stop offset="1" stop-color="#e8743a" stop-opacity=".14"/>
+        </linearGradient>
         <clipPath id="moonPool"><ellipse cx="116" cy="248" rx="60" ry="17"/></clipPath>
         <clipPath id="winClip"><circle cx="86" cy="98" r="33"/></clipPath>
         <clipPath id="sqClip"><rect x="282" y="66" width="64" height="64"/></clipPath>
@@ -43,6 +52,9 @@
       <!-- round window -->
       <circle class="f-window" cx="86" cy="98" r="33"/>
       <circle class="moon" cx="98" cy="86" r="9"/>   <!-- behind the branches: a twig may cross it -->
+      <g class="dusk" clip-path="url(#winClip)">   <!-- dusk: a big red sun low in the round window -->
+        <circle cx="94" cy="111" r="24" fill="url(#sunGlow)"/><circle cx="94" cy="111" r="10.5" fill="#e8553a"/>
+      </g>
       <g id="winView" clip-path="url(#winClip)"></g>   <!-- the season outside, drawn by the script -->
       <g clip-path="url(#winClip)" class="s-wood" stroke-width="1.6">
         <line x1="70" y1="60" x2="70" y2="140"/><line x1="86" y1="60" x2="86" y2="140"/><line x1="102" y1="60" x2="102" y2="140"/>
@@ -135,6 +147,12 @@
             <ellipse cx="40" cy="186" rx="62" ry="12" fill="#ffb874" opacity=".16" filter="url(#soft)"/>
           </g>
         </g>
+      </g>
+
+      <!-- dusk: the low sun throws long orange patches from both windows across the tatami -->
+      <g class="dusk" filter="url(#softer)">
+        <ellipse cx="134" cy="246" rx="80" ry="20" fill="#ff9d4f" opacity=".42"/>
+        <path d="M318 234 H392 L400 264 H306 Z" fill="#ff9d4f" opacity=".38"/>
       </g>
 
       <!-- the andon itself stands there day and night; only at night is its paper lit.
@@ -241,4 +259,6 @@
         </g>
         </g>
       </g>
+      <!-- dusk: evening light over everything, warmer on the window side -->
+      <rect class="dusk" x="0" y="0" width="400" height="280" fill="url(#duskWash)" style="mix-blend-mode: multiply" pointer-events="none"/>
     </svg>
