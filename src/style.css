@@ -16,7 +16,7 @@
   --tatami-line: #bdb476;
   --heri: #3d4a2d;
   --window: #f7f5e9;
-  --moon-o: 0; --night-o: 0;
+  --moon-o: 0; --night-o: 0; --beam-o: 1; --dusk-o: 0;
   --paper: #f5f1e4;
   --mount: #8c9a7a;
   --scroll-ink: #2a2622;
@@ -35,7 +35,7 @@
   --f-num: "Fredoka", ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root:not([data-theme="light"]):not([data-theme="dusk"]) {
     --bg: #141816; --surface: #1d2320; --line: #323a36; --ink: #ebe6d8; --muted: #a39e8f;
     --accent: #a8bbe6; --on-accent: #141816; --shu: #ff6b4f;
     --wall: #1f2624; --wood: #2d211a; --wood-2: #4a3a2e; --tatami: #4a4831; --tatami-line: #5a5739; --heri: #1b2316;
@@ -53,6 +53,16 @@
   --mochi: #f3eee2; --blush: #e08d84; --skin: #e0bd9b; --robe: #3d4c70; --kesa: #85582f; --stick: #b88d55;
   --cushion: #8a699c; --mat: #2a2622;
   color-scheme: dark;
+}
+/* dusk (only when the look follows the time): the zendo in orange evening light, a red sun going down in a sunset sky,
+   the andon just lit and no moon yet. Also used around sunrise. */
+:root[data-theme="dusk"] .fireflies { display: none; }   /* they come out once it is dark */
+:root[data-theme="dusk"] {
+  --bg: #f1d9bd; --surface: #fcf0e1; --line: #e5c39d; --muted: #75583f;
+  --wall: #eec393; --wood: #5a3b28; --wood-2: #845638; --tatami: #e0bb78; --tatami-line: #c99d5c;
+  --window: url(#duskSky); --night-o: .6; --beam-o: 0; --dusk-o: 1;
+  --scroll-paper: #f8e6cc; --paper: #f5e2c4;
+  color-scheme: light;
 }
 
 [hidden] { display: none !important; }
@@ -98,6 +108,7 @@ body {
 .f-ink{fill:var(--ink)} .f-shu{fill:var(--shu)} .f-sink{fill:var(--scroll-ink)}
 .s-ink{stroke:#2a2622; fill:none} .s-wood{stroke:var(--wood); fill:none} .s-weave{stroke:var(--tatami-line)}
 .moon{fill:#fbf6df; opacity:var(--moon-o)}
+.dusk{opacity:var(--dusk-o)}
 .scroll-char{font-family:var(--f-display); font-weight:700}
 .smoke{stroke:var(--muted); fill:none; opacity:.45; stroke-linecap:round; animation: smoke 5s ease-in-out infinite;}
 @keyframes smoke { 0%,100%{transform:translateX(0); opacity:.25} 50%{transform:translateX(2px); opacity:.55} }

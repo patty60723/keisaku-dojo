@@ -589,6 +589,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
 
 /* ---------- night: the andon and the moonlight (dark theme only) ---------- */
 .night { opacity: var(--night-o); }
+.beam { opacity: var(--beam-o); }   /* the moonlight on the tatami: night, not dusk */
 #andonLamp { transition: opacity 2s ease; }
 #andonPaperLit { transition: opacity 2s ease; }
 #stageWrap[data-phase="break"] #andonLamp { opacity: .6; }      /* the monk is at his tea; the lamp burns low */

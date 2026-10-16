@@ -19,8 +19,18 @@ if preview:
 script=src('i18n.js')+src('app.js')
 head='''<title>香板禪堂</title>
 <script>
+/* roughly when the sun rises and sets today, in hours (about 5:15–18:45 in June, 6:45–17:15 in December; northern hemisphere).
+   It is a guess by date alone, so the 40 minutes either side of each is dusk: half-light that is right either way. */
+window.KEISAKU_SUN = (d = new Date(Date.now())) => {
+  const day = (Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(d.getFullYear(), 0, 0)) / 864e5, k = .75 * Math.cos(2 * Math.PI * (day - 172) / 365);
+  return [6 - k, 18 + k];
+};
+window.KEISAKU_SKY = (d = new Date(Date.now())) => {
+  const [rise, set] = KEISAKU_SUN(d), h = d.getHours() + d.getMinutes() / 60, near = t => Math.abs(h - t) < 2 / 3;
+  return near(rise) || near(set) ? 'dusk' : h < rise || h > set ? 'dark' : 'light';
+};
 /* apply a saved light/dark choice before first paint, so the page doesn't flash the other theme */
-try { const t = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).theme; if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+try { const t = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).theme; if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; else if (t === 'time') document.documentElement.dataset.theme = KEISAKU_SKY(); } catch (e) {}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

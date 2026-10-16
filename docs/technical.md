@@ -21,7 +21,7 @@
 - `build.py` 會從 `sw.js` 讀出快取版本 `VERSION`,填進設定最下面顯示的版本號,所以版本只要在 `sw.js` 改一個地方。
 - `python3 build.py` 產生 `index.html`;`python3 build.py preview` 產生 `preview.html`(左上角多一個「預覽版」標籤,其餘相同)。`python3 build.py debug` 產生 `debug.html`:注入 `window.KEISAKU_DEBUG = true` 和建置時間,所有儲存的 key 前面加 `debug:`(不會動到正式版的紀錄和設定),收藏全部解鎖、導覽視為看過,畫面下方的浮動面板可以切季節、日夜、打一下、坐站、開收藏冊。
 - `python3 build_lab.py` 從 `app.js` 裡 `/*SND-START*/ … /*SND-END*/` 之間的聲音引擎產生 `soundlab.html`,所以試聽台跟 App 永遠用同一份聲音程式。
-- `<head>` 裡有一小段同步 script,在第一次繪製前把存好的深淺色套到 `<html data-theme>`,避免閃一下另一個主題。
+- `<head>` 裡有一小段同步 script,在第一次繪製前把存好的深淺色套到 `<html data-theme>`,避免閃一下另一個主題。這段也定義了 `KEISAKU_SUN()`(依日期估今天的日出、日落:`6 ∓ 0.75·cos(2π(日序−172)/365)` 時,北半球、不看位置,台灣大約差 20–30 分)和 `KEISAKU_SKY()`(回傳 `light` / `dusk` / `dark`,日出日落前後 40 分鐘算黃昏,剛好蓋過估算的誤差),外觀選「隨時間」時 App 每分鐘和回到前景時重新判斷。黃昏是 `data-theme="dusk"`:另一組暖色 token,窗戶填 `url(#duskSky)` 漸層,`--dusk-o` 打開紅日和整個場景上的暖光(`mix-blend-mode: multiply`),`--beam-o: 0` 關掉榻榻米上的月光,螢火蟲不出現。
 
 ## 2. PWA 與快取
 

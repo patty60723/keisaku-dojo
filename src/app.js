@@ -558,7 +558,27 @@
     if (front !== stickInFront) { stickInFront = front; (front ? sitterEl : monkEl).after(stickLayer); }
     stickEl.setAttribute('transform', `rotate(${M.stick.toFixed(1)} ${PIVOT})`);
     if (!bubbleEl.hidden) placeBubble();
+    flyFireflies(now);
     requestAnimationFrame(frame);
+  }
+  // summer nights: each firefly drifts on its own wandering path (a few slow sines with random speeds and phases),
+  // only while they can be seen
+  let fliesLit = false, fliesChecked = -1e9;
+  function flyFireflies(now) {
+    if (reduceMotion) return;
+    if (now - fliesChecked > 1000) {                       // whether it is night is looked up once a second, not every frame
+      fliesChecked = now;
+      const any = document.querySelector('.fireflies');
+      fliesLit = !!any && getComputedStyle(any).display !== 'none' && +getComputedStyle(document.documentElement).getPropertyValue('--night-o') > 0;
+    }
+    if (!fliesLit) return;
+    const t = now / 1000, R = () => Math.random();
+    document.querySelectorAll('.firefly').forEach(f => {
+      const w = f._wander || (f._wander = [...Array(4)].map(() => [.25 + R() * .55, R() * 6.3]));
+      const dx = 8 * Math.sin(t * w[0][0] + w[0][1]) + 4 * Math.sin(t * w[1][0] * 1.7 + w[1][1]);
+      const dy = 5 * Math.sin(t * w[2][0] + w[2][1]) + 3 * Math.sin(t * w[3][0] * 1.9 + w[3][1]);
+      f.setAttribute('transform', `translate(${dx.toFixed(2)} ${dy.toFixed(2)})`);
+    });
   }
 
   function placeBubble() {
@@ -1579,15 +1599,26 @@
     toast(perm === 'granted' ? tr('好,休息結束時會用通知叫你。') : tr('沒關係,休息結束時聽鐘聲回座。'), false, 3600);
   });
 
-  // appearance: follow the phone, or force light / dark (the tokens already handle [data-theme])
+  // appearance: follow the phone, follow the sun (light by day, dark after sunset), or force light / dark (the tokens already handle [data-theme])
   const themeMetas = [...document.querySelectorAll('meta[name="theme-color"]')].map(m => [m, m.content]);
-  function applyTheme(theme) {
-    if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+  const clock = h => `${Math.floor(h)}:${String(Math.round(h % 1 * 60)).padStart(2, '0')}`;
+  let themeMode = 'system';
+  function applyTheme(mode) {
+    themeMode = mode;
+    const theme = mode === 'time' ? window.KEISAKU_SKY() : mode;
+    if (['light', 'dark', 'dusk'].includes(theme)) document.documentElement.dataset.theme = theme;
     else delete document.documentElement.dataset.theme;
     // keep the installed app's status bar in step with the chosen look
-    themeMetas.forEach(([m, original]) => { m.content = theme === 'light' ? '#e9ecdf' : theme === 'dark' ? '#141816' : original; });
+    themeMetas.forEach(([m, original]) => { m.content = { light: '#e9ecdf', dark: '#141816', dusk: '#efe2cf' }[theme] || original; });
+    const [rise, set] = window.KEISAKU_SUN();
+    $('#themeNote').hidden = mode !== 'time';
+    $('#themeNote').textContent = tr('白天淺色、天黑變深色,日出和日落前後是黃昏。今天大約 {0} 天亮、{1} 天黑。', clock(rise), clock(set));
   }
-  const savedTheme = ['light', 'dark'].includes(opts.theme) ? opts.theme : 'system';
+  // while following the sun, look again every minute and whenever the app comes back to the front
+  const followSun = () => { if (themeMode === 'time') applyTheme('time'); };
+  setInterval(followSun, 60000);
+  document.addEventListener('visibilitychange', followSun);
+  const savedTheme = ['light', 'dark', 'time'].includes(opts.theme) ? opts.theme : 'system';
   document.querySelector(`input[name="theme"][value="${savedTheme}"]`).checked = true;
   applyTheme(savedTheme);
   document.querySelectorAll('input[name="theme"]').forEach(r => r.addEventListener('change', () => { applyTheme(themeNow()); saveOpts(); }));
@@ -2360,7 +2391,7 @@
       + drift('petal', '<ellipse rx="1.6" ry="1" fill="#f4c4cf"/>', 5, 9),
     summer: () => '<g stroke-linecap="round">' + [[66, '#7aa35a'], [78, '#8fb76a'], [108, '#6f9a52']].map(([x, c]) => `<path d="M${x} 140 V58" stroke="${c}" stroke-width="3.2"/><path d="M${x - 1.5} 120 h3 M${x - 1.5} 96 h3 M${x - 1.5} 74 h3" stroke="#5c7f44" stroke-width="1"/>`).join('')
       + [[66, 96, -1], [78, 80, 1], [108, 90, -1], [78, 110, 1], [108, 70, 1]].map(([x, y, d]) => `<path d="M${x} ${y} q${d * 8} -3 ${d * 14} 2 q${-d * 7} 2 ${-d * 14} -2z" fill="#86b061"/>`).join('') + '</g>'
-      + '<g class="night">' + [[70, 100, 0], [96, 84, 1.3], [106, 112, 2.1], [84, 122, .7], [116, 96, 2.8]].map(([x, y, dl]) => `<g class="firefly" style="--delay:-${dl}s"><circle cx="${x}" cy="${y}" r="4" fill="#f3e48a" opacity=".25"/><circle cx="${x}" cy="${y}" r="1.6" fill="#f3e48a"/></g>`).join('') + '</g>',
+      + '<g class="night fireflies">' + [[70, 100, 0], [96, 84, 1.3], [106, 112, 2.1], [84, 122, .7], [116, 96, 2.8]].map(([x, y, dl]) => `<g class="firefly" style="--delay:-${dl}s"><circle cx="${x}" cy="${y}" r="4" fill="#f3e48a" opacity=".25"/><circle cx="${x}" cy="${y}" r="1.6" fill="#f3e48a"/></g>`).join('') + '</g>',
     autumn: () => '<path d="M124 64 Q104 74 92 70 Q80 66 66 76 M100 72 Q105 79 113 82" stroke="#6b4a33" stroke-width="2" fill="none" stroke-linecap="round"/>'
       + [[92, 72, '#d4572e', 0], [80, 70, '#e07a2f', 20], [68, 78, '#c8432b', -15], [100, 74, '#cf4f2c', 35], [70, 124, '#d4572e', -40]].map(([x, y, c, r]) => maple(x, y, c, 1.15, r)).join('')
       + drift('leaf', maple(0, 0, '#e07a2f', .9), 3, 12),
@@ -2490,14 +2521,14 @@
     const bar = document.createElement('div');
     bar.className = 'debug-bar';
     bar.innerHTML = `<b>除錯 ${window.KEISAKU_BUILT || ''}</b>` + SEASONS.map(x => `<button type="button" data-season="${x.id}">${x.name}</button>`).join('')
-      + '<button type="button" data-act="night">日／夜</button><button type="button" data-act="hit">打一下</button>'
+      + '<button type="button" data-act="night">日／昏／夜</button><button type="button" data-act="hit">打一下</button>'
       + '<button type="button" data-act="sit">坐／站</button><button type="button" data-act="book">收藏冊</button>';
     document.body.appendChild(bar);
     const mark = () => bar.querySelectorAll('[data-season]').forEach(b => b.classList.toggle('on', b.dataset.season === seasonOf()));
     bar.addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b) return;
       if (b.dataset.season) { DBG.season = b.dataset.season; renderScene(); mark(); }
-      else if (b.dataset.act === 'night') applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+      else if (b.dataset.act === 'night') applyTheme({ light: 'dusk', dusk: 'dark' }[document.documentElement.dataset.theme] || 'light');   // day → dusk → night
       else if (b.dataset.act === 'hit') impact();
       else if (b.dataset.act === 'sit') { if (standing) sitDown(); else standUp(); }
       else if (b.dataset.act === 'book') $('#collectBtn').click();
