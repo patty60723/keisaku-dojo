@@ -101,6 +101,7 @@ try { const t = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).them
 }
 /* dusk (only when the look follows the time): the zendo in orange evening light, a red sun going down in a sunset sky,
    the andon just lit and no moon yet. Also used around sunrise. */
+:root[data-theme="dusk"] .fireflies { display: none; }   /* they come out once it is dark */
 :root[data-theme="dusk"] {
   --bg: #f1d9bd; --surface: #fcf0e1; --line: #e5c39d; --muted: #75583f;
   --wall: #eec393; --wood: #5a3b28; --wood-2: #845638; --tatami: #e0bb78; --tatami-line: #c99d5c;
@@ -1590,7 +1591,7 @@ html:lang(en) * { letter-spacing: normal !important; }
 </main>
 
 <script>
-window.KEISAKU_DEBUG = true; window.KEISAKU_BUILT = '10/16 11:54';
+window.KEISAKU_DEBUG = true; window.KEISAKU_BUILT = '10/16 12:00';
 // 日本語 and English for 香板禪堂 (警策道場 / Keisaku Dojo). Keys are the Chinese text in app.js and the page;
 // {0}, {1}… are filled in by tr(). Anything missing falls back to Chinese.
 const I18N = {
@@ -3209,7 +3210,27 @@ const I18N = {
     if (front !== stickInFront) { stickInFront = front; (front ? sitterEl : monkEl).after(stickLayer); }
     stickEl.setAttribute('transform', `rotate(${M.stick.toFixed(1)} ${PIVOT})`);
     if (!bubbleEl.hidden) placeBubble();
+    flyFireflies(now);
     requestAnimationFrame(frame);
+  }
+  // summer nights: each firefly drifts on its own wandering path (a few slow sines with random speeds and phases),
+  // only while they can be seen
+  let fliesLit = false, fliesChecked = -1e9;
+  function flyFireflies(now) {
+    if (reduceMotion) return;
+    if (now - fliesChecked > 1000) {                       // whether it is night is looked up once a second, not every frame
+      fliesChecked = now;
+      const any = document.querySelector('.fireflies');
+      fliesLit = !!any && getComputedStyle(any).display !== 'none' && +getComputedStyle(document.documentElement).getPropertyValue('--night-o') > 0;
+    }
+    if (!fliesLit) return;
+    const t = now / 1000, R = () => Math.random();
+    document.querySelectorAll('.firefly').forEach(f => {
+      const w = f._wander || (f._wander = [...Array(4)].map(() => [.25 + R() * .55, R() * 6.3]));
+      const dx = 8 * Math.sin(t * w[0][0] + w[0][1]) + 4 * Math.sin(t * w[1][0] * 1.7 + w[1][1]);
+      const dy = 5 * Math.sin(t * w[2][0] + w[2][1]) + 3 * Math.sin(t * w[3][0] * 1.9 + w[3][1]);
+      f.setAttribute('transform', `translate(${dx.toFixed(2)} ${dy.toFixed(2)})`);
+    });
   }
 
   function placeBubble() {
@@ -5022,7 +5043,7 @@ const I18N = {
       + drift('petal', '<ellipse rx="1.6" ry="1" fill="#f4c4cf"/>', 5, 9),
     summer: () => '<g stroke-linecap="round">' + [[66, '#7aa35a'], [78, '#8fb76a'], [108, '#6f9a52']].map(([x, c]) => `<path d="M${x} 140 V58" stroke="${c}" stroke-width="3.2"/><path d="M${x - 1.5} 120 h3 M${x - 1.5} 96 h3 M${x - 1.5} 74 h3" stroke="#5c7f44" stroke-width="1"/>`).join('')
       + [[66, 96, -1], [78, 80, 1], [108, 90, -1], [78, 110, 1], [108, 70, 1]].map(([x, y, d]) => `<path d="M${x} ${y} q${d * 8} -3 ${d * 14} 2 q${-d * 7} 2 ${-d * 14} -2z" fill="#86b061"/>`).join('') + '</g>'
-      + '<g class="night">' + [[70, 100, 0], [96, 84, 1.3], [106, 112, 2.1], [84, 122, .7], [116, 96, 2.8]].map(([x, y, dl]) => `<g class="firefly" style="--delay:-${dl}s"><circle cx="${x}" cy="${y}" r="4" fill="#f3e48a" opacity=".25"/><circle cx="${x}" cy="${y}" r="1.6" fill="#f3e48a"/></g>`).join('') + '</g>',
+      + '<g class="night fireflies">' + [[70, 100, 0], [96, 84, 1.3], [106, 112, 2.1], [84, 122, .7], [116, 96, 2.8]].map(([x, y, dl]) => `<g class="firefly" style="--delay:-${dl}s"><circle cx="${x}" cy="${y}" r="4" fill="#f3e48a" opacity=".25"/><circle cx="${x}" cy="${y}" r="1.6" fill="#f3e48a"/></g>`).join('') + '</g>',
     autumn: () => '<path d="M124 64 Q104 74 92 70 Q80 66 66 76 M100 72 Q105 79 113 82" stroke="#6b4a33" stroke-width="2" fill="none" stroke-linecap="round"/>'
       + [[92, 72, '#d4572e', 0], [80, 70, '#e07a2f', 20], [68, 78, '#c8432b', -15], [100, 74, '#cf4f2c', 35], [70, 124, '#d4572e', -40]].map(([x, y, c, r]) => maple(x, y, c, 1.15, r)).join('')
       + drift('leaf', maple(0, 0, '#e07a2f', .9), 3, 12),
