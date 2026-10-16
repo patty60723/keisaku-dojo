@@ -1579,15 +1579,26 @@
     toast(perm === 'granted' ? tr('好,休息結束時會用通知叫你。') : tr('沒關係,休息結束時聽鐘聲回座。'), false, 3600);
   });
 
-  // appearance: follow the phone, or force light / dark (the tokens already handle [data-theme])
+  // appearance: follow the phone, follow the sun (light by day, dark after sunset), or force light / dark (the tokens already handle [data-theme])
   const themeMetas = [...document.querySelectorAll('meta[name="theme-color"]')].map(m => [m, m.content]);
-  function applyTheme(theme) {
+  const clock = h => `${Math.floor(h)}:${String(Math.round(h % 1 * 60)).padStart(2, '0')}`;
+  let themeMode = 'system';
+  function applyTheme(mode) {
+    themeMode = mode;
+    const theme = mode === 'time' ? (window.KEISAKU_NIGHT() ? 'dark' : 'light') : mode;
     if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
     else delete document.documentElement.dataset.theme;
     // keep the installed app's status bar in step with the chosen look
     themeMetas.forEach(([m, original]) => { m.content = theme === 'light' ? '#e9ecdf' : theme === 'dark' ? '#141816' : original; });
+    const [rise, set] = window.KEISAKU_SUN();
+    $('#themeNote').hidden = mode !== 'time';
+    $('#themeNote').textContent = tr('白天淺色、天黑變深色。今天大約 {0} 天亮、{1} 天黑。', clock(rise), clock(set));
   }
-  const savedTheme = ['light', 'dark'].includes(opts.theme) ? opts.theme : 'system';
+  // while following the sun, look again every minute and whenever the app comes back to the front
+  const followSun = () => { if (themeMode === 'time') applyTheme('time'); };
+  setInterval(followSun, 60000);
+  document.addEventListener('visibilitychange', followSun);
+  const savedTheme = ['light', 'dark', 'time'].includes(opts.theme) ? opts.theme : 'system';
   document.querySelector(`input[name="theme"][value="${savedTheme}"]`).checked = true;
   applyTheme(savedTheme);
   document.querySelectorAll('input[name="theme"]').forEach(r => r.addEventListener('change', () => { applyTheme(themeNow()); saveOpts(); }));

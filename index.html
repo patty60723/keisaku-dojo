@@ -26,8 +26,14 @@
 <meta name="twitter:card" content="summary_large_image">
 <title>香板禪堂</title>
 <script>
+/* roughly when the sun rises and sets today, in hours (about 5:15–18:45 in June, 6:45–17:15 in December; northern hemisphere) */
+window.KEISAKU_SUN = (d = new Date(Date.now())) => {
+  const day = (Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(d.getFullYear(), 0, 0)) / 864e5, k = .75 * Math.cos(2 * Math.PI * (day - 172) / 365);
+  return [6 - k, 18 + k];
+};
+window.KEISAKU_NIGHT = (d = new Date(Date.now())) => { const [rise, set] = KEISAKU_SUN(d), h = d.getHours() + d.getMinutes() / 60; return h < rise || h >= set; };
 /* apply a saved light/dark choice before first paint, so the page doesn't flash the other theme */
-try { const t = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).theme; if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+try { const t = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).theme; if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; else if (t === 'time') document.documentElement.dataset.theme = KEISAKU_NIGHT() ? 'dark' : 'light'; } catch (e) {}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1130,11 +1136,13 @@ html:lang(en) * { letter-spacing: normal !important; }
     </div>
     <fieldset class="theme-pick">
       <legend>外觀</legend>
-      <div class="seg" role="radiogroup" aria-label="外觀">
+      <div class="seg seg-4" role="radiogroup" aria-label="外觀">
         <label><input type="radio" name="theme" id="themeSystem" value="system" checked><span>跟隨手機</span></label>
+        <label><input type="radio" name="theme" id="themeTime" value="time"><span>隨時間</span></label>
         <label><input type="radio" name="theme" id="themeLight" value="light"><span>淺色</span></label>
         <label><input type="radio" name="theme" id="themeDark" value="dark"><span>深色</span></label>
       </div>
+      <p class="amb-note" id="themeNote" hidden></p>
     </fieldset>
     <fieldset class="theme-pick">
       <legend>語言 / Language</legend>
@@ -1983,7 +1991,9 @@ const I18N = {
     "四季": "四季",
     "坐禪中只能看,報到或休息時才能換。": "坐禅中は見るだけです。変更は受付中か休憩中にどうぞ。",
     "外觀": "外観",
-    "跟隨手機": "端末に合わせる",
+    "跟隨手機": "端末設定",
+    "隨時間": "時間帯で",
+    "白天淺色、天黑變深色。今天大約 {0} 天亮、{1} 天黑。": "昼はライト、日が暮れるとダークに。今日の日の出はおよそ {0}、日の入りは {1}。",
     "語言 / Language": "言語 / Language",
     "自動": "自動",
     "中文": "中文",
@@ -2509,6 +2519,8 @@ const I18N = {
     "坐禪中只能看,報到或休息時才能換。": "View only during zazen. Change things while checking in or on a break. ",
     "外觀": "Appearance",
     "跟隨手機": "Match phone",
+    "隨時間": "By time",
+    "白天淺色、天黑變深色。今天大約 {0} 天亮、{1} 天黑。": "Light by day, dark once the sun sets. Today the sun rises around {0} and sets around {1}.",
     "語言 / Language": "Language",
     "自動": "Auto",
     "中文": "中文",
@@ -4181,15 +4193,26 @@ const I18N = {
     toast(perm === 'granted' ? tr('好,休息結束時會用通知叫你。') : tr('沒關係,休息結束時聽鐘聲回座。'), false, 3600);
   });
 
-  // appearance: follow the phone, or force light / dark (the tokens already handle [data-theme])
+  // appearance: follow the phone, follow the sun (light by day, dark after sunset), or force light / dark (the tokens already handle [data-theme])
   const themeMetas = [...document.querySelectorAll('meta[name="theme-color"]')].map(m => [m, m.content]);
-  function applyTheme(theme) {
+  const clock = h => `${Math.floor(h)}:${String(Math.round(h % 1 * 60)).padStart(2, '0')}`;
+  let themeMode = 'system';
+  function applyTheme(mode) {
+    themeMode = mode;
+    const theme = mode === 'time' ? (window.KEISAKU_NIGHT() ? 'dark' : 'light') : mode;
     if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
     else delete document.documentElement.dataset.theme;
     // keep the installed app's status bar in step with the chosen look
     themeMetas.forEach(([m, original]) => { m.content = theme === 'light' ? '#e9ecdf' : theme === 'dark' ? '#141816' : original; });
+    const [rise, set] = window.KEISAKU_SUN();
+    $('#themeNote').hidden = mode !== 'time';
+    $('#themeNote').textContent = tr('白天淺色、天黑變深色。今天大約 {0} 天亮、{1} 天黑。', clock(rise), clock(set));
   }
-  const savedTheme = ['light', 'dark'].includes(opts.theme) ? opts.theme : 'system';
+  // while following the sun, look again every minute and whenever the app comes back to the front
+  const followSun = () => { if (themeMode === 'time') applyTheme('time'); };
+  setInterval(followSun, 60000);
+  document.addEventListener('visibilitychange', followSun);
+  const savedTheme = ['light', 'dark', 'time'].includes(opts.theme) ? opts.theme : 'system';
   document.querySelector(`input[name="theme"][value="${savedTheme}"]`).checked = true;
   applyTheme(savedTheme);
   document.querySelectorAll('input[name="theme"]').forEach(r => r.addEventListener('change', () => { applyTheme(themeNow()); saveOpts(); }));

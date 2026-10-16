@@ -84,3 +84,22 @@ test('settings show the version from sw.js, a privacy note, and a report link th
   assert.match(body, /開啟方式:瀏覽器/);
   await ctx.close();
 });
+
+test('"by time" is light by day and dark after sunset, from the first paint, and turns over on its own', async () => {
+  const { p, ctx } = await openApp(browser, server.url, { storage: { 'keisaku-opts-v1': { theme: 'time' } } });
+  const at = hour => p.evaluate(h => { const d = new Date(); d.setHours(h, 0, 0, 0); window.__skew += d.getTime() - Date.now(); window.__hide(false); }, hour);
+  const theme = () => p.evaluate(() => document.documentElement.dataset.theme);
+  await at(13);
+  assert.equal(await theme(), 'light');
+  await at(22);
+  assert.equal(await theme(), 'dark', 'coming back to the app at night');
+  await p.addInitScript(skew => { window.__skew = skew; }, await p.evaluate(() => window.__skew));
+  await p.reload();                                                     // still night: the page opens straight in dark
+  assert.equal(await p.evaluate(() => document.documentElement.dataset.theme), 'dark');
+  await p.locator('#settingsBtn').click();
+  assert.equal(await p.locator('#themeTime').isChecked(), true);
+  assert.match(await p.locator('#themeNote').textContent(), /今天大約 \d:\d\d 天亮、1\d:\d\d 天黑/);
+  await p.locator('.seg label', { hasText: '淺色' }).click();
+  assert.equal(await p.locator('#themeNote').isVisible(), false);
+  await ctx.close();
+});
