@@ -22,6 +22,11 @@
           <stop offset=".55" stop-color="#9fb8e8" stop-opacity=".24"/>
           <stop offset="1" stop-color="#9fb8e8" stop-opacity="0"/>
         </radialGradient>
+        <linearGradient id="duskSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#8f8bb8"/>
+          <stop offset=".45" stop-color="#eaa08a"/>
+          <stop offset="1" stop-color="#f8d39a"/>
+        </linearGradient>
         <clipPath id="moonPool"><ellipse cx="116" cy="248" rx="60" ry="17"/></clipPath>
         <clipPath id="winClip"><circle cx="86" cy="98" r="33"/></clipPath>
         <clipPath id="sqClip"><rect x="282" y="66" width="64" height="64"/></clipPath>
@@ -110,7 +115,7 @@
       <g class="night" id="nightLights">
         <!-- each window's moonlight lying on the tatami, faint and soft-edged, with its lattice's shadow in it.
              One moon lights both: each patch lands the same 30 units right of its window. -->
-        <g filter="url(#softer)" style="mix-blend-mode: screen">
+        <g class="beam"><g filter="url(#softer)" style="mix-blend-mode: screen">
           <ellipse cx="116" cy="248" rx="74" ry="22" fill="url(#moonGlow)"/>
           <path d="M306 234 H382 L392 262 H296 Z" fill="#9fb8e8" opacity=".28"/>
         </g>
@@ -123,7 +128,7 @@
             <line x1="325" y1="230" x2="322" y2="266"/><line x1="344" y1="230" x2="344" y2="266"/><line x1="363" y1="230" x2="366" y2="266"/>
             <line x1="290" y1="243" x2="400" y2="243"/><line x1="290" y1="253" x2="400" y2="253"/>
           </g>
-        </g>
+        </g></g>
         <g id="andonLamp" transform="translate(272 16)">
           <g id="andonLight">
             <circle cx="38" cy="160" r="135" fill="url(#andonGlow)"/>

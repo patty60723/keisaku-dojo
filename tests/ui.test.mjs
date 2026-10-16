@@ -85,7 +85,7 @@ test('settings show the version from sw.js, a privacy note, and a report link th
   await ctx.close();
 });
 
-test('"by time" is light by day and dark after sunset, from the first paint, and turns over on its own', async () => {
+test('"by time" is light by day, dusk around sunset and dark at night, from the first paint, and turns over on its own', async () => {
   const { p, ctx } = await openApp(browser, server.url, { storage: { 'keisaku-opts-v1': { theme: 'time' } } });
   const at = hour => p.evaluate(h => { const d = new Date(); d.setHours(h, 0, 0, 0); window.__skew += d.getTime() - Date.now(); window.__hide(false); }, hour);
   const theme = () => p.evaluate(() => document.documentElement.dataset.theme);
@@ -93,6 +93,9 @@ test('"by time" is light by day and dark after sunset, from the first paint, and
   assert.equal(await theme(), 'light');
   await at(22);
   assert.equal(await theme(), 'dark', 'coming back to the app at night');
+  await p.evaluate(() => { const d = new Date(Date.now()); d.setHours(0, KEISAKU_SUN(d)[1] * 60 + 10, 0, 0); window.__skew += d.getTime() - Date.now(); window.__hide(false); });
+  assert.equal(await theme(), 'dusk', 'ten minutes after sunset');
+  await at(22);
   await p.addInitScript(skew => { window.__skew = skew; }, await p.evaluate(() => window.__skew));
   await p.reload();                                                     // still night: the page opens straight in dark
   assert.equal(await p.evaluate(() => document.documentElement.dataset.theme), 'dark');

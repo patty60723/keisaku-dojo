@@ -1585,14 +1585,14 @@
   let themeMode = 'system';
   function applyTheme(mode) {
     themeMode = mode;
-    const theme = mode === 'time' ? (window.KEISAKU_NIGHT() ? 'dark' : 'light') : mode;
-    if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    const theme = mode === 'time' ? window.KEISAKU_SKY() : mode;
+    if (['light', 'dark', 'dusk'].includes(theme)) document.documentElement.dataset.theme = theme;
     else delete document.documentElement.dataset.theme;
     // keep the installed app's status bar in step with the chosen look
-    themeMetas.forEach(([m, original]) => { m.content = theme === 'light' ? '#e9ecdf' : theme === 'dark' ? '#141816' : original; });
+    themeMetas.forEach(([m, original]) => { m.content = { light: '#e9ecdf', dark: '#141816', dusk: '#efe2cf' }[theme] || original; });
     const [rise, set] = window.KEISAKU_SUN();
     $('#themeNote').hidden = mode !== 'time';
-    $('#themeNote').textContent = tr('白天淺色、天黑變深色。今天大約 {0} 天亮、{1} 天黑。', clock(rise), clock(set));
+    $('#themeNote').textContent = tr('白天淺色、天黑變深色,日出和日落前後是黃昏。今天大約 {0} 天亮、{1} 天黑。', clock(rise), clock(set));
   }
   // while following the sun, look again every minute and whenever the app comes back to the front
   const followSun = () => { if (themeMode === 'time') applyTheme('time'); };
@@ -2501,14 +2501,14 @@
     const bar = document.createElement('div');
     bar.className = 'debug-bar';
     bar.innerHTML = `<b>除錯 ${window.KEISAKU_BUILT || ''}</b>` + SEASONS.map(x => `<button type="button" data-season="${x.id}">${x.name}</button>`).join('')
-      + '<button type="button" data-act="night">日／夜</button><button type="button" data-act="hit">打一下</button>'
+      + '<button type="button" data-act="night">日／昏／夜</button><button type="button" data-act="hit">打一下</button>'
       + '<button type="button" data-act="sit">坐／站</button><button type="button" data-act="book">收藏冊</button>';
     document.body.appendChild(bar);
     const mark = () => bar.querySelectorAll('[data-season]').forEach(b => b.classList.toggle('on', b.dataset.season === seasonOf()));
     bar.addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b) return;
       if (b.dataset.season) { DBG.season = b.dataset.season; renderScene(); mark(); }
-      else if (b.dataset.act === 'night') applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+      else if (b.dataset.act === 'night') applyTheme({ light: 'dusk', dusk: 'dark' }[document.documentElement.dataset.theme] || 'light');   // day → dusk → night
       else if (b.dataset.act === 'hit') impact();
       else if (b.dataset.act === 'sit') { if (standing) sitDown(); else standUp(); }
       else if (b.dataset.act === 'book') $('#collectBtn').click();
