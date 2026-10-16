@@ -56,6 +56,7 @@
 }
 /* dusk (only when the look follows the time): the zendo in orange evening light, a red sun going down in a sunset sky,
    the andon just lit and no moon yet. Also used around sunrise. */
+:root[data-theme="dusk"] .fireflies { display: none; }   /* they come out once it is dark */
 :root[data-theme="dusk"] {
   --bg: #f1d9bd; --surface: #fcf0e1; --line: #e5c39d; --muted: #75583f;
   --wall: #eec393; --wood: #5a3b28; --wood-2: #845638; --tatami: #e0bb78; --tatami-line: #c99d5c;
