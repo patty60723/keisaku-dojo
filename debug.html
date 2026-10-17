@@ -1059,6 +1059,10 @@ html:lang(en) * { letter-spacing: normal !important; }
 @media (prefers-reduced-motion: reduce) { .tour-hint::before { animation: none; } }
 .ico-stick { width: 1.4em; height: 1.4em; }
 .dlg-choices.held:empty { display: block; }
+/* a button whose label changes keeps the width of its longer label, so nothing beside it shifts */
+.two-label { display: inline-grid; }
+.two-label > span { grid-area: 1 / 1; }
+.two-label[aria-pressed="true"] .when-off, .two-label:not([aria-pressed="true"]) .when-on { visibility: hidden; }
 .preview-tag{align-self:flex-start;font-size:.78rem;color:#fff;background:#8e3b2e;padding:2px 10px;border-radius:999px;text-decoration:none}
 </style>
 </head>
@@ -1234,7 +1238,7 @@ html:lang(en) * { letter-spacing: normal !important; }
       <label class="amb-music" for="ambMusic"><input type="checkbox" id="ambMusic"> 加上輕柔的和弦 <small>和弦慢慢變換,偶爾點綴一兩個高音;可以單獨播,也能疊在上面的聲音上</small></label>
       <div class="amb-row">
         <label for="ambVol" class="amb-vol">音量 <input type="range" id="ambVol" min="5" max="100" value="100"></label>
-        <button type="button" class="small-btn" id="ambPreview" aria-pressed="false">試聽</button>
+        <button type="button" class="small-btn two-label" id="ambPreview" aria-pressed="false"><span class="when-off">試聽</span><span class="when-on" aria-hidden="true">停止試聽</span></button>
       </div>
       <p class="amb-note">止靜的鐘聲敲完後才慢慢出現,開靜時淡出,休息時不播。手機開靜音模式時可能聽不到。</p>
     </fieldset>
@@ -1631,7 +1635,7 @@ html:lang(en) * { letter-spacing: normal !important; }
 </main>
 
 <script>
-window.KEISAKU_DEBUG = true; window.KEISAKU_BUILT = '10/17 11:46';
+window.KEISAKU_DEBUG = true; window.KEISAKU_BUILT = '10/17 12:13';
 // 日本語 and English for 香板禪堂 (警策道場 / Keisaku Dojo). Keys are the Chinese text in app.js and the page;
 // {0}, {1}… are filled in by tr(). Anything missing falls back to Chinese.
 const I18N = {
@@ -4284,8 +4288,9 @@ const I18N = {
   let previewing = false;
   function setPreview(on) {
     previewing = on;
-    previewBtn.textContent = on ? tr('停止試聽') : tr('試聽');
-    previewBtn.setAttribute('aria-pressed', String(on));
+    previewBtn.setAttribute('aria-pressed', String(on));     // the CSS shows the matching label; the width stays put
+    previewBtn.querySelector('.when-off').setAttribute('aria-hidden', String(on));
+    previewBtn.querySelector('.when-on').setAttribute('aria-hidden', String(!on));
     if (on) startBackground(PREVIEW_RISE);
     else if (P.phase === 'focus') startBackground();     // when a sitting is on, go back to what it was playing
     else stopBackground(.8);
