@@ -1592,8 +1592,9 @@
   let previewing = false;
   function setPreview(on) {
     previewing = on;
-    previewBtn.textContent = on ? tr('停止試聽') : tr('試聽');
-    previewBtn.setAttribute('aria-pressed', String(on));
+    previewBtn.setAttribute('aria-pressed', String(on));     // the CSS shows the matching label; the width stays put
+    previewBtn.querySelector('.when-off').setAttribute('aria-hidden', String(on));
+    previewBtn.querySelector('.when-on').setAttribute('aria-hidden', String(!on));
     if (on) startBackground(PREVIEW_RISE);
     else if (P.phase === 'focus') startBackground();     // when a sitting is on, go back to what it was playing
     else stopBackground(.8);

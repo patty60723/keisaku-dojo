@@ -735,3 +735,7 @@ html:lang(en) * { letter-spacing: normal !important; }
 @media (prefers-reduced-motion: reduce) { .tour-hint::before { animation: none; } }
 .ico-stick { width: 1.4em; height: 1.4em; }
 .dlg-choices.held:empty { display: block; }
+/* a button whose label changes keeps the width of its longer label, so nothing beside it shifts */
+.two-label { display: inline-grid; }
+.two-label > span { grid-area: 1 / 1; }
+.two-label[aria-pressed="true"] .when-off, .two-label:not([aria-pressed="true"]) .when-on { visibility: hidden; }
