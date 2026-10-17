@@ -3012,18 +3012,19 @@ const I18N = {
       });
     }
   }
-  function startAmbient(kind) {
+  // rise: how slowly it fades in (seconds, time constant). A sitting eases in; a preview comes in straight away.
+  function startAmbient(kind, rise = 1.2) {
     stopAmbient(0);
     const a = audio(); if (!a || kind === 'none') return;
     Amb.kind = kind; Amb.playing = true;
     Amb.out = a.createGain(); Amb.out.gain.value = 0; Amb.out.connect(a.destination);
-    Amb.out.gain.setTargetAtTime(ambientVolume(), a.currentTime, 1.2);       // slow fade-in
+    Amb.out.gain.setTargetAtTime(ambientVolume(), a.currentTime, rise);
     Amb.verb = a.createConvolver(); Amb.verb.buffer = hallReverb(a);
     Amb.verb.connect(gainOf(a, .5)).connect(Amb.out);
     if (kind === 'rain') {
       noiseSource(a, 'brown', filt(a, 'lowpass', 800, .5), gainOf(a, SND.rainBed));     // very distant
-      let intensity = .55;                                                      // the shower slowly comes and goes
-      const breathe = () => { intensity = Math.min(1, Math.max(.25, intensity + rnd(-.25, .25))); later(breathe, rnd(4000, 10000)); };
+      let intensity = .6;                                                       // the shower slowly comes and goes, gently
+      const breathe = () => { intensity = Math.min(.9, Math.max(.4, intensity + rnd(-.15, .15))); later(breathe, rnd(6000, 12000)); };
       breathe();
       const fall = () => {
         const r = Math.random();
@@ -3177,12 +3178,12 @@ const I18N = {
       o.connect(v).connect(Mus.bus); o.start(when); o.stop(when + d + .1);
     });
   }
-  function startMusic() {
+  function startMusic(rise = 1.5) {
     stopMusic(0);
     const a = audio(); if (!a) return;
     Mus.playing = true;
     Mus.out = a.createGain(); Mus.out.gain.value = 0; Mus.out.connect(a.destination);
-    Mus.out.gain.setTargetAtTime(ambientVolume(), a.currentTime, 1.5);
+    Mus.out.gain.setTargetAtTime(ambientVolume(), a.currentTime, rise);
     Mus.bus = a.createGain();
     const dry = gainOf(a, .55), wet = gainOf(a, .6), verb = a.createConvolver();
     verb.buffer = hallReverb(a);
@@ -3212,7 +3213,7 @@ const I18N = {
   }
   const musicOn = () => $('#ambMusic').checked;
   /*SND-END*/
-  function startBackground() { startAmbient(ambientChoice()); if (musicOn()) startMusic(); else stopMusic(1); }
+  function startBackground(rise) { startAmbient(ambientChoice(), rise); if (musicOn()) startMusic(rise); else stopMusic(1); }
   function stopBackground(fade = 1.5) { stopAmbient(fade); stopMusic(fade); }
 
   /* ---------- monk motion ---------- */
@@ -4276,25 +4277,26 @@ const I18N = {
   if (typeof opts.music === 'boolean') $('#ambMusic').checked = opts.music;
   if (AMBIENT_LABEL[opts.ambient]) document.querySelector(`input[name="ambient"][value="${opts.ambient}"]`).checked = true;
   if (typeof opts.ambVol === 'number') $('#ambVol').value = opts.ambVol;
-  const previewBtn = $('#ambPreview');
+  const previewBtn = $('#ambPreview'), PREVIEW_RISE = .12;
   let previewing = false;
   function setPreview(on) {
     previewing = on;
     previewBtn.textContent = on ? tr('停止試聽') : tr('試聽');
     previewBtn.setAttribute('aria-pressed', String(on));
-    if (on || P.phase === 'focus') startBackground();   // when a sitting is on, go back to what it was playing
+    if (on) startBackground(PREVIEW_RISE);
+    else if (P.phase === 'focus') startBackground();     // when a sitting is on, go back to what it was playing
     else stopBackground(.8);
   }
   previewBtn.addEventListener('click', () => setPreview(!previewing));
   document.querySelectorAll('input[name="ambient"]').forEach(r => r.addEventListener('change', () => {
     saveOpts();
     syncPreviewBtn();
-    if (previewing || P.phase === 'focus') startAmbient(ambientChoice());
+    if (previewing || P.phase === 'focus') startAmbient(ambientChoice(), previewing ? PREVIEW_RISE : undefined);
     if (previewing && nothingChosen()) setPreview(false);
   }));
   $('#ambMusic').addEventListener('change', () => {
     saveOpts(); syncPreviewBtn();
-    if (previewing || P.phase === 'focus') { if (musicOn()) startMusic(); else stopMusic(1.5); }
+    if (previewing || P.phase === 'focus') { if (musicOn()) startMusic(previewing ? PREVIEW_RISE : undefined); else stopMusic(1.5); }
     if (previewing && nothingChosen()) setPreview(false);
   });
   function nothingChosen() { return ambientChoice() === 'none' && !musicOn(); }
