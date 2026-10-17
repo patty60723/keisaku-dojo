@@ -537,6 +537,7 @@
   function walkTo(x, speed) { M.tx = x; M.speed = speed; return new Promise(r => { M.arrive = r; }); }
 
   let last = performance.now(), stickInFront = false;
+  const monkFeet = [...document.querySelectorAll('#monk .m-foot')];
   function frame(now) {
     const dt = Math.min(.05, (now - last) / 1000); last = now;
     const dx = M.tx - M.x, moving = Math.abs(dx) > .4;
@@ -552,6 +553,8 @@
     const bob = moving && !reduceMotion ? -Math.abs(Math.sin(M.walkT * 7)) * 2.4 : 0;
     const place = `translate(${M.x.toFixed(2)} ${(M.y + bob).toFixed(2)}) scale(${M.face} 1)`;
     monkEl.setAttribute('transform', place);
+    const step = moving && !reduceMotion ? Math.sin(M.walkT * 7) : 0;     // one foot lifts and swings forward, then the other
+    monkFeet.forEach((f, i) => { const k = i ? -step : step; f.setAttribute('transform', k > 0 ? `translate(${(k * 2.5).toFixed(2)} ${(-k * 2.2 - bob).toFixed(2)})` : `translate(0 ${(-bob).toFixed(2)})`); });
     stickLayer.setAttribute('transform', place);
     // the stick is always above the monk; while he strikes it also goes above the mochi
     const front = M.mode === 'task';
@@ -768,12 +771,31 @@
   const dlg = $('#dialog'), dlgText = $('#dlgText'), dlgChoices = $('#dlgChoices'), dlgSkip = $('#dlgSkip');
   let finishTyping = null, pendingAsk = null, skipRequested = false;
 
+  // on a phone the zendo floor takes up whatever height the dialogue box and the timer card leave, so when either
+  // grows or shrinks the floor would jump; glide it to its new height instead. ResizeObserver runs before the paint,
+  // so the floor never shows its new size first.
+  const stageWrapEl = $('#stageWrap');
+  let floorTimer = 0, floorH = 0;           // the height the floor was last painted at
+  function glideFloor() {
+    const wrap = stageWrapEl, gliding = !!wrap.style.height;
+    const cur = gliding ? wrap.getBoundingClientRect().height : floorH;   // mid-glide, carry on from where it is
+    Object.assign(wrap.style, { flex: '', height: '', transition: 'none' });
+    const target = floorH = wrap.getBoundingClientRect().height
+    if (reduceMotion || !cur || Math.abs(target - cur) < 2) return;
+    Object.assign(wrap.style, { flex: 'none', height: cur + 'px' });
+    void wrap.offsetHeight;
+    Object.assign(wrap.style, { transition: 'height .5s cubic-bezier(.3,.7,.3,1)', height: target + 'px' });
+    clearTimeout(floorTimer);
+    floorTimer = setTimeout(() => Object.assign(wrap.style, { flex: '', height: '', transition: '' }), 560);
+  }
+  if (window.ResizeObserver) { const ro = new ResizeObserver(glideFloor); ro.observe($('#dialog')); ro.observe($('.panel')); ro.observe($('.top')); }
+  addEventListener('resize', () => { if (!stageWrapEl.style.height) floorH = stageWrapEl.getBoundingClientRect().height; });
   function openDialog(skippable) {
     dlgSkip.hidden = !skippable;
     if (dlg.hidden) { dlg.hidden = false; toastEl.hidden = true; settleMonk(); }
   }
   function closeDialog() {
-    dlg.hidden = true; dlgChoices.replaceChildren(); toastEl.hidden = !toastEl.textContent;
+    dlg.hidden = true; dlgChoices.replaceChildren(); releaseChoices(); toastEl.hidden = !toastEl.textContent;
     settleMonk();
   }
   function typeText(text) {
@@ -793,16 +815,24 @@
     if (pendingAsk) pendingAsk.reject(SKIP);
   });
 
+  // between one question and the next the buttons' space is kept, so the box (and the floor above it) doesn't
+  // shrink while the next line types out and grow again when its buttons arrive
+  function clearChoices() {
+    if (dlgChoices.childElementCount) { dlgChoices.style.minHeight = dlgChoices.offsetHeight + 'px'; dlgChoices.classList.add('held'); }
+    dlgChoices.replaceChildren();
+  }
+  function releaseChoices() { dlgChoices.style.minHeight = ''; dlgChoices.classList.remove('held'); }
   // choices: [{label, sub?, value, primary?, wide?, onPick?}] — onPick runs inside the click (needed for iOS permission prompts)
   async function ask(text, choices, { skippable = false, timeout = 0, timeoutValue = null, input = null } = {}) {
     openDialog(skippable);
-    dlgChoices.replaceChildren();
+    clearChoices();
     await typeText(text);
     if (skipRequested) { skipRequested = false; throw SKIP; }
     return new Promise((resolve, reject) => {
       let timer = 0;
-      const settle = v => { clearTimeout(timer); pendingAsk = null; dlgChoices.replaceChildren(); resolve(v); };
-      pendingAsk = { reject: e => { clearTimeout(timer); pendingAsk = null; skipRequested = false; dlgChoices.replaceChildren(); reject(e); } };
+      const settle = v => { clearTimeout(timer); pendingAsk = null; clearChoices(); resolve(v); };
+      pendingAsk = { reject: e => { clearTimeout(timer); pendingAsk = null; skipRequested = false; clearChoices(); reject(e); } };
+      releaseChoices();
       if (input) {
         const row = document.createElement('form'); row.className = 'dlg-input';
         row.innerHTML = tr('<input id="dlgInput" maxlength="12" autocomplete="off"><button type="submit" class="choice primary">確定</button>');
@@ -1125,7 +1155,7 @@
     if (P.phase !== 'focus' || P.leaveUsed || store.get('keisaku-tip-leave-v1', false)) return;
     store.set('keisaku-tip-leave-v1', true);
     tour([{ target: '#leaveBtn', act: true, skipLabel: tr('知道了'),
-      text: tr('如果真的有事要用手機,先按「暫離」,計時會暫停,就不會挨打了。每炷可以用一次。'), hint: tr('👆 現在就要暫離的話,點一下「暫離」') }]);
+      text: tr('如果真的有事要用手機,先按「暫離」,計時會暫停,就不會挨打了。每炷可以用一次。'), hint: tr('現在就要暫離的話,點一下「暫離」') }]);
   }
   function onPutDown() {
     setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on');
@@ -1871,7 +1901,7 @@
         const s = steps[i];
         $(s.target).scrollIntoView({ block: 'nearest' });
         $('#tourText').textContent = s.text;
-        $('#tourHint').textContent = s.hint || tr('👆 點一下亮起來的地方');
+        $('#tourHint').textContent = s.hint || tr('點一下亮起來的地方');
         $('#tourSkip').textContent = s.skipLabel || tr('略過導覽');
         $('#tourNext').textContent = s.nextLabel || tr('下一步');
         place(); setTimeout(place, 300);
@@ -1916,16 +1946,16 @@
     [tr('先帶施主看看禪堂裡的東西。'), tr('好')],
   ];
   const introSteps = returning => [
-    { target: '#helpBtn', sheet: '#help', text: (returning ? tr('禪堂重新布置過了,我帶施主看一下。') : '') + tr('禪堂的規矩寫在左邊這塊「堂規」木牌上,點開看看,看完收起來就好。'), hint: tr('👆 點一下「堂規」木牌') },
-    { target: '#journalBtn', sheet: '#journal', text: tr('右邊柱子上掛的是坐禪帳。每坐完一炷,我就在上面蓋一個章。點開看看。'), hint: tr('👆 點一下坐禪帳') },
+    { target: '#helpBtn', sheet: '#help', text: (returning ? tr('禪堂重新布置過了,我帶施主看一下。') : '') + tr('禪堂的規矩寫在左邊這塊「堂規」木牌上,點開看看,看完收起來就好。'), hint: tr('點一下「堂規」木牌') },
+    { target: '#journalBtn', sheet: '#journal', text: tr('右邊柱子上掛的是坐禪帳。每坐完一炷,我就在上面蓋一個章。點開看看。'), hint: tr('點一下坐禪帳') },
     collectStep(false),
-    { target: '#settingsBtn', sheet: '#settings', text: tr('背景聲音、每日目標、深色淺色,都在這個齒輪裡調。'), hint: tr('👆 點一下齒輪') },
+    { target: '#settingsBtn', sheet: '#settings', text: tr('背景聲音、每日目標、深色淺色,都在這個齒輪裡調。'), hint: tr('點一下齒輪') },
   ];
   // the first time a round is stamped, point at the ledger, and this time the tap opens it
   function journalTip() {
     if (store.get('keisaku-tip-journal-v1', false) || !readLog().some(e => e.full)) return;
     store.set('keisaku-tip-journal-v1', true);
-    tour([{ target: '#journalBtn', text: tr('蓋好章了。點坐禪帳,看看今天的章吧。'), hint: tr('👆 點一下坐禪帳'), skipLabel: tr('等一下再看'), go: () => $('#journalBtn').click() }]);
+    tour([{ target: '#journalBtn', text: tr('蓋好章了。點坐禪帳,看看今天的章吧。'), hint: tr('點一下坐禪帳'), skipLabel: tr('等一下再看'), go: () => $('#journalBtn').click() }]);
   }
   $('#feedbackLink').addEventListener('click', e => {
     const installed = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
@@ -2514,7 +2544,7 @@
   }
   const collectStep = returning => ({ target: '#collectBtn', sheet: '#collect',
     text: (returning ? tr('禪堂多了一本收藏冊,就是中間這幅掛軸。') : tr('中間的掛軸是收藏冊。')) + tr('坐滿的炷越多,能換的掛軸和麻糬的配件就越多。點開看看。'),
-    hint: tr('👆 點一下中間的掛軸') });
+    hint: tr('點一下中間的掛軸') });
   renderScene();
 
   if (DEBUG) {                                       // a small floating panel: season, day / night, strike, sit / stand
