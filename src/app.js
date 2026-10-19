@@ -2348,9 +2348,9 @@
     { id: 'beanie', slot: 'head', name: tr('毛帽'), gift: tr('這頂毛帽'), how: tr('冬天坐滿 5 炷'), season: 'winter', need: s => [s.season.winter, 5, tr('炷')], hidesBump: true,
       svg: `<path d="M-24 -56 Q-22 -78 0 -79 Q22 -78 24 -56 Q0 -61 -24 -56Z" fill="#7d8fb3" ${INK}/><path d="M-25 -57 Q0 -62 25 -57 L25 -52 Q0 -57 -25 -52Z" fill="#5f6f94" ${INK}/><circle cx="0" cy="-81" r="4.5" fill="#eef0f4" ${INK}/>` },
 
-    { id: 'mino', slot: 'body', name: tr('蓑衣'), gift: tr('這件蓑衣'), how: tr('累計坐滿 20 炷'), need: s => [s.rounds, 20, tr('炷')],
+    { id: 'mino', slot: 'body', sleeve: '#c9a85c', name: tr('蓑衣'), gift: tr('這件蓑衣'), how: tr('累計坐滿 20 炷'), need: s => [s.rounds, 20, tr('炷')],
       svg: `<path d="M-31 -31 Q0 -25 31 -31 L35 -13 Q0 -7 -35 -13Z" fill="#c9a85c" ${INK}/><path d="M-24 -29 l-2 15 M-14 -27.5 l-1 15 M-4 -27 v15 M6 -27 v15 M16 -27.5 l1 15 M26 -29 l2 15" stroke="#9c7d3a" stroke-width=".9"/>` },
-    { id: 'yukata', slot: 'body', name: tr('浴衣'), gift: tr('這件浴衣'), how: tr('夏天坐滿 10 炷'), season: 'summer', need: s => [s.season.summer, 10, tr('炷')],
+    { id: 'yukata', slot: 'body', sleeve: '#5b7bb5', name: tr('浴衣'), gift: tr('這件浴衣'), how: tr('夏天坐滿 10 炷'), season: 'summer', need: s => [s.season.summer, 10, tr('炷')],
       svg: `<path d="M-31.5 -28 Q0 -22 31.5 -28 L32 -14 Q0 -9 -32 -14Z" fill="#5b7bb5" ${INK}/><path d="M-10 -27 L1.5 -17.5" fill="none" stroke="#f8f5ec" stroke-width="2.2"/><path d="M10 -27 L-3.5 -15" fill="none" stroke="#f8f5ec" stroke-width="2.2"/>`
         + [[-22, -21], [-16, -16], [17, -21], [23, -16], [-27, -16], [27, -21]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.3" fill="#f8f5ec"/>`).join('') },
     { id: 'blanket', slot: 'body', name: tr('膝上毯'), gift: tr('這條膝上毯'), how: tr('冬天坐滿 10 炷'), season: 'winter', need: s => [s.season.winter, 10, tr('炷')],
@@ -2359,7 +2359,7 @@
       svg: `<path d="M-30 -27 Q0 -19 30 -27 L31 -21 Q0 -13 -31 -21Z" fill="#c8434b" ${INK}/><path d="M18 -22 l4 14 l7 -2 l-3 -13z" fill="#c8434b" ${INK}/><path d="M20 -12 h7 M21 -15 h6" stroke="#f8e2c8" stroke-width="1"/>` },
     { id: 'kesa', slot: 'body', name: tr('小袈裟'), gift: tr('這件小袈裟'), how: tr('累計坐滿 100 炷'), need: s => [s.rounds, 100, tr('炷')],
       svg: `<path d="M-29 -36 Q-6 -30 26 -14 L16 -11 Q-8 -24 -31 -26Z" fill="#8a5d34" ${INK}/><path d="M-22 -32 l3 6 M-12 -28 l3 6 M-2 -24 l3 6 M8 -20 l3 6" stroke="#5d3f22" stroke-width=".8"/>` },
-    { id: 'samue', slot: 'body', name: tr('作務衣'), gift: tr('這件作務衣'), how: tr('累計坐滿 200 炷'), need: s => [s.rounds, 200, tr('炷')],
+    { id: 'samue', slot: 'body', sleeve: '#3e4f6e', name: tr('作務衣'), gift: tr('這件作務衣'), how: tr('累計坐滿 200 炷'), need: s => [s.rounds, 200, tr('炷')],
       svg: `<path d="M-31.5 -29 Q0 -23 31.5 -29 L32 -14 Q0 -9 -32 -14Z" fill="#3e4f6e" ${INK}/><path d="M-12 -28 L1 -18" stroke="#e9e3d3" stroke-width="2"/><path d="M12 -28 L-5 -15" stroke="#e9e3d3" stroke-width="2"/>` },
 
     { id: 'glasses', slot: 'extra', name: tr('眼鏡'), gift: tr('這副眼鏡'), how: tr('累計坐禪 25 小時'), need: s => [Math.floor(s.hours), 25, tr('小時')],
@@ -2465,6 +2465,7 @@
     $('#accSide').innerHTML = extra && extra.place === 'side' ? g(extra) : '';
     $('#accCushion').innerHTML = body && body.id === 'blanket' ? FOLDED_BLANKET : '';   // shown only while standing (CSS)   // on the mat beside the cushion
     sitterEl.dataset.head = head ? head.id : '';
+    sitterEl.style.setProperty('--sleeve', body && body.sleeve || 'var(--mochi)');   // a robe covers the arms too
     sitterEl.classList.toggle('no-bump', !!(head && head.hidesBump));      // a hat or beanie hides the bump
   }
   const sittingNow = () => ['settle', 'focus', 'leave'].includes(P.phase) || P.resuming;
