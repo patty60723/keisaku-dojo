@@ -575,12 +575,11 @@
     if (id !== animFace) {
       animEls.forEach(({ el }) => { el.removeAttribute('transform'); el.style.opacity = ''; });
       animFace = id; animEls = [];
-      const g = sitterEl.querySelector('.f-' + id);
-      if (g) g.querySelectorAll('[data-a]').forEach(el => {
+      sitterEl.querySelectorAll('.f-' + id).forEach(g => g.querySelectorAll('[data-a]').forEach(el => {
         const b = el.getBBox();
         animEls.push({ el, g, cx: b.x + b.width / 2, cy: b.y + b.height / 2, kinds: el.dataset.a.split(' '),
           amp: +el.dataset.amp || 0, per: +el.dataset.per || 0, off: +el.dataset.off || 0, i: +el.dataset.i || 0 });
-      });
+      }));
     }
     const t = now / 1000;
     for (const a of animEls) {
@@ -2600,7 +2599,7 @@
     $('#accList').innerHTML = SLOTS.map(([slot, label]) => `<li class="c-slot"><h3>${label}</h3><ul class="c-grid c-accs">`
       + ACCS.filter(x => x.slot === slot).map(x => card('a', x, mini(x))).join('') + '</ul></li>').join('');
     // faces: the mochi's head with that face, drawn from the same face as in the zendo; not yet seen ones are a question mark
-    const faceArt = f => { const g = document.querySelector(`#sitter .f-${f.id}`); return g ? g.outerHTML.replace('class="face ', 'class="') : ''; };
+    const faceArt = f => [...document.querySelectorAll(`#sitter .f-${f.id}`)].map(g => g.outerHTML.replace(/class="face (fx )?/, 'class="')).join('');
     $('#faceList').innerHTML = FACES.map(f => {
       const ok = faceGot(f, stats), on = C.face === f.id, left = ok || !f.need ? '' : (([have, need, unit]) => have < need ? tr('還差 {0} {1}', need - have, unit) : '')(f.need(stats));
       return `<li><button type="button" class="c-item c-face${ok ? '' : ' locked'}${on ? ' on' : ''}" data-id="${f.id}" aria-pressed="${on}" ${ok ? '' : 'aria-disabled="true"'}`
