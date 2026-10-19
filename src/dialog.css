@@ -741,3 +741,4 @@ html:lang(en) * { letter-spacing: normal !important; }
 .two-label[aria-pressed="true"] .when-off, .two-label:not([aria-pressed="true"]) .when-on { visibility: hidden; }
 /* things held in the hands follow the pose: in the lap while sitting, in a hand at the side while standing */
 #sitter.standing .acc .pose-sit, #sitter:not(.standing) .acc .pose-stand { display: none; }
+.tabs-4 { grid-template-columns: repeat(4, 1fr); }

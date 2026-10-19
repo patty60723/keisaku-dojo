@@ -123,7 +123,8 @@ body {
 #sitter:not(.standing) .side-arms{display:none}
 #sitter.standing .lap-hands{display:none}
 .face{display:none}
-#sitter[data-face="calm"] .f-calm, #sitter[data-face="ouch"] .f-ouch, #sitter[data-face="happy"] .f-happy, #sitter[data-face="peek"] .f-peek { display:inline; }
+#sitter[data-face="calm"] .f-calm, #sitter[data-face="ouch"] .f-ouch, #sitter[data-face="happy"] .f-happy, #sitter[data-face="peek"] .f-peek,
+#sitter[data-face="sleepy"] .f-sleepy, #sitter[data-face="proud"] .f-proud, #sitter[data-face="surprised"] .f-surprised, #sitter[data-face="teary"] .f-teary, #sitter[data-face="content"] .f-content, #sitter[data-face="shy"] .f-shy, #sitter[data-face="daze"] .f-daze, #sitter[data-face="focus"] .f-focus { display:inline; }
 .bump{display:none} #sitter[data-face="ouch"] .bump{display:inline}
 .brow{display:none} #monk[data-mood="stern"] .brow{display:inline}
 #monk[data-mood="stern"] .m-mouth{display:none}

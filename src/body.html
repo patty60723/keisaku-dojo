@@ -104,15 +104,17 @@
       <button type="button" class="sheet-close" id="collectClose" aria-label="關閉">✕</button>
     </div>
     <p class="collect-sum" id="collectSum"></p>
-    <div class="tabs tabs-3" role="tablist" aria-label="收藏冊">
+    <div class="tabs tabs-4" role="tablist" aria-label="收藏冊">
       <button type="button" role="tab" id="tabScrolls" aria-selected="true" aria-controls="scrollView">掛軸</button>
       <button type="button" role="tab" id="tabSeasons" aria-selected="false" aria-controls="seasonView">四季</button>
       <button type="button" role="tab" id="tabAccs" aria-selected="false" aria-controls="accView">配件</button>
+      <button type="button" role="tab" id="tabFaces" aria-selected="false" aria-controls="faceView">表情</button>
     </div>
     <p class="collect-note" id="collectNote" hidden>坐禪中只能看,報到或休息時才能換。</p>
     <div id="scrollView" class="tab-view" role="tabpanel" aria-labelledby="tabScrolls"><ul class="c-grid c-scrolls" id="scrollList"></ul></div>
     <div id="seasonView" class="tab-view" role="tabpanel" aria-labelledby="tabSeasons" hidden><ul class="c-seasons" id="seasonList"></ul></div>
     <div id="accView" class="tab-view" role="tabpanel" aria-labelledby="tabAccs" hidden><p class="collect-hint">頭、身體、配飾各可以戴一樣。再點一次就拿下來。</p><ul class="c-slots" id="accList"></ul></div>
+    <div id="faceView" class="tab-view" role="tabpanel" aria-labelledby="tabFaces" hidden><p class="collect-hint">點一下,就是報到和休息時的表情。坐禪時麻糬會自己換表情。</p><ul class="c-grid c-accs" id="faceList"></ul></div>
    </div>
    </div>
   </dialog>

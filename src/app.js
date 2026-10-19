@@ -607,7 +607,23 @@
   const mochiEl = $('#mochi');
   let standing = true;
   const mochiX = () => SITTER_X + (standing ? STAND.x : 0);
-  const restFace = () => standing ? (P.phase === 'break' ? 'happy' : 'peek') : 'calm';
+  const nightNow = () => { const h = new Date(Date.now()).getHours(); return h >= 22 || h < 3; };
+  const sitFace = () => nightNow() ? 'focus' : 'calm';                   // late at night the mochi sits with a set jaw
+  const restFace = () => standing ? (C.face || 'peek') : sitFace();     // standing: the everyday face chosen in the 收藏冊
+  // every face change goes through here, so a face is collected the first time it is seen
+  function setFace(id) {
+    sitterEl.dataset.face = id;
+    if (!C || C.faces.includes(id)) return;
+    const f = FACES.find(x => x.id === id); if (!f) return;
+    const had = faceGot(f, collectStats(readLog()));
+    C.faces.push(id); saveCollect();
+    if (!had) toast(tr('收藏冊多了一個表情:「{0}」', f.name));
+  }
+  let faceTimer = 0;
+  function flashFace(id, ms) {                                          // a face for a moment, then back to resting
+    clearTimeout(faceTimer); setFace(id);
+    faceTimer = setTimeout(() => { if (sitterEl.dataset.face === id) setFace(restFace()); }, ms);
+  }
   const placeMochi = (x, y) => mochiEl.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
   async function hop(toSit) {
     if (standing !== toSit) return;              // already there
@@ -703,10 +719,10 @@
     const lamp = $('#andonLight');
     lamp.classList.remove('jolt'); void lamp.getBoundingClientRect(); lamp.classList.add('jolt');
     const pow = $('#pow'); pow.style.left = (mochiX() + 24) / 4 + '%'; pow.classList.remove('go'); void pow.offsetWidth; pow.classList.add('go');
-    sitterEl.dataset.face = 'ouch';
+    setFace('ouch');
     sitterEl.classList.remove('ouch'); void sitterEl.getBoundingClientRect(); sitterEl.classList.add('ouch');
     document.querySelectorAll('#sitter .acc').forEach(reactAcc);       // whatever is worn reacts to the strike
-    setTimeout(() => { if (sitterEl.dataset.face === 'ouch') sitterEl.dataset.face = restFace(); sitterEl.classList.remove('ouch'); }, 1300);
+    setTimeout(() => { if (sitterEl.dataset.face === 'ouch') setFace(restFace()); sitterEl.classList.remove('ouch'); }, 1300);
     const stars = $('#stars');
     for (let i = 0; i < 6; i++) {
       const s = document.createElement('span'); s.className = 'star'; s.textContent = '✦';
@@ -885,7 +901,7 @@
 
   async function onboarding(again = false) {
     P.phase = 'idle'; renderAll();
-    sitterEl.dataset.face = 'peek';
+    setFace(restFace());
     const lastCfg = loadLast();
     // "returning" means they have actually sat before, not just opened the page
     const log = readLog(), hasSat = log.length > 0;
@@ -1096,9 +1112,9 @@
       hostAway = false; settleMonk();
       prefix = delays >= 3 ? tr('回來了。') : '';
     }
-    sitterEl.dataset.face = 'happy';
+    setFace('happy');
     await Promise.all([ask(tr('那麼,止靜。'), [], { timeout: 900 }), sitDown()]);
-    sitterEl.dataset.face = 'calm';
+    setFace(sitFace());
     closeDialog();
     beginSettle();
   }
@@ -1147,7 +1163,7 @@
   });
   function onPickUp() {
     setStatus(tr('拿起手機了'), 'hit');
-    sitterEl.dataset.face = 'peek';
+    setFace('peek');
     enqueue(() => strike({ reason: tr('啪!手機拿起來了。放回原位才能繼續。'), counted: true }));
     enqueue(leaveTip);
   }
@@ -1266,7 +1282,7 @@
     enqueue(takeStick);
     $('#result').hidden = true;
     renderRounds(); renderStats(); keepAwake(); settleMonk();
-    sitterEl.dataset.face = 'calm';
+    setFace(sitFace());
     setStatus(tr('落座中'), 'on');
     setMain(tr('取消'));
     settleCountdown(cfg.focusMin * 60000, beginFocus);
@@ -1301,7 +1317,7 @@
     P.phase = 'leave'; P.leaveUsed = true; P.leaveAt = Date.now();
     Mo.base = null; Mo.picked = false;
     stopBackground(1.2); letSleep(); renderSense(null);
-    sitterEl.dataset.face = 'peek'; standUp();
+    standUp(); setFace(restFace());
     setStatus(tr('暫離中'), '');
     setMain(tr('出堂・結束'));
     bubble(tr('去吧,快去快回。')); P.leaveBubble = setTimeout(() => bubble(null), 2400);
@@ -1314,7 +1330,7 @@
     clearTimeout(P.leaveBubble); bubble(null);
     P.phase = 'settle'; P.resuming = true;
     audio(); askMotionPermission();
-    sitterEl.dataset.face = 'calm';
+    setFace(sitFace());
     setStatus(tr('回座中'), 'on');
     setMain(tr('出堂・結束'));
     keepAwake();
@@ -1337,7 +1353,7 @@
 
   function beginFocus(withMotion) {
     P.phase = 'focus';
-    P.start = Date.now(); P.end = P.start + cfg.focusMin * 60000;
+    P.start = Date.now(); P.end = P.start + cfg.focusMin * 60000; P.nextYawn = 0;
     Mo.base = withMotion ? Mo.lp.slice() : null; Mo.picked = false; Mo.score = 0;
     senseFor(withMotion);
     setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on');
@@ -1348,10 +1364,20 @@
     toast(P.round === 1 ? tr('止靜。住持開始巡堂了。') : tr('第 {0} 炷,止靜。', P.round));
   }
 
+  // how the mochi looks when a round ends: a 4th round today, 3 clean in a row, a hard round, a clean one, or just glad
+  function roundEndFace() {
+    const log = readLog(), last = log.slice(-3);
+    if (P.todayRounds === 4) return 'content';
+    if (last.length === 3 && last.every(e => e.full && !e.hits)) return 'proud';
+    if (P.roundHits >= 3) return 'teary';
+    if (P.roundHits === 0) return 'shy';                                // the monk praises a clean round
+    return 'happy';
+  }
   function endFocus() {
     stopBackground(2.5);
     P.focusTotal += cfg.focusMin;
     saveRound(cfg.focusMin, true); renderStats();
+    P.endFace = roundEndFace();
     bell(0, .26); buzz([200, 120, 200]);
     const goalMet = P.goalJustMet; P.goalJustMet = false;
     if (P.round >= cfg.rounds) { P.showGoal = goalMet; finishCycle(false); return; }
@@ -1359,7 +1385,7 @@
     P.end = Date.now() + cfg.breakMin * 60000;
     Mo.base = null; Mo.picked = false;
     letSleep(); renderSense(null);
-    sitterEl.dataset.face = 'happy'; standUp();
+    standUp(); flashFace(P.endFace || 'happy', 6000);
     setStatus(tr('休息'), '');
     setMain(tr('跳過休息'));
     toast(goalMet ? tr('今日目標 {0} 炷達成!休息 {1} 分鐘。', goalNow(), cfg.breakMin) : tr('開靜。這炷被打 {0} 下,休息 {1} 分鐘,手機可以用了。', P.roundHits, cfg.breakMin));
@@ -1372,7 +1398,7 @@
     P.breakEnd = P.end;
     P.round++;
     P.phase = 'ready';
-    sitterEl.dataset.face = 'peek';
+    setFace(restFace());
     setStatus(tr('該回座了'), 'on');
     setMain(null);
     renderRounds(); tick();
@@ -1384,6 +1410,7 @@
     P.awaitReturn = false;
     const late = Date.now() - P.breakEnd;
     P.lateMin = late >= 60000 ? Math.round(late / 60000) : 0;
+    if (P.lateMin) setFace('daze');                                      // the break ran long: caught staring into space
     readyCheck(P.lateMin ? tr('休息超過 {0} 分鐘了喔。第 {1} 炷,', P.lateMin, P.round) : tr('休息結束。第 {0} 炷,', P.round));
   }
 
@@ -1438,7 +1465,7 @@
     if (P.hits === 0) { seal = tr('不動'); line2 = tr('一下都沒被打,如山不動。'); }
     else if (perRound <= 1) { seal = tr('精進'); line2 = tr('被打了 {0} 下,還算專心。', P.hits); }
     else { seal = tr('喝'); line2 = tr('被打了 {0} 下,肩膀辛苦了。', P.hits); }
-    sitterEl.dataset.face = 'happy';
+    setFace(early ? 'happy' : (P.endFace || 'happy')); P.endFace = null;
     $('#seal').replaceChildren(...[...seal].map(ch => Object.assign(document.createElement('i'), { textContent: ch })));
     $('#resultTitle').textContent = early ? tr('提早出堂') : tr('坐滿 {0} 炷', cfg.rounds);
     $('#resultLine1').textContent = tr('「{0}」共坐了 {1} 分鐘', cfg.task, P.focusTotal) + (P.asks ? tr(',自己請打 {0} 下', P.asks) : '');
@@ -1458,7 +1485,14 @@
     if (P.phase === 'focus' || P.phase === 'break') {
       const left = P.end - Date.now();
       clockEl.textContent = fmt(left);
-      if (P.phase === 'focus') setIncense(left / (cfg.focusMin * 60000), true);
+      if (P.phase === 'focus') {
+        setIncense(left / (cfg.focusMin * 60000), true);
+        // a long round: past halfway, a yawn now and then
+        if (cfg.focusMin >= 45 && left < cfg.focusMin * 30000 && Date.now() > (P.nextYawn || 0) && !busy && sitterEl.dataset.face === sitFace()) {
+          if (P.nextYawn) flashFace('sleepy', 2600);
+          P.nextYawn = Date.now() + (50 + Math.random() * 60) * 1000;
+        }
+      }
       else setIncense(1, false);
       if (left <= 0) {
         if (P.phase === 'focus') { if (!document.hidden) endFocus(); }
@@ -1484,7 +1518,7 @@
     if (away < 2000) { tick(); return; }
     const secs = Math.round(away / 1000);
     const label = secs >= 60 ? tr('{0} 分 {1} 秒', Math.floor(secs / 60), secs % 60) : tr('{0} 秒', secs);
-    sitterEl.dataset.face = 'peek';
+    setFace('peek');
     setStatus(tr('被抓到了'), 'hit');
     enqueue(() => strike({ reason: tr('啪!離開畫面 {0}。', label), counted: true }));
     if (secs >= 90) enqueue(() => strike({ reason: tr('啪!離開太久,再補一下。'), counted: true }));
@@ -1509,6 +1543,7 @@
   askBtn.addEventListener('click', () => {
     audio();
     if (busy) return;
+    setFace('surprised');                                                // "wait, now?" until the stick lands
     enqueue(() => strike({ reason: tr('啪!精神一振,謝謝師父。'), counted: false }));
   });
   // Install to home screen: Chrome/Android fire beforeinstallprompt; iOS Safari needs the share menu.
@@ -1823,7 +1858,7 @@
   // backup: a JSON file, or the same JSON as text for phones that can't save files easily
   const backupStatus = t => { $('#backupStatus').textContent = t; };
   const backupText = () => JSON.stringify({ app: 'keisaku-dojo', version: 2, exported: new Date().toISOString(),
-    log: readLog(), presets: loadPresets(), collect: { scroll: C.scroll, wear: C.wear } });
+    log: readLog(), presets: loadPresets(), collect: { scroll: C.scroll, wear: C.wear, faces: C.faces, face: C.face } });
   $('#exportBtn').addEventListener('click', () => {
     try {
       const url = URL.createObjectURL(new Blob([backupText()], { type: 'application/json' }));
@@ -1875,6 +1910,10 @@
       if (SCROLLS.some(x => x.id === wear.scroll)) C.scroll = wear.scroll;
       const ids = wear.wear && typeof wear.wear === 'object' ? Object.values(wear.wear) : [wear.acc];   // v18 backups, or an older single one
       for (const id of ids) { const it = ACCS.find(x => x.id === id); if (it) C.wear[it.slot] = it.id; }
+    }
+    if (wear && Array.isArray(wear.faces)) {                                // faces seen on the other phone come along
+      C.faces = [...new Set([...C.faces, ...wear.faces.filter(x => FACES.some(f => f.id === x))])];
+      if (C.face === 'peek' && C.faces.includes(wear.face)) C.face = wear.face;
     }
     C.seen = [...new Set([...C.seen, ...unlockedIds(readLog())])]; saveCollect(); renderScene();   // restored rounds are not "new"
     $('#importConfirm').hidden = true; $('#pasteBox').hidden = true;
@@ -2275,7 +2314,7 @@
   const seasonOf = (t = Date.now()) => DBG.season || SEASONS[Math.floor(((new Date(t).getMonth() + 11) % 12) / 3)].id;
   // tallies the conditions read from: full rounds, days, streaks, minutes
   function collectStats(log) {
-    if (DEBUG) return { rounds: 999, still: 999, leave: 9, long: 9, hours: 999, bigDay: 9, onTime: 99, streak: 99, early: 9, night: 9, tasks: 9,
+    if (DEBUG) return { rounds: 999, still: 999, leave: 9, long: 9, hours: 999, bigDay: 9, onTime: 99, streak: 99, early: 9, night: 9, tasks: 9, hit: 9, teary: 9, late: 9, cleanRun: 9,
       season: { spring: 99, summer: 99, autumn: 99, winter: 99 } };
     const full = log.filter(e => e.full), days = new Map();
     for (const e of log) {
@@ -2300,6 +2339,8 @@
       early: full.filter(e => { const h = new Date(e.t).getHours(); return h >= 3 && h < 7; }).length,   // finished before 7 in the morning
       night: full.filter(e => { const h = new Date(e.t).getHours(); return h >= 22 || h < 3; }).length,  // after 10 at night
       tasks: new Set(full.map(e => e.task)).size,
+      hit: log.filter(e => e.hits).length, teary: log.filter(e => e.hits >= 3).length, late: log.filter(e => e.late).length,
+      cleanRun: [...log].sort((a, b) => a.t - b.t).reduce((r, e) => { r.n = e.full && !e.hits ? r.n + 1 : e.full ? 0 : r.n; r.best = Math.max(r.best, r.n); return r; }, { n: 0, best: 0 }).best,   // clean full rounds in a row
     };
   }
   // need(stats) -> [have, need, unit]; under each scroll English shows what it means, Japanese how it is read
@@ -2412,6 +2453,23 @@
   const FOLDED_BLANKET = `<path d="M-15 -16 h30 q3 0 3 3 v3 q0 3 -3 3 h-30 q-3 0 -3 -3 v-3 q0 -3 3 -3z" fill="#b5654a" ${INK}/>`
     + '<path d="M-17 -11.5 h34 M-6 -16 v9 M6 -16 v9" stroke="#e7c9a0" stroke-width=".9"/>';
   const SLOTS = [['head', tr('頭')], ['body', tr('身體')], ['extra', tr('配飾')]];
+  // the mochi's faces: each is collected the first time it shows (or, for the ones the log can tell, as soon as the log says so).
+  // Any collected face can be chosen as the everyday face for checking in and for the break; sitting has its own.
+  const FACES = [
+    { id: 'peek', name: tr('張望'), how: tr('一開始就有'), got: () => true },
+    { id: 'calm', name: tr('平靜'), how: tr('一開始就有'), got: () => true },
+    { id: 'happy', name: tr('開心'), how: tr('坐滿一炷'), got: s => s.rounds >= 1 },
+    { id: 'ouch', name: tr('痛'), how: tr('第一次被打'), got: s => s.hit >= 1 },
+    { id: 'sleepy', name: tr('睏'), how: tr('坐 45 分以上的一炷,後半段偶爾打個哈欠'), got: s => s.long >= 1 },
+    { id: 'proud', name: tr('得意'), how: tr('連續 3 炷都沒被打'), got: s => s.cleanRun >= 3, need: s => [s.cleanRun, 3, tr('炷')] },
+    { id: 'surprised', name: tr('嚇一跳'), how: tr('按「合掌請打」的時候') },
+    { id: 'teary', name: tr('淚眼'), how: tr('一炷被打 3 下以上'), got: s => s.teary >= 1 },
+    { id: 'content', name: tr('滿足'), how: tr('一天坐滿 4 炷'), got: s => s.bigDay >= 4, need: s => [s.bigDay, 4, tr('炷')] },
+    { id: 'shy', name: tr('害羞'), how: tr('一炷都沒被打,被住持稱讚的時候'), got: s => s.still >= 1 },
+    { id: 'daze', name: tr('發呆'), how: tr('休息超過時間還沒回座'), got: s => s.late >= 1 },
+    { id: 'focus', name: tr('專注'), how: tr('晚上 10 點以後坐禪'), got: s => s.night >= 1 },
+  ];
+  const faceGot = (f, s) => DEBUG || C.faces.includes(f.id) || !!(f.got && f.got(s));
   const unlocked = (item, s) => { const [have, need] = item.need(s); return have >= need; };
   const unlockedIds = log => { const s = collectStats(log); return [...SCROLLS.filter(x => unlocked(x, s)).map(x => 's:' + x.id), ...ACCS.filter(x => unlocked(x, s)).map(x => 'a:' + x.id)]; };
 
@@ -2447,9 +2505,11 @@
     const put = id => { const it = ACCS.find(x => x.id === id); if (it) wear[it.slot] = it.id; };
     if (v.wear && typeof v.wear === 'object') Object.values(v.wear).forEach(put);
     else if (typeof v.acc === 'string') put(v.acc);                        // before v18 there was one accessory
-    return { scroll: typeof v.scroll === 'string' ? v.scroll : '靜', wear, seen: Array.isArray(v.seen) ? v.seen.filter(x => typeof x === 'string') : null };
+    const faces = Array.isArray(v.faces) ? v.faces.filter(x => FACES.some(f => f.id === x)) : [];
+    return { scroll: typeof v.scroll === 'string' ? v.scroll : '靜', wear, seen: Array.isArray(v.seen) ? v.seen.filter(x => typeof x === 'string') : null,
+      faces, face: FACES.some(f => f.id === v.face) ? v.face : 'peek' };
   })();
-  const saveCollect = () => store.set(COLLECT_KEY, { scroll: C.scroll, wear: C.wear, seen: C.seen });
+  const saveCollect = () => store.set(COLLECT_KEY, { scroll: C.scroll, wear: C.wear, seen: C.seen, faces: C.faces, face: C.face });
   if (!C.seen) { C.seen = unlockedIds(readLog()); saveCollect(); }   // what was earned before the 收藏冊 existed is not "new"
   function renderScene() {
     const stats = collectStats(readLog());
@@ -2474,15 +2534,15 @@
   const progressText = (item, s) => { const [have, need, unit] = item.need(s); return have >= need ? '' : tr('還差 {0} {1}', need - have, unit); };
   const MOCHI_BODY = '<path d="M-31 -14 C-34 -40 -20 -68 0 -68 C20 -68 34 -40 31 -14 C22 -9 -22 -9 -31 -14 Z" fill="#fffdf7" stroke="#2a2622" stroke-width="1.6"/>'
     + '<ellipse fill="#f2a49a" cx="-17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/><ellipse fill="#f2a49a" cx="17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/>';
-  const MOCHI_HANDS = '<path d="M-26 -33 Q-23 -21 -9 -18.5 M26 -33 Q23 -21 9 -18.5" fill="none" stroke="#2a2622" stroke-width="1.3" stroke-linecap="round"/>'
-    + '<ellipse fill="#fffdf7" cx="0" cy="-17" rx="10" ry="4.6" stroke="#2a2622" stroke-width="1.3"/>';
+  const MOCHI_HANDS = '<path d="M-30.8 -29.6 C-29.8 -23.6 -22.4 -19.6 -11.8 -18.2 M-11 -22.2 C-18.8 -23.4 -23 -26.6 -24.6 -30.6 M30.8 -29.6 C29.8 -23.6 22.4 -19.6 11.8 -18.2 M11 -22.2 C18.8 -23.4 23 -26.6 24.6 -30.6" fill="none" stroke="#2a2622" stroke-width="1.3" stroke-linecap="round"/>'
+    + '<ellipse fill="#fffdf7" cx="-5.6" cy="-19" rx="6.6" ry="4.6" stroke="#2a2622" stroke-width="1.3"/><ellipse fill="#fffdf7" cx="5.6" cy="-19.4" rx="6.6" ry="4.6" stroke="#2a2622" stroke-width="1.3"/>';
   const MOCHI_FACE = '<g fill="none" stroke="#2a2622" stroke-width="1.5" stroke-linecap="round"><path d="M-13 -44 q4 3.2 8 0"/><path d="M5 -44 q4 3.2 8 0"/><path d="M-2 -35 q2 1.4 4 0"/></g>';
   const WIN = '<circle cx="86" cy="98" r="33" class="f-window"/>';
   const LATTICE = '<g class="s-wood" stroke-width="1.6" clip-path="url(#winClip)"><line x1="70" y1="60" x2="70" y2="140"/><line x1="86" y1="60" x2="86" y2="140"/><line x1="102" y1="60" x2="102" y2="140"/><line x1="50" y1="82" x2="120" y2="82"/><line x1="50" y1="98" x2="120" y2="98"/><line x1="50" y1="114" x2="120" y2="114"/></g><circle cx="86" cy="98" r="33" class="s-wood" fill="none" stroke-width="5"/>';
   function renderCollect() {
     const stats = collectStats(readLog()), locked = sittingNow(), now = seasonOf();
-    const got = [...SCROLLS, ...ACCS].filter(x => unlocked(x, stats)).length;
-    $('#collectSum').textContent = tr('已經收到 {0} / {1} 樣。坐滿的炷越多,能換的就越多。', got, SCROLLS.length + ACCS.length);
+    const got = [...SCROLLS, ...ACCS].filter(x => unlocked(x, stats)).length + FACES.filter(f => faceGot(f, stats)).length;
+    $('#collectSum').textContent = tr('已經收到 {0} / {1} 樣。坐滿的炷越多,能換的就越多。', got, SCROLLS.length + ACCS.length + FACES.length);
     $('#collectNote').hidden = !locked;
     const card = (kind, item, inner) => {
       const ok = unlocked(item, stats), on = kind === 's' ? C.scroll === item.id : C.wear[item.slot] === item.id;
@@ -2498,6 +2558,16 @@
       + MOCHI_BODY + (x.slot === 'body' ? x.svg : '') + MOCHI_HANDS + MOCHI_FACE + (x.slot !== 'body' ? x.svg : '') + '</svg>';
     $('#accList').innerHTML = SLOTS.map(([slot, label]) => `<li class="c-slot"><h3>${label}</h3><ul class="c-grid c-accs">`
       + ACCS.filter(x => x.slot === slot).map(x => card('a', x, mini(x))).join('') + '</ul></li>').join('');
+    // faces: the mochi's head with that face, drawn from the same face as in the zendo; not yet seen ones are a question mark
+    const faceArt = f => { const g = document.querySelector(`#sitter .f-${f.id}`); return g ? g.outerHTML.replace('class="face ', 'class="') : ''; };
+    $('#faceList').innerHTML = FACES.map(f => {
+      const ok = faceGot(f, stats), on = C.face === f.id, left = ok || !f.need ? '' : (([have, need, unit]) => have < need ? tr('還差 {0} {1}', need - have, unit) : '')(f.need(stats));
+      return `<li><button type="button" class="c-item c-face${ok ? '' : ' locked'}${on ? ' on' : ''}" data-id="${f.id}" aria-pressed="${on}" ${ok ? '' : 'aria-disabled="true"'}`
+        + ` aria-label="${ok ? f.name + (on ? tr(',平常的表情') : '') : tr('還沒看過的表情:') + f.how}">`
+        + `<svg class="c-mochi" viewBox="-40 -84 80 72" aria-hidden="true">${MOCHI_BODY}${ok ? faceArt(f) : '<text x="0" y="-32" text-anchor="middle" font-size="22" font-weight="700" fill="#b9b3a3">?</text>'}</svg>`
+        + `<b>${ok ? f.name : '?'}</b>` + (on ? tr('<span class="c-on">平常</span>') : ok ? '' : `<small>${f.how}</small>` + (left ? `<small class="c-left">${left}</small>` : ''))
+        + '</button></li>';
+    }).join('');
     $('#seasonList').innerHTML = SEASONS.map(se => {
       const items = [...SCROLLS, ...ACCS].filter(x => x.season === se.id);
       return `<li class="c-season${se.id === now ? ' now' : ''}"><svg viewBox="50 62 72 72" aria-hidden="true">${WIN}<g clip-path="url(#winClip)">${SEASON_ART[se.id]()}</g>${LATTICE}</svg>`
@@ -2516,12 +2586,20 @@
     if (!b || b.getAttribute('aria-disabled') === 'true') return;
     equip(b.dataset.kind, b.dataset.id, true); renderCollect();
   }));
+  // choosing the everyday face: it shows at once if the mochi is standing about (checking in, on a break)
+  $('#faceList').addEventListener('click', e => {
+    const b = e.target.closest('.c-item');
+    if (!b || b.getAttribute('aria-disabled') === 'true') return;
+    C.face = b.dataset.id; saveCollect();
+    if (standing && !['focus', 'settle'].includes(P.phase)) setFace(restFace());
+    renderCollect();
+  });
   function showCollectTab(which) {
-    [['tabScrolls', 'scrollView'], ['tabSeasons', 'seasonView'], ['tabAccs', 'accView']].forEach(([t, v]) => {
+    [['tabScrolls', 'scrollView'], ['tabSeasons', 'seasonView'], ['tabAccs', 'accView'], ['tabFaces', 'faceView']].forEach(([t, v]) => {
       $('#' + t).setAttribute('aria-selected', String(t === which)); $('#' + v).hidden = t !== which;
     });
   }
-  ['tabScrolls', 'tabSeasons', 'tabAccs'].forEach(t => $('#' + t).addEventListener('click', () => showCollectTab(t)));
+  ['tabScrolls', 'tabSeasons', 'tabAccs', 'tabFaces'].forEach(t => $('#' + t).addEventListener('click', () => showCollectTab(t)));
   $('#collectBtn').addEventListener('click', () => { renderCollect(); showCollectTab('tabScrolls'); openSheet($('#collect')); });
   const windowTale = text => { bubble(text); clearTimeout(P.bubbleTimer); P.bubbleTimer = setTimeout(() => bubble(null), 5200); };
   $('#windowBtn').addEventListener('click', () => windowTale(tr('方的叫「迷之窗」,四個角是生老病死。圓的叫「悟之窗」。京都的源光庵就是這樣開窗的。')));
@@ -2558,7 +2636,7 @@
     bar.className = 'debug-bar';
     bar.innerHTML = `<b>除錯 ${window.KEISAKU_BUILT || ''}</b>` + SEASONS.map(x => `<button type="button" data-season="${x.id}">${x.name}</button>`).join('')
       + '<button type="button" data-act="night">日／昏／夜</button><button type="button" data-act="hit">打一下</button>'
-      + '<button type="button" data-act="sit">坐／站</button><button type="button" data-act="book">收藏冊</button>';
+      + '<button type="button" data-act="sit">坐／站</button><button type="button" data-act="face">換表情</button><button type="button" data-act="book">收藏冊</button>';
     document.body.appendChild(bar);
     const mark = () => bar.querySelectorAll('[data-season]').forEach(b => b.classList.toggle('on', b.dataset.season === seasonOf()));
     bar.addEventListener('click', e => {
@@ -2568,6 +2646,7 @@
       else if (b.dataset.act === 'hit') impact();
       else if (b.dataset.act === 'sit') { if (standing) sitDown(); else standUp(); }
       else if (b.dataset.act === 'book') $('#collectBtn').click();
+      else if (b.dataset.act === 'face') { const i = FACES.findIndex(f => f.id === sitterEl.dataset.face); setFace(FACES[(i + 1) % FACES.length].id); toast(FACES[(i + 1) % FACES.length].name); }
     });
     mark();
   }

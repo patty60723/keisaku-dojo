@@ -21,7 +21,7 @@ test('the hanging scroll opens the 收藏冊, which works out from the log what 
   for (const id of ['靜', '忍', '心', '莫妄想', '日日是好日', SEASON_SCROLL[seasonNow()]]) assert.equal(await locked(id), false, id);
   for (const id of ['無', '一期一會', '放下著']) assert.equal(await locked(id), true, id);
   assert.match(await card(p, '無').textContent(), /還差 40 炷/);
-  assert.match(await p.locator('#collectSum').textContent(), /已經收到 \d+ \/ 35 樣/);
+  assert.match(await p.locator('#collectSum').textContent(), /已經收到 \d+ \/ 47 樣/);
   await p.locator('#tabAccs').click();
   assert.equal(await locked('leaf'), false);
   assert.equal(await locked('hat'), true);
@@ -155,5 +155,29 @@ test('when struck, a hat hides the bump and what is worn reacts', async () => {
   assert.equal(await p.evaluate(() => getComputedStyle(document.querySelector('#sitter .bump')).display), 'none');
   await p.waitForTimeout(150);
   assert.match(await p.evaluate(() => document.querySelector('#mochiAcc .acc-hat').getAttribute('transform') || ''), /rotate/, 'the hat is moving');
+  await ctx.close();
+});
+
+test('faces: seen ones are collected, one can be chosen as the everyday face, and asking for a tap startles the mochi', async () => {
+  const log = [...Array(3)].map((_, i) => entry(i, { min: 25, hits: 0 }));
+  const { p, ctx, errors } = await openApp(browser, server.url, { storage: { 'keisaku-log-v2': log } });
+  await openBook(p);
+  await p.locator('#tabFaces').click();
+  const locked = id => card(p, id).evaluate(b => b.classList.contains('locked'));
+  assert.equal(await locked('happy'), false, 'the log already shows full rounds');
+  assert.equal(await locked('proud'), false, 'three clean rounds in a row');
+  assert.equal(await locked('surprised'), true, 'only seen when asking for a tap');
+  await card(p, 'happy').click();
+  assert.equal(await p.evaluate(() => document.getElementById('sitter').dataset.face), 'happy', 'standing at check-in, the everyday face shows at once');
+  await p.locator('#collectClose').click();
+  await p.reload(); await waitForLine(p, '今天想做什麼');
+  assert.equal(await p.evaluate(() => document.getElementById('sitter').dataset.face), 'happy', 'and stays after a reload');
+  await sit(p);
+  await p.locator('#askBtn').click();
+  await p.waitForFunction(() => ['surprised', 'ouch'].includes(document.getElementById('sitter').dataset.face));
+  const stored = await p.evaluate(() => JSON.parse(localStorage.getItem('keisaku-collect-v1')));
+  assert.ok(stored.faces.includes('surprised'));
+  assert.equal(stored.face, 'happy');
+  assert.deepEqual(errors, []);
   await ctx.close();
 });
