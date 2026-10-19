@@ -249,54 +249,58 @@
             <ellipse class="f-mochi" cx="5.6" cy="-19.4" rx="6.6" ry="4.6" stroke="#2a2622" stroke-width="1.3"/>
             <path d="M3.6 -22.6 q1.6 -.8 3.4 -.2" class="s-ink" stroke-width=".9" stroke-linecap="round" opacity=".5"/>
           </g>
+          <!-- faces. Parts marked data-a move a little while their face shows (driven from the script, see animateFace):
+               blink, bob, glance, float, drip, twinkle, pulse, shake, yawn, fade, seq -->
           <g class="face f-calm s-ink" stroke-width="1.5" stroke-linecap="round">
-            <path d="M-13 -44 q4 3.2 8 0"/><path d="M5 -44 q4 3.2 8 0"/><path d="M-2 -35 q2 1.4 4 0"/>
+            <g data-a="bob" data-amp=".5" data-per="5"><path d="M-13 -44 q4 3.2 8 0"/><path d="M5 -44 q4 3.2 8 0"/></g><path d="M-2 -35 q2 1.4 4 0"/>
           </g>
           <g class="face f-ouch s-ink" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M-14 -48 l7 3 l-7 3"/><path d="M14 -48 l-7 3 l7 3"/><path d="M-5 -34 q2.5 -2.4 5 0 q2.5 2.4 5 0"/>
-            <path d="M24 -48 q3 4 0 6 q-3 -2 0 -6" fill="#9ccbe8" stroke-width="1"/>
+            <g data-a="shake"><path d="M-14 -48 l7 3 l-7 3"/><path d="M14 -48 l-7 3 l7 3"/><path d="M-5 -34 q2.5 -2.4 5 0 q2.5 2.4 5 0"/></g>
+            <path data-a="drip" data-amp="4" data-per="1.3" d="M24 -48 q3 4 0 6 q-3 -2 0 -6" fill="#9ccbe8" stroke-width="1"/>
           </g>
           <g class="face f-happy s-ink" stroke-width="1.5" stroke-linecap="round">
-            <path d="M-13 -42 q4 -4 8 0"/><path d="M5 -42 q4 -4 8 0"/><path d="M-4 -36 q4 4 8 0"/>
+            <g data-a="bob" data-amp="1.2" data-per="1.1"><path d="M-13 -42 q4 -4 8 0"/><path d="M5 -42 q4 -4 8 0"/></g><path d="M-4 -36 q4 4 8 0"/>
           </g>
           <g class="face f-peek" stroke-linecap="round">
-            <circle cx="-9" cy="-43" r="2" fill="#2a2622"/><circle cx="9" cy="-43" r="2" fill="#2a2622"/>
+            <g data-a="blink glance"><circle cx="-9" cy="-43" r="2" fill="#2a2622"/><circle cx="9" cy="-43" r="2" fill="#2a2622"/></g>
             <path class="s-ink" d="M-2 -35 h4" stroke-width="1.5"/>
           </g>
           <!-- faces collected in the 收藏冊: each turns up at its own moment -->
           <g class="face f-sleepy s-ink" stroke-width="1.5" stroke-linecap="round">
-            <path d="M-13 -44 q4 1.8 8 .6 M5 -43.4 q4 1.2 8 -.6"/><ellipse cx="0" cy="-34.4" rx="2.1" ry="2.7" fill="#5a3430" stroke-width="1.2"/>
-            <path d="M20 -59 h4.2 l-4.2 4.2 h4.2 M27 -66 h3 l-3 3 h3" stroke-width="1.1" stroke-linejoin="round"/>
+            <path d="M-13 -44 q4 1.8 8 .6 M5 -43.4 q4 1.2 8 -.6"/><ellipse data-a="yawn" cx="0" cy="-34.4" rx="2.1" ry="2.7" fill="#5a3430" stroke-width="1.2"/>
+            <path data-a="float" data-amp="7" data-per="2.6" d="M20 -59 h4.2 l-4.2 4.2 h4.2" stroke-width="1.1" stroke-linejoin="round"/>
+            <path data-a="float" data-amp="7" data-per="2.6" data-off="1.3" d="M27 -66 h3 l-3 3 h3" stroke-width="1.1" stroke-linejoin="round"/>
           </g>
           <g class="face f-proud s-ink" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M-13 -42 l4 -3.4 l4 3.4 M5 -42 l4 -3.4 l4 3.4"/><path d="M-3.5 -35.8 q3.8 3 7.6 -.9"/>
-            <path d="M23 -57 l1.2 2.8 l2.8 1.2 l-2.8 1.2 l-1.2 2.8 l-1.2 -2.8 l-2.8 -1.2 l2.8 -1.2 z" fill="#e8b84a" stroke="none"/>
+            <g data-a="bob" data-amp=".8" data-per="1.6"><path d="M-13 -42 l4 -3.4 l4 3.4 M5 -42 l4 -3.4 l4 3.4"/></g><path d="M-3.5 -35.8 q3.8 3 7.6 -.9"/>
+            <path data-a="twinkle" d="M23 -57 l1.2 2.8 l2.8 1.2 l-2.8 1.2 l-1.2 2.8 l-1.2 -2.8 l-2.8 -1.2 l2.8 -1.2 z" fill="#e8b84a" stroke="none"/>
           </g>
           <g class="face f-surprised s-ink" stroke-width="1.3" stroke-linecap="round">
-            <circle cx="-9" cy="-43" r="3.6" fill="#fff"/><circle cx="9" cy="-43" r="3.6" fill="#fff"/>
-            <circle cx="-9" cy="-42.6" r="1.5" fill="#2a2622" stroke="none"/><circle cx="9" cy="-42.6" r="1.5" fill="#2a2622" stroke="none"/>
-            <ellipse cx="0" cy="-34" rx="1.9" ry="2.5"/><path d="M-7 -73 l-2.2 -5 M0 -74.5 v-5.5 M7 -73 l2.2 -5" stroke-width="1.4"/>
+            <g data-a="shake" data-amp=".35"><circle cx="-9" cy="-43" r="3.6" fill="#fff"/><circle cx="9" cy="-43" r="3.6" fill="#fff"/>
+            <circle cx="-9" cy="-42.6" r="1.5" fill="#2a2622" stroke="none"/><circle cx="9" cy="-42.6" r="1.5" fill="#2a2622" stroke="none"/></g>
+            <ellipse cx="0" cy="-34" rx="1.9" ry="2.5"/><path data-a="pulse" d="M-7 -73 l-2.2 -5 M0 -74.5 v-5.5 M7 -73 l2.2 -5" stroke-width="1.4"/>
           </g>
           <g class="face f-teary s-ink" stroke-width="1.5" stroke-linecap="round">
             <path d="M-13 -43 h8 M5 -43 h8"/><path d="M-13 -48 l6.6 -2.2 M13 -48 l-6.6 -2.2" stroke-width="1.3"/>
-            <path d="M-9 -42.4 q-1.9 3.6 0 4.8 q1.9 -1.2 0 -4.8z M9 -42.4 q-1.9 3.6 0 4.8 q1.9 -1.2 0 -4.8z" fill="#9ccbe8" stroke-width=".9"/>
-            <path d="M-4 -34 q1 -1.6 2 0 q1 1.6 2 0 q1 -1.6 2 0 q1 1.6 2 0" stroke-width="1.3"/>
+            <path data-a="drip" data-amp="3.4" data-per="1.6" d="M-9 -42.4 q-1.9 3.6 0 4.8 q1.9 -1.2 0 -4.8z" fill="#9ccbe8" stroke-width=".9"/>
+            <path data-a="drip" data-amp="3.4" data-per="1.6" data-off=".8" d="M9 -42.4 q-1.9 3.6 0 4.8 q1.9 -1.2 0 -4.8z" fill="#9ccbe8" stroke-width=".9"/>
+            <path data-a="shake" data-amp=".25" d="M-4 -34 q1 -1.6 2 0 q1 1.6 2 0 q1 -1.6 2 0 q1 1.6 2 0" stroke-width="1.3"/>
           </g>
           <g class="face f-content s-ink" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M-13 -42 q4 -4 8 0 M5 -42 q4 -4 8 0"/><path d="M-5 -36.6 q5 6.4 10 0 z" fill="#b5534b" stroke-width="1.3"/>
-            <path d="M22 -58 c-1.4 -2.4 -4.6 -.6 -2.6 1.6 l2.6 2.6 l2.6 -2.6 c2 -2.2 -1.2 -4 -2.6 -1.6z" fill="#e8798a" stroke="none"/>
+            <g data-a="bob" data-amp=".8" data-per="1.4"><path d="M-13 -42 q4 -4 8 0 M5 -42 q4 -4 8 0"/></g><path d="M-5 -36.6 q5 6.4 10 0 z" fill="#b5534b" stroke-width="1.3"/>
+            <path data-a="float" data-amp="9" data-per="2.4" d="M22 -58 c-1.4 -2.4 -4.6 -.6 -2.6 1.6 l2.6 2.6 l2.6 -2.6 c2 -2.2 -1.2 -4 -2.6 -1.6z" fill="#e8798a" stroke="none"/>
           </g>
           <g class="face f-shy s-ink" stroke-width="1.5" stroke-linecap="round">
-            <circle cx="-10.5" cy="-41.6" r="1.8" fill="#2a2622" stroke="none"/><circle cx="7.5" cy="-41.6" r="1.8" fill="#2a2622" stroke="none"/>
+            <g data-a="glance" data-amp="1.2"><circle cx="-10.5" cy="-41.6" r="1.8" fill="#2a2622" stroke="none"/><circle cx="7.5" cy="-41.6" r="1.8" fill="#2a2622" stroke="none"/></g>
             <path d="M-2.2 -34.6 q1.1 -1.1 2.2 0 q1.1 1.1 2.2 0" stroke-width="1.2"/>
-            <path d="M-21 -36.6 l2 -3 M-18 -36.6 l2 -3 M-15 -36.6 l2 -3 M13 -36.6 l2 -3 M16 -36.6 l2 -3 M19 -36.6 l2 -3" stroke="#d9645f" stroke-width=".9"/>
+            <path data-a="fade" d="M-21 -36.6 l2 -3 M-18 -36.6 l2 -3 M-15 -36.6 l2 -3 M13 -36.6 l2 -3 M16 -36.6 l2 -3 M19 -36.6 l2 -3" stroke="#d9645f" stroke-width=".9"/>
           </g>
           <g class="face f-daze s-ink" stroke-width="1.3" stroke-linecap="round">
-            <circle cx="-9" cy="-43" r="2.4"/><circle cx="9" cy="-43" r="2.4"/><path d="M-2.4 -34.4 h4.8"/>
-            <circle cx="20" cy="-58" r="1.1" fill="#2a2622" stroke="none"/><circle cx="23.6" cy="-58" r="1.1" fill="#2a2622" stroke="none"/><circle cx="27.2" cy="-58" r="1.1" fill="#2a2622" stroke="none"/>
+            <g data-a="glance" data-amp="1.6" data-per="7"><circle cx="-9" cy="-43" r="2.4"/><circle cx="9" cy="-43" r="2.4"/></g><path d="M-2.4 -34.4 h4.8"/>
+            <circle data-a="seq" data-i="0" cx="20" cy="-58" r="1.1" fill="#2a2622" stroke="none"/><circle data-a="seq" data-i="1" cx="23.6" cy="-58" r="1.1" fill="#2a2622" stroke="none"/><circle data-a="seq" data-i="2" cx="27.2" cy="-58" r="1.1" fill="#2a2622" stroke="none"/>
           </g>
           <g class="face f-focus s-ink" stroke-width="1.5" stroke-linecap="round">
-            <path d="M-13 -43 h8 M5 -43 h8"/><path d="M-13.5 -49.4 l7 1.8 M13.5 -49.4 l-7 1.8" stroke-width="1.4"/><path d="M-2 -34.6 h4"/>
+            <path d="M-13 -43 h8 M5 -43 h8"/><path data-a="bob" data-amp=".7" data-per="2.4" d="M-13.5 -49.4 l7 1.8 M13.5 -49.4 l-7 1.8" stroke-width="1.4"/><path d="M-2 -34.6 h4"/>
           </g>
           <g id="mochiAcc"></g>   <!-- what the mochi is wearing, from the 收藏冊 -->
           <path class="bump f-mochi" d="M10 -66 q8 -10 15 -2" stroke="#2a2622" stroke-width="1.4"/>

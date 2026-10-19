@@ -563,7 +563,48 @@
     stickEl.setAttribute('transform', `rotate(${M.stick.toFixed(1)} ${PIVOT})`);
     if (!bubbleEl.hidden) placeBubble();
     flyFireflies(now);
+    animateFace(now);
     requestAnimationFrame(frame);
+  }
+  // every face moves a little while it shows: parts marked data-a in the SVG get a transform each frame
+  // (set as an attribute, frame by frame, which iOS redraws reliably, unlike CSS animations on SVG)
+  let animFace = null, animEls = [];
+  function animateFace(now) {
+    if (reduceMotion) return;
+    const id = sitterEl.dataset.face;
+    if (id !== animFace) {
+      animEls.forEach(({ el }) => { el.removeAttribute('transform'); el.style.opacity = ''; });
+      animFace = id; animEls = [];
+      const g = sitterEl.querySelector('.f-' + id);
+      if (g) g.querySelectorAll('[data-a]').forEach(el => {
+        const b = el.getBBox();
+        animEls.push({ el, g, cx: b.x + b.width / 2, cy: b.y + b.height / 2, kinds: el.dataset.a.split(' '),
+          amp: +el.dataset.amp || 0, per: +el.dataset.per || 0, off: +el.dataset.off || 0, i: +el.dataset.i || 0 });
+      });
+    }
+    const t = now / 1000;
+    for (const a of animEls) {
+      let dx = 0, dy = 0, sx = 1, sy = 1, rot = 0, op = null;
+      for (const k of a.kinds) {
+        if (k === 'blink') {                                     // a quick blink every few seconds
+          if (!a.g.nextBlink || t > a.g.nextBlink) { a.g.blinkAt = a.g.nextBlink ? t : -9; a.g.nextBlink = t + 2.4 + Math.random() * 3.2; }
+          if (t - a.g.blinkAt < .14) sy = .12;
+        } else if (k === 'bob') dy = -(a.amp || 1) * Math.abs(Math.sin(Math.PI * t / (a.per || 1.2)));
+        else if (k === 'glance') dx = (a.amp || 1.2) * Math.max(-1, Math.min(1, 2.2 * Math.sin(2 * Math.PI * t / (a.per || 4))));   // rests at each side
+        else if (k === 'float' || k === 'drip') {
+          const ph = ((t + a.off) / (a.per || 2)) % 1;
+          if (k === 'float') { dy = -(a.amp || 6) * ph; op = Math.sin(Math.PI * ph); }
+          else { dy = (a.amp || 3) * ph * ph; op = Math.min(1, ph * 8) * (1 - ph * ph); }
+        } else if (k === 'twinkle') { sx = sy = .7 + .45 * Math.abs(Math.sin(t * 2.6)); rot = (t * 40) % 360; }
+        else if (k === 'pulse') sx = sy = 1 + .14 * Math.sin(t * 7);
+        else if (k === 'shake') dx = (a.amp || .6) * Math.sin(t * 38);
+        else if (k === 'yawn') sy = .55 + .55 * (.5 + .5 * Math.sin(t * 2.2));
+        else if (k === 'fade') op = .3 + .7 * (.5 + .5 * Math.sin(t * 2.4));
+        else if (k === 'seq') { const ph = (t * 1.4) % 3; op = ph > a.i * .6 && ph < 2.3 ? 1 : .12; }   // the dots come one by one
+      }
+      a.el.setAttribute('transform', `translate(${(a.cx + dx).toFixed(2)} ${(a.cy + dy).toFixed(2)}) rotate(${rot.toFixed(1)}) scale(${sx.toFixed(3)} ${sy.toFixed(3)}) translate(${-a.cx} ${-a.cy})`);
+      if (op !== null) a.el.style.opacity = op.toFixed(2);
+    }
   }
   // summer nights: each firefly drifts on its own wandering path (a few slow sines with random speeds and phases),
   // only while they can be seen
