@@ -742,3 +742,9 @@ html:lang(en) * { letter-spacing: normal !important; }
 /* things held in the hands follow the pose: in the lap while sitting, in a hand at the side while standing */
 #sitter.standing .acc .pose-sit, #sitter:not(.standing) .acc .pose-stand { display: none; }
 .tabs-4 { grid-template-columns: repeat(4, 1fr); }
+/* the bits floating beside the head sit over the wall, not the mochi: ink by day, pale at night */
+#sitter .fx.s-ink { stroke: var(--fx-ink); }
+.fx-dot { fill: var(--fx-ink); stroke: none; }
+:root { --fx-ink: #2a2622; }
+:root[data-theme="dark"] { --fx-ink: #ebe6d8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]):not([data-theme="dusk"]) { --fx-ink: #ebe6d8; } }

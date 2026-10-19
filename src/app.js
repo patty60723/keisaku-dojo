@@ -599,7 +599,7 @@
         else if (k === 'shake') dx = (a.amp || .6) * Math.sin(t * 38);
         else if (k === 'yawn') sy = .55 + .55 * (.5 + .5 * Math.sin(t * 2.2));
         else if (k === 'fade') op = .3 + .7 * (.5 + .5 * Math.sin(t * 2.4));
-        else if (k === 'seq') { const ph = (t * 1.4) % 3; op = ph > a.i * .6 && ph < 2.3 ? 1 : .12; }   // the dots come one by one
+        else if (k === 'seq') { const ph = (t * 1.4) % 3; op = ph > a.i * .6 && ph < 2.3 ? 1 : .22; }   // the dots come one by one
       }
       a.el.setAttribute('transform', `translate(${(a.cx + dx).toFixed(2)} ${(a.cy + dy).toFixed(2)}) rotate(${rot.toFixed(1)}) scale(${sx.toFixed(3)} ${sy.toFixed(3)}) translate(${-a.cx} ${-a.cy})`);
       if (op !== null) a.el.style.opacity = op.toFixed(2);

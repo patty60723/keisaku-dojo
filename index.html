@@ -1067,6 +1067,12 @@ html:lang(en) * { letter-spacing: normal !important; }
 /* things held in the hands follow the pose: in the lap while sitting, in a hand at the side while standing */
 #sitter.standing .acc .pose-sit, #sitter:not(.standing) .acc .pose-stand { display: none; }
 .tabs-4 { grid-template-columns: repeat(4, 1fr); }
+/* the bits floating beside the head sit over the wall, not the mochi: ink by day, pale at night */
+#sitter .fx.s-ink { stroke: var(--fx-ink); }
+.fx-dot { fill: var(--fx-ink); stroke: none; }
+:root { --fx-ink: #2a2622; }
+:root[data-theme="dark"] { --fx-ink: #ebe6d8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]):not([data-theme="dusk"]) { --fx-ink: #ebe6d8; } }
 </style>
 </head>
 <body>
@@ -1609,7 +1615,7 @@ html:lang(en) * { letter-spacing: normal !important; }
           <g class="face fx f-proud s-ink" stroke-linecap="round"><path data-a="twinkle" d="M18.6 -50.6 l1 2.3 l2.3 1 l-2.3 1 l-1 2.3 l-1 -2.3 l-2.3 -1 l2.3 -1 z" fill="#e8b84a" stroke="#a87d24" stroke-width=".5"/></g>
           <g class="face fx f-surprised s-ink" stroke-linecap="round"><path data-a="pulse" d="M22 -64 l2 -5 M26.6 -61 l4.4 -3.4 M29.6 -57.2 l5 -1.6" stroke-width="1.4"/></g>
           <g class="face fx f-content s-ink" stroke-linecap="round"><path data-a="float" data-amp="9" data-per="2.4" d="M22 -58 c-1.4 -2.4 -4.6 -.6 -2.6 1.6 l2.6 2.6 l2.6 -2.6 c2 -2.2 -1.2 -4 -2.6 -1.6z" fill="#e8798a" stroke="none"/></g>
-          <g class="face fx f-daze s-ink" stroke-linecap="round"><circle data-a="seq" data-i="0" cx="20" cy="-58" r="1.1" fill="#2a2622" stroke="none"/><circle data-a="seq" data-i="1" cx="23.6" cy="-58" r="1.1" fill="#2a2622" stroke="none"/><circle data-a="seq" data-i="2" cx="27.2" cy="-58" r="1.1" fill="#2a2622" stroke="none"/></g>
+          <g class="face fx f-daze s-ink" stroke-linecap="round"><circle data-a="seq" data-i="0" cx="23" cy="-59.6" r="1.9" class="fx-dot"/><circle data-a="seq" data-i="1" cx="28.8" cy="-61" r="1.9" class="fx-dot"/><circle data-a="seq" data-i="2" cx="34.6" cy="-62.4" r="1.9" class="fx-dot"/></g>
           <path class="bump f-mochi" d="M10 -66 q8 -10 15 -2" stroke="#2a2622" stroke-width="1.4"/>
         </g>
         </g>
@@ -3415,7 +3421,7 @@ const I18N = {
         else if (k === 'shake') dx = (a.amp || .6) * Math.sin(t * 38);
         else if (k === 'yawn') sy = .55 + .55 * (.5 + .5 * Math.sin(t * 2.2));
         else if (k === 'fade') op = .3 + .7 * (.5 + .5 * Math.sin(t * 2.4));
-        else if (k === 'seq') { const ph = (t * 1.4) % 3; op = ph > a.i * .6 && ph < 2.3 ? 1 : .12; }   // the dots come one by one
+        else if (k === 'seq') { const ph = (t * 1.4) % 3; op = ph > a.i * .6 && ph < 2.3 ? 1 : .22; }   // the dots come one by one
       }
       a.el.setAttribute('transform', `translate(${(a.cx + dx).toFixed(2)} ${(a.cy + dy).toFixed(2)}) rotate(${rot.toFixed(1)}) scale(${sx.toFixed(3)} ${sy.toFixed(3)}) translate(${-a.cx} ${-a.cy})`);
       if (op !== null) a.el.style.opacity = op.toFixed(2);
