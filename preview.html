@@ -3473,8 +3473,8 @@ const I18N = {
   let standing = true;
   const mochiX = () => SITTER_X + (standing ? STAND.x : 0);
   const nightNow = () => { const h = new Date(Date.now()).getHours(); return h >= 22 || h < 3; };
-  const sitFace = () => nightNow() ? 'focus' : 'calm';                   // late at night the mochi sits with a set jaw
-  const restFace = () => standing ? (C.face || 'peek') : sitFace();     // standing: the everyday face chosen in the 收藏冊
+  const sitFace = () => DEBUG && DBG.face ? DBG.face : nightNow() ? 'focus' : 'calm';   // the debug page can pin a face to try it out                   // late at night the mochi sits with a set jaw
+  const restFace = () => DEBUG && DBG.face ? DBG.face : standing ? (C.face || 'peek') : sitFace();     // standing: the everyday face chosen in the 收藏冊
   // every face change goes through here, so a face is collected the first time it is seen
   function setFace(id) {
     sitterEl.dataset.face = id;
@@ -5511,7 +5511,10 @@ const I18N = {
       else if (b.dataset.act === 'hit') impact();
       else if (b.dataset.act === 'sit') { if (standing) sitDown(); else standUp(); }
       else if (b.dataset.act === 'book') $('#collectBtn').click();
-      else if (b.dataset.act === 'face') { const i = FACES.findIndex(f => f.id === sitterEl.dataset.face); setFace(FACES[(i + 1) % FACES.length].id); toast(FACES[(i + 1) % FACES.length].name); }
+      else if (b.dataset.act === 'face') {             // pin the next face: strikes and sitting down come back to it
+        const i = FACES.findIndex(f => f.id === (DBG.face || sitterEl.dataset.face)), f = FACES[(i + 1) % FACES.length];
+        DBG.face = f.id; setFace(f.id); toast(`除錯:表情固定為「${f.name}」`);
+      }
     });
     mark();
   }
