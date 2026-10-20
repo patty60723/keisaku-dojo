@@ -63,7 +63,8 @@ test('the first full round earns a scroll and a leaf; the monk offers them after
   await p.waitForFunction(() => document.getElementById('status').textContent === '坐禪中', null, { timeout: 15000 });
   await forward(p, 15 * 60000 + 1000);
   await p.waitForFunction(() => !document.getElementById('result').hidden, null, { timeout: 15000 });
-  assert.equal(await p.locator('#resultNew').textContent(), '收藏冊多了:掛軸「忍」、配件「葉子」');
+  // late at night or early in the morning the first round also earns the lantern or the mokugyo
+  assert.match(await p.locator('#resultNew').textContent(), /^收藏冊多了:掛軸「忍」、配件「葉子」(、配件「(小提燈|木魚)」)?$/);
   await p.locator('#closeResult').click();
   await waitForLine(p, '這幅「忍」送你');
   await pick(p, '掛上去');
