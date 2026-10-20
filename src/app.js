@@ -323,18 +323,19 @@
       });
     }
   }
-  function startAmbient(kind) {
+  // rise: how slowly it fades in (seconds, time constant). A sitting eases in; a preview comes in straight away.
+  function startAmbient(kind, rise = 1.2) {
     stopAmbient(0);
     const a = audio(); if (!a || kind === 'none') return;
     Amb.kind = kind; Amb.playing = true;
     Amb.out = a.createGain(); Amb.out.gain.value = 0; Amb.out.connect(a.destination);
-    Amb.out.gain.setTargetAtTime(ambientVolume(), a.currentTime, 1.2);       // slow fade-in
+    Amb.out.gain.setTargetAtTime(ambientVolume(), a.currentTime, rise);
     Amb.verb = a.createConvolver(); Amb.verb.buffer = hallReverb(a);
     Amb.verb.connect(gainOf(a, .5)).connect(Amb.out);
     if (kind === 'rain') {
       noiseSource(a, 'brown', filt(a, 'lowpass', 800, .5), gainOf(a, SND.rainBed));     // very distant
-      let intensity = .55;                                                      // the shower slowly comes and goes
-      const breathe = () => { intensity = Math.min(1, Math.max(.25, intensity + rnd(-.25, .25))); later(breathe, rnd(4000, 10000)); };
+      let intensity = .6;                                                       // the shower slowly comes and goes, gently
+      const breathe = () => { intensity = Math.min(.9, Math.max(.4, intensity + rnd(-.15, .15))); later(breathe, rnd(6000, 12000)); };
       breathe();
       const fall = () => {
         const r = Math.random();
@@ -488,12 +489,12 @@
       o.connect(v).connect(Mus.bus); o.start(when); o.stop(when + d + .1);
     });
   }
-  function startMusic() {
+  function startMusic(rise = 1.5) {
     stopMusic(0);
     const a = audio(); if (!a) return;
     Mus.playing = true;
     Mus.out = a.createGain(); Mus.out.gain.value = 0; Mus.out.connect(a.destination);
-    Mus.out.gain.setTargetAtTime(ambientVolume(), a.currentTime, 1.5);
+    Mus.out.gain.setTargetAtTime(ambientVolume(), a.currentTime, rise);
     Mus.bus = a.createGain();
     const dry = gainOf(a, .55), wet = gainOf(a, .6), verb = a.createConvolver();
     verb.buffer = hallReverb(a);
@@ -523,7 +524,7 @@
   }
   const musicOn = () => $('#ambMusic').checked;
   /*SND-END*/
-  function startBackground() { startAmbient(ambientChoice()); if (musicOn()) startMusic(); else stopMusic(1); }
+  function startBackground(rise) { startAmbient(ambientChoice(), rise); if (musicOn()) startMusic(rise); else stopMusic(1); }
   function stopBackground(fade = 1.5) { stopAmbient(fade); stopMusic(fade); }
 
   /* ---------- monk motion ---------- */
@@ -537,6 +538,7 @@
   function walkTo(x, speed) { M.tx = x; M.speed = speed; return new Promise(r => { M.arrive = r; }); }
 
   let last = performance.now(), stickInFront = false;
+  const monkFeet = [...document.querySelectorAll('#monk .m-foot')];
   function frame(now) {
     const dt = Math.min(.05, (now - last) / 1000); last = now;
     const dx = M.tx - M.x, moving = Math.abs(dx) > .4;
@@ -552,6 +554,8 @@
     const bob = moving && !reduceMotion ? -Math.abs(Math.sin(M.walkT * 7)) * 2.4 : 0;
     const place = `translate(${M.x.toFixed(2)} ${(M.y + bob).toFixed(2)}) scale(${M.face} 1)`;
     monkEl.setAttribute('transform', place);
+    const step = moving && !reduceMotion ? Math.sin(M.walkT * 7) : 0;     // one foot lifts and swings forward, then the other
+    monkFeet.forEach((f, i) => { const k = i ? -step : step; f.setAttribute('transform', k > 0 ? `translate(${(k * 2.5).toFixed(2)} ${(-k * 2.2 - bob).toFixed(2)})` : `translate(0 ${(-bob).toFixed(2)})`); });
     stickLayer.setAttribute('transform', place);
     // the stick is always above the monk; while he strikes it also goes above the mochi
     const front = M.mode === 'task';
@@ -559,7 +563,47 @@
     stickEl.setAttribute('transform', `rotate(${M.stick.toFixed(1)} ${PIVOT})`);
     if (!bubbleEl.hidden) placeBubble();
     flyFireflies(now);
+    animateFace(now);
     requestAnimationFrame(frame);
+  }
+  // every face moves a little while it shows: parts marked data-a in the SVG get a transform each frame
+  // (set as an attribute, frame by frame, which iOS redraws reliably, unlike CSS animations on SVG)
+  let animFace = null, animEls = [];
+  function animateFace(now) {
+    if (reduceMotion) return;
+    const id = sitterEl.dataset.face;
+    if (id !== animFace) {
+      animEls.forEach(({ el }) => { el.removeAttribute('transform'); el.style.opacity = ''; });
+      animFace = id; animEls = [];
+      sitterEl.querySelectorAll('.f-' + id).forEach(g => g.querySelectorAll('[data-a]').forEach(el => {
+        const b = el.getBBox();
+        animEls.push({ el, g, cx: b.x + b.width / 2, cy: b.y + b.height / 2, kinds: el.dataset.a.split(' '),
+          amp: +el.dataset.amp || 0, per: +el.dataset.per || 0, off: +el.dataset.off || 0, i: +el.dataset.i || 0 });
+      }));
+    }
+    const t = now / 1000;
+    for (const a of animEls) {
+      let dx = 0, dy = 0, sx = 1, sy = 1, rot = 0, op = null;
+      for (const k of a.kinds) {
+        if (k === 'blink') {                                     // a quick blink every few seconds
+          if (!a.g.nextBlink || t > a.g.nextBlink) { a.g.blinkAt = a.g.nextBlink ? t : -9; a.g.nextBlink = t + 2.4 + Math.random() * 3.2; }
+          if (t - a.g.blinkAt < .14) sy = .12;
+        } else if (k === 'bob') dy = -(a.amp || 1) * Math.abs(Math.sin(Math.PI * t / (a.per || 1.2)));
+        else if (k === 'glance') dx = (a.amp || 1.2) * Math.max(-1, Math.min(1, 2.2 * Math.sin(2 * Math.PI * t / (a.per || 4))));   // rests at each side
+        else if (k === 'float' || k === 'drip') {
+          const ph = ((t + a.off) / (a.per || 2)) % 1;
+          if (k === 'float') { dy = -(a.amp || 6) * ph; op = Math.sin(Math.PI * ph); }
+          else { dy = (a.amp || 3) * ph * ph; op = Math.min(1, ph * 8) * (1 - ph * ph); }
+        } else if (k === 'twinkle') { sx = sy = .7 + .45 * Math.abs(Math.sin(t * 2.6)); rot = (t * 40) % 360; }
+        else if (k === 'pulse') sx = sy = 1 + .14 * Math.sin(t * 7);
+        else if (k === 'shake') dx = (a.amp || .6) * Math.sin(t * 38);
+        else if (k === 'yawn') sy = .55 + .55 * (.5 + .5 * Math.sin(t * 2.2));
+        else if (k === 'fade') op = .3 + .7 * (.5 + .5 * Math.sin(t * 2.4));
+        else if (k === 'seq') { const ph = (t * 1.4) % 3; op = ph > a.i * .6 && ph < 2.3 ? 1 : .22; }   // the dots come one by one
+      }
+      a.el.setAttribute('transform', `translate(${(a.cx + dx).toFixed(2)} ${(a.cy + dy).toFixed(2)}) rotate(${rot.toFixed(1)}) scale(${sx.toFixed(3)} ${sy.toFixed(3)}) translate(${-a.cx} ${-a.cy})`);
+      if (op !== null) a.el.style.opacity = op.toFixed(2);
+    }
   }
   // summer nights: each firefly drifts on its own wandering path (a few slow sines with random speeds and phases),
   // only while they can be seen
@@ -603,7 +647,23 @@
   const mochiEl = $('#mochi');
   let standing = true;
   const mochiX = () => SITTER_X + (standing ? STAND.x : 0);
-  const restFace = () => standing ? (P.phase === 'break' ? 'happy' : 'peek') : 'calm';
+  const nightNow = () => { const h = new Date(Date.now()).getHours(); return h >= 22 || h < 3; };
+  const sitFace = () => DEBUG && DBG.face ? DBG.face : nightNow() ? 'focus' : 'calm';   // the debug page can pin a face to try it out                   // late at night the mochi sits with a set jaw
+  const restFace = () => DEBUG && DBG.face ? DBG.face : standing ? (C.face || 'peek') : sitFace();     // standing: the everyday face chosen in the 收藏冊
+  // every face change goes through here, so a face is collected the first time it is seen
+  function setFace(id) {
+    sitterEl.dataset.face = id;
+    if (!C || C.faces.includes(id)) return;
+    const f = FACES.find(x => x.id === id); if (!f) return;
+    const had = faceGot(f, collectStats(readLog()));
+    C.faces.push(id); saveCollect();
+    if (!had) toast(tr('收藏冊多了一個表情:「{0}」', f.name));
+  }
+  let faceTimer = 0;
+  function flashFace(id, ms) {                                          // a face for a moment, then back to resting
+    clearTimeout(faceTimer); setFace(id);
+    faceTimer = setTimeout(() => { if (sitterEl.dataset.face === id) setFace(restFace()); }, ms);
+  }
   const placeMochi = (x, y) => mochiEl.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
   async function hop(toSit) {
     if (standing !== toSit) return;              // already there
@@ -699,10 +759,10 @@
     const lamp = $('#andonLight');
     lamp.classList.remove('jolt'); void lamp.getBoundingClientRect(); lamp.classList.add('jolt');
     const pow = $('#pow'); pow.style.left = (mochiX() + 24) / 4 + '%'; pow.classList.remove('go'); void pow.offsetWidth; pow.classList.add('go');
-    sitterEl.dataset.face = 'ouch';
+    setFace('ouch');
     sitterEl.classList.remove('ouch'); void sitterEl.getBoundingClientRect(); sitterEl.classList.add('ouch');
     document.querySelectorAll('#sitter .acc').forEach(reactAcc);       // whatever is worn reacts to the strike
-    setTimeout(() => { if (sitterEl.dataset.face === 'ouch') sitterEl.dataset.face = restFace(); sitterEl.classList.remove('ouch'); }, 1300);
+    setTimeout(() => { if (sitterEl.dataset.face === 'ouch') setFace(restFace()); sitterEl.classList.remove('ouch'); }, 1300);
     const stars = $('#stars');
     for (let i = 0; i < 6; i++) {
       const s = document.createElement('span'); s.className = 'star'; s.textContent = '✦';
@@ -768,12 +828,31 @@
   const dlg = $('#dialog'), dlgText = $('#dlgText'), dlgChoices = $('#dlgChoices'), dlgSkip = $('#dlgSkip');
   let finishTyping = null, pendingAsk = null, skipRequested = false;
 
+  // on a phone the zendo floor takes up whatever height the dialogue box and the timer card leave, so when either
+  // grows or shrinks the floor would jump; glide it to its new height instead. ResizeObserver runs before the paint,
+  // so the floor never shows its new size first.
+  const stageWrapEl = $('#stageWrap');
+  let floorTimer = 0, floorH = 0;           // the height the floor was last painted at
+  function glideFloor() {
+    const wrap = stageWrapEl, gliding = !!wrap.style.height;
+    const cur = gliding ? wrap.getBoundingClientRect().height : floorH;   // mid-glide, carry on from where it is
+    Object.assign(wrap.style, { flex: '', height: '', transition: 'none' });
+    const target = floorH = wrap.getBoundingClientRect().height
+    if (reduceMotion || !cur || Math.abs(target - cur) < 2) return;
+    Object.assign(wrap.style, { flex: 'none', height: cur + 'px' });
+    void wrap.offsetHeight;
+    Object.assign(wrap.style, { transition: 'height .5s cubic-bezier(.3,.7,.3,1)', height: target + 'px' });
+    clearTimeout(floorTimer);
+    floorTimer = setTimeout(() => Object.assign(wrap.style, { flex: '', height: '', transition: '' }), 560);
+  }
+  if (window.ResizeObserver) { const ro = new ResizeObserver(glideFloor); ro.observe($('#dialog')); ro.observe($('.panel')); ro.observe($('.top')); }
+  addEventListener('resize', () => { if (!stageWrapEl.style.height) floorH = stageWrapEl.getBoundingClientRect().height; });
   function openDialog(skippable) {
     dlgSkip.hidden = !skippable;
     if (dlg.hidden) { dlg.hidden = false; toastEl.hidden = true; settleMonk(); }
   }
   function closeDialog() {
-    dlg.hidden = true; dlgChoices.replaceChildren(); toastEl.hidden = !toastEl.textContent;
+    dlg.hidden = true; dlgChoices.replaceChildren(); releaseChoices(); toastEl.hidden = !toastEl.textContent;
     settleMonk();
   }
   function typeText(text) {
@@ -793,16 +872,24 @@
     if (pendingAsk) pendingAsk.reject(SKIP);
   });
 
+  // between one question and the next the buttons' space is kept, so the box (and the floor above it) doesn't
+  // shrink while the next line types out and grow again when its buttons arrive
+  function clearChoices() {
+    if (dlgChoices.childElementCount) { dlgChoices.style.minHeight = dlgChoices.offsetHeight + 'px'; dlgChoices.classList.add('held'); }
+    dlgChoices.replaceChildren();
+  }
+  function releaseChoices() { dlgChoices.style.minHeight = ''; dlgChoices.classList.remove('held'); }
   // choices: [{label, sub?, value, primary?, wide?, onPick?}] — onPick runs inside the click (needed for iOS permission prompts)
   async function ask(text, choices, { skippable = false, timeout = 0, timeoutValue = null, input = null } = {}) {
     openDialog(skippable);
-    dlgChoices.replaceChildren();
+    clearChoices();
     await typeText(text);
     if (skipRequested) { skipRequested = false; throw SKIP; }
     return new Promise((resolve, reject) => {
       let timer = 0;
-      const settle = v => { clearTimeout(timer); pendingAsk = null; dlgChoices.replaceChildren(); resolve(v); };
-      pendingAsk = { reject: e => { clearTimeout(timer); pendingAsk = null; skipRequested = false; dlgChoices.replaceChildren(); reject(e); } };
+      const settle = v => { clearTimeout(timer); pendingAsk = null; clearChoices(); resolve(v); };
+      pendingAsk = { reject: e => { clearTimeout(timer); pendingAsk = null; skipRequested = false; clearChoices(); reject(e); } };
+      releaseChoices();
       if (input) {
         const row = document.createElement('form'); row.className = 'dlg-input';
         row.innerHTML = tr('<input id="dlgInput" maxlength="12" autocomplete="off"><button type="submit" class="choice primary">確定</button>');
@@ -854,7 +941,7 @@
 
   async function onboarding(again = false) {
     P.phase = 'idle'; renderAll();
-    sitterEl.dataset.face = 'peek';
+    setFace(restFace());
     const lastCfg = loadLast();
     // "returning" means they have actually sat before, not just opened the page
     const log = readLog(), hasSat = log.length > 0;
@@ -1065,9 +1152,9 @@
       hostAway = false; settleMonk();
       prefix = delays >= 3 ? tr('回來了。') : '';
     }
-    sitterEl.dataset.face = 'happy';
+    setFace('happy');
     await Promise.all([ask(tr('那麼,止靜。'), [], { timeout: 900 }), sitDown()]);
-    sitterEl.dataset.face = 'calm';
+    setFace(sitFace());
     closeDialog();
     beginSettle();
   }
@@ -1116,7 +1203,7 @@
   });
   function onPickUp() {
     setStatus(tr('拿起手機了'), 'hit');
-    sitterEl.dataset.face = 'peek';
+    setFace('peek');
     enqueue(() => strike({ reason: tr('啪!手機拿起來了。放回原位才能繼續。'), counted: true }));
     enqueue(leaveTip);
   }
@@ -1125,7 +1212,7 @@
     if (P.phase !== 'focus' || P.leaveUsed || store.get('keisaku-tip-leave-v1', false)) return;
     store.set('keisaku-tip-leave-v1', true);
     tour([{ target: '#leaveBtn', act: true, skipLabel: tr('知道了'),
-      text: tr('如果真的有事要用手機,先按「暫離」,計時會暫停,就不會挨打了。每炷可以用一次。'), hint: tr('👆 現在就要暫離的話,點一下「暫離」') }]);
+      text: tr('如果真的有事要用手機,先按「暫離」,計時會暫停,就不會挨打了。每炷可以用一次。'), hint: tr('現在就要暫離的話,點一下「暫離」') }]);
   }
   function onPutDown() {
     setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on');
@@ -1235,7 +1322,7 @@
     enqueue(takeStick);
     $('#result').hidden = true;
     renderRounds(); renderStats(); keepAwake(); settleMonk();
-    sitterEl.dataset.face = 'calm';
+    setFace(sitFace());
     setStatus(tr('落座中'), 'on');
     setMain(tr('取消'));
     settleCountdown(cfg.focusMin * 60000, beginFocus);
@@ -1270,7 +1357,7 @@
     P.phase = 'leave'; P.leaveUsed = true; P.leaveAt = Date.now();
     Mo.base = null; Mo.picked = false;
     stopBackground(1.2); letSleep(); renderSense(null);
-    sitterEl.dataset.face = 'peek'; standUp();
+    standUp(); setFace(restFace());
     setStatus(tr('暫離中'), '');
     setMain(tr('出堂・結束'));
     bubble(tr('去吧,快去快回。')); P.leaveBubble = setTimeout(() => bubble(null), 2400);
@@ -1283,7 +1370,7 @@
     clearTimeout(P.leaveBubble); bubble(null);
     P.phase = 'settle'; P.resuming = true;
     audio(); askMotionPermission();
-    sitterEl.dataset.face = 'calm';
+    setFace(sitFace());
     setStatus(tr('回座中'), 'on');
     setMain(tr('出堂・結束'));
     keepAwake();
@@ -1306,7 +1393,7 @@
 
   function beginFocus(withMotion) {
     P.phase = 'focus';
-    P.start = Date.now(); P.end = P.start + cfg.focusMin * 60000;
+    P.start = Date.now(); P.end = P.start + cfg.focusMin * 60000; P.nextYawn = 0;
     Mo.base = withMotion ? Mo.lp.slice() : null; Mo.picked = false; Mo.score = 0;
     senseFor(withMotion);
     setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on');
@@ -1317,10 +1404,20 @@
     toast(P.round === 1 ? tr('止靜。住持開始巡堂了。') : tr('第 {0} 炷,止靜。', P.round));
   }
 
+  // how the mochi looks when a round ends: a 4th round today, 3 clean in a row, a hard round, a clean one, or just glad
+  function roundEndFace() {
+    const log = readLog(), last = log.slice(-3);
+    if (P.todayRounds === 4) return 'content';
+    if (last.length === 3 && last.every(e => e.full && !e.hits)) return 'proud';
+    if (P.roundHits >= 3) return 'teary';
+    if (P.roundHits === 0) return 'shy';                                // the monk praises a clean round
+    return 'happy';
+  }
   function endFocus() {
     stopBackground(2.5);
     P.focusTotal += cfg.focusMin;
     saveRound(cfg.focusMin, true); renderStats();
+    P.endFace = roundEndFace();
     bell(0, .26); buzz([200, 120, 200]);
     const goalMet = P.goalJustMet; P.goalJustMet = false;
     if (P.round >= cfg.rounds) { P.showGoal = goalMet; finishCycle(false); return; }
@@ -1328,7 +1425,7 @@
     P.end = Date.now() + cfg.breakMin * 60000;
     Mo.base = null; Mo.picked = false;
     letSleep(); renderSense(null);
-    sitterEl.dataset.face = 'happy'; standUp();
+    standUp(); flashFace(P.endFace || 'happy', 6000);
     setStatus(tr('休息'), '');
     setMain(tr('跳過休息'));
     toast(goalMet ? tr('今日目標 {0} 炷達成!休息 {1} 分鐘。', goalNow(), cfg.breakMin) : tr('開靜。這炷被打 {0} 下,休息 {1} 分鐘,手機可以用了。', P.roundHits, cfg.breakMin));
@@ -1341,7 +1438,7 @@
     P.breakEnd = P.end;
     P.round++;
     P.phase = 'ready';
-    sitterEl.dataset.face = 'peek';
+    setFace(restFace());
     setStatus(tr('該回座了'), 'on');
     setMain(null);
     renderRounds(); tick();
@@ -1353,6 +1450,7 @@
     P.awaitReturn = false;
     const late = Date.now() - P.breakEnd;
     P.lateMin = late >= 60000 ? Math.round(late / 60000) : 0;
+    if (P.lateMin) setFace('daze');                                      // the break ran long: caught staring into space
     readyCheck(P.lateMin ? tr('休息超過 {0} 分鐘了喔。第 {1} 炷,', P.lateMin, P.round) : tr('休息結束。第 {0} 炷,', P.round));
   }
 
@@ -1407,7 +1505,7 @@
     if (P.hits === 0) { seal = tr('不動'); line2 = tr('一下都沒被打,如山不動。'); }
     else if (perRound <= 1) { seal = tr('精進'); line2 = tr('被打了 {0} 下,還算專心。', P.hits); }
     else { seal = tr('喝'); line2 = tr('被打了 {0} 下,肩膀辛苦了。', P.hits); }
-    sitterEl.dataset.face = 'happy';
+    setFace(early ? 'happy' : (P.endFace || 'happy')); P.endFace = null;
     $('#seal').replaceChildren(...[...seal].map(ch => Object.assign(document.createElement('i'), { textContent: ch })));
     $('#resultTitle').textContent = early ? tr('提早出堂') : tr('坐滿 {0} 炷', cfg.rounds);
     $('#resultLine1').textContent = tr('「{0}」共坐了 {1} 分鐘', cfg.task, P.focusTotal) + (P.asks ? tr(',自己請打 {0} 下', P.asks) : '');
@@ -1427,7 +1525,14 @@
     if (P.phase === 'focus' || P.phase === 'break') {
       const left = P.end - Date.now();
       clockEl.textContent = fmt(left);
-      if (P.phase === 'focus') setIncense(left / (cfg.focusMin * 60000), true);
+      if (P.phase === 'focus') {
+        setIncense(left / (cfg.focusMin * 60000), true);
+        // a long round: past halfway, a yawn now and then
+        if (cfg.focusMin >= 45 && left < cfg.focusMin * 30000 && Date.now() > (P.nextYawn || 0) && !busy && sitterEl.dataset.face === sitFace()) {
+          if (P.nextYawn) flashFace('sleepy', 2600);
+          P.nextYawn = Date.now() + (50 + Math.random() * 60) * 1000;
+        }
+      }
       else setIncense(1, false);
       if (left <= 0) {
         if (P.phase === 'focus') { if (!document.hidden) endFocus(); }
@@ -1453,7 +1558,7 @@
     if (away < 2000) { tick(); return; }
     const secs = Math.round(away / 1000);
     const label = secs >= 60 ? tr('{0} 分 {1} 秒', Math.floor(secs / 60), secs % 60) : tr('{0} 秒', secs);
-    sitterEl.dataset.face = 'peek';
+    setFace('peek');
     setStatus(tr('被抓到了'), 'hit');
     enqueue(() => strike({ reason: tr('啪!離開畫面 {0}。', label), counted: true }));
     if (secs >= 90) enqueue(() => strike({ reason: tr('啪!離開太久,再補一下。'), counted: true }));
@@ -1478,6 +1583,7 @@
   askBtn.addEventListener('click', () => {
     audio();
     if (busy) return;
+    setFace('surprised');                                                // "wait, now?" until the stick lands
     enqueue(() => strike({ reason: tr('啪!精神一振,謝謝師父。'), counted: false }));
   });
   // Install to home screen: Chrome/Android fire beforeinstallprompt; iOS Safari needs the share menu.
@@ -1557,25 +1663,27 @@
   if (typeof opts.music === 'boolean') $('#ambMusic').checked = opts.music;
   if (AMBIENT_LABEL[opts.ambient]) document.querySelector(`input[name="ambient"][value="${opts.ambient}"]`).checked = true;
   if (typeof opts.ambVol === 'number') $('#ambVol').value = opts.ambVol;
-  const previewBtn = $('#ambPreview');
+  const previewBtn = $('#ambPreview'), PREVIEW_RISE = .12;
   let previewing = false;
   function setPreview(on) {
     previewing = on;
-    previewBtn.textContent = on ? tr('停止試聽') : tr('試聽');
-    previewBtn.setAttribute('aria-pressed', String(on));
-    if (on || P.phase === 'focus') startBackground();   // when a sitting is on, go back to what it was playing
+    previewBtn.setAttribute('aria-pressed', String(on));     // the CSS shows the matching label; the width stays put
+    previewBtn.querySelector('.when-off').setAttribute('aria-hidden', String(on));
+    previewBtn.querySelector('.when-on').setAttribute('aria-hidden', String(!on));
+    if (on) startBackground(PREVIEW_RISE);
+    else if (P.phase === 'focus') startBackground();     // when a sitting is on, go back to what it was playing
     else stopBackground(.8);
   }
   previewBtn.addEventListener('click', () => setPreview(!previewing));
   document.querySelectorAll('input[name="ambient"]').forEach(r => r.addEventListener('change', () => {
     saveOpts();
     syncPreviewBtn();
-    if (previewing || P.phase === 'focus') startAmbient(ambientChoice());
+    if (previewing || P.phase === 'focus') startAmbient(ambientChoice(), previewing ? PREVIEW_RISE : undefined);
     if (previewing && nothingChosen()) setPreview(false);
   }));
   $('#ambMusic').addEventListener('change', () => {
     saveOpts(); syncPreviewBtn();
-    if (previewing || P.phase === 'focus') { if (musicOn()) startMusic(); else stopMusic(1.5); }
+    if (previewing || P.phase === 'focus') { if (musicOn()) startMusic(previewing ? PREVIEW_RISE : undefined); else stopMusic(1.5); }
     if (previewing && nothingChosen()) setPreview(false);
   });
   function nothingChosen() { return ambientChoice() === 'none' && !musicOn(); }
@@ -1790,7 +1898,7 @@
   // backup: a JSON file, or the same JSON as text for phones that can't save files easily
   const backupStatus = t => { $('#backupStatus').textContent = t; };
   const backupText = () => JSON.stringify({ app: 'keisaku-dojo', version: 2, exported: new Date().toISOString(),
-    log: readLog(), presets: loadPresets(), collect: { scroll: C.scroll, wear: C.wear } });
+    log: readLog(), presets: loadPresets(), collect: { scroll: C.scroll, wear: C.wear, faces: C.faces, face: C.face } });
   $('#exportBtn').addEventListener('click', () => {
     try {
       const url = URL.createObjectURL(new Blob([backupText()], { type: 'application/json' }));
@@ -1843,6 +1951,10 @@
       const ids = wear.wear && typeof wear.wear === 'object' ? Object.values(wear.wear) : [wear.acc];   // v18 backups, or an older single one
       for (const id of ids) { const it = ACCS.find(x => x.id === id); if (it) C.wear[it.slot] = it.id; }
     }
+    if (wear && Array.isArray(wear.faces)) {                                // faces seen on the other phone come along
+      C.faces = [...new Set([...C.faces, ...wear.faces.filter(x => FACES.some(f => f.id === x))])];
+      if (C.face === 'peek' && C.faces.includes(wear.face)) C.face = wear.face;
+    }
     C.seen = [...new Set([...C.seen, ...unlockedIds(readLog())])]; saveCollect(); renderScene();   // restored rounds are not "new"
     $('#importConfirm').hidden = true; $('#pasteBox').hidden = true;
     loadToday(); renderStats(); renderJournal();
@@ -1871,7 +1983,7 @@
         const s = steps[i];
         $(s.target).scrollIntoView({ block: 'nearest' });
         $('#tourText').textContent = s.text;
-        $('#tourHint').textContent = s.hint || tr('👆 點一下亮起來的地方');
+        $('#tourHint').textContent = s.hint || tr('點一下亮起來的地方');
         $('#tourSkip').textContent = s.skipLabel || tr('略過導覽');
         $('#tourNext').textContent = s.nextLabel || tr('下一步');
         place(); setTimeout(place, 300);
@@ -1916,16 +2028,16 @@
     [tr('先帶施主看看禪堂裡的東西。'), tr('好')],
   ];
   const introSteps = returning => [
-    { target: '#helpBtn', sheet: '#help', text: (returning ? tr('禪堂重新布置過了,我帶施主看一下。') : '') + tr('禪堂的規矩寫在左邊這塊「堂規」木牌上,點開看看,看完收起來就好。'), hint: tr('👆 點一下「堂規」木牌') },
-    { target: '#journalBtn', sheet: '#journal', text: tr('右邊柱子上掛的是坐禪帳。每坐完一炷,我就在上面蓋一個章。點開看看。'), hint: tr('👆 點一下坐禪帳') },
+    { target: '#helpBtn', sheet: '#help', text: (returning ? tr('禪堂重新布置過了,我帶施主看一下。') : '') + tr('禪堂的規矩寫在左邊這塊「堂規」木牌上,點開看看,看完收起來就好。'), hint: tr('點一下「堂規」木牌') },
+    { target: '#journalBtn', sheet: '#journal', text: tr('右邊柱子上掛的是坐禪帳。每坐完一炷,我就在上面蓋一個章。點開看看。'), hint: tr('點一下坐禪帳') },
     collectStep(false),
-    { target: '#settingsBtn', sheet: '#settings', text: tr('背景聲音、每日目標、深色淺色,都在這個齒輪裡調。'), hint: tr('👆 點一下齒輪') },
+    { target: '#settingsBtn', sheet: '#settings', text: tr('背景聲音、每日目標、深色淺色,都在這個齒輪裡調。'), hint: tr('點一下齒輪') },
   ];
   // the first time a round is stamped, point at the ledger, and this time the tap opens it
   function journalTip() {
     if (store.get('keisaku-tip-journal-v1', false) || !readLog().some(e => e.full)) return;
     store.set('keisaku-tip-journal-v1', true);
-    tour([{ target: '#journalBtn', text: tr('蓋好章了。點坐禪帳,看看今天的章吧。'), hint: tr('👆 點一下坐禪帳'), skipLabel: tr('等一下再看'), go: () => $('#journalBtn').click() }]);
+    tour([{ target: '#journalBtn', text: tr('蓋好章了。點坐禪帳,看看今天的章吧。'), hint: tr('點一下坐禪帳'), skipLabel: tr('等一下再看'), go: () => $('#journalBtn').click() }]);
   }
   $('#feedbackLink').addEventListener('click', e => {
     const installed = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
@@ -2242,7 +2354,7 @@
   const seasonOf = (t = Date.now()) => DBG.season || SEASONS[Math.floor(((new Date(t).getMonth() + 11) % 12) / 3)].id;
   // tallies the conditions read from: full rounds, days, streaks, minutes
   function collectStats(log) {
-    if (DEBUG) return { rounds: 999, still: 999, leave: 9, long: 9, hours: 999, bigDay: 9, onTime: 99, streak: 99, early: 9, night: 9, tasks: 9,
+    if (DEBUG) return { rounds: 999, still: 999, leave: 9, long: 9, hours: 999, bigDay: 9, onTime: 99, streak: 99, early: 9, night: 9, tasks: 9, hit: 9, teary: 9, late: 9, cleanRun: 9,
       season: { spring: 99, summer: 99, autumn: 99, winter: 99 } };
     const full = log.filter(e => e.full), days = new Map();
     for (const e of log) {
@@ -2267,6 +2379,8 @@
       early: full.filter(e => { const h = new Date(e.t).getHours(); return h >= 3 && h < 7; }).length,   // finished before 7 in the morning
       night: full.filter(e => { const h = new Date(e.t).getHours(); return h >= 22 || h < 3; }).length,  // after 10 at night
       tasks: new Set(full.map(e => e.task)).size,
+      hit: log.filter(e => e.hits).length, teary: log.filter(e => e.hits >= 3).length, late: log.filter(e => e.late).length,
+      cleanRun: [...log].sort((a, b) => a.t - b.t).reduce((r, e) => { r.n = e.full && !e.hits ? r.n + 1 : e.full ? 0 : r.n; r.best = Math.max(r.best, r.n); return r; }, { n: 0, best: 0 }).best,   // clean full rounds in a row
     };
   }
   // need(stats) -> [have, need, unit]; under each scroll English shows what it means, Japanese how it is read
@@ -2315,9 +2429,9 @@
     { id: 'beanie', slot: 'head', name: tr('毛帽'), gift: tr('這頂毛帽'), how: tr('冬天坐滿 5 炷'), season: 'winter', need: s => [s.season.winter, 5, tr('炷')], hidesBump: true,
       svg: `<path d="M-24 -56 Q-22 -78 0 -79 Q22 -78 24 -56 Q0 -61 -24 -56Z" fill="#7d8fb3" ${INK}/><path d="M-25 -57 Q0 -62 25 -57 L25 -52 Q0 -57 -25 -52Z" fill="#5f6f94" ${INK}/><circle cx="0" cy="-81" r="4.5" fill="#eef0f4" ${INK}/>` },
 
-    { id: 'mino', slot: 'body', name: tr('蓑衣'), gift: tr('這件蓑衣'), how: tr('累計坐滿 20 炷'), need: s => [s.rounds, 20, tr('炷')],
+    { id: 'mino', slot: 'body', sleeve: '#c9a85c', name: tr('蓑衣'), gift: tr('這件蓑衣'), how: tr('累計坐滿 20 炷'), need: s => [s.rounds, 20, tr('炷')],
       svg: `<path d="M-31 -31 Q0 -25 31 -31 L35 -13 Q0 -7 -35 -13Z" fill="#c9a85c" ${INK}/><path d="M-24 -29 l-2 15 M-14 -27.5 l-1 15 M-4 -27 v15 M6 -27 v15 M16 -27.5 l1 15 M26 -29 l2 15" stroke="#9c7d3a" stroke-width=".9"/>` },
-    { id: 'yukata', slot: 'body', name: tr('浴衣'), gift: tr('這件浴衣'), how: tr('夏天坐滿 10 炷'), season: 'summer', need: s => [s.season.summer, 10, tr('炷')],
+    { id: 'yukata', slot: 'body', sleeve: '#5b7bb5', name: tr('浴衣'), gift: tr('這件浴衣'), how: tr('夏天坐滿 10 炷'), season: 'summer', need: s => [s.season.summer, 10, tr('炷')],
       svg: `<path d="M-31.5 -28 Q0 -22 31.5 -28 L32 -14 Q0 -9 -32 -14Z" fill="#5b7bb5" ${INK}/><path d="M-10 -27 L1.5 -17.5" fill="none" stroke="#f8f5ec" stroke-width="2.2"/><path d="M10 -27 L-3.5 -15" fill="none" stroke="#f8f5ec" stroke-width="2.2"/>`
         + [[-22, -21], [-16, -16], [17, -21], [23, -16], [-27, -16], [27, -21]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.3" fill="#f8f5ec"/>`).join('') },
     { id: 'blanket', slot: 'body', name: tr('膝上毯'), gift: tr('這條膝上毯'), how: tr('冬天坐滿 10 炷'), season: 'winter', need: s => [s.season.winter, 10, tr('炷')],
@@ -2326,13 +2440,15 @@
       svg: `<path d="M-30 -27 Q0 -19 30 -27 L31 -21 Q0 -13 -31 -21Z" fill="#c8434b" ${INK}/><path d="M18 -22 l4 14 l7 -2 l-3 -13z" fill="#c8434b" ${INK}/><path d="M20 -12 h7 M21 -15 h6" stroke="#f8e2c8" stroke-width="1"/>` },
     { id: 'kesa', slot: 'body', name: tr('小袈裟'), gift: tr('這件小袈裟'), how: tr('累計坐滿 100 炷'), need: s => [s.rounds, 100, tr('炷')],
       svg: `<path d="M-29 -36 Q-6 -30 26 -14 L16 -11 Q-8 -24 -31 -26Z" fill="#8a5d34" ${INK}/><path d="M-22 -32 l3 6 M-12 -28 l3 6 M-2 -24 l3 6 M8 -20 l3 6" stroke="#5d3f22" stroke-width=".8"/>` },
-    { id: 'samue', slot: 'body', name: tr('作務衣'), gift: tr('這件作務衣'), how: tr('累計坐滿 200 炷'), need: s => [s.rounds, 200, tr('炷')],
+    { id: 'samue', slot: 'body', sleeve: '#3e4f6e', name: tr('作務衣'), gift: tr('這件作務衣'), how: tr('累計坐滿 200 炷'), need: s => [s.rounds, 200, tr('炷')],
       svg: `<path d="M-31.5 -29 Q0 -23 31.5 -29 L32 -14 Q0 -9 -32 -14Z" fill="#3e4f6e" ${INK}/><path d="M-12 -28 L1 -18" stroke="#e9e3d3" stroke-width="2"/><path d="M12 -28 L-5 -15" stroke="#e9e3d3" stroke-width="2"/>` },
 
     { id: 'glasses', slot: 'extra', name: tr('眼鏡'), gift: tr('這副眼鏡'), how: tr('累計坐禪 25 小時'), need: s => [Math.floor(s.hours), 25, tr('小時')],
       svg: '<g fill="none" stroke="#2a2622" stroke-width="1.3"><circle cx="-9" cy="-43" r="5.5"/><circle cx="9" cy="-43" r="5.5"/><path d="M-3.5 -43 h7 M-14.5 -44 l-8 -2 M14.5 -44 l8 -2"/></g>' },
     { id: 'beads', slot: 'extra', name: tr('念珠'), gift: tr('這串念珠'), how: tr('累計坐禪 50 小時'), need: s => [Math.floor(s.hours), 50, tr('小時')],
-      svg: [...Array(9)].map((_, i) => { const a = Math.PI * i / 8; return `<circle cx="${(-Math.cos(a) * 9).toFixed(1)}" cy="${(-13.5 + Math.sin(a) * 6.5).toFixed(1)}" r="1.9" fill="#6b3f2a" stroke="#2a2622" stroke-width=".6"/>`; }).join('') + '<path d="M0 -6.5 v5" stroke="#b44a3a" stroke-width="2"/>' },
+      // sitting, the beads hang below the hands in the lap; standing, the loop hangs from the right hand at the side
+      svg: '<g class="pose-sit">' + [...Array(9)].map((_, i) => { const a = Math.PI * i / 8; return `<circle cx="${(-Math.cos(a) * 9).toFixed(1)}" cy="${(-13.5 + Math.sin(a) * 6.5).toFixed(1)}" r="1.9" fill="#6b3f2a" stroke="#2a2622" stroke-width=".6"/>`; }).join('') + '<path d="M0 -6.5 v5" stroke="#b44a3a" stroke-width="2"/></g>'
+        + '<g class="pose-stand">' + [...Array(7)].map((_, i) => { const a = Math.PI * i / 6; return `<circle cx="${(35 - Math.cos(a) * 4.2).toFixed(1)}" cy="${(-26.4 + Math.sin(a) * 5.4).toFixed(1)}" r="1.6" fill="#6b3f2a" stroke="#2a2622" stroke-width=".55"/>`; }).join('') + '<path d="M35 -20.6 v4" stroke="#b44a3a" stroke-width="1.8"/></g>' },
     { id: 'chawan', slot: 'extra', place: 'side', name: tr('茶碗'), gift: tr('這只茶碗'), how: tr('一天坐滿 2 炷、休息沒超時,累計 10 天'), need: s => [s.onTime, 10, tr('天')],
       svg: `<path d="M38 -9 h15 q-1 8 -7.5 8 q-6.5 0 -7.5 -8z" fill="#7c9a74" ${INK}/><path class="smoke" d="M43 -12 q-2 -3 0 -6 M48 -12 q2 -3 0 -6" stroke-width=".9"/>` },
     { id: 'uchiwa', slot: 'extra', place: 'side', name: tr('團扇'), gift: tr('這把團扇'), how: tr('在 3 種不同的事上坐滿過'), need: s => [s.tasks, 3, tr('種')],
@@ -2377,6 +2493,23 @@
   const FOLDED_BLANKET = `<path d="M-15 -16 h30 q3 0 3 3 v3 q0 3 -3 3 h-30 q-3 0 -3 -3 v-3 q0 -3 3 -3z" fill="#b5654a" ${INK}/>`
     + '<path d="M-17 -11.5 h34 M-6 -16 v9 M6 -16 v9" stroke="#e7c9a0" stroke-width=".9"/>';
   const SLOTS = [['head', tr('頭')], ['body', tr('身體')], ['extra', tr('配飾')]];
+  // the mochi's faces: each is collected the first time it shows (or, for the ones the log can tell, as soon as the log says so).
+  // Any collected face can be chosen as the everyday face for checking in and for the break; sitting has its own.
+  const FACES = [
+    { id: 'peek', name: tr('張望'), how: tr('一開始就有'), got: () => true },
+    { id: 'calm', name: tr('平靜'), how: tr('一開始就有'), got: () => true },
+    { id: 'happy', name: tr('開心'), how: tr('坐滿一炷'), got: s => s.rounds >= 1 },
+    { id: 'ouch', name: tr('痛'), how: tr('第一次被打'), got: s => s.hit >= 1 },
+    { id: 'sleepy', name: tr('睏'), how: tr('坐 45 分以上的一炷,後半段偶爾打個哈欠'), got: s => s.long >= 1 },
+    { id: 'proud', name: tr('得意'), how: tr('連續 3 炷都沒被打'), got: s => s.cleanRun >= 3, need: s => [s.cleanRun, 3, tr('炷')] },
+    { id: 'surprised', name: tr('嚇一跳'), how: tr('按「合掌請打」的時候') },
+    { id: 'teary', name: tr('淚眼'), how: tr('一炷被打 3 下以上'), got: s => s.teary >= 1 },
+    { id: 'content', name: tr('滿足'), how: tr('一天坐滿 4 炷'), got: s => s.bigDay >= 4, need: s => [s.bigDay, 4, tr('炷')] },
+    { id: 'shy', name: tr('害羞'), how: tr('一炷都沒被打,被住持稱讚的時候'), got: s => s.still >= 1 },
+    { id: 'daze', name: tr('發呆'), how: tr('休息超過時間還沒回座'), got: s => s.late >= 1 },
+    { id: 'focus', name: tr('專注'), how: tr('晚上 10 點以後坐禪'), got: s => s.night >= 1 },
+  ];
+  const faceGot = (f, s) => DEBUG || C.faces.includes(f.id) || !!(f.got && f.got(s));
   const unlocked = (item, s) => { const [have, need] = item.need(s); return have >= need; };
   const unlockedIds = log => { const s = collectStats(log); return [...SCROLLS.filter(x => unlocked(x, s)).map(x => 's:' + x.id), ...ACCS.filter(x => unlocked(x, s)).map(x => 'a:' + x.id)]; };
 
@@ -2412,9 +2545,11 @@
     const put = id => { const it = ACCS.find(x => x.id === id); if (it) wear[it.slot] = it.id; };
     if (v.wear && typeof v.wear === 'object') Object.values(v.wear).forEach(put);
     else if (typeof v.acc === 'string') put(v.acc);                        // before v18 there was one accessory
-    return { scroll: typeof v.scroll === 'string' ? v.scroll : '靜', wear, seen: Array.isArray(v.seen) ? v.seen.filter(x => typeof x === 'string') : null };
+    const faces = Array.isArray(v.faces) ? v.faces.filter(x => FACES.some(f => f.id === x)) : [];
+    return { scroll: typeof v.scroll === 'string' ? v.scroll : '靜', wear, seen: Array.isArray(v.seen) ? v.seen.filter(x => typeof x === 'string') : null,
+      faces, face: FACES.some(f => f.id === v.face) ? v.face : 'peek' };
   })();
-  const saveCollect = () => store.set(COLLECT_KEY, { scroll: C.scroll, wear: C.wear, seen: C.seen });
+  const saveCollect = () => store.set(COLLECT_KEY, { scroll: C.scroll, wear: C.wear, seen: C.seen, faces: C.faces, face: C.face });
   if (!C.seen) { C.seen = unlockedIds(readLog()); saveCollect(); }   // what was earned before the 收藏冊 existed is not "new"
   function renderScene() {
     const stats = collectStats(readLog());
@@ -2432,21 +2567,22 @@
     $('#accSide').innerHTML = extra && extra.place === 'side' ? g(extra) : '';
     $('#accCushion').innerHTML = body && body.id === 'blanket' ? FOLDED_BLANKET : '';   // shown only while standing (CSS)   // on the mat beside the cushion
     sitterEl.dataset.head = head ? head.id : '';
+    sitterEl.style.setProperty('--sleeve', body && body.sleeve || 'var(--mochi)');   // a robe covers the arms too
     sitterEl.classList.toggle('no-bump', !!(head && head.hidesBump));      // a hat or beanie hides the bump
   }
   const sittingNow = () => ['settle', 'focus', 'leave'].includes(P.phase) || P.resuming;
   const progressText = (item, s) => { const [have, need, unit] = item.need(s); return have >= need ? '' : tr('還差 {0} {1}', need - have, unit); };
   const MOCHI_BODY = '<path d="M-31 -14 C-34 -40 -20 -68 0 -68 C20 -68 34 -40 31 -14 C22 -9 -22 -9 -31 -14 Z" fill="#fffdf7" stroke="#2a2622" stroke-width="1.6"/>'
     + '<ellipse fill="#f2a49a" cx="-17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/><ellipse fill="#f2a49a" cx="17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/>';
-  const MOCHI_HANDS = '<path d="M-26 -33 Q-23 -21 -9 -18.5 M26 -33 Q23 -21 9 -18.5" fill="none" stroke="#2a2622" stroke-width="1.3" stroke-linecap="round"/>'
-    + '<ellipse fill="#fffdf7" cx="0" cy="-17" rx="10" ry="4.6" stroke="#2a2622" stroke-width="1.3"/>';
+  const MOCHI_HANDS = '<path d="M-30.8 -29.6 C-29.8 -23.6 -22.4 -19.6 -11.8 -18.2 M-11 -22.2 C-18.8 -23.4 -23 -26.6 -24.6 -30.6 M30.8 -29.6 C29.8 -23.6 22.4 -19.6 11.8 -18.2 M11 -22.2 C18.8 -23.4 23 -26.6 24.6 -30.6" fill="none" stroke="#2a2622" stroke-width="1.3" stroke-linecap="round"/>'
+    + '<ellipse fill="#fffdf7" cx="-5.6" cy="-19" rx="6.6" ry="4.6" stroke="#2a2622" stroke-width="1.3"/><ellipse fill="#fffdf7" cx="5.6" cy="-19.4" rx="6.6" ry="4.6" stroke="#2a2622" stroke-width="1.3"/>';
   const MOCHI_FACE = '<g fill="none" stroke="#2a2622" stroke-width="1.5" stroke-linecap="round"><path d="M-13 -44 q4 3.2 8 0"/><path d="M5 -44 q4 3.2 8 0"/><path d="M-2 -35 q2 1.4 4 0"/></g>';
   const WIN = '<circle cx="86" cy="98" r="33" class="f-window"/>';
   const LATTICE = '<g class="s-wood" stroke-width="1.6" clip-path="url(#winClip)"><line x1="70" y1="60" x2="70" y2="140"/><line x1="86" y1="60" x2="86" y2="140"/><line x1="102" y1="60" x2="102" y2="140"/><line x1="50" y1="82" x2="120" y2="82"/><line x1="50" y1="98" x2="120" y2="98"/><line x1="50" y1="114" x2="120" y2="114"/></g><circle cx="86" cy="98" r="33" class="s-wood" fill="none" stroke-width="5"/>';
   function renderCollect() {
     const stats = collectStats(readLog()), locked = sittingNow(), now = seasonOf();
-    const got = [...SCROLLS, ...ACCS].filter(x => unlocked(x, stats)).length;
-    $('#collectSum').textContent = tr('已經收到 {0} / {1} 樣。坐滿的炷越多,能換的就越多。', got, SCROLLS.length + ACCS.length);
+    const got = [...SCROLLS, ...ACCS].filter(x => unlocked(x, stats)).length + FACES.filter(f => faceGot(f, stats)).length;
+    $('#collectSum').textContent = tr('已經收到 {0} / {1} 樣。坐滿的炷越多,能換的就越多。', got, SCROLLS.length + ACCS.length + FACES.length);
     $('#collectNote').hidden = !locked;
     const card = (kind, item, inner) => {
       const ok = unlocked(item, stats), on = kind === 's' ? C.scroll === item.id : C.wear[item.slot] === item.id;
@@ -2462,6 +2598,16 @@
       + MOCHI_BODY + (x.slot === 'body' ? x.svg : '') + MOCHI_HANDS + MOCHI_FACE + (x.slot !== 'body' ? x.svg : '') + '</svg>';
     $('#accList').innerHTML = SLOTS.map(([slot, label]) => `<li class="c-slot"><h3>${label}</h3><ul class="c-grid c-accs">`
       + ACCS.filter(x => x.slot === slot).map(x => card('a', x, mini(x))).join('') + '</ul></li>').join('');
+    // faces: the mochi's head with that face, drawn from the same face as in the zendo; not yet seen ones are a question mark
+    const faceArt = f => [...document.querySelectorAll(`#sitter .f-${f.id}`)].map(g => g.outerHTML.replace(/class="face (fx )?/, 'class="')).join('');
+    $('#faceList').innerHTML = FACES.map(f => {
+      const ok = faceGot(f, stats), on = C.face === f.id, left = ok || !f.need ? '' : (([have, need, unit]) => have < need ? tr('還差 {0} {1}', need - have, unit) : '')(f.need(stats));
+      return `<li><button type="button" class="c-item c-face${ok ? '' : ' locked'}${on ? ' on' : ''}" data-id="${f.id}" aria-pressed="${on}" ${ok ? '' : 'aria-disabled="true"'}`
+        + ` aria-label="${ok ? f.name + (on ? tr(',平常的表情') : '') : tr('還沒看過的表情:') + f.how}">`
+        + `<svg class="c-mochi" viewBox="-40 -84 80 72" aria-hidden="true">${MOCHI_BODY}${ok ? faceArt(f) : '<text x="0" y="-32" text-anchor="middle" font-size="22" font-weight="700" fill="#b9b3a3">?</text>'}</svg>`
+        + `<b>${ok ? f.name : '?'}</b>` + (on ? tr('<span class="c-on">平常</span>') : ok ? '' : `<small>${f.how}</small>` + (left ? `<small class="c-left">${left}</small>` : ''))
+        + '</button></li>';
+    }).join('');
     $('#seasonList').innerHTML = SEASONS.map(se => {
       const items = [...SCROLLS, ...ACCS].filter(x => x.season === se.id);
       return `<li class="c-season${se.id === now ? ' now' : ''}"><svg viewBox="50 62 72 72" aria-hidden="true">${WIN}<g clip-path="url(#winClip)">${SEASON_ART[se.id]()}</g>${LATTICE}</svg>`
@@ -2480,12 +2626,20 @@
     if (!b || b.getAttribute('aria-disabled') === 'true') return;
     equip(b.dataset.kind, b.dataset.id, true); renderCollect();
   }));
+  // choosing the everyday face: it shows at once if the mochi is standing about (checking in, on a break)
+  $('#faceList').addEventListener('click', e => {
+    const b = e.target.closest('.c-item');
+    if (!b || b.getAttribute('aria-disabled') === 'true') return;
+    C.face = b.dataset.id; saveCollect();
+    if (standing && !['focus', 'settle'].includes(P.phase)) setFace(restFace());
+    renderCollect();
+  });
   function showCollectTab(which) {
-    [['tabScrolls', 'scrollView'], ['tabSeasons', 'seasonView'], ['tabAccs', 'accView']].forEach(([t, v]) => {
+    [['tabScrolls', 'scrollView'], ['tabSeasons', 'seasonView'], ['tabAccs', 'accView'], ['tabFaces', 'faceView']].forEach(([t, v]) => {
       $('#' + t).setAttribute('aria-selected', String(t === which)); $('#' + v).hidden = t !== which;
     });
   }
-  ['tabScrolls', 'tabSeasons', 'tabAccs'].forEach(t => $('#' + t).addEventListener('click', () => showCollectTab(t)));
+  ['tabScrolls', 'tabSeasons', 'tabAccs', 'tabFaces'].forEach(t => $('#' + t).addEventListener('click', () => showCollectTab(t)));
   $('#collectBtn').addEventListener('click', () => { renderCollect(); showCollectTab('tabScrolls'); openSheet($('#collect')); });
   const windowTale = text => { bubble(text); clearTimeout(P.bubbleTimer); P.bubbleTimer = setTimeout(() => bubble(null), 5200); };
   $('#windowBtn').addEventListener('click', () => windowTale(tr('方的叫「迷之窗」,四個角是生老病死。圓的叫「悟之窗」。京都的源光庵就是這樣開窗的。')));
@@ -2514,7 +2668,7 @@
   }
   const collectStep = returning => ({ target: '#collectBtn', sheet: '#collect',
     text: (returning ? tr('禪堂多了一本收藏冊,就是中間這幅掛軸。') : tr('中間的掛軸是收藏冊。')) + tr('坐滿的炷越多,能換的掛軸和麻糬的配件就越多。點開看看。'),
-    hint: tr('👆 點一下中間的掛軸') });
+    hint: tr('點一下中間的掛軸') });
   renderScene();
 
   if (DEBUG) {                                       // a small floating panel: season, day / night, strike, sit / stand
@@ -2522,7 +2676,7 @@
     bar.className = 'debug-bar';
     bar.innerHTML = `<b>除錯 ${window.KEISAKU_BUILT || ''}</b>` + SEASONS.map(x => `<button type="button" data-season="${x.id}">${x.name}</button>`).join('')
       + '<button type="button" data-act="night">日／昏／夜</button><button type="button" data-act="hit">打一下</button>'
-      + '<button type="button" data-act="sit">坐／站</button><button type="button" data-act="book">收藏冊</button>';
+      + '<button type="button" data-act="sit">坐／站</button><button type="button" data-act="face">換表情</button><button type="button" data-act="book">收藏冊</button>';
     document.body.appendChild(bar);
     const mark = () => bar.querySelectorAll('[data-season]').forEach(b => b.classList.toggle('on', b.dataset.season === seasonOf()));
     bar.addEventListener('click', e => {
@@ -2532,6 +2686,10 @@
       else if (b.dataset.act === 'hit') impact();
       else if (b.dataset.act === 'sit') { if (standing) sitDown(); else standUp(); }
       else if (b.dataset.act === 'book') $('#collectBtn').click();
+      else if (b.dataset.act === 'face') {             // pin the next face: strikes and sitting down come back to it
+        const i = FACES.findIndex(f => f.id === (DBG.face || sitterEl.dataset.face)), f = FACES[(i + 1) % FACES.length];
+        DBG.face = f.id; setFace(f.id); toast(`除錯:表情固定為「${f.name}」`);
+      }
     });
     mark();
   }

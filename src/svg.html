@@ -170,14 +170,17 @@
       <!-- monk (drawn behind the sitter; feet at 0,0, facing right) -->
       <g id="monk" data-mood="calm" transform="translate(90 215)">
         <!-- drawn in a consistent three-quarter view facing right (flipped with scale(-1,1) to face left) -->
-        <ellipse class="f-sink" cx="-6" cy="1" rx="6" ry="2.5"/>
-        <ellipse class="f-sink" cx="9" cy="1" rx="6" ry="2.5"/>
-        <!-- far sleeve, mostly hidden behind the body -->
-        <path class="f-robe" d="M-9 -53 Q-18 -50 -20.5 -40 L-21.5 -32 Q-16 -29 -11 -32 Z" stroke="#2a2622" stroke-width="1.3" stroke-linejoin="round"/>
-        <path class="f-robe" d="M-17 0 L-13.5 -54 Q1 -61 15 -54 L20 0 Z" stroke="#2a2622" stroke-width="1.5" stroke-linejoin="round"/>
-        <!-- kimono collar, crossed toward the side he faces -->
-        <path d="M-5 -58 L6 -41 L9.5 -57.5" fill="#f3efe4" stroke="#2a2622" stroke-width="1.1" stroke-linejoin="round"/>
-        <path d="M-5 -58 L6 -41 M9.5 -57.5 L6 -41" stroke="#2a2622" stroke-width="2.6" opacity=".55" stroke-linecap="round"/>
+        <ellipse class="f-sink m-foot" cx="-6" cy="1" rx="6" ry="2.5"/>   <!-- the feet take turns stepping while he walks -->
+        <ellipse class="f-sink m-foot" cx="9" cy="1" rx="6" ry="2.5"/>
+        <!-- far sleeve: the wide kimono sleeve of the arm on the other side, hanging behind the body -->
+        <path class="f-robe" d="M-12.5 -53.5 C-17.4 -51.6 -19.6 -46.4 -20 -38.6 L-20.6 -25.6 Q-16.8 -22.8 -12.4 -24.6 Z" stroke="#2a2622" stroke-width="1.3" stroke-linejoin="round"/>
+        <path class="f-skin" d="M-3.6 -61 h7.6 v5.5 h-7.6 z"/>   <!-- neck -->
+        <!-- the robe: rounded shoulders, a little flare, the hem dipping slightly in the middle -->
+        <path class="f-robe" d="M-16.6 0 C-17.4 -17 -16.6 -37 -14.6 -49.6 Q-13.2 -57.6 -5.2 -58.6 L6.2 -58.6 Q14.6 -57.6 16.2 -49.6 C17.8 -36 19.6 -18 20.6 0 Q2 2 -16.6 0 Z" stroke="#2a2622" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M-6 -30 Q-5 -15 -7.2 -2.4 M7.8 -22 Q9.2 -11 8.6 -1.6" class="s-ink" stroke-width=".9" stroke-linecap="round" opacity=".28"/>   <!-- folds -->
+        <!-- kimono collar, crossed toward the side he faces: the white under-collar, then the robe's own collar band -->
+        <path d="M-5 -58.4 L6 -41 L9.6 -57.8" fill="#f3efe4" stroke="#2a2622" stroke-width="1.1" stroke-linejoin="round"/>
+        <path d="M-6.6 -58.2 L5.2 -40.4 M11.2 -57.4 L7.4 -42.6" stroke="#22314f" stroke-width="2.6" stroke-linecap="round"/>
         <!-- rakusu hung from the neck -->
         <g class="rakusu">
           <path d="M-4.5 -57 L-6.5 -43 M10.5 -56.5 L13 -43" stroke="var(--kesa)" stroke-width="2.2" stroke-linecap="round"/>
@@ -185,8 +188,9 @@
           <rect class="f-kesa" x="-8" y="-44" width="22" height="15" rx="1.2" stroke="#2a2622" stroke-width="1"/>
           <rect x="-5.6" y="-41.6" width="17.2" height="10.2" rx=".6" fill="none" stroke="#2a2622" stroke-width=".7" opacity=".35"/>
         </g>
-        <!-- near sleeve hangs in front; the hand comes out of its opening to hold the stick -->
-        <path class="f-robe" d="M6.5 -57 Q11 -59.5 15.5 -55.5 Q19 -51 19.8 -43 L20.6 -35 Q15 -31.5 9 -34.5 Q4.5 -45 6.5 -57 Z" stroke="#2a2622" stroke-width="1.3" stroke-linejoin="round"/>
+        <!-- near sleeve: the forearm reaches forward to hold the stick and the wide sleeve drapes below it -->
+        <path class="f-robe" d="M6.4 -57.2 Q12.4 -59.6 16.2 -55 Q19.8 -50 20.6 -42 L21.8 -28.6 Q17.6 -25.4 11.6 -27.4 Q9.6 -30.6 9.2 -34.4 Q6 -45 6.4 -57.2 Z" stroke="#2a2622" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="M12.6 -30.4 Q16.6 -29.6 20.2 -31.6" class="s-ink" stroke-width=".8" opacity=".3" stroke-linecap="round"/>
         <circle class="f-skin" cx="12" cy="-38" r="4.2" stroke="#2a2622" stroke-width="1.1"/>
         <circle class="f-skin" cx="-13" cy="-72" r="3.4" stroke="#2a2622" stroke-width="1.1"/>
         <circle class="f-skin" cx="0" cy="-72" r="15" stroke="#2a2622" stroke-width="1.5"/>
@@ -229,26 +233,83 @@
           <ellipse class="f-blush" cx="-17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/>
           <ellipse class="f-blush" cx="17" cy="-36" rx="4.5" ry="2.8" opacity=".75"/>
           <g id="mochiAccBack"></g>   <!-- worn under the arms: the hands stay in front of a scarf or a sash -->
+          <!-- sitting: the arms curve down the body to the lap, where the hands make the zazen mudra
+               (right hand resting in the left, thumb tips just touching). In a robe the arms take its colour. -->
           <g class="lap-hands">
-            <path d="M-26 -33 Q-23 -21 -9 -18.5 M26 -33 Q23 -21 9 -18.5" class="s-ink" stroke-width="1.3" stroke-linecap="round"/>
-            <ellipse class="f-mochi" cx="0" cy="-17" rx="10" ry="4.6" stroke="#2a2622" stroke-width="1.3"/>
-            <path d="M-3.5 -20.5 Q0 -23.5 3.5 -20.5" class="s-ink" stroke-width="1.1" stroke-linecap="round"/>
+            <!-- each arm leaves the body's own outline at the side and curves in to the lap -->
+            <g class="arm" style="fill: var(--sleeve, var(--mochi))">
+              <path d="M-30.8 -29.6 C-29.8 -23.6 -22.4 -19.6 -11.8 -18.2 L-11 -22.2 C-18.8 -23.4 -23 -26.6 -24.6 -30.6 Z"/>
+              <path d="M30.8 -29.6 C29.8 -23.6 22.4 -19.6 11.8 -18.2 L11 -22.2 C18.8 -23.4 23 -26.6 24.6 -30.6 Z"/>
+            </g>
+            <path class="s-ink" stroke-width="1.3" stroke-linecap="round" fill="none"
+                  d="M-30.8 -29.6 C-29.8 -23.6 -22.4 -19.6 -11.8 -18.2 M-11 -22.2 C-18.8 -23.4 -23 -26.6 -24.6 -30.6
+                     M30.8 -29.6 C29.8 -23.6 22.4 -19.6 11.8 -18.2 M11 -22.2 C18.8 -23.4 23 -26.6 24.6 -30.6"/>
+            <!-- two round little hands meeting in the lap, the right one just over the left -->
+            <ellipse class="f-mochi" cx="-5.6" cy="-19" rx="6.6" ry="4.6" stroke="#2a2622" stroke-width="1.3"/>
+            <ellipse class="f-mochi" cx="5.6" cy="-19.4" rx="6.6" ry="4.6" stroke="#2a2622" stroke-width="1.3"/>
+            <path d="M3.6 -22.6 q1.6 -.8 3.4 -.2" class="s-ink" stroke-width=".9" stroke-linecap="round" opacity=".5"/>
           </g>
+          <!-- faces. Parts marked data-a move a little while their face shows (driven from the script, see animateFace):
+               blink, bob, glance, float, drip, twinkle, pulse, shake, yawn, fade, seq -->
           <g class="face f-calm s-ink" stroke-width="1.5" stroke-linecap="round">
-            <path d="M-13 -44 q4 3.2 8 0"/><path d="M5 -44 q4 3.2 8 0"/><path d="M-2 -35 q2 1.4 4 0"/>
+            <g data-a="bob" data-amp=".5" data-per="5"><path d="M-13 -44 q4 3.2 8 0"/><path d="M5 -44 q4 3.2 8 0"/></g><path d="M-2 -35 q2 1.4 4 0"/>
           </g>
           <g class="face f-ouch s-ink" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M-14 -48 l7 3 l-7 3"/><path d="M14 -48 l-7 3 l7 3"/><path d="M-5 -34 q2.5 -2.4 5 0 q2.5 2.4 5 0"/>
-            <path d="M24 -48 q3 4 0 6 q-3 -2 0 -6" fill="#9ccbe8" stroke-width="1"/>
+            <g data-a="shake"><path d="M-14 -48 l7 3 l-7 3"/><path d="M14 -48 l-7 3 l7 3"/><path d="M-5 -34 q2.5 -2.4 5 0 q2.5 2.4 5 0"/></g>
+            
           </g>
           <g class="face f-happy s-ink" stroke-width="1.5" stroke-linecap="round">
-            <path d="M-13 -42 q4 -4 8 0"/><path d="M5 -42 q4 -4 8 0"/><path d="M-4 -36 q4 4 8 0"/>
+            <g data-a="bob" data-amp="1.2" data-per="1.1"><path d="M-13 -42 q4 -4 8 0"/><path d="M5 -42 q4 -4 8 0"/></g><path d="M-4 -36 q4 4 8 0"/>
           </g>
           <g class="face f-peek" stroke-linecap="round">
-            <circle cx="-9" cy="-43" r="2" fill="#2a2622"/><circle cx="9" cy="-43" r="2" fill="#2a2622"/>
+            <g data-a="blink glance"><circle cx="-9" cy="-43" r="2" fill="#2a2622"/><circle cx="9" cy="-43" r="2" fill="#2a2622"/></g>
             <path class="s-ink" d="M-2 -35 h4" stroke-width="1.5"/>
           </g>
+          <!-- faces collected in the 收藏冊: each turns up at its own moment -->
+          <g class="face f-sleepy s-ink" stroke-width="1.5" stroke-linecap="round">
+            <path d="M-13 -44 q4 1.8 8 .6 M5 -43.4 q4 1.2 8 -.6"/><ellipse data-a="yawn" cx="0" cy="-34.4" rx="2.1" ry="2.7" fill="#5a3430" stroke-width="1.2"/>
+            
+            
+          </g>
+          <g class="face f-proud s-ink" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <g data-a="bob" data-amp=".8" data-per="1.6"><path d="M-13 -42 l4 -3.4 l4 3.4 M5 -42 l4 -3.4 l4 3.4"/></g><path d="M-3.5 -35.8 q3.8 3 7.6 -.9"/>
+            
+          </g>
+          <g class="face f-surprised s-ink" stroke-width="1.3" stroke-linecap="round">
+            <g data-a="shake" data-amp=".35"><circle cx="-9" cy="-43" r="3.6" fill="#fff"/><circle cx="9" cy="-43" r="3.6" fill="#fff"/>
+            <circle cx="-9" cy="-42.6" r="1.5" fill="#2a2622" stroke="none"/><circle cx="9" cy="-42.6" r="1.5" fill="#2a2622" stroke="none"/></g>
+            <ellipse cx="0" cy="-34" rx="1.9" ry="2.5"/>
+          </g>
+          <g class="face f-teary s-ink" stroke-width="1.5" stroke-linecap="round">
+            <path d="M-13 -43 h8 M5 -43 h8"/><path d="M-13 -48 l6.6 -2.2 M13 -48 l-6.6 -2.2" stroke-width="1.3"/>
+            <path data-a="drip" data-amp="3.4" data-per="1.6" d="M-9 -42.4 q-1.9 3.6 0 4.8 q1.9 -1.2 0 -4.8z" fill="#9ccbe8" stroke-width=".9"/>
+            <path data-a="drip" data-amp="3.4" data-per="1.6" data-off=".8" d="M9 -42.4 q-1.9 3.6 0 4.8 q1.9 -1.2 0 -4.8z" fill="#9ccbe8" stroke-width=".9"/>
+            <path data-a="shake" data-amp=".25" d="M-4 -34 q1 -1.6 2 0 q1 1.6 2 0 q1 -1.6 2 0 q1 1.6 2 0" stroke-width="1.3"/>
+          </g>
+          <g class="face f-content s-ink" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <g data-a="bob" data-amp=".8" data-per="1.4"><path d="M-13 -42 q4 -4 8 0 M5 -42 q4 -4 8 0"/></g><path d="M-5 -36.6 q5 6.4 10 0 z" fill="#b5534b" stroke-width="1.3"/>
+            
+          </g>
+          <g class="face f-shy s-ink" stroke-width="1.5" stroke-linecap="round">
+            <g data-a="glance" data-amp="1.2"><circle cx="-10.5" cy="-41.6" r="1.8" fill="#2a2622" stroke="none"/><circle cx="7.5" cy="-41.6" r="1.8" fill="#2a2622" stroke="none"/></g>
+            <path d="M-2.2 -34.6 q1.1 -1.1 2.2 0 q1.1 1.1 2.2 0" stroke-width="1.2"/>
+            <path data-a="fade" d="M-21 -36.6 l2 -3 M-18 -36.6 l2 -3 M-15 -36.6 l2 -3 M13 -36.6 l2 -3 M16 -36.6 l2 -3 M19 -36.6 l2 -3" stroke="#d9645f" stroke-width=".9"/>
+          </g>
+          <g class="face f-daze s-ink" stroke-width="1.3" stroke-linecap="round">
+            <g data-a="glance" data-amp="1.6" data-per="7"><circle cx="-9" cy="-43" r="2.4"/><circle cx="9" cy="-43" r="2.4"/></g><path d="M-2.4 -34.4 h4.8"/>
+            
+          </g>
+          <g class="face f-focus s-ink" stroke-width="1.5" stroke-linecap="round">
+            <path d="M-13 -43 h8 M5 -43 h8"/><path data-a="bob" data-amp=".7" data-per="2.4" d="M-13.5 -49.4 l7 1.8 M13.5 -49.4 l-7 1.8" stroke-width="1.4"/><path d="M-2 -34.6 h4"/>
+          </g>
           <g id="mochiAcc"></g>   <!-- what the mochi is wearing, from the 收藏冊 -->
+          <!-- the bits floating around a face (sparkle, z, heart, sweat…) go above hats and flowers -->
+          <g class="face fx f-ouch s-ink" stroke-linecap="round"><path data-a="drip" data-amp="4" data-per="1.3" d="M24 -48 q3 4 0 6 q-3 -2 0 -6" fill="#9ccbe8" stroke-width="1"/></g>
+          <g class="face fx f-sleepy s-ink" stroke-linecap="round"><path data-a="float" data-amp="7" data-per="2.6" d="M20 -59 h4.2 l-4.2 4.2 h4.2" stroke-width="1.1" stroke-linejoin="round"/><path data-a="float" data-amp="7" data-per="2.6" data-off="1.3" d="M27 -66 h3 l-3 3 h3" stroke-width="1.1" stroke-linejoin="round"/></g>
+          <g class="face fx f-proud s-ink" stroke-linecap="round"><path data-a="twinkle" d="M18.6 -50.6 l1 2.3 l2.3 1 l-2.3 1 l-1 2.3 l-1 -2.3 l-2.3 -1 l2.3 -1 z" fill="#e8b84a" stroke="#a87d24" stroke-width=".5"/></g>
+          <g class="face fx f-surprised s-ink" stroke-linecap="round"><path data-a="pulse" d="M22 -64 l2 -5 M26.6 -61 l4.4 -3.4 M29.6 -57.2 l5 -1.6" stroke-width="1.4"/></g>
+          <g class="face fx f-content s-ink" stroke-linecap="round"><path data-a="float" data-amp="9" data-per="2.4" d="M22 -58 c-1.4 -2.4 -4.6 -.6 -2.6 1.6 l2.6 2.6 l2.6 -2.6 c2 -2.2 -1.2 -4 -2.6 -1.6z" fill="#e8798a" stroke="none"/></g>
+          <g class="face fx f-daze s-ink" stroke-linecap="round"><circle data-a="seq" data-i="0" cx="23" cy="-59.6" r="1.9" class="fx-dot"/><circle data-a="seq" data-i="1" cx="28.8" cy="-61" r="1.9" class="fx-dot"/><circle data-a="seq" data-i="2" cx="34.6" cy="-62.4" r="1.9" class="fx-dot"/></g>
           <path class="bump f-mochi" d="M10 -66 q8 -10 15 -2" stroke="#2a2622" stroke-width="1.4"/>
         </g>
         </g>
