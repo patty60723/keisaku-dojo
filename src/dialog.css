@@ -748,3 +748,4 @@ html:lang(en) * { letter-spacing: normal !important; }
 :root { --fx-ink: #2a2622; }
 :root[data-theme="dark"] { --fx-ink: #ebe6d8; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]):not([data-theme="dusk"]) { --fx-ink: #ebe6d8; } }
+.c-mochi .pose-stand { display: none; }   /* the cards show the mochi sitting, so only the lap beads */
