@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>住持 v2 角色審查</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Huninn&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="r1-tokens.css">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--washi); color: var(--ink); font: 16px/1.75 var(--f-ui); -webkit-text-size-adjust: 100%; }
+main { max-width: 1040px; margin: 0 auto; padding: 32px 16px 80px; }
+h1 { font: 700 32px/1.25 var(--f-story); letter-spacing: .08em; margin: 0 0 6px; }
+h2 { font: 700 24px/1.3 var(--f-story); margin: 56px 0 10px; padding-top: 18px; border-top: 1.5px solid var(--paper-edge); }
+h2 .no { font: 600 14px/1 var(--f-num); color: var(--ink-3); display: block; margin-bottom: 8px; letter-spacing: .1em; }
+h3 { font: 700 18px/1.4 var(--f-story); margin: 26px 0 6px; }
+p, li { max-width: 760px; } .muted { color: var(--ink-2); } .note { font-size: 14px; color: var(--ink-2); }
+code { font: 13px/1.4 ui-monospace, Menlo, monospace; background: var(--washi-2); padding: 1px 5px; border-radius: 5px; }
+a { color: var(--ai); }
+.row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+.tile { background: var(--wall); border-radius: 18px; box-shadow: var(--lift); padding: 10px; margin: 0; }
+.tile.paper { background: var(--paper); }
+.tile figcaption { font-size: 13px; color: var(--ink-2); text-align: center; margin-top: 4px; line-height: 1.45; }
+.tile svg { display: block; }
+.grid { display: grid; gap: 14px; }
+.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } .g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } .g5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@media (max-width: 760px) { .g4, .g5 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .g3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.grid svg { width: 100%; height: auto; }
+.card { background: var(--paper); border-radius: 18px; box-shadow: var(--lift); padding: 16px 18px; margin: 12px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; line-height: 1.55; background: var(--paper); border-radius: 14px; overflow: hidden; box-shadow: var(--lift); }
+.tw { overflow-x: auto; margin: 12px 0; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--paper-edge); }
+th { background: var(--washi-2); font-weight: 400; color: var(--ink-2); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+.num { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--shu); color: #fff; font: 600 12px/1 var(--f-num); margin-right: 4px; }
+.num.ok { background: var(--matcha); }
+.scene { width: 368px; max-width: 100%; border-radius: 18px; overflow: hidden; box-shadow: var(--lift); }
+.scene svg { display: block; width: 100%; height: auto; }
+
+/* ---- Round 1 monk & scene classes ---- */
+.ln { stroke: var(--line); stroke-linecap: round; stroke-linejoin: round; }
+.cshadow { fill: #1f1610; opacity: var(--shadow-o); }
+.day-only, .dusk-only, .night-only { transition: opacity .6s; }
+[data-time="day"] .dusk-only, [data-time="day"] .night-only, [data-time="dusk"] .day-only, [data-time="dusk"] .night-only, [data-time="night"] .day-only, [data-time="night"] .dusk-only { opacity: 0; }
+
+/* ---- monk v2 ---- */
+.m2 { --robe-in: #1d2741; }
+.m2p { fill: var(--sil, var(--flat, var(--c))); stroke: var(--sil, var(--inner, var(--line))); stroke-width: var(--sw, 1.3); stroke-linejoin: round; }
+.m2det { display: var(--det, inline); }
+.m2-sil { --sil: var(--line); --sw: 4; --det: none; }
+.m2l { fill: none; stroke: var(--inner, var(--line)); stroke-width: var(--w, 1); stroke-linecap: round; stroke-linejoin: round; }
+.m2f { fill: var(--flat, var(--c)); }
+.m2s { stroke: var(--inner, var(--line)); stroke-width: var(--w, 1.3); stroke-linejoin: round; }
+.m2ink { fill: var(--inner, var(--line)); }
+.m2band-o { fill: none; stroke: var(--inner, var(--line)); stroke-width: 4.4; }
+.m2band { fill: none; stroke: var(--flat, var(--robe-lo)); stroke-width: 2.2; }
+.m2strap-o { fill: none; stroke: var(--inner, var(--line)); stroke-width: 3.2; stroke-linecap: round; }
+.m2strap { fill: none; stroke: var(--inner, #5a3b22); stroke-width: 1.3; stroke-linecap: round; }
+.m2ring { fill: none; stroke: var(--flat, #eadcbf); stroke-width: 1.2; }
+.m2stick rect { fill: var(--flat, #c69b62); stroke: var(--inner, var(--line)); stroke-width: 1.1; }
+.m2shadow { fill: #1f1610; opacity: .2; }
+.m2-lines { --flat: #fff; --inner: #2f74d0; }
+.m2-lines .m2shadow { opacity: 0; }
+/* construction overlay */
+.cons { fill: none; stroke: var(--shu); stroke-width: .7; stroke-dasharray: 2 1.6; }
+.cons-s { fill: none; stroke: var(--shu); stroke-width: .9; }
+.cons-t { font: 3.6px var(--f-ui); fill: var(--shu); }
+.mark circle { fill: none; stroke: var(--shu); stroke-width: 1; }
+.mark text { font: 600 6px var(--f-num); fill: #fff; text-anchor: middle; }
+.mark .bg { fill: var(--shu); stroke: none; }
+.okmark .bg { fill: var(--matcha); } .okmark circle { stroke: var(--matcha); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" id="globalDefs"></svg>
+<main>
+<p class="muted" style="margin:0 0 4px;font-size:14px;letter-spacing:.1em">KEISAKU DOJO · ROUND 2 · CHARACTER REVIEW</p>
+<h1>住持 v2：結構重製</h1>
+<p class="muted">只做靜態造型。<b>動畫還沒重做，正式版也沒有改動</b>。這一頁通過審查後，才會把新住持接上動畫骨架。<a href="../round1/">← Round 1 報告</a></p>
+
+<h2><span class="no">00</span>先定結構，再畫線</h2>
+<p>沒有沿用 Round 1 的任何 path，從結構草圖重新畫。紅色虛線是結構，底下是依結構畫出的完稿。</p>
+<div class="grid g2">
+  <figure class="tile paper"><svg id="consSvg" viewBox="-54 -100 100 108"></svg><figcaption>結構草圖：頭的方向、肩線、中軸、手臂、重心、衣領交叉點</figcaption></figure>
+  <div class="card" style="margin:0">
+    <b>三分之四視角、朝右</b>
+    <ul style="margin:6px 0 0;padding-left:20px;font-size:15px">
+      <li><b>頭</b>：圓心 (3, −74)。臉的中線彎到 x≈12，耳朵在後側，鼻子在前側輪廓上。</li>
+      <li><b>脖子／衣領中心</b>：x≈4，跟臉一起往前側偏。</li>
+      <li><b>肩線</b>：近側肩（角色的右肩）在 x≈−19，比較寬；遠側肩在 x≈11，藏在胸口後面。</li>
+      <li><b>中軸與重心</b>：下襬中心 x≈0。肚子在前側往外鼓，重心落在腳跟上方，上身微微後仰。</li>
+      <li><b>手臂</b>：近側手臂 肩 → 肘 (−20, −31) → 腕 (−8, −20)。香板<b>靠在近側肩上</b>，握在腰前，整根留在身體後側，不會經過衣領與絡子。</li>
+      <li><b>衣領</b>：和服規則是<b>穿著者的左襟在上</b>。朝右時壓在上面的是遠側那片，它的前緣（衽）從交叉點一路往下到下襬。</li>
+      <li><b>下襬與腳</b>：兩隻腳都朝前側，遠側那隻在後面；下襬中間微微下垂，看起來有重量。</li>
+    </ul>
+  </div>
+</div>
+
+<h2><span class="no">01</span>Round 1 與 v2 等比例對照</h2>
+<p class="note">兩邊同一個比例（1 單位 = 3px）。左圖的紅色編號對應你列出的 7 個問題，右圖的綠色編號是 v2 的處理位置。</p>
+<div class="grid g2" id="cmp"></div>
+<div class="tw"><table>
+<thead><tr><th>#</th><th>Round 1 的問題</th><th>v2 怎麼處理</th></tr></thead>
+<tbody>
+<tr><td><span class="num">1</span></td><td>肩膀與脖子之間的藍色突起與接縫</td><td>肩膀的輪廓只由袖子這一個形狀決定，身體在肩膀附近藏在袖子裡面。脖子由頭和衣領蓋住，沒有另外一塊「脖子」與兩塊「肩」互相拼接。</td></tr>
+<tr><td><span class="num">2</span></td><td>左右袖子形狀與結構語言不一致</td><td>兩隻袖子用同一套結構：肩部圓弧 → 上臂 → 下垂的袖袋（圓底、半徑一致）→ 袖口。後側袖只露出袖袋的前緣與底部。</td></tr>
+<tr><td><span class="num">3</span></td><td>手掌像貼在袖子表面</td><td>袖口畫成有深色內側的開口，手從開口裡伸出來，握住香板；拇指繞過香板，香板的握把端露在拳頭下方。</td></tr>
+<tr><td><span class="num">4</span></td><td>衣領、絡子與香板互相干擾</td><td>三者分開：衣領的 V 在上，絡子在胸前並蓋住衣領交叉點，香板整根在身體後側（從腰前經過肩膀往後上方）。三者之間沒有相切的線。</td></tr>
+<tr><td><span class="num">5</span></td><td>衣身太像鐘罩</td><td>輪廓改成肩窄、肚子在前側鼓出、下襬近乎直落；後背是一條長直線，前側是飽滿的曲線，重量在下半身。</td></tr>
+<tr><td><span class="num">6</span></td><td>粗描邊重疊成深色團塊</td><td>外輪廓由一份「剪影」統一描出（同一個粗細），各部件只帶 1.3 的內線；細節、衣領、臉不進剪影。接縫處不會出現兩條粗線疊在一起。</td></tr>
+<tr><td><span class="num">7</span></td><td>臉與身體朝向缺少結構線索</td><td>頭、脖子、衣領、肚子、雙腳全部往同一側偏移；臉的中線、鼻子、耳朵位置都跟著三分之四視角。</td></tr>
+</tbody></table></div>
+
+<h2><span class="no">02</span>v2 四倍放大</h2>
+<p class="note">以手機場景中的大小為 1 倍（約 0.92px／單位），這裡是 4 倍（3.7px／單位）。可以直接檢查每一條線。</p>
+<div class="row" id="big"></div>
+
+<h2><span class="no">03</span>在正式場景中的實際大小</h2>
+<p class="note">場景寬 368px，等於 iPhone／一般 Android 直式時舞台的實際寬度。Round 1 的場景、麻糬都沒有改，只換了住持。</p>
+<div class="row" id="scenes"></div>
+
+<h2><span class="no">04</span>左右三分之四視角</h2>
+<p class="note">朝左是鏡像，但<b>衣領重新畫過</b>：不論朝哪邊，都是穿著者的左襟在上（直接鏡像會變成右襟在上，在和服裡是錯的）。絡子的小環也維持在穿著者的左側帶子上。</p>
+<div class="grid g4" id="dirs"></div>
+
+<h2><span class="no">05</span>持香板與不持香板</h2>
+<p class="note">不持香板時是「袖手」：兩手收進對方的袖子，放在肚子前面。兩隻袖子在身前接在一起，袖袋一前一後垂下來。</p>
+<div class="grid g4" id="poses"></div>
+
+<h2><span class="no">06</span>描邊與圖層結構</h2>
+<h3>描邊：外輪廓一條、內線一種粗細</h3>
+<div class="grid g3" id="lines"></div>
+<div class="tw"><table>
+<thead><tr><th>線</th><th>粗細（單位）</th><th>用在哪裡</th></tr></thead>
+<tbody>
+<tr><td>外輪廓</td><td>≈ 2.65（剪影露出 2.0＋部件內線 0.65）</td><td>整個角色的外緣，只有一條</td></tr>
+<tr><td>部件內線</td><td>1.3</td><td>袖子壓在身體上、頭壓在衣領上、手、耳朵、腳</td></tr>
+<tr><td>結構細線</td><td>1.0–1.1</td><td>衣領邊、衽（前襟邊）、袖口、絡子</td></tr>
+<tr><td>摺線</td><td>0.9，透明度 40%</td><td>袖袋、肚子下方、手肘內側；全身只有 4 條</td></tr>
+<tr><td>道具</td><td>1.1</td><td>香板自己的線，比角色輕</td></tr>
+</tbody></table></div>
+<h3>圖層：由後往前逐層疊上（持香板）</h3>
+<div class="grid g5" id="build"></div>
+<p class="note">順序依姿勢調整：持香板時香板在前側袖之上、手之下；袖手時遠側袖改在身體之前（前臂在肚子前），而且沒有手掌層。</p>
+<div class="grid g5" id="buildTuck"></div>
+
+<h2><span class="no">07</span>交接處特寫（8 倍）</h2>
+<p class="note">特別檢查肩膀、袖口、衣領、絡子與香板的交接處。左邊 Round 1，右邊 v2。</p>
+<div class="grid g2" id="joints"></div>
+
+<h2><span class="no">08</span>個性：慈祥、圓潤、偶爾嚴肅</h2>
+<p class="note">白色的垂眉是這一版的個性重點，讓他看起來年長、慈祥，還帶一點幽默。表情只換五官，頭與身體不變。</p>
+<div class="grid g3" id="faces"></div>
+
+<h2><span class="no">09</span>審查重點與下一步</h2>
+<div class="card">
+<ol style="margin:0;padding-left:22px">
+<li>請先看 <b>01 對照</b>和 <b>07 特寫</b>，確認肩膀、袖口、衣領、絡子、香板的交接處已經沒有破綻。</li>
+<li>香板改成「靠在肩上」的持法：這是巡堂時的實際持法，也讓胸前保持乾淨。打人時會從肩上舉起、往前揮下，在動畫階段設計。</li>
+<li>轉頭（看窗外、看麻糬）會另外定義成獨立的頭部姿態，不混在這個基礎造型裡。</li>
+<li>通過之後的順序：骨架（肩、肘、頭、香板的軸心）→ 套回 Round 1 原型的動畫 → 你在手機上看 → 才考慮正式版。</li>
+</ol>
+</div>
+</main>
+
+<script src="r1-scene.js"></script>
+<script src="monk2.js"></script>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+document.getElementById('globalDefs').innerHTML = sceneDefs();
+let uid = 0; const nid = p => `${p}${++uid}`;
+
+/* Round 1 monk, filled in with its default face (as the prototype shows it) */
+function monkR1(opts = {}) {
+  const id = nid('r1m');
+  let m = monkMarkup(id).replace(`<g id="${id}-eyes"></g>`, `<g id="${id}-eyes">${MONK_EYES.open}</g>`).replace(`<g id="${id}-mouth"></g>`, `<g id="${id}-mouth">${MONK_MOUTH.smile}</g>`);
+  if (opts.noStick) m = m.replace(`<g id="${id}-stick">`, `<g id="${id}-stick" opacity="0">`);
+  return m;
+}
+const v2 = o => monkV2(Object.assign({ id: nid('m2-') }, o));
+const tile = (vb, inner, cap, w, cls = '', attrs = '') => `<figure class="tile ${cls}" ${attrs}><svg viewBox="${vb}" ${w ? `width="${w}"` : ''}>${inner}</svg>${cap ? `<figcaption>${cap}</figcaption>` : ''}</figure>`;
+const mark = (n, x, y, ok) => `<g class="mark ${ok ? 'okmark' : ''}"><circle cx="${x}" cy="${y}" r="5"/><circle class="bg" cx="${x + 6.5}" cy="${y - 6.5}" r="3.6"/><text x="${x + 6.5}" y="${y - 4.4}">${n}</text></g>`;
+
+/* 00 construction */
+$('#consSvg').innerHTML = `<g opacity=".3">${v2({ shadow: false })}</g>
+  <g>
+    <circle class="cons" cx="3" cy="-74" r="20"/>
+    <path class="cons-s" d="M12 -94 C16.5 -84 16.6 -64 11 -54.6"/><path class="cons" d="M-16.6 -73 C-4 -69.4 10 -69.4 22.4 -73"/>
+    <text class="cons-t" x="12" y="-96">臉中線</text>
+    <path class="cons-s" d="M-21 -50 L12.6 -52.6"/><text class="cons-t" x="-53" y="-51">肩線（近寬遠窄）</text>
+    <path class="cons" d="M4 -56 L0 1.5"/><text class="cons-t" x="-6" y="5.8">中軸</text>
+    <path class="cons-s" d="M-18.8 -48.6 L-20 -31 L-8 -20"/><circle cx="-20" cy="-31" r="1.3" style="fill:var(--shu)"/><circle cx="-18.8" cy="-48.6" r="1.3" style="fill:var(--shu)"/><circle cx="-8" cy="-20" r="1.3" style="fill:var(--shu)"/>
+    <text class="cons-t" x="-53" y="-30">肩 → 肘 → 腕</text>
+    <path class="cons" d="M-1.5 -56 L6 -43 L11.5 -55.6"/><circle cx="6" cy="-43" r="1.3" style="fill:var(--shu)"/><text class="cons-t" x="29" y="-41">衣領交叉</text><path class="cons" d="M7.6 -43 L28 -42"/>
+    <ellipse class="cons" cx="-1" cy="-1" rx="22" ry="3.4"/>
+    <path class="cons-s" d="M-3 -10 v10"/><path class="cons-s" d="M-5.6 -3 l2.6 3 l2.6 -3"/><text class="cons-t" x="-12" y="-12">重心</text>
+    <path class="cons" d="M21 -40 C24.6 -30 24.6 -16 21.6 -6"/><text class="cons-t" x="29" y="-22">肚子在前</text>
+  </g>`;
+
+/* 01 compare at the same scale */
+const S = 3;
+$('#cmp').innerHTML =
+  tile('-48 -112 82 118', monkR1() + [mark(1, -14, -48), mark(1, 14, -53), mark(2, 18, -40), mark(2, -20, -36), mark(3, 17, -29), mark(4, 4, -44), mark(5, 0, -6), mark(6, -15, -44), mark(7, 1, -74)].join(''), 'Round 1', 82 * S) +
+  tile('-48 -112 82 118', v2({}) + [mark(1, -16, -50, 1), mark(2, -20, -22, 1), mark(2, 24, -24, 1), mark(3, -5, -20, 1), mark(4, 8, -40, 1), mark(5, 20, -18, 1), mark(6, -21, -6, 1), mark(7, 12, -74, 1)].join(''), 'v2', 82 * S);
+$('#cmp').querySelectorAll('svg').forEach(s => { s.style.width = '100%'; s.removeAttribute('width'); });
+
+/* 02 4× */
+$('#big').innerHTML = tile('-46 -100 76 106', v2({}), 'v2・持香板・4 倍', 76 * 3.7) + tile('-32 -100 62 106', v2({ pose: 'tuck' }), 'v2・袖手・4 倍', 62 * 3.7);
+
+/* 03 in the scene at actual size */
+function sceneWith(time, monkSvg, x = 120) {
+  const mid = nid('sm');
+  const svg = `<div class="scene" data-time="${time}"><svg viewBox="0 0 400 300">${sceneMarkup()}</svg></div>`;
+  const host = document.createElement('div'); host.innerHTML = svg; const s = host.querySelector('svg');
+  s.querySelector('#monkSlot').innerHTML = `<g transform="translate(${x} 254)">${monkSvg}</g>`;
+  s.querySelector('#mochiSlot').innerHTML = mochiMarkup(mid);
+  const g = s.querySelector('#' + mid); g.setAttribute('transform', 'translate(206 257)');
+  const f = FACE.calm; s.querySelector(`#${mid}-face`).innerHTML = `<ellipse cx="-20" cy="-22" rx="5.4" ry="3.2" fill="var(--blush)" opacity=".6"/><ellipse cx="20" cy="-22" rx="5.4" ry="3.2" fill="var(--blush)" opacity=".6"/>${f.eyes}${f.mouth}`;
+  s.querySelector(`#${mid}-feet`).setAttribute('opacity', 0);
+  HANDS.lap.forEach(([cx, cy, rx, ry, r], i) => { const e = s.querySelector(`#${mid}-${i ? 'hr' : 'hl'}`); Object.entries({ cx, cy, rx, ry, transform: `rotate(${r} ${cx} ${cy})` }).forEach(([k, v]) => e.setAttribute(k, v)); });
+  s.querySelector('#seatLip').setAttribute('opacity', 1);
+  s.querySelector('#rack').setAttribute('opacity', 0);
+  return host.innerHTML;
+}
+$('#scenes').innerHTML =
+  `<figure style="margin:0">${sceneWith('day', v2({}))}<figcaption class="note">v2・白天・持香板</figcaption></figure>` +
+  `<figure style="margin:0">${sceneWith('night', v2({ pose: 'tuck' }), 110)}<figcaption class="note">v2・夜・袖手</figcaption></figure>` +
+  `<figure style="margin:0">${sceneWith('day', monkR1())}<figcaption class="note">對照：Round 1</figcaption></figure>`;
+
+/* 04 directions, 05 poses */
+const vbC = '-46 -100 76 106', vbT = '-32 -100 62 106', vbCL = '-30 -100 76 106', vbTL = '-30 -100 62 106';
+$('#dirs').innerHTML = tile(vbC, v2({}), '朝右・持香板') + tile(vbCL, v2({ facing: 'left' }), '朝左・持香板') + tile(vbT, v2({ pose: 'tuck' }), '朝右・袖手') + tile(vbTL, v2({ pose: 'tuck', facing: 'left' }), '朝左・袖手');
+$('#poses').innerHTML = tile(vbC, v2({}), '持香板：靠在肩上') + tile(vbT, v2({ pose: 'tuck' }), '不持香板：袖手') + tile(vbC, monkR1(), 'Round 1・持香板') + tile('-32 -100 62 106', monkR1({ noStick: true }), 'Round 1・不持');
+
+/* 06 lines and build-up */
+$('#lines').innerHTML = tile(vbC, v2({ mode: 'lines' }), '黑＝外輪廓（剪影），藍＝內線與結構線', 0, 'paper') +
+  tile(vbC, v2({ mode: 'silonly', shadow: false }), '只有外輪廓：一條、粗細一致', 0, 'paper') +
+  tile(vbC, v2({ mode: 'nosil' }), '只有內線（沒有剪影），可以看出每個部件的邊界', 0, 'paper');
+const names = monkV2Layers({});
+$('#build').innerHTML = names.map((n, i) => tile(vbC, v2({ upto: i + 1, shadow: false }), `${i + 1}. ${n}`)).join('');
+const namesT = monkV2Layers({ pose: 'tuck' });
+$('#buildTuck').innerHTML = namesT.map((n, i) => tile(vbT, v2({ pose: 'tuck', upto: i + 1, shadow: false }), `${i + 1}. ${n}`)).join('');
+
+/* 07 joints: same crop in both */
+const crops = [
+  ['肩膀與脖子', '-26 -62 34 26', '-26 -62 34 26'],
+  ['袖口與手', '0 -46 30 26', '-16 -32 24 22'],
+  ['衣領・絡子', '-8 -62 30 26', '-6 -60 28 26'],
+  ['香板的位置', '-8 -112 40 82', '-46 -100 40 82'],
+];
+$('#joints').innerHTML = crops.map(([n, a, b]) => tile(a, monkR1(), `Round 1・${n}`) + tile(b, v2({}), `v2・${n}`)).join('');
+
+/* 08 faces */
+const vbH = '-22 -98 48 50';
+$('#faces').innerHTML = tile(vbH, v2({ face: 'kind' }), '慈祥（平常）') + tile(vbH, v2({ face: 'laugh' }), '笑') + tile(vbH, v2({ face: 'stern' }), '嚴肅（打人前）');
+document.querySelectorAll('.grid .tile svg').forEach(s => s.removeAttribute('width'));
+</script>
+</body>
+</html>

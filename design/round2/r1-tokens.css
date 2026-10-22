@@ -1,0 +1,47 @@
+/* copied from round1/proto.html (scene + UI tokens) */
+:root {
+  /* UI: washi base, ink text, indigo action, vermilion only for the seal and the moment of a hit */
+  --washi: #f3eee2; --washi-2: #ebe4d4; --paper: #fbf8f1; --paper-edge: #e6ddca;
+  --ink: #3b2f27; --ink-2: #6b5f51; --ink-3: #988c7c;
+  --ai: #34466e; --ai-press: #2a3a5e; --on-ai: #fbf8f1; --ai-soft: #e4e6ec;
+  --shu: #c8432d; --matcha: #7c8a55; --kin: #c99a3e;
+  --lift: 0 1px 0 rgb(59 47 39 / .05), 0 10px 28px -14px rgb(59 47 39 / .32);
+  --r-lg: 22px; --r-md: 16px; --r-sm: 12px;
+  /* type: WenKai = the monk's voice and titles; Huninn = everything you operate; Fredoka = numbers */
+  --f-story: "LXGW WenKai TC", "Kaiti TC", serif;
+  --f-ui: "Huninn", "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
+  --f-num: "Fredoka", ui-rounded, system-ui, sans-serif;
+
+  /* scene, day */
+  --wall: #ece3cf; --wall-hi: #f3ecdb; --alcove: #ddd0b4; --alcove-lo: #cbbd9e;
+  --wood: #6b4a33; --wood-d: #4a3222; --wood-l: #8a6646; --post: #a27a52;
+  --tatami: #d9ca90; --tatami-back: #c9b87c; --tatami-line: #b9a96d; --heri: #44502f;
+  --win-a: #d6e6ec; --win-b: #f4f1e2;
+  --mochi-hi: #fffefa; --mochi: #f8f1e3; --mochi-lo: #e6d8c0; --blush: #f0a497;
+  --skin: #f1d2b3; --skin-lo: #e2b994; --robe: #3a4c76; --robe-lo: #2a3859; --kesa: #8a5d34;
+  --zafu: #6c4d7a; --zafu-lo: #533a60; --mat: #3d3833;
+  --line: #3b2f27; --scroll-paper: #f8f3e4; --mount: #8c9a7a;
+  --shadow-o: .26; --rim-l: 0; --rim-r: 0; --shaft: #fffbe8; --shaft-o: .55; --amb: transparent;
+}
+[data-time="dusk"] {
+  --washi: #f4ebdf; --washi-2: #ecdfcf; --paper: #fcf6ee; --paper-edge: #e9d9c6;
+  --wall: #ecd8c1; --wall-hi: #f2e1cb; --alcove: #dcc6a8; --alcove-lo: #c9b08e;
+  --tatami: #dcc08a; --tatami-back: #c9a873; --tatami-line: #bc9e66;
+  --win-a: #9a8fbb; --win-b: #f6cf98;
+  --mochi-lo: #e9d0b4; --shaft: #ffb36b; --shaft-o: .7; --rim-l: .85; --amb: #f1a25f;
+}
+[data-time="night"] {
+  --washi: #1e1c1a; --washi-2: #282521; --paper: #2a2723; --paper-edge: #3a352f;
+  --ink: #ede5d6; --ink-2: #b9ae9d; --ink-3: #8a8072; --ai: #aebde4; --ai-press: #c3cfee; --on-ai: #1e1c1a; --ai-soft: #33363f;
+  --shu: #e8634a; --matcha: #a9b880;
+  --lift: 0 1px 0 rgb(0 0 0 / .2), 0 12px 30px -14px rgb(0 0 0 / .7);
+  --wall: #2d2f37; --wall-hi: #34363f; --alcove: #24262d; --alcove-lo: #1d1f25;
+  --wood: #2d211a; --wood-d: #1f1712; --wood-l: #45342a; --post: #57422f;
+  --tatami: #4b4632; --tatami-back: #3b3727; --tatami-line: #5a543a; --heri: #1d2316;
+  --win-a: #1c2842; --win-b: #36486d;
+  --mochi-hi: #fbf6ea; --mochi: #ece4d3; --mochi-lo: #c9bca5; --blush: #e0918a;
+  --skin: #dcb898; --skin-lo: #c49c7c; --robe: #3d4c72; --robe-lo: #2a3550; --kesa: #7d5430;
+  --zafu: #7d5f8d; --zafu-lo: #5c4469; --mat: #24211e; --scroll-paper: #d9d2bf; --mount: #4d5a45;
+  --line: #2a231e; --shadow-o: .4; --shaft: #a9c2f0; --shaft-o: .4; --rim-r: .7; --amb: transparent;
+}
+
