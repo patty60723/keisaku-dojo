@@ -1,0 +1,1174 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>香板禪堂 Round 1 原型</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Huninn&family=Fredoka:wght@500;600&display=swap">
+<style>
+/* ============ design tokens (Round 1 proposal) ============ */
+:root {
+  /* UI: washi base, ink text, indigo action, vermilion only for the seal and the moment of a hit */
+  --washi: #f3eee2; --washi-2: #ebe4d4; --paper: #fbf8f1; --paper-edge: #e6ddca;
+  --ink: #3b2f27; --ink-2: #6b5f51; --ink-3: #988c7c;
+  --ai: #34466e; --ai-press: #2a3a5e; --on-ai: #fbf8f1; --ai-soft: #e4e6ec;
+  --shu: #c8432d; --matcha: #7c8a55; --kin: #c99a3e;
+  --lift: 0 1px 0 rgb(59 47 39 / .05), 0 10px 28px -14px rgb(59 47 39 / .32);
+  --r-lg: 22px; --r-md: 16px; --r-sm: 12px;
+  /* type: WenKai = the monk's voice and titles; Huninn = everything you operate; Fredoka = numbers */
+  --f-story: "LXGW WenKai TC", "Kaiti TC", serif;
+  --f-ui: "Huninn", "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
+  --f-num: "Fredoka", ui-rounded, system-ui, sans-serif;
+
+  /* scene, day */
+  --wall: #ece3cf; --wall-hi: #f3ecdb; --alcove: #ddd0b4; --alcove-lo: #cbbd9e;
+  --wood: #6b4a33; --wood-d: #4a3222; --wood-l: #8a6646; --post: #a27a52;
+  --tatami: #d9ca90; --tatami-back: #c9b87c; --tatami-line: #b9a96d; --heri: #44502f;
+  --win-a: #d6e6ec; --win-b: #f4f1e2;
+  --mochi-hi: #fffefa; --mochi: #f8f1e3; --mochi-lo: #e6d8c0; --blush: #f0a497;
+  --skin: #f1d2b3; --skin-lo: #e2b994; --robe: #3a4c76; --robe-lo: #2a3859; --kesa: #8a5d34;
+  --zafu: #6c4d7a; --zafu-lo: #533a60; --mat: #3d3833;
+  --line: #3b2f27; --scroll-paper: #f8f3e4; --mount: #8c9a7a;
+  --shadow-o: .26; --rim-l: 0; --rim-r: 0; --shaft: #fffbe8; --shaft-o: .55; --amb: transparent;
+}
+[data-time="dusk"] {
+  --washi: #f4ebdf; --washi-2: #ecdfcf; --paper: #fcf6ee; --paper-edge: #e9d9c6;
+  --wall: #ecd8c1; --wall-hi: #f2e1cb; --alcove: #dcc6a8; --alcove-lo: #c9b08e;
+  --tatami: #dcc08a; --tatami-back: #c9a873; --tatami-line: #bc9e66;
+  --win-a: #9a8fbb; --win-b: #f6cf98;
+  --mochi-lo: #e9d0b4; --shaft: #ffb36b; --shaft-o: .7; --rim-l: .85; --amb: #f1a25f;
+}
+[data-time="night"] {
+  --washi: #1e1c1a; --washi-2: #282521; --paper: #2a2723; --paper-edge: #3a352f;
+  --ink: #ede5d6; --ink-2: #b9ae9d; --ink-3: #8a8072; --ai: #aebde4; --ai-press: #c3cfee; --on-ai: #1e1c1a; --ai-soft: #33363f;
+  --shu: #e8634a; --matcha: #a9b880;
+  --lift: 0 1px 0 rgb(0 0 0 / .2), 0 12px 30px -14px rgb(0 0 0 / .7);
+  --wall: #2d2f37; --wall-hi: #34363f; --alcove: #24262d; --alcove-lo: #1d1f25;
+  --wood: #2d211a; --wood-d: #1f1712; --wood-l: #45342a; --post: #57422f;
+  --tatami: #4b4632; --tatami-back: #3b3727; --tatami-line: #5a543a; --heri: #1d2316;
+  --win-a: #1c2842; --win-b: #36486d;
+  --mochi-hi: #fbf6ea; --mochi: #ece4d3; --mochi-lo: #c9bca5; --blush: #e0918a;
+  --skin: #dcb898; --skin-lo: #c49c7c; --robe: #3d4c72; --robe-lo: #2a3550; --kesa: #7d5430;
+  --zafu: #7d5f8d; --zafu-lo: #5c4469; --mat: #24211e; --scroll-paper: #d9d2bf; --mount: #4d5a45;
+  --line: #2a231e; --shadow-o: .4; --shaft: #a9c2f0; --shaft-o: .4; --rim-r: .7; --amb: transparent;
+}
+
+/* ============ page ============ */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--washi); color: var(--ink); font-family: var(--f-ui); font-size: 15px; line-height: 1.5;
+  transition: background-color .6s, color .6s; }
+/* washi fibre: a static noise tile, removed in lite mode */
+body:not(.lite)::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .5; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55  0 0 0 0 .48  0 0 0 0 .38  0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+[data-time="night"] body::before, body[data-time="night"]::before { mix-blend-mode: screen; opacity: .25; }
+button { font: inherit; color: inherit; }
+
+/* ---------- prototype control bar (not part of the design) ---------- */
+.pbar { position: sticky; top: 0; z-index: 50; background: #26282c; color: #e9e9e6; font: 13px/1.3 system-ui, sans-serif;
+  padding: 8px 12px calc(8px); display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; box-shadow: 0 2px 10px rgb(0 0 0 / .25); }
+.pbar .tag { font-weight: 700; letter-spacing: .04em; color: #f3c46b; margin-right: 2px; }
+.pbar a { color: #9fc3ff; }
+.seg { display: inline-flex; background: #3a3d42; border-radius: 9px; padding: 2px; }
+.seg button { border: 0; background: none; color: #d6d6d2; padding: 6px 10px; border-radius: 7px; min-height: 32px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: #f3efe6; color: #26282c; font-weight: 700; }
+.pbar label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; min-height: 32px; }
+.pbar .demo { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 6px; }
+.pbar .demo button { border: 1px solid #55595f; background: #31343a; color: #f1f1ee; border-radius: 8px; padding: 6px 10px; min-height: 32px; cursor: pointer; }
+.pbar .demo button:active { background: #464a51; }
+
+/* ---------- layout: after (and before, when comparing) ---------- */
+.compare { position: relative; z-index: 1; display: flex; justify-content: center; gap: 28px; padding: 18px 16px 48px; }
+.col { width: 100%; max-width: 420px; }
+.col-label { font: 600 12px/1 system-ui, sans-serif; letter-spacing: .08em; color: var(--ink-3); margin: 0 0 10px 4px; }
+.before { display: none; }
+.before img { width: 100%; border-radius: 18px; display: block; box-shadow: var(--lift); }
+.cmp .before { display: block; }
+@media (max-width: 879px) { .cmp .after { display: none; } }
+
+/* ============ the app (proposal) ============ */
+.app-top { display: flex; align-items: center; justify-content: space-between; margin: 4px 2px 12px; transition: opacity .5s; }
+.app-top h1 { font: 700 22px/1.2 var(--f-story); letter-spacing: .14em; margin: 0; }
+.icon-btn { width: 44px; height: 44px; border-radius: 50%; border: 0; background: transparent; display: grid; place-items: center; cursor: pointer; color: var(--ink-2); }
+.icon-btn:active { background: var(--washi-2); }
+.icon-btn svg { width: 24px; height: 24px; }
+[data-state="focus"] .app-top { opacity: .35; }
+
+.stage { position: relative; border-radius: var(--r-lg); overflow: hidden; aspect-ratio: 4 / 3; box-shadow: var(--lift); background: var(--wall); isolation: isolate; }
+.stage svg { display: block; width: 100%; height: 100%; }
+
+/* speech bubble (HTML over the svg, positioned in scene units) */
+.bubble { position: absolute; transform: translate(-50%, -100%); background: var(--paper); color: var(--ink); font: 400 15px/1.45 var(--f-story);
+  padding: 7px 12px; border-radius: 14px; box-shadow: 0 6px 16px -8px rgb(0 0 0 / .4); white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity .2s, translate .2s; translate: 0 6px; z-index: 3; }
+.bubble::after { content: ""; position: absolute; left: 50%; bottom: -6px; width: 12px; height: 12px; background: inherit; transform: translateX(-50%) rotate(45deg); border-radius: 2px; }
+.bubble.on { opacity: 1; translate: 0 0; }
+.bubble.loud { font-weight: 700; font-size: 18px; }
+
+/* hotspots: invisible hit areas + a washi tag that is shown on arrival and on long-press */
+.hot { position: absolute; border: 0; background: transparent; padding: 0; cursor: pointer; z-index: 2; border-radius: 10px; -webkit-tap-highlight-color: transparent; }
+.hot:focus-visible { outline: 2.5px solid var(--ai); outline-offset: 2px; }
+.hot .t { position: absolute; left: 50%; bottom: -4px; transform: translate(-50%, 100%) scale(.9); background: var(--paper); color: var(--ink);
+  font: 13px/1 var(--f-ui); padding: 6px 9px; border-radius: 8px; white-space: nowrap; box-shadow: 0 4px 12px -6px rgb(0 0 0 / .45);
+  opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; }
+.stage.show-tags .hot .t { opacity: 1; transform: translate(-50%, 100%) scale(1); }
+.hot .dot { position: absolute; right: -10%; top: 46%; width: 9px; height: 9px; border-radius: 50%; background: var(--matcha); box-shadow: 0 0 0 2px var(--wall-hi); }
+.hot .dot::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 1.5px solid var(--matcha); opacity: 0; animation: ring 2.4s ease-out 3; }
+@keyframes ring { 0% { opacity: .9; transform: scale(.5); } 100% { opacity: 0; transform: scale(1.5); } }
+.hot.pressed { background: rgb(255 255 255 / .16); }
+
+/* request-a-strike pill on the scene while sitting */
+.ask { position: absolute; right: 10px; bottom: 10px; z-index: 2; display: none; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px 0 10px;
+  border: 0; border-radius: 22px; background: color-mix(in srgb, var(--paper) 82%, transparent); color: var(--ink-2); font: 14px/1 var(--f-ui); cursor: pointer;
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.lite .ask { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--paper); }
+.ask svg { width: 20px; height: 20px; }
+[data-state="focus"] .ask { display: inline-flex; }
+
+/* the monk's line under the scene: one paper strip, not a separate card */
+.say { margin: -14px 10px 0; position: relative; z-index: 2; background: var(--paper); border-radius: 0 0 var(--r-md) var(--r-md); padding: 22px 18px 14px;
+  font: 400 17px/1.65 var(--f-story); box-shadow: var(--lift); }
+.say .who { font: 13px/1 var(--f-ui); color: var(--ink-3); display: block; margin-bottom: 4px; letter-spacing: .1em; }
+
+/* panes */
+.pane { display: none; }
+[data-state="home"] .p-home, [data-state="focus"] .p-focus, [data-state="result"] .p-result { display: block; }
+[data-state="chars"] .p-chars { display: block; }
+[data-state="chars"] .stage-block { display: none; }
+
+.card { background: var(--paper); border-radius: var(--r-lg); box-shadow: var(--lift); padding: 18px; margin-top: 14px; }
+.plan { display: flex; align-items: center; gap: 10px; }
+.plan .what { font: 700 19px/1.2 var(--f-story); }
+.plan .how { color: var(--ink-2); font-size: 14px; }
+.plan .how b { font: 600 15px/1 var(--f-num); color: var(--ink); }
+.plan .edit { margin-left: auto; border: 0; background: var(--ai-soft); color: var(--ai); border-radius: 18px; min-height: 40px; padding: 0 14px; font-size: 14px; cursor: pointer; }
+.btn-main { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 58px; margin-top: 14px; border: 0; border-radius: 18px;
+  background: var(--ai); color: var(--on-ai); font: 400 18px/1 var(--f-ui); letter-spacing: .12em; cursor: pointer;
+  box-shadow: 0 2px 0 var(--ai-press); transition: transform .08s, box-shadow .08s; }
+.btn-main:active { transform: translateY(2px); box-shadow: 0 0 0 var(--ai-press); }
+.btn-main svg { width: 22px; height: 22px; }
+.meta { display: flex; gap: 14px; justify-content: center; color: var(--ink-3); font-size: 13px; margin-top: 12px; }
+.meta b { font: 600 14px/1 var(--f-num); color: var(--ink-2); }
+
+/* adjust: one sheet, three short rows of chips */
+.adjust { overflow: hidden; max-height: 0; transition: max-height .35s ease; }
+.adjust.open { max-height: 420px; }
+.adjust .row { margin-top: 14px; }
+.adjust .lbl { font-size: 13px; color: var(--ink-3); margin-bottom: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 40px; padding: 0 14px; border-radius: 20px; border: 0; background: var(--washi-2); color: var(--ink); font-size: 15px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ai); color: var(--on-ai); }
+.chip.num { font-family: var(--f-num); font-weight: 500; }
+.adv { display: inline-block; margin-top: 14px; color: var(--ai); font-size: 14px; text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--ai) 40%, transparent); }
+
+/* focus pane: just the time, the incense, two quiet actions */
+.p-focus { text-align: center; padding-top: 8px; }
+.clock { font: 600 76px/1 var(--f-num); letter-spacing: .01em; margin: 18px 0 10px; font-variant-numeric: tabular-nums; }
+.incense { height: 4px; border-radius: 2px; background: var(--washi-2); margin: 0 auto; width: 62%; overflow: hidden; }
+.incense i { display: block; height: 100%; background: var(--ink-3); border-radius: 2px; transform-origin: left; transition: transform .9s linear; }
+.fmeta { color: var(--ink-2); margin: 12px 0 0; font-size: 15px; }
+.fmeta b { font: 500 15px/1 var(--f-num); }
+.factions { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+.ghost { min-height: 44px; padding: 0 18px; border-radius: 22px; border: 1.5px solid var(--paper-edge); background: transparent; color: var(--ink-2); font-size: 15px; cursor: pointer; }
+.sensechip { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; padding: 6px 12px; border-radius: 14px; border: 0; background: transparent; color: var(--ink-3); font-size: 13px; cursor: pointer; }
+.sensechip svg { width: 16px; height: 16px; }
+.sensetip { font-size: 13px; color: var(--ink-2); max-width: 300px; margin: 4px auto 0; display: none; }
+.sensetip.on { display: block; }
+
+/* result paper */
+.p-result { position: relative; }
+.paper { background: var(--paper); border-radius: 6px 6px var(--r-lg) var(--r-lg); box-shadow: var(--lift); padding: 22px 20px 18px; margin-top: -26px; position: relative; z-index: 3;
+  opacity: 0; transform: translateY(24px); }
+.paper::before { /* deckled top edge */ content: ""; position: absolute; left: 0; right: 0; top: -6px; height: 7px; background: var(--paper);
+  -webkit-mask: radial-gradient(4px 5px at 50% 100%, #000 98%, transparent) 0 0 / 9px 7px repeat-x; mask: radial-gradient(4px 5px at 50% 100%, #000 98%, transparent) 0 0 / 9px 7px repeat-x; }
+.paper h2 { font: 700 24px/1.25 var(--f-story); margin: 0 0 6px; letter-spacing: .06em; }
+.paper .l1 { margin: 0; color: var(--ink-2); }
+.paper .l2 { margin: 2px 0 0; color: var(--ink-2); }
+.seal { position: absolute; right: 18px; top: 16px; width: 66px; height: 66px; opacity: 0; }
+.seal svg { width: 100%; height: 100%; overflow: visible; }
+.stats { display: flex; gap: 18px; margin: 16px 0 0; padding-top: 14px; border-top: 1.5px dashed var(--paper-edge); }
+.stat { opacity: 0; }
+.stat .n { font: 600 28px/1 var(--f-num); }
+.stat .u { font-size: 13px; color: var(--ink-3); margin-left: 3px; }
+.stat .k { display: block; font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+.unlock { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding: 10px 12px; border-radius: 14px; background: var(--washi-2); opacity: 0; transform: translateY(8px); }
+.unlock .ic { width: 44px; height: 44px; border-radius: 12px; background: var(--paper); display: grid; place-items: center; }
+.unlock .ic svg { width: 34px; height: 34px; }
+.unlock small { display: block; color: var(--ink-3); font-size: 12px; }
+.koan { font: 400 15px/1.6 var(--f-story); color: var(--ink-2); margin: 14px 0 0; opacity: 0; }
+.racts { display: flex; gap: 10px; margin-top: 16px; opacity: 0; }
+.racts .btn-main { margin: 0; flex: 1; min-height: 52px; font-size: 16px; }
+.racts .ghost { flex: 0 0 auto; }
+.skip { position: absolute; top: 10px; right: 10px; z-index: 4; border: 0; background: color-mix(in srgb, var(--paper) 80%, transparent); color: var(--ink-2); border-radius: 16px; min-height: 36px; padding: 0 12px; font-size: 13px; cursor: pointer; display: none; }
+.skip.on { display: block; }
+
+/* ---------- characters sheet ---------- */
+.p-chars h2 { font: 700 20px/1.3 var(--f-story); margin: 8px 2px 4px; }
+.p-chars p.note { color: var(--ink-2); font-size: 14px; margin: 0 2px 10px; }
+.viewer { background: var(--wall); border-radius: var(--r-lg); box-shadow: var(--lift); overflow: hidden; }
+.viewer svg { display: block; width: 100%; }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 22px; }
+.btnrow .chip { min-height: 38px; font-size: 14px; }
+.faces { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 22px; }
+.faces figure { margin: 0; background: var(--paper); border-radius: 14px; padding: 6px 4px 8px; text-align: center; box-shadow: var(--lift); cursor: pointer; }
+.faces svg { width: 100%; display: block; }
+.faces figcaption { font-size: 12px; color: var(--ink-2); }
+.log { font: 12px/1.5 ui-monospace, monospace; color: var(--ink-2); background: var(--paper); border-radius: 12px; padding: 10px 12px; height: 128px; overflow: auto; margin: -10px 0 22px; white-space: pre-wrap; }
+
+/* ---------- svg classes ---------- */
+.ln { stroke: var(--line); stroke-linecap: round; stroke-linejoin: round; }
+.cshadow { fill: #1f1610; opacity: var(--shadow-o); }
+.lite .cshadow { filter: none; opacity: calc(var(--shadow-o) * .7); }
+.lite [data-heavy] { display: none; }
+.lite .blurred { filter: none !important; }
+.day-only, .dusk-only, .night-only { transition: opacity .6s; }
+[data-time="day"] .dusk-only, [data-time="day"] .night-only,
+[data-time="dusk"] .day-only, [data-time="dusk"] .night-only,
+[data-time="night"] .day-only, [data-time="night"] .dusk-only { opacity: 0; }
+.fx-pop { transform-box: fill-box; transform-origin: center; }
+@media (prefers-reduced-motion: reduce) { .hot .dot::after { animation: none; } }
+</style>
+</head>
+<body>
+<div class="pbar" role="toolbar" aria-label="原型控制列">
+  <span class="tag">Round 1 原型</span>
+  <div class="seg" id="segState" aria-label="畫面">
+    <button data-v="home" aria-pressed="true">首頁</button><button data-v="focus">專注中</button><button data-v="result">結算</button><button data-v="chars">角色</button>
+  </div>
+  <div class="seg" id="segTime" aria-label="時段">
+    <button data-v="day">日</button><button data-v="dusk">黃昏</button><button data-v="night">夜</button>
+  </div>
+  <label><input type="checkbox" id="optCmp"> 對照 v20</label>
+  <label><input type="checkbox" id="optLite"> 低效能</label>
+  <label><input type="checkbox" id="optRM"> 減少動態</label>
+  <label><input type="checkbox" id="optSnd" checked> 聲音</label>
+  <a href="./">← 報告</a>
+  <div class="demo" id="demo"></div>
+</div>
+
+<div class="compare" id="compare">
+  <div class="col before"><p class="col-label">目前 v20（截圖）</p><img id="beforeImg" alt="目前版本截圖"></div>
+  <div class="col after" id="app" data-state="home">
+    <p class="col-label">Round 1 提案（可互動）</p>
+    <header class="app-top">
+      <h1>香板禪堂</h1>
+      <button class="icon-btn" aria-label="設定"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M10.3 2.8h3.4l.5 2.4 1.7.9 2.2-1.1 2.4 2.4-1.1 2.2.9 1.7 2.4.5v3.4l-2.4.5-.9 1.7 1.1 2.2-2.4 2.4-2.2-1.1-1.7.9-.5 2.4h-3.4l-.5-2.4-1.7-.9-2.2 1.1-2.4-2.4 1.1-2.2-.9-1.7-2.4-.5v-3.4l2.4-.5.9-1.7-1.1-2.2 2.4-2.4 2.2 1.1 1.7-.9z"/><circle cx="12" cy="12" r="3.2"/></svg></button>
+    </header>
+
+    <div class="stage-block">
+      <div class="stage" id="stage">
+        <svg id="scene" viewBox="0 0 400 300" role="img" aria-label="禪堂：麻糬與住持"></svg>
+        <button class="hot" data-k="rules" style="left:6%;top:14%;width:7%;height:24%" aria-label="堂規"><span class="t">堂規</span></button>
+        <button class="hot" data-k="rwin" style="left:13.5%;top:22%;width:15%;height:20%" aria-label="悟之窗"><span class="t">悟之窗</span></button>
+        <button class="hot" data-k="collect" style="left:44%;top:16%;width:12%;height:35%" aria-label="收藏冊"><span class="t">收藏冊</span><span class="dot" title="有新收藏"></span></button>
+        <button class="hot" data-k="swin" style="left:71.5%;top:22%;width:15.5%;height:21%" aria-label="迷之窗"><span class="t">迷之窗</span></button>
+        <button class="hot" data-k="ledger" style="left:89%;top:15%;width:7%;height:25%" aria-label="坐禪帳"><span class="t">坐禪帳</span></button>
+        <button class="ask" id="askBtn" aria-label="合掌請打"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V8.5c0-2 .9-4 2.6-5.3.5 2.2 1.4 4 1.4 6.6V15l2 3.2"/><path d="M12 20V8.5c0-2-.9-4-2.6-5.3-.5 2.2-1.4 4-1.4 6.6V15l-2 3.2"/></svg>合掌請打</button>
+        <button class="skip" id="skipBtn">略過 ›</button>
+        <div class="bubble" id="bubble"></div>
+      </div>
+
+      <!-- home -->
+      <div class="pane p-home">
+        <p class="say" id="say"><span class="who">住持</span><span id="sayText">早安。今天也來坐一炷嗎？</span></p>
+        <div class="card">
+          <div class="plan">
+            <div><div class="what" id="planWhat">讀書</div><div class="how" id="planHow"><b>25</b> 分 × <b>2</b> 炷 · 休息 <b>5</b> 分</div></div>
+            <button class="edit" id="editBtn" aria-expanded="false">調整本次</button>
+          </div>
+          <div class="adjust" id="adjust">
+            <div class="row"><div class="lbl">做什麼</div><div class="chips" data-k="task"><button class="chip" aria-pressed="true">讀書</button><button class="chip">工作</button><button class="chip">寫作</button><button class="chip">自訂…</button></div></div>
+            <div class="row"><div class="lbl">一炷多久</div><div class="chips" data-k="min"><button class="chip num">15</button><button class="chip num" aria-pressed="true">25</button><button class="chip num">45</button><button class="chip num">60</button></div></div>
+            <div class="row"><div class="lbl">坐幾炷</div><div class="chips" data-k="rounds"><button class="chip num">1</button><button class="chip num" aria-pressed="true">2</button><button class="chip num">3</button><button class="chip num">4</button></div></div>
+            <a class="adv" href="#" onclick="return false">進階設定：偵測方式、鐘聲、每日目標 ›</a>
+          </div>
+          <button class="btn-main" id="startBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 21V9"/><path d="M12 6.5c-1.6-1.2-1.6-3 0-4.5 1.6 1.5 1.6 3.3 0 4.5z" fill="currentColor"/><path d="M7 21h10"/></svg>開始坐禪</button>
+          <div class="meta"><span>今日 <b>50</b> 分</span><span>本週來堂 <b>4</b> 天</span></div>
+        </div>
+      </div>
+
+      <!-- focus -->
+      <div class="pane p-focus">
+        <div class="clock" id="clock" role="timer" aria-live="off">25:00</div>
+        <div class="incense"><i id="incBar"></i></div>
+        <p class="fmeta"><span id="fTask">讀書</span> · 第 <b>1</b> / <b>2</b> 炷</p>
+        <div class="factions"><button class="ghost">暫離</button><button class="ghost">出堂</button></div>
+        <button class="sensechip" id="senseChip" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5" stroke-linecap="round"/></svg>這次的偵測：切出畫面</button>
+        <p class="sensetip" id="senseTip">這台裝置沒有動作感測，所以住持只看得到你有沒有切走畫面。拿起手機但沒切走，他是不會知道的。</p>
+      </div>
+
+      <!-- result -->
+      <div class="pane p-result">
+        <div class="paper" id="paper">
+          <h2 id="rTitle">坐滿 2 炷</h2>
+          <p class="l1">「讀書」共坐了 <b style="font-family:var(--f-num)">50</b> 分鐘</p>
+          <p class="l2" id="rLine2">一下都沒被打，如山不動。</p>
+          <div class="seal" id="seal"></div>
+          <div class="stats">
+            <div class="stat"><span class="n" data-to="75">0</span><span class="u">分</span><span class="k">今日坐禪</span></div>
+            <div class="stat"><span class="n" data-to="4">0</span><span class="u">天</span><span class="k">本週來堂</span></div>
+            <div class="stat"><span class="n" data-to="0">0</span><span class="u">下</span><span class="k">被打</span></div>
+          </div>
+          <div class="unlock" id="unlock"><div class="ic" id="unlockIc"></div><div><small>新收藏</small>麻糬的表情「滿足」</div></div>
+          <p class="koan">「行住坐臥，皆是禪。」</p>
+          <div class="racts"><button class="btn-main" id="okBtn">收下</button><button class="ghost" id="againBtn">再一炷</button><button class="ghost" aria-label="分享">分享</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- characters -->
+    <div class="pane p-chars" id="chars"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* =====================================================================
+   Round 1 prototype. Everything moves through one rAF loop that writes
+   transform *attributes* (safe on iOS Safari). Timers use timestamps,
+   never frame counts. Level-3 events are exclusive.
+   ===================================================================== */
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const NS = 'http://www.w3.org/2000/svg';
+const qs = new URLSearchParams(location.search);
+const sysRM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const opt = { rm: sysRM || qs.has('rm'), lite: qs.has('lite'), snd: !qs.has('mute') };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const E = {
+  lin: t => t, out: t => 1 - (1 - t) ** 3, in: t => t * t * t,
+  inOut: t => t < .5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2,
+  back: t => { const c = 1.9; return 1 + (c + 1) * (t - 1) ** 3 + c * (t - 1) ** 2; },          // overshoot
+  spring: t => 1 - Math.exp(-5.5 * t) * Math.cos(13 * t),                                          // damped wobble, ends at 1
+};
+
+/* ---------- tween engine ---------- */
+const tweens = new Set();
+let frozenUntil = 0;   // hit-stop: everything holds still
+function anim(ms, fn, ease = E.inOut) {
+  return new Promise(res => {
+    if (opt.rm || ms <= 0) { fn(1); res(); return; }
+    tweens.add({ t0: performance.now(), ms, fn, ease, res });
+  });
+}
+const wait = ms => new Promise(r => setTimeout(r, opt.rm ? Math.min(ms, 400) : ms));
+function flushTweens() { for (const tw of tweens) { tw.fn(1); tw.res(); } tweens.clear(); }
+document.addEventListener('visibilitychange', () => { if (!document.hidden) flushTweens(); });   // resume at the end state, never replay
+
+/* ---------- sound (WebAudio, synthesized; nothing to download) ---------- */
+let ac = null;
+function audio() { if (!opt.snd) return null; try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.state === 'suspended' && ac.resume(); } catch { ac = null; } return ac; }
+function bell(vol = .22) {
+  const a = audio(); if (!a) return; const t = a.currentTime;
+  [[1, 1], [2.76, .45], [5.4, .2], [8.9, .08]].forEach(([m, g]) => {
+    const o = a.createOscillator(), v = a.createGain(); o.frequency.value = 392 * m; o.type = 'sine';
+    v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(vol * g, t + .008); v.gain.exponentialRampToValueAtTime(.0001, t + 3.2 / Math.sqrt(m));
+    o.connect(v).connect(a.destination); o.start(t); o.stop(t + 3.5);
+  });
+}
+function clack(vol = .5, f = 1700) {
+  const a = audio(); if (!a) return; const t = a.currentTime, n = a.sampleRate * .08, b = a.createBuffer(1, n, a.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (n * .12));
+  const s = a.createBufferSource(), bp = a.createBiquadFilter(), v = a.createGain(); s.buffer = b; bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = 2.4; v.gain.value = vol;
+  s.connect(bp).connect(v).connect(a.destination); s.start(t);
+}
+function pop(vol = .2) { const a = audio(); if (!a) return; const t = a.currentTime, o = a.createOscillator(), v = a.createGain();
+  o.frequency.setValueAtTime(240, t); o.frequency.exponentialRampToValueAtTime(90, t + .12); v.gain.setValueAtTime(vol, t); v.gain.exponentialRampToValueAtTime(.0001, t + .16);
+  o.connect(v).connect(a.destination); o.start(t); o.stop(t + .2); }
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
+
+/* =====================================================================
+   SCENE
+   ===================================================================== */
+const MOCHI_BODY = 'M-34 0 C-38 -10 -36 -30 -26 -48 C-18 -62 -8 -68 0 -68 C8 -68 18 -62 26 -48 C36 -30 38 -10 34 0 C22 4.5 -22 4.5 -34 0 Z';
+function sceneDefs() { return `
+<defs>
+  <linearGradient id="gWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--wall-hi)"/><stop offset="1" style="stop-color:var(--wall)"/></linearGradient>
+  <linearGradient id="gAlcove" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--alcove-lo)"/><stop offset=".35" style="stop-color:var(--alcove)"/><stop offset="1" style="stop-color:var(--alcove)"/></linearGradient>
+  <linearGradient id="gFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--tatami-back)"/><stop offset="1" style="stop-color:var(--tatami)"/></linearGradient>
+  <linearGradient id="gAO" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1d14" stop-opacity=".22"/><stop offset="1" stop-color="#2a1d14" stop-opacity="0"/></linearGradient>
+  <linearGradient id="gWin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--win-a)"/><stop offset="1" style="stop-color:var(--win-b)"/></linearGradient>
+  <radialGradient id="gMochi" cx=".36" cy=".26" r=".85"><stop offset="0" style="stop-color:var(--mochi-hi)"/><stop offset=".55" style="stop-color:var(--mochi)"/><stop offset="1" style="stop-color:var(--mochi-lo)"/></radialGradient>
+  <linearGradient id="gRobe" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--robe-lo)"/><stop offset=".45" style="stop-color:var(--robe)"/><stop offset="1" style="stop-color:var(--robe-lo)"/></linearGradient>
+  <radialGradient id="gHead" cx=".38" cy=".32" r=".8"><stop offset="0" style="stop-color:var(--skin)"/><stop offset="1" style="stop-color:var(--skin-lo)"/></radialGradient>
+  <linearGradient id="gShaft" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--shaft)" stop-opacity=".0"/><stop offset=".3" style="stop-color:var(--shaft)" stop-opacity=".55"/><stop offset="1" style="stop-color:var(--shaft)" stop-opacity=".1"/></linearGradient>
+  <radialGradient id="gPatch"><stop offset="0" style="stop-color:var(--shaft)" stop-opacity=".9"/><stop offset="1" style="stop-color:var(--shaft)" stop-opacity="0"/></radialGradient>
+  <radialGradient id="gAndon"><stop offset="0" stop-color="#ffc583" stop-opacity=".5"/><stop offset=".4" stop-color="#ffb46e" stop-opacity=".18"/><stop offset="1" stop-color="#ffb46e" stop-opacity="0"/></radialGradient>
+  <radialGradient id="gVig" cx=".5" cy=".55" r=".75"><stop offset=".6" stop-color="#1a120c" stop-opacity="0"/><stop offset="1" stop-color="#1a120c" stop-opacity=".28"/></radialGradient>
+  <radialGradient id="gSun"><stop offset="0" stop-color="#ffe0a0"/><stop offset=".4" stop-color="#ff9d52" stop-opacity=".6"/><stop offset="1" stop-color="#ff8a4a" stop-opacity="0"/></radialGradient>
+  <filter id="fBlur2" x="-50%" y="-200%" width="200%" height="500%"><feGaussianBlur stdDeviation="2"/></filter>
+  <filter id="fBlur6" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+  <pattern id="pWeave" width="6" height="2.4" patternUnits="userSpaceOnUse"><path d="M0 1.2 H6" stroke="var(--tatami-line)" stroke-width=".55" opacity=".7"/></pattern>
+  <clipPath id="cRwin"><circle cx="84" cy="100" r="30"/></clipPath>
+  <clipPath id="cSwin"><rect x="288" y="70" width="60" height="60"/></clipPath>
+</defs>`; }
+
+function windowView(clip) { return `<g clip-path="url(#${clip})">
+  <rect x="0" y="40" width="400" height="120" fill="url(#gWin)"/>
+  <g class="day-only"><path d="M40 132 Q90 112 140 124 Q220 108 360 126 L360 160 L40 160 Z" fill="#b9c8ad" opacity=".75"/>
+    <path d="M250 112 Q300 98 360 110 L360 160 L250 160Z" fill="#a7b99b" opacity=".6"/></g>
+  <g class="dusk-only"><circle cx="96" cy="116" r="22" fill="url(#gSun)"/><circle cx="96" cy="116" r="9" fill="#ec6a3e"/>
+    <path d="M40 132 Q90 116 140 126 L140 160 L40 160 Z M250 118 Q300 106 360 116 L360 160 L250 160Z" fill="#7d6a8a" opacity=".6"/></g>
+  <g class="night-only"><circle cx="330" cy="88" r="16" fill="#f3ecd2" opacity=".14"/><circle cx="330" cy="88" r="7" fill="#f3ecd2"/>
+    <circle cx="70" cy="84" r=".9" fill="#fff"/><circle cx="98" cy="76" r=".7" fill="#fff"/><circle cx="300" cy="104" r=".8" fill="#fff"/><circle cx="76" cy="112" r=".6" fill="#fff"/></g>
+  <g fill="#3f4a33" opacity=".85"><path d="M48 76 q14 -6 30 2 q-8 4 -18 3 q-6 4 -12 -5z"/><path d="M60 70 q10 -8 22 -2" stroke="#3f4a33" stroke-width="1.6" fill="none"/></g>
+</g>`; }
+
+function sceneMarkup() { return `
+<g id="world">
+  <!-- ===== background: wall, woodwork, alcove ===== -->
+  <rect x="0" y="0" width="400" height="190" fill="url(#gWall)"/>
+  <rect x="0" y="0" width="400" height="12" fill="var(--wood-d)"/>
+  <rect x="0" y="12" width="400" height="2" fill="#000" opacity=".12"/>
+  <rect x="0" y="29" width="400" height="7" fill="var(--wood)"/><rect x="0" y="29" width="400" height="1.2" fill="#fff" opacity=".12"/>
+  <rect x="0" y="36" width="400" height="3" fill="#2a1d14" opacity=".1"/>
+
+  <!-- tokonoma: a recessed alcove gives the room a back plane -->
+  <rect x="150" y="36" width="100" height="150" fill="var(--wood-d)" opacity=".25"/>
+  <rect x="156" y="42" width="88" height="134" fill="url(#gAlcove)"/>
+  <rect x="156" y="42" width="88" height="8" fill="var(--wood)"/>
+  <rect x="156" y="50" width="88" height="6" fill="#2a1d14" opacity=".12"/>
+  <rect x="148" y="36" width="8" height="152" fill="var(--post)"/><path d="M150 40 V186" stroke="#fff" stroke-width=".8" opacity=".18"/>
+  <path d="M152 60 q1 6 0 12 M152.6 110 q-1 5 0 9" stroke="var(--wood-d)" stroke-width=".7" opacity=".5" fill="none"/>
+  <rect x="244" y="36" width="5" height="152" fill="var(--wood)"/>
+  <!-- the scroll -->
+  <rect x="176" y="54" width="48" height="3.5" rx="1.7" fill="var(--wood-d)"/>
+  <rect x="181" y="57" width="38" height="90" fill="var(--mount)"/>
+  <rect x="185.5" y="64" width="29" height="76" fill="var(--scroll-paper)"/>
+  <text x="200" y="100" font-size="21" text-anchor="middle" fill="#2a2622" style="font-family:var(--f-story)">靜</text>
+  <rect x="204" y="121" width="5.5" height="5.5" rx="1" fill="var(--shu)" opacity=".85"/>
+  <rect x="178" y="146" width="44" height="4.5" rx="2.2" fill="var(--wood-d)"/>
+  <rect x="181" y="150" width="38" height="5" fill="#2a1d14" opacity=".08" class="blurred" filter="url(#fBlur2)"/>
+  <!-- toko board, incense on it (it still doubles as the timer) -->
+  <rect x="156" y="172" width="88" height="10" fill="var(--wood-l)"/><rect x="156" y="172" width="88" height="1.4" fill="#fff" opacity=".2"/>
+  <rect x="156" y="182" width="88" height="4" fill="var(--wood-d)"/>
+  <g id="incenseG" transform="translate(231 172)">
+    <ellipse cx="0" cy="0" rx="9" ry="2" fill="#2a1d14" opacity=".25"/>
+    <path d="M-8 -7 h16 q-1 7 -8 7 q-7 0 -8 -7z" fill="var(--wood)" stroke="var(--line)" stroke-width=".8"/>
+    <rect id="incStick" x="-.9" y="-44" width="1.8" height="37" fill="var(--kesa)"/>
+    <circle id="ember" cx="0" cy="-44" r="1.5" fill="#ff7a45"/>
+    <path id="smoke" d="M0 -48 q-4 -7 0 -14 q4 -7 0 -14" fill="none" stroke="var(--ink-3)" stroke-width="1" opacity=".45" stroke-linecap="round"/>
+  </g>
+
+  <!-- pillars -->
+  <rect x="8" y="0" width="10" height="190" fill="var(--wood)"/><rect x="8" y="0" width="2" height="190" fill="#fff" opacity=".08"/>
+  <rect x="382" y="0" width="10" height="190" fill="var(--wood)"/><rect x="390" y="0" width="2" height="190" fill="#000" opacity=".12"/>
+
+  <!-- 悟之窗 (round) -->
+  <circle cx="84" cy="100" r="31" fill="var(--wood-d)" opacity=".2" transform="translate(1.5 2)"/>
+  ${windowView('cRwin')}
+  <g clip-path="url(#cRwin)" stroke="var(--wood)" stroke-width="1.5" opacity=".9"><path d="M69 66 V134 M84 66 V134 M99 66 V134 M50 85 H118 M50 100 H118 M50 115 H118"/></g>
+  <circle cx="84" cy="100" r="30" fill="none" stroke="var(--wood)" stroke-width="5"/>
+  <circle cx="84" cy="100" r="27.5" fill="none" stroke="#000" stroke-width="1" opacity=".12"/>
+  <!-- 迷之窗 (square) -->
+  <rect x="289.5" y="72" width="60" height="60" fill="var(--wood-d)" opacity=".2"/>
+  ${windowView('cSwin')}
+  <g stroke="var(--wood)" stroke-width="1.5" opacity=".9"><path d="M303 70 V130 M318 70 V130 M333 70 V130 M288 85 H348 M288 100 H348 M288 115 H348"/></g>
+  <rect x="288" y="70" width="60" height="60" fill="none" stroke="var(--wood)" stroke-width="5"/>
+
+  <!-- 堂規 board, 坐禪帳 ledger -->
+  <path d="M36 42 L27 56 M36 42 L45 56" stroke="var(--line)" stroke-width=".7" fill="none"/>
+  <rect x="25" y="56" width="22" height="56" rx="1.5" fill="#c69b62" stroke="var(--wood)" stroke-width="1.2"/>
+  <rect x="27" y="112" width="22" height="2" fill="#2a1d14" opacity=".12"/>
+  <text x="36" y="79" font-size="11.5" text-anchor="middle" fill="#2a2622" style="font-family:var(--f-story)">堂</text>
+  <text x="36" y="96" font-size="11.5" text-anchor="middle" fill="#2a2622" style="font-family:var(--f-story)">規</text>
+  <path d="M369 42 L360 56 M369 42 L378 56" stroke="var(--line)" stroke-width=".7" fill="none"/>
+  <rect x="358" y="56" width="22" height="60" rx="1" fill="var(--scroll-paper)" stroke="var(--line)" stroke-width=".8"/>
+  <rect x="358" y="56" width="22" height="5" fill="var(--wood-l)"/>
+  <text x="369" y="76" font-size="9" text-anchor="middle" fill="#2a2622" style="font-family:var(--f-story)">坐</text>
+  <text x="369" y="89" font-size="9" text-anchor="middle" fill="#2a2622" style="font-family:var(--f-story)">禪</text>
+  <text x="369" y="102" font-size="9" text-anchor="middle" fill="#2a2622" style="font-family:var(--f-story)">帳</text>
+
+  <!-- ===== midground: floor in perspective ===== -->
+  <rect x="0" y="186" width="400" height="114" fill="url(#gFloor)"/>
+  <rect x="0" y="186" width="400" height="114" fill="url(#pWeave)" opacity=".7"/>
+  <path d="M0 216 H400" stroke="var(--heri)" stroke-width="2.2"/>
+  <path d="M0 262 H400" stroke="var(--heri)" stroke-width="3"/>
+  <path d="M130 188 L115.6 216 M274.7 216 L294.3 262 M63.2 262 L39.7 300" stroke="var(--heri)" stroke-width="2.2"/>
+  <rect x="0" y="182" width="400" height="7" fill="var(--wood-d)"/>
+  <rect x="0" y="189" width="400" height="18" fill="url(#gAO)"/>
+
+  <!-- ===== light: window shafts and their patches (day/dusk/night differ) ===== -->
+  <g id="lights" style="mix-blend-mode:screen" opacity="var(--shaft-o)">
+    <g class="day-only">
+      <path d="M58 80 L110 80 L196 252 L120 258 Z" fill="url(#gShaft)" opacity=".28" class="blurred" filter="url(#fBlur6)"/>
+      <ellipse cx="158" cy="248" rx="46" ry="11" fill="url(#gPatch)" opacity=".7" class="blurred" filter="url(#fBlur2)"/>
+      <ellipse cx="350" cy="240" rx="32" ry="8" fill="url(#gPatch)" opacity=".4" class="blurred" filter="url(#fBlur2)"/>
+    </g>
+    <g class="dusk-only">
+      <path d="M56 92 L112 84 L270 246 L180 262 Z" fill="url(#gShaft)" opacity=".45" class="blurred" filter="url(#fBlur6)"/>
+      <ellipse cx="226" cy="254" rx="70" ry="13" fill="url(#gPatch)" opacity=".75" class="blurred" filter="url(#fBlur2)"/>
+      <ellipse cx="226" cy="140" rx="30" ry="40" fill="url(#gPatch)" opacity=".18" class="blurred" filter="url(#fBlur6)"/>
+    </g>
+    <g class="night-only">
+      <path d="M290 76 L348 76 L300 254 L214 254 Z" fill="url(#gShaft)" opacity=".3" class="blurred" filter="url(#fBlur6)"/>
+      <ellipse cx="258" cy="252" rx="48" ry="11" fill="url(#gPatch)" opacity=".55" class="blurred" filter="url(#fBlur2)"/>
+    </g>
+  </g>
+  <g id="dust" data-heavy class="day-only"></g>
+
+  <!-- andon: stands under the square window; lit only at night -->
+  <g transform="translate(334 214)">
+    <g class="night-only"><circle cx="0" cy="-16" r="80" fill="url(#gAndon)"/><ellipse cx="0" cy="2" rx="40" ry="8" fill="#ffb874" opacity=".22" class="blurred" filter="url(#fBlur2)"/></g>
+    <ellipse class="cshadow blurred" cx="0" cy="1" rx="14" ry="2.6" filter="url(#fBlur2)"/>
+    <rect x="-8" y="-8" width="2" height="9" fill="var(--wood)"/><rect x="6" y="-8" width="2" height="9" fill="var(--wood)"/>
+    <rect x="-10" y="-34" width="20" height="26" fill="#efe6cf" stroke="var(--wood)" stroke-width=".8"/>
+    <rect class="night-only" x="-10" y="-34" width="20" height="26" fill="#ffe3ac"/>
+    <path d="M0 -34 V-8 M-10 -25 H10 M-10 -16.5 H10" stroke="var(--wood)" stroke-width=".55" opacity=".55"/>
+    <rect x="-12" y="-37" width="24" height="3" rx="1" fill="var(--wood)"/><rect x="-12" y="-9" width="24" height="3" rx="1" fill="var(--wood)"/>
+  </g>
+  <!-- the keisaku rests against the right pillar until the monk takes it -->
+  <g id="rack" transform="translate(377 214) rotate(5)">
+    <rect x="-1.4" y="-62" width="2.8" height="62" rx="1.2" fill="#c69b62" stroke="var(--line)" stroke-width=".8"/>
+    <rect x="-2.8" y="-82" width="5.6" height="24" rx="2" fill="#c69b62" stroke="var(--line)" stroke-width=".8"/>
+  </g>
+
+  <!-- ===== characters ===== -->
+  <g id="monkSlot"></g>
+  <g id="seat" transform="translate(206 262)">
+    <ellipse class="cshadow blurred" cx="0" cy="8" rx="62" ry="6" filter="url(#fBlur2)"/>
+    <path d="M-54 0 L54 0 L62 12 L-62 12 Z" fill="var(--mat)" stroke="var(--line)" stroke-width="1.2" stroke-linejoin="round"/>
+    <path d="M-54 0 L54 0" stroke="#fff" stroke-width=".8" opacity=".12"/>
+    <path d="M-38 -6 V0 A38 9 0 0 0 38 0 V-6" fill="var(--zafu-lo)" stroke="var(--line)" stroke-width="1.3"/>
+    <ellipse cx="0" cy="-6" rx="38" ry="9" fill="var(--zafu)" stroke="var(--line)" stroke-width="1.3"/>
+    <path d="M-30 -9 Q0 -15 30 -9" stroke="#fff" stroke-width="1.2" opacity=".14" fill="none"/>
+    <path d="M0 -15 V3" stroke="var(--zafu-lo)" stroke-width=".9" opacity=".6"/>
+  </g>
+  <g id="mochiSlot"></g>
+  <path id="seatLip" d="M174 256.5 A38 9 0 0 0 238 256.5 A38 9 0 0 0 244 254 L244 256 A38 9 0 0 1 168 256 L168 254 A38 9 0 0 0 174 256.5 Z" fill="var(--zafu)" opacity="0"/>
+  <g id="fxSlot"></g>
+
+  <!-- ===== foreground: a sill, the room's lip, and a soft vignette ===== -->
+  <rect x="0" y="291" width="400" height="9" fill="var(--wood-d)"/><rect x="0" y="291" width="400" height="1.2" fill="#fff" opacity=".14"/>
+  <rect x="0" y="0" width="400" height="300" fill="var(--amb)" opacity=".16" style="mix-blend-mode:multiply" pointer-events="none"/>
+  <rect x="0" y="0" width="400" height="300" fill="url(#gVig)" pointer-events="none"/>
+</g>`; }
+
+/* =====================================================================
+   CHARACTERS
+   ===================================================================== */
+/* ---- Mochi: rigged as root(translate) > lean(rotate about the base) > squash(scale about the base).
+   Garments are clipped to the body and live inside the squash, so they deform with it.
+   Hats are rigid and sit outside the squash; they follow the top point. ---- */
+function mochiMarkup(id) { return `
+<g id="${id}">
+  <clipPath id="${id}-clip"><path d="${MOCHI_BODY}"/></clipPath>
+  <ellipse class="cshadow blurred" id="${id}-sh" cx="0" cy="1" rx="32" ry="4.6" filter="url(#fBlur2)"/>
+  <g id="${id}-lean"><g id="${id}-sq">
+    <g id="${id}-feet"><ellipse cx="-13" cy="-1.5" rx="8.5" ry="4.2" fill="var(--mochi)" class="ln" stroke-width="1.8"/><ellipse cx="13" cy="-1.5" rx="8.5" ry="4.2" fill="var(--mochi)" class="ln" stroke-width="1.8"/></g>
+    <path d="${MOCHI_BODY}" fill="url(#gMochi)"/>
+    <g clip-path="url(#${id}-clip)">
+      <ellipse cx="4" cy="6" rx="42" ry="15" fill="var(--mochi-lo)" opacity=".55"/>
+      <path d="M-31 -34 C-27 -50 -15 -63 -2 -65.5" stroke="var(--shaft)" stroke-width="3" fill="none" opacity="var(--rim-l)" stroke-linecap="round"/>
+      <path d="M31 -34 C27 -50 15 -63 2 -65.5" stroke="var(--shaft)" stroke-width="3" fill="none" opacity="var(--rim-r)" stroke-linecap="round"/>
+      <g id="${id}-garment"></g>
+    </g>
+    <path d="${MOCHI_BODY}" fill="none" class="ln" stroke-width="2.2"/>
+    <ellipse cx="-14" cy="-52" rx="6.5" ry="3.4" fill="#fff" opacity=".85" transform="rotate(-32 -14 -52)"/>
+    <g id="${id}-face"></g>
+    <g id="${id}-hands"><ellipse id="${id}-hl" fill="var(--sleeve, var(--mochi))" class="ln" stroke-width="1.8"/><ellipse id="${id}-hr" fill="var(--sleeve, var(--mochi))" class="ln" stroke-width="1.8"/></g>
+    <g id="${id}-fx"></g>
+  </g></g>
+  <g id="${id}-hat"></g>
+  <g id="${id}-tail"></g>
+</g>`; }
+
+/* faces: eyes at y −30, x ±11; mouth at y −21; fx at the upper right of the head.
+   Each entry is the drawing; motion is applied by the rig (blink/gaze/bob). */
+const FACE = {
+  peek:     { eyes: 'dot',   mouth: '<path d="M-2.6 -20.5 h5.2" class="ln" stroke-width="2" fill="none"/>', blink: true },
+  calm:     { eyes: '<path d="M-15 -30 q4 3.4 8 0 M7 -30 q4 3.4 8 0" class="ln" stroke-width="2" fill="none"/>', mouth: '<path d="M-2.4 -21 q2.4 1.6 4.8 0" class="ln" stroke-width="1.8" fill="none"/>' },
+  happy:    { eyes: '<path d="M-15 -28.5 q4 -5 8 0 M7 -28.5 q4 -5 8 0" class="ln" stroke-width="2.1" fill="none"/>', mouth: '<path d="M-5 -22.5 q5 6 10 0 z" fill="#b5534b" class="ln" stroke-width="1.6"/>' },
+  ouch:     { eyes: '<path d="M-16 -34 l7 3.6 l-7 3.6 M16 -34 l-7 3.6 l7 3.6" class="ln" stroke-width="2.1" fill="none"/>', mouth: '<path d="M-5.5 -20 q2.75 -2.6 5.5 0 q2.75 2.6 5.5 0" class="ln" stroke-width="1.8" fill="none"/>',
+              fx: '<path class="fx-pop fx-drip" d="M27 -50 q3.4 4.6 0 7 q-3.4 -2.4 0 -7z" fill="#9ccbe8" stroke="var(--line)" stroke-width="1"/>' },
+  focus:    { eyes: '<path d="M-15 -30 h8 M7 -30 h8" class="ln" stroke-width="2.1"/><path d="M-15.5 -37 l7.5 2 M15.5 -37 l-7.5 2" class="ln" stroke-width="1.8"/>', mouth: '<path d="M-2 -21 h4" class="ln" stroke-width="1.8"/>' },
+  sleepy:   { eyes: '<path d="M-15 -30.5 q4 2 8 .6 M7 -29.9 q4 1.4 8 -.6" class="ln" stroke-width="2" fill="none"/>', mouth: '<ellipse cx="0" cy="-20.5" rx="2.3" ry="3" fill="#5a3430" class="ln" stroke-width="1.4"/>',
+              fx: '<path class="fx-pop fx-float" d="M24 -58 h4.4 l-4.4 4.4 h4.4" class="ln" stroke-width="1.3" fill="none"/>' },
+  content:  { eyes: '<path d="M-15 -28.5 q4 -5 8 0 M7 -28.5 q4 -5 8 0" class="ln" stroke-width="2.1" fill="none"/>', mouth: '<path d="M-3.4 -22 q3.4 2.6 6.8 0" class="ln" stroke-width="1.8" fill="none"/>',
+              fx: '<path class="fx-pop fx-float" d="M26 -58 c-1.5 -2.6 -5 -.6 -2.8 1.8 l2.8 2.8 l2.8 -2.8 c2.2 -2.4 -1.3 -4.4 -2.8 -1.8z" fill="#e8798a" stroke="var(--line)" stroke-width=".8"/>' },
+  proud:    { eyes: '<path d="M-15 -28.5 l4 -3.8 l4 3.8 M7 -28.5 l4 -3.8 l4 3.8" class="ln" stroke-width="2.1" fill="none"/>', mouth: '<path d="M-3.8 -22.4 q4 3.2 8 -1" class="ln" stroke-width="1.8" fill="none"/>',
+              fx: '<path class="fx-pop fx-twinkle" d="M22 -39 l1.1 2.5 l2.5 1.1 l-2.5 1.1 l-1.1 2.5 l-1.1 -2.5 l-2.5 -1.1 l2.5 -1.1z" fill="var(--kin)" stroke="#8a6420" stroke-width=".5"/>' },
+  surprised:{ eyes: '<circle cx="-11" cy="-30" r="4" fill="#fff" class="ln" stroke-width="1.6"/><circle cx="11" cy="-30" r="4" fill="#fff" class="ln" stroke-width="1.6"/><circle cx="-11" cy="-29.6" r="1.7" fill="var(--line)"/><circle cx="11" cy="-29.6" r="1.7" fill="var(--line)"/>',
+              mouth: '<ellipse cx="0" cy="-20" rx="2.2" ry="2.8" fill="none" class="ln" stroke-width="1.6"/>', fx: '<path class="fx-pop fx-pulse" d="M26 -60 l2 -5 M30.6 -56.6 l4.4 -3.4 M33.4 -52.4 l5 -1.6" class="ln" stroke-width="1.6" fill="none"/>' },
+  teary:    { eyes: '<path d="M-15 -30 h8 M7 -30 h8" class="ln" stroke-width="2.1"/><path d="M-15 -36 l6.6 -2.2 M15 -36 l-6.6 -2.2" class="ln" stroke-width="1.5"/><path class="fx-pop fx-drip" d="M-11 -29 q-2 3.8 0 5 q2 -1.2 0 -5z M11 -29 q-2 3.8 0 5 q2 -1.2 0 -5z" fill="#9ccbe8" stroke="var(--line)" stroke-width=".9"/>',
+              mouth: '<path d="M-4.4 -20.5 q1.1 -1.7 2.2 0 q1.1 1.7 2.2 0 q1.1 -1.7 2.2 0 q1.1 1.7 2.2 0" class="ln" stroke-width="1.5" fill="none"/>' },
+  shy:      { eyes: '<circle cx="-12.5" cy="-29" r="2.3" fill="var(--line)"/><circle cx="9.5" cy="-29" r="2.3" fill="var(--line)"/>', mouth: '<path d="M-2.4 -20.6 q1.2 -1.2 2.4 0 q1.2 1.2 2.4 0" class="ln" stroke-width="1.5" fill="none"/>',
+              extra: '<path d="M-24 -21 l2 -3 M-20.6 -21 l2 -3 M-17.2 -21 l2 -3 M15.2 -21 l2 -3 M18.6 -21 l2 -3 M22 -21 l2 -3" stroke="#d9645f" stroke-width="1.1" stroke-linecap="round"/>' },
+  daze:     { eyes: '<circle cx="-11" cy="-30" r="2.8" fill="none" class="ln" stroke-width="1.6"/><circle cx="11" cy="-30" r="2.8" fill="none" class="ln" stroke-width="1.6"/>', mouth: '<path d="M-2.6 -20.5 h5.2" class="ln" stroke-width="1.6"/>',
+              fx: '<g class="fx-pop fx-seq"><circle cx="24" cy="-56" r="2" fill="var(--line)"/><circle cx="30" cy="-58" r="2" fill="var(--line)"/><circle cx="36" cy="-60" r="2" fill="var(--line)"/></g>' },
+};
+const FACE_ZH = { peek: '張望', calm: '平靜', happy: '開心', ouch: '吃痛', focus: '專注', sleepy: '想睡', content: '滿足', proud: '得意', surprised: '驚訝', teary: '委屈', shy: '害羞', daze: '發呆' };
+const HANDS = {   // [cx, cy, rx, ry, rot] for left and right
+  side:   [[-33, -19, 5.6, 7.6, 28], [33, -19, 5.6, 7.6, -28]],
+  lap:    [[-2.6, -5, 7.6, 4.2, -4], [2.6, -6.2, 7.6, 4.2, 4]],
+  gassho: [[-3.2, -14, 4.2, 7.4, 16], [3.2, -14, 4.2, 7.4, -16]],
+  rub:    [[-21, -60, 5.6, 7.2, -40], [33, -19, 5.6, 7.6, -28]],
+  cheer:  [[-37, -44, 5.6, 7.6, 62], [37, -44, 5.6, 7.6, -62]],
+  tuck:   [[-30, -13, 5.4, 6.6, 50], [30, -13, 5.4, 6.6, -50]],
+};
+
+class Mochi {
+  constructor(svg, id) {
+    this.id = id; this.g = svg.querySelector('#' + id);
+    const p = s => svg.querySelector(`#${id}-${s}`);
+    Object.assign(this, { lean: p('lean'), sq: p('sq'), sh: p('sh'), feet: p('feet'), face: p('face'), hl: p('hl'), hr: p('hr'), fxg: p('fx'), hat: p('hat'), tail: p('tail'), garment: p('garment') });
+    this.s = { x: 0, y: 0, sx: 1, sy: 1, rot: 0, lift: 0, gx: 0, gy: 0, blink: 0, feet: 1, breathe: 0 };
+    this.hand = JSON.parse(JSON.stringify(HANDS.side)); this.handTarget = null;
+    this.faceName = ''; this.nextBlink = 0; this.hatRot = 0; this.tailRot = 0; this.vy = 0; this.lastY = 0;
+    this.setFace('peek');
+  }
+  setFace(name) {
+    if (name === this.faceName) return; const f = FACE[name]; this.faceName = name;
+    const eyes = f.eyes === 'dot' ? '<circle cx="-11" cy="-30" r="2.7" fill="var(--line)"/><circle cx="11" cy="-30" r="2.7" fill="var(--line)"/>' : f.eyes;
+    const blushO = name === 'shy' ? .95 : .6;
+    this.face.innerHTML = `<ellipse cx="-20" cy="-22" rx="5.4" ry="3.2" fill="var(--blush)" opacity="${blushO}"/><ellipse cx="20" cy="-22" rx="5.4" ry="3.2" fill="var(--blush)" opacity="${blushO}"/>${f.extra || ''}
+      <g class="eyes">${eyes}</g><g class="mouth">${f.mouth}</g>`;
+    this.eyes = this.face.querySelector('.eyes');
+    this.fxg.innerHTML = f.fx || '';
+    this.fxT0 = performance.now();
+  }
+  /* switching faces behind a quick blink hides the swap */
+  async flash(name, ms = 1200, back) {
+    await this.blinkOnce(70); this.setFace(name);
+    if (ms) { await wait(ms); await this.blinkOnce(70); this.setFace(back || 'calm'); }
+  }
+  async blinkOnce(ms = 90) { await anim(ms, t => this.s.blink = t, E.out); await anim(ms, t => this.s.blink = 1 - t, E.inOut); }
+  pose(name, ms = 260, ease = E.inOut) {
+    const from = JSON.parse(JSON.stringify(this.hand)), to = HANDS[name];
+    return anim(ms, t => { for (let h = 0; h < 2; h++) for (let i = 0; i < 5; i++) this.hand[h][i] = lerp(from[h][i], to[h][i], t); }, ease);
+  }
+  render(t, ambient = true) {
+    const s = this.s;
+    // L1 ambient: breathing (very small, slower when sitting), blink every 3–6 s
+    const br = ambient && !opt.rm ? Math.sin(t / 1000 * (s.breathe ? 1.3 : 2.2)) * (s.breathe ? .014 : .008) : 0;
+    if (ambient && !opt.rm && FACE[this.faceName].blink && t > this.nextBlink) { this.nextBlink = t + 2600 + Math.random() * 3400; if (!this.blinking) { this.blinking = true; this.blinkOnce(80).then(() => this.blinking = false); } }
+    const sy = s.sy * (1 + br), sx = s.sx * (1 - br * .6);
+    this.g.setAttribute('transform', `translate(${s.x.toFixed(2)} ${s.y.toFixed(2)})`);
+    this.lean.setAttribute('transform', `translate(0 ${(-s.lift).toFixed(2)}) rotate(${s.rot.toFixed(2)})`);
+    this.sq.setAttribute('transform', `scale(${sx.toFixed(4)} ${sy.toFixed(4)})`);
+    // shadow: smaller and fainter the higher she is
+    const k = clamp(1 - s.lift / 70, .35, 1);
+    this.sh.setAttribute('transform', `scale(${(k * sx).toFixed(3)} ${k.toFixed(3)})`); this.sh.style.opacity = '';
+    this.sh.setAttribute('opacity', (k * k).toFixed(3));
+    this.feet.setAttribute('opacity', s.feet.toFixed(2));
+    if (this.eyes) { const b = 1 - s.blink * .9; this.eyes.setAttribute('transform', `translate(${s.gx.toFixed(2)} ${(s.gy - 30 * (1 - b)).toFixed(2)}) scale(1 ${b.toFixed(3)})`); }
+    this.face.firstElementChild && this.face.setAttribute('transform', `translate(${(s.gx * .4).toFixed(2)} 0)`);
+    const set = (el, [cx, cy, rx, ry, r]) => { el.setAttribute('cx', cx); el.setAttribute('cy', cy); el.setAttribute('rx', rx); el.setAttribute('ry', ry); el.setAttribute('transform', `rotate(${r} ${cx} ${cy})`); };
+    set(this.hl, this.hand[0]); set(this.hr, this.hand[1]);
+    // fx: small life of their own
+    const ft = (t - this.fxT0) / 1000;
+    for (const el of this.fxg.querySelectorAll('.fx-pop').length ? this.fxg.querySelectorAll('.fx-pop') : this.face.querySelectorAll('.fx-pop')) {
+      let tr = '';
+      if (el.classList.contains('fx-float')) tr = `translate(${Math.sin(ft * 2) * 1.5} ${-((ft * 6) % 9)})`;
+      else if (el.classList.contains('fx-drip')) tr = `translate(0 ${((ft * 3.2) % 3.4)})`;
+      else if (el.classList.contains('fx-twinkle')) { const sc = .8 + .35 * Math.abs(Math.sin(ft * 3)); tr = `translate(22 -35) scale(${sc}) translate(-22 35)`; }
+      else if (el.classList.contains('fx-pulse')) tr = `translate(${Math.sin(ft * 9) * .6} 0)`;
+      else if (el.classList.contains('fx-seq')) { [...el.children].forEach((c, i) => c.setAttribute('opacity', (Math.floor(ft * 2.5) % 4) > i ? 1 : .15)); }
+      if (opt.rm) tr = '';
+      tr ? el.setAttribute('transform', tr) : el.removeAttribute('transform');
+    }
+    // rigid hat follows the top point (not squashed); a scarf tail lags behind (follow-through)
+    this.vy = lerp(this.vy, (s.y - s.lift) - this.lastY, .3); this.lastY = s.y - s.lift;
+    if (this.hat.firstChild) {
+      this.hatRot = lerp(this.hatRot, s.rot * 1.15, .18);
+      this.hat.setAttribute('transform', `translate(0 ${(-s.lift - 64 * sy).toFixed(2)}) rotate(${this.hatRot.toFixed(2)}) scale(${(.5 + sx * .5).toFixed(3)} 1)`);
+    }
+    if (this.tail.firstChild) {
+      const target = clamp(-this.vy * 9, -35, 35) + s.rot * .6 + (opt.rm ? 0 : Math.sin(t / 700) * 2);
+      this.tailRot = lerp(this.tailRot, target, .12);
+      this.tail.setAttribute('transform', `translate(${(26 * sx).toFixed(2)} ${(-s.lift - 15 * sy).toFixed(2)}) rotate(${this.tailRot.toFixed(2)})`);
+    }
+  }
+}
+
+/* ---- Monk: chibi, head:body ≈ 1:1.4, the robe is a bell — the same dome language as the mochi ---- */
+function monkMarkup(id) { return `
+<g id="${id}">
+  <ellipse class="cshadow blurred" cx="1" cy="1" rx="24" ry="4.4" filter="url(#fBlur2)"/>
+  <g id="${id}-flip"><g id="${id}-lean"><g id="${id}-bob">
+    <ellipse id="${id}-f1" cx="-7" cy="-1.5" rx="7" ry="3.2" fill="#f2ede2" class="ln" stroke-width="1.4"/>
+    <ellipse id="${id}-f2" cx="9" cy="-1.5" rx="7" ry="3.2" fill="#f2ede2" class="ln" stroke-width="1.4"/>
+    <path d="M-15 -45 Q-22 -42 -23 -32 L-24 -22 Q-20 -18 -14.5 -20 Z" fill="var(--robe-lo)" class="ln" stroke-width="1.6"/>
+    <path d="M-21 0 C-23 -16 -21 -34 -16 -44 Q-10 -53 1 -53 Q12 -53 17 -44 C22 -34 24 -16 22 0 C9 3.4 -8 3.4 -21 0 Z" fill="url(#gRobe)" class="ln" stroke-width="2.2"/>
+    <path d="M-20 -6 C-8 -3 8 -3 21.4 -6" stroke="#000" stroke-width="1" opacity=".18" fill="none"/>
+    <path d="M-5 -30 Q-4 -16 -6 -3 M9 -24 Q10.5 -12 10 -2.5" class="ln" stroke-width="1.1" opacity=".3" fill="none"/>
+    <path d="M-7 -52 L4 -37.5 L11 -52" fill="#f4efe4" class="ln" stroke-width="1.3"/>
+    <path d="M-8.4 -51.6 L3.4 -36.6 M12.6 -51 L8.4 -38.4" stroke="var(--robe-lo)" stroke-width="2.8" stroke-linecap="round"/>
+    <g><path d="M-4 -51 L-6 -40 M10.5 -50.5 L12 -40" stroke="var(--kesa)" stroke-width="2.2" stroke-linecap="round"/>
+      <rect x="-8" y="-40.5" width="22" height="14" rx="1.8" fill="var(--kesa)" class="ln" stroke-width="1.3"/>
+      <rect x="-5.5" y="-38" width="17" height="9" rx=".8" fill="none" class="ln" stroke-width=".8" opacity=".35"/>
+      <circle cx="-5.4" cy="-46" r="1.6" fill="none" stroke="#e9dcc0" stroke-width="1"/></g>
+    <g id="${id}-head">
+      <circle cx="-15" cy="-70" r="4.2" fill="var(--skin)" class="ln" stroke-width="1.5"/>
+      <circle cx="1.5" cy="-71" r="19" fill="url(#gHead)" class="ln" stroke-width="2.2"/>
+      <path d="M-10 -84 q5 -4.6 11 -4.4" stroke="#fff" stroke-width="2.4" opacity=".45" fill="none" stroke-linecap="round"/>
+      <ellipse cx="2.4" cy="-63.5" rx="3.6" ry="2.1" fill="var(--blush)" opacity=".6"/><ellipse cx="17.5" cy="-63.5" rx="1.8" ry="1.6" fill="var(--blush)" opacity=".6"/>
+      <g id="${id}-eyes"></g>
+      <g id="${id}-mouth"></g>
+    </g>
+    <g id="${id}-arm">
+      <g id="${id}-stick"><rect x="15.8" y="-86" width="2.8" height="62" rx="1.2" fill="#c69b62" class="ln" stroke-width=".9"/><rect x="14.4" y="-106" width="5.6" height="24" rx="2" fill="#c69b62" class="ln" stroke-width=".9"/></g>
+      <g id="${id}-cup" opacity="0"><path d="M12 -34 h10 l-1.3 7 h-7.4 z" fill="#efe6cf" class="ln" stroke-width="1"/></g>
+      <path d="M6 -49 Q16 -51 19.5 -42 L22.4 -27 Q22.6 -20.4 16.4 -20.4 Q10.4 -20.4 9.4 -26.6 Z" fill="var(--robe)" class="ln" stroke-width="1.8"/>
+      <path d="M11.5 -24.5 Q16 -23 21.5 -25" class="ln" stroke-width=".9" opacity=".3" fill="none"/>
+      <circle cx="17.2" cy="-29" r="4.6" fill="var(--skin)" class="ln" stroke-width="1.5"/>
+    </g>
+  </g></g></g>
+</g>`; }
+const MONK_EYES = {
+  open:  '<ellipse cx="6.5" cy="-71" rx="1.9" ry="2.4" fill="var(--line)"/><ellipse cx="14.5" cy="-71" rx="1.9" ry="2.4" fill="var(--line)"/>',
+  smile: '<path d="M4 -70.5 q2.5 -3 5 0 M12 -70.5 q2.5 -3 5 0" class="ln" stroke-width="1.7" fill="none"/>',
+  shut:  '<path d="M4 -71 q2.5 2 5 0 M12 -71 q2.5 2 5 0" class="ln" stroke-width="1.7" fill="none"/>',
+  stern: '<ellipse cx="6.5" cy="-70.5" rx="1.9" ry="2" fill="var(--line)"/><ellipse cx="14.5" cy="-70.5" rx="1.9" ry="2" fill="var(--line)"/><path d="M3 -77 l6 2 M18 -77 l-5.6 2" class="ln" stroke-width="1.7"/>',
+  wide:  '<circle cx="6.5" cy="-71" r="2.6" fill="var(--line)"/><circle cx="14.5" cy="-71" r="2.6" fill="var(--line)"/>',
+};
+const MONK_MOUTH = {
+  smile: '<path d="M8 -63.5 q2.6 2 5.2 0" class="ln" stroke-width="1.5" fill="none"/>',
+  flat:  '<path d="M8 -63.2 h5" class="ln" stroke-width="1.6"/>',
+  laugh: '<path d="M7.4 -64.4 q3.2 4.6 6.4 0 z" fill="#b5534b" class="ln" stroke-width="1.3"/>',
+  o:     '<ellipse cx="10.5" cy="-63" rx="1.8" ry="2.2" fill="none" class="ln" stroke-width="1.4"/>',
+  sip:   '<path d="M9 -63.4 q1.6 -.8 3.2 0" class="ln" stroke-width="1.4" fill="none"/>',
+};
+class Monk {
+  constructor(svg, id) {
+    const p = s => svg.querySelector(`#${id}-${s}`);
+    this.g = svg.querySelector('#' + id);
+    Object.assign(this, { flip: p('flip'), leanG: p('lean'), bob: p('bob'), head: p('head'), arm: p('arm'), eyesG: p('eyes'), mouthG: p('mouth'), f1: p('f1'), f2: p('f2'), stick: p('stick'), cup: p('cup') });
+    this.s = { x: 0, y: 0, dir: 1, lean: 0, head: 0, arm: 0, walk: 0, moving: false, squash: 1, blink: 0, bobY: 0 };
+    this.eyes('open'); this.mouth('smile'); this.nextBlink = 0;
+  }
+  eyes(k) { this.eyeK = k; this.eyesG.innerHTML = MONK_EYES[k]; }
+  mouth(k) { this.mouthG.innerHTML = MONK_MOUTH[k]; }
+  holdStick(on) { this.stick.setAttribute('opacity', on ? 1 : 0); }
+  async walkTo(x, speed = 150) {
+    const s = this.s, from = s.x, d = Math.abs(x - from); if (d < 1) return;
+    await this.face(x > from ? 1 : -1);
+    s.moving = true; await anim(d / speed * 1000, t => s.x = lerp(from, x, t), E.inOut); s.moving = false;
+  }
+  async face(dir) { if (this.s.dir === dir) return; const s = this.s, from = s.dir; await anim(180, t => s.dir = lerp(from, dir, t), E.inOut); s.dir = dir; }
+  async blinkOnce() { const k = this.eyeK; if (k !== 'open') return; this.eyes('shut'); await wait(110); if (this.eyeK === 'shut') this.eyes('open'); }
+  render(t, ambient = true) {
+    const s = this.s;
+    if (ambient && !opt.rm && t > this.nextBlink) { this.nextBlink = t + 3000 + Math.random() * 4000; this.blinkOnce(); }
+    if (s.moving && !opt.rm) s.walk += 1 / 60 * 9.5;
+    const step = s.moving && !opt.rm ? Math.sin(s.walk) : 0;
+    const bob = (s.moving && !opt.rm ? -Math.abs(step) * 2.2 : 0) + s.bobY + (ambient && !opt.rm ? Math.sin(t / 1000 * 1.6) * .35 : 0);
+    const dir = Math.abs(s.dir) < .05 ? .05 * Math.sign(s.dir || 1) : s.dir;
+    this.g.setAttribute('transform', `translate(${s.x.toFixed(2)} ${s.y.toFixed(2)})`);
+    this.flip.setAttribute('transform', `scale(${dir.toFixed(3)} 1)`);
+    this.leanG.setAttribute('transform', `rotate(${s.lean.toFixed(2)}) scale(${(2 - s.squash).toFixed(3)} ${s.squash.toFixed(3)})`);
+    this.bob.setAttribute('transform', `translate(0 ${bob.toFixed(2)})`);
+    this.head.setAttribute('transform', `rotate(${s.head.toFixed(2)} 1 -54)`);
+    this.arm.setAttribute('transform', `rotate(${s.arm.toFixed(2)} 10 -45)`);
+    this.f1.setAttribute('transform', `translate(${(step * 3).toFixed(2)} ${(-Math.max(0, step) * 2.4).toFixed(2)})`);
+    this.f2.setAttribute('transform', `translate(${(-step * 3).toFixed(2)} ${(-Math.max(0, -step) * 2.4).toFixed(2)})`);
+  }
+}
+
+/* ---- accessory demos: a body garment (clipped, deforms), a scarf (clipped band + follow-through tail), a rigid hat ---- */
+const GARMENT = {
+  yukata: `<path d="M-46 -27 L-31 -27 Q-13 -22 0 -10 Q13 -22 31 -27 L46 -27 L46 8 L-46 8 Z" fill="#3e5a86"/>
+    <g fill="#fff" opacity=".55"><circle cx="-22" cy="-6" r="1.1"/><circle cx="-12" cy="-16" r="1.1"/><circle cx="16" cy="-12" r="1.1"/><circle cx="24" cy="-3" r="1.1"/><circle cx="-26" cy="-18" r="1.1"/></g>
+    <path d="M-32 -26.4 Q-13 -21.4 0 -9.6" stroke="#f4efe4" stroke-width="3" fill="none"/>
+    <path d="M32 -26.4 Q13 -21.4 -2.4 -8.6" stroke="#f4efe4" stroke-width="3" fill="none"/>
+    <path d="M32 -24.4 Q13 -19.4 -1.6 -6.6" stroke="#2b4166" stroke-width="1.2" fill="none"/>
+    <rect x="-46" y="-9" width="92" height="7" fill="#d9a441"/><path d="M-46 -9 H46 M-46 -2 H46" stroke="var(--line)" stroke-width="1"/>`,
+  scarf: `<path d="M-46 -19 Q0 -9 46 -19 L46 -10 Q0 0 -46 -10 Z" fill="#d9a441"/><path d="M-46 -15 Q0 -5 46 -15" stroke="#fff3d6" stroke-width="1.4" fill="none" opacity=".8"/>
+    <path d="M-46 -19 Q0 -9 46 -19 M-46 -10 Q0 0 46 -10" stroke="var(--line)" stroke-width="1.2" fill="none"/>`,
+};
+const SCARF_TAIL = `<path d="M-3 0 Q-5 10 -2 20 L6 20 Q5 10 5 0 Z" fill="#d9a441" class="ln" stroke-width="1.4"/><path d="M-2 20 v3 M1 20 v3 M4 20 v3" class="ln" stroke-width="1.1"/><path d="M-2 9 h7" stroke="#fff3d6" stroke-width="1.3"/>`;
+const KASA = `<path d="M-31 2 Q-2 -22 31 2 Q0 6 -31 2 Z" fill="#d8b878" class="ln" stroke-width="1.8"/><path d="M-20 -3 Q0 -15 20 -3 M-10 -9 Q0 -15 10 -9" class="ln" stroke-width=".9" opacity=".4" fill="none"/>`;
+function dress(m, what) {
+  m.garment.innerHTML = ''; m.hat.innerHTML = ''; m.tail.innerHTML = ''; m.g.style.removeProperty('--sleeve');
+  if (what === 'yukata') { m.garment.innerHTML = GARMENT.yukata; m.g.style.setProperty('--sleeve', '#3e5a86'); }
+  if (what === 'scarf') { m.garment.innerHTML = GARMENT.scarf; m.tail.innerHTML = SCARF_TAIL; }
+  if (what === 'kasa') m.hat.innerHTML = KASA;
+}
+
+/* =====================================================================
+   MOTION SYSTEM: levels and the exclusive Level-3 lane
+   L1 ambient (breath, blink, smoke, dust) — always on, never waits
+   L2 feedback (hop, face flash, idle performances, tags) — one per actor, cancelled by L3
+   L3 events (strike, ceremony, unlock) — exclusive; others merge into a counter
+   ===================================================================== */
+const L3 = { busy: false, merged: 0 };
+async function level3(fn) { if (L3.busy) { L3.merged++; return false; } L3.busy = true; try { await fn(); } finally { L3.busy = false; } return true; }
+
+/* =====================================================================
+   SCENE INSTANCE
+   ===================================================================== */
+const app = $('#app'), stage = $('#stage'), scene = $('#scene');
+document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style="position:absolute" aria-hidden="true">${sceneDefs()}</svg>`);
+scene.innerHTML = sceneMarkup();
+$('#monkSlot', scene).innerHTML = monkMarkup('monk');
+$('#mochiSlot', scene).innerHTML = mochiMarkup('mochi');
+const M = new Mochi(scene, 'mochi'), K = new Monk(scene, 'monk');
+const SEAT = { x: 206, y: 257 }, STAND = { x: 140, y: 276 }, MONK_HOME = { x: 72, y: 254 };
+
+/* dust motes in the day shaft: L1, removed in lite */
+const dust = $('#dust', scene); const motes = [];
+for (let i = 0; i < 9; i++) { const c = document.createElementNS(NS, 'circle'); c.setAttribute('r', (.5 + Math.random() * .6).toFixed(2)); c.setAttribute('fill', '#fffbea'); dust.appendChild(c); motes.push({ c, u: Math.random(), v: Math.random(), sp: .015 + Math.random() * .02 }); }
+
+function toStage(x, y) { return [x / 400 * 100, y / 300 * 100]; }
+const bubbleEl = $('#bubble'); let bubbleTimer;
+function say(text, x, y, ms = 1600, loud = false) {
+  const [px, py] = toStage(x, y); bubbleEl.textContent = text; bubbleEl.style.left = clamp(px, 16, 84) + '%'; bubbleEl.style.top = py + '%';
+  bubbleEl.classList.toggle('loud', loud); bubbleEl.classList.add('on'); clearTimeout(bubbleTimer);
+  if (ms) bubbleTimer = setTimeout(() => bubbleEl.classList.remove('on'), ms);
+}
+const hush = () => bubbleEl.classList.remove('on');
+
+/* fx layer: stars and an impact ring at a scene point */
+function burst(x, y, n = 6) {
+  const fx = $('#fxSlot', scene), g = document.createElementNS(NS, 'g'); fx.appendChild(g);
+  const stars = [];
+  for (let i = 0; i < n; i++) {
+    const a = -Math.PI * (.15 + .7 * i / Math.max(1, n - 1)), p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', 'M0 -4 L1.2 -1.2 L4 0 L1.2 1.2 L0 4 L-1.2 1.2 L-4 0 L-1.2 -1.2Z'); p.setAttribute('fill', i % 2 ? 'var(--kin)' : '#fff3c4'); p.setAttribute('stroke', '#8a6420'); p.setAttribute('stroke-width', '.5');
+    g.appendChild(p); stars.push({ p, a, d: 16 + Math.random() * 10 });
+  }
+  const ring = document.createElementNS(NS, 'ellipse'); ring.setAttribute('fill', 'none'); ring.setAttribute('stroke', '#fff'); ring.setAttribute('stroke-width', '2'); g.appendChild(ring);
+  return anim(560, t => {
+    stars.forEach(s => { const r = s.d * E.out(t); s.p.setAttribute('transform', `translate(${x + Math.cos(s.a) * r} ${y + Math.sin(s.a) * r * .8}) scale(${1.2 - t * .6}) rotate(${t * 90})`); s.p.setAttribute('opacity', 1 - t * t); });
+    ring.setAttribute('cx', x); ring.setAttribute('cy', y); ring.setAttribute('rx', 4 + t * 22); ring.setAttribute('ry', 2 + t * 9); ring.setAttribute('opacity', (1 - t) * .8);
+  }, E.lin).then(() => g.remove());
+}
+function shake(px = 2.2, ms = 260) {
+  if (opt.rm || opt.lite) return Promise.resolve();
+  const w = $('#world', scene);
+  return anim(ms, t => { const a = (1 - t) * px; w.setAttribute('transform', t >= 1 ? '' : `translate(${(Math.random() * 2 - 1) * a} ${(Math.random() * 2 - 1) * a * .6})`); }, E.lin);
+}
+
+/* ---------- mochi moves ---------- */
+async function hopTo(tx, ty, sitAfter) {
+  const s = M.s, fx = s.x, fy = s.y, dir = Math.sign(tx - fx) || 1;
+  // anticipation: crouch and lean back
+  await Promise.all([anim(150, t => { s.sy = lerp(1, .84, t); s.sx = lerp(1, 1.12, t); s.rot = lerp(0, -5 * dir, t); }, E.out), M.pose('tuck', 150)]);
+  // take-off: stretch, lean into the jump, arc
+  M.flash('happy', 0);
+  const arc = anim(520, t => { s.x = lerp(fx, tx, t); s.y = lerp(fy, ty, t); s.lift = Math.sin(Math.PI * t) * 30; }, E.inOut);
+  await anim(120, t => { s.sy = lerp(.84, 1.12, t); s.sx = lerp(1.12, .92, t); s.rot = lerp(-5 * dir, 7 * dir, t); }, E.out);
+  await anim(220, t => { s.sy = lerp(1.12, 1, t); s.sx = lerp(.92, 1, t); }, E.inOut);
+  await arc;
+  // landing: squash, then recover with a little wobble
+  if (sitAfter) { s.feet = 0; $('#seatLip', scene).setAttribute('opacity', 1); }
+  pop(.12); buzz(8);
+  await anim(80, t => { s.sy = lerp(1, .8, t); s.sx = lerp(1, 1.16, t); s.rot = lerp(7 * dir, 0, t); }, E.out);
+  await Promise.all([anim(380, t => { const k = E.spring(t); s.sy = lerp(.8, 1, k); s.sx = lerp(1.16, 1, k); }, E.lin), M.pose(sitAfter ? 'lap' : 'side', 320)]);
+}
+async function sitDown() { await hopTo(SEAT.x, SEAT.y, true); M.s.breathe = 1; await wait(180); await M.flash('calm', 0); }
+function placeStanding() { Object.assign(M.s, { x: STAND.x, y: STAND.y, sx: 1, sy: 1, rot: 0, lift: 0, feet: 1, breathe: 0 }); M.hand = JSON.parse(JSON.stringify(HANDS.side)); $('#seatLip', scene).setAttribute('opacity', 0); M.setFace('peek'); }
+function placeSitting(face = 'calm') { Object.assign(M.s, { x: SEAT.x, y: SEAT.y, sx: 1, sy: 1, rot: 0, lift: 0, feet: 0, breathe: 1 }); M.hand = JSON.parse(JSON.stringify(HANDS.lap)); $('#seatLip', scene).setAttribute('opacity', 1); M.setFace(face); }
+
+/* =====================================================================
+   STRIKE: 10 steps, throttled when repeated
+   ===================================================================== */
+const hits = [];
+let monkNear = 0;     // until when the monk lingers by the mochi after a strike
+async function strike(kind = 'caught') {
+  return level3(async () => {
+    const now = Date.now(); hits.push(now); while (hits.length && now - hits[0] > 60000) hits.shift();
+    const gentle = hits.length >= 3;            // third time inside a minute: a light tap, no fireworks
+    const quick = now < monkNear;               // he's still standing here: skip notice/turn/approach
+    const ms = M.s, ks = K.s, hitX = SEAT.x - 66;
+    patrol.stop();
+    // 1 trigger: nothing flashes in the UI; the scene tells it
+    // 2 the mochi notices: a sweat drop, a glance toward the monk
+    if (!quick) { M.setFace(kind === 'asked' ? 'focus' : 'surprised'); await anim(200, t => ms.gx = lerp(0, -2.6, t), E.out); }
+    // 3 the monk turns, 4 approaches (stick already in hand)
+    K.eyes(kind === 'asked' ? 'open' : 'stern'); K.mouth('flat');
+    if (Math.abs(ks.x - hitX) > 2) await K.walkTo(hitX, 170);
+    await K.face(1);
+    if (kind === 'asked') { say('請。', ks.x + 10, ks.y - 96, 900); await wait(380); }
+    else if (!gentle) { say('喝！', ks.x + 10, ks.y - 96, 900, true); await wait(300); }
+    // 5 raise (anticipation): arm back, body leans back; the mochi hunches
+    const raise = gentle ? -12 : -38, swing = gentle ? 56 : 71;
+    await Promise.all([
+      anim(gentle ? 240 : 380, t => { ks.arm = lerp(0, raise, t); ks.lean = lerp(0, -4, t); ks.squash = lerp(1, 1.03, t); }, E.back),
+      anim(320, t => { ms.sy = lerp(1, .94, t); ms.sx = lerp(1, 1.04, t); }, E.out).then(() => M.setFace('ouch')),
+    ]);
+    // 6 hold: the beat before
+    await wait(gentle ? 80 : 170);
+    // 7 swing down, fast
+    await anim(gentle ? 120 : 85, t => { ks.arm = lerp(raise, swing, t); ks.lean = lerp(-4, 5, t); ks.squash = lerp(1.03, .97, t); }, E.in);
+    // 8 impact + hit-stop
+    clack(gentle ? .18 : .5, gentle ? 2200 : 1700); buzz(gentle ? 10 : 28);
+    ms.sy = gentle ? .9 : .78; ms.sx = gentle ? 1.06 : 1.14; ms.rot = gentle ? 1 : 3;
+    const hx = ms.x - 4, hy = ms.y - 68 * ms.sy;
+    if (!gentle) { frozenUntil = performance.now() + 70; await wait(70); }
+    const fx = gentle ? Promise.resolve() : Promise.all([burst(hx, hy, quick ? 3 : 6), shake(quick ? 1.2 : 2.2)]);
+    // 9 recovery: the mochi springs back with a wobble; the monk follows through
+    await Promise.all([
+      fx,
+      anim(520, t => { const k = E.spring(t); ms.sy = lerp(gentle ? .9 : .78, 1, k); ms.sx = lerp(gentle ? 1.06 : 1.14, 1, k); ms.rot = lerp(3, 0, k); }, E.lin),
+      anim(260, t => { ks.arm = lerp(swing, swing - 8, t); ks.lean = lerp(5, 2, t); ks.squash = lerp(.97, 1, t); }, E.out),
+    ]);
+    // 10 resolve: stick back, a small bow; the mochi rubs her head, peeks at him, settles
+    if (gentle) say('回來吧。', ks.x + 10, ks.y - 96, 1400);
+    await Promise.all([
+      anim(420, t => { ks.arm = lerp(swing - 8, 0, t); ks.lean = lerp(2, 0, t); }, E.inOut).then(async () => { K.eyes('shut'); K.mouth('smile'); await anim(220, t => ks.head = 10 * Math.sin(Math.PI * t)); K.eyes('open'); }),
+      (async () => { if (gentle) return; await M.pose('rub', 240); await anim(360, t => ms.rot = Math.sin(t * Math.PI * 2) * 3, E.lin); await M.pose('lap', 260); })(),
+    ]);
+    M.setFace(kind === 'asked' ? 'proud' : 'teary'); await anim(180, t => ms.gx = lerp(-2.6, -3.2, t));
+    await wait(gentle ? 500 : 900);
+    await anim(220, t => ms.gx = lerp(-3.2, 0, t)); await M.flash('calm', 0);
+    monkNear = Date.now() + 10000;
+    if (L3.merged) { const n = L3.merged; L3.merged = 0; say(`（又分心了 ${n} 次）`, ks.x + 10, ks.y - 96, 1400); }
+    if (app.dataset.state === 'focus') patrol.start(10000);
+  });
+}
+
+/* ---------- monk patrol & idle performances (priority + cooldown) ---------- */
+const IDLE = [
+  { k: 'blink',  zh: '慢眨眼',   pri: 1, cd: 6000,   when: ['home', 'focus', 'break'], run: async k => { k.eyes('shut'); await wait(380); k.eyes('open'); } },
+  { k: 'window', zh: '看窗外',   pri: 2, cd: 45000,  when: ['home', 'focus'], run: async k => { await k.face(-1); await anim(500, t => k.s.head = lerp(0, -9, t)); await wait(1500); await anim(400, t => k.s.head = lerp(-9, 0, t)); } },
+  { k: 'watch',  zh: '看麻糬',   pri: 2, cd: 25000,  when: ['home', 'focus'], run: async k => { await k.face(Math.sign(M.s.x - k.s.x) || 1); k.mouth('smile'); await anim(300, t => k.s.head = lerp(0, 6, t)); await wait(1300); await anim(300, t => k.s.head = lerp(6, 0, t)); } },
+  { k: 'sleeve', zh: '整理袖子', pri: 2, cd: 40000,  when: ['home', 'break'], run: async k => { await anim(300, t => { k.s.arm = lerp(0, -14, t); k.s.bobY = lerp(0, -1.2, t); }); await anim(240, t => k.s.arm = lerp(-14, 6, t)); await anim(420, t => { k.s.arm = lerp(6, 0, t); k.s.bobY = lerp(-1.2, 0, t); }, E.spring); } },
+  { k: 'nod',    zh: '點頭',     pri: 2, cd: 30000,  when: ['home', 'result'], run: async k => { for (let i = 0; i < 2; i++) { await anim(170, t => k.s.head = lerp(0, 9, t), E.out); await anim(200, t => k.s.head = lerp(9, 0, t)); } } },
+  { k: 'tea',    zh: '喝茶',     pri: 3, cd: 120000, when: ['home', 'break'], run: async k => { k.holdStick(false); k.cup.setAttribute('opacity', 1); await anim(420, t => { k.s.arm = lerp(0, -32, t); k.s.head = lerp(0, -6, t); }); k.eyes('shut'); k.mouth('sip'); await wait(900); k.eyes('open'); k.mouth('smile'); await anim(420, t => { k.s.arm = lerp(-32, 0, t); k.s.head = lerp(-6, 0, t); }); k.cup.setAttribute('opacity', 0); } },
+  { k: 'laugh',  zh: '笑',       pri: 3, cd: 60000,  when: ['home', 'result'], run: async k => { k.eyes('smile'); k.mouth('laugh'); for (let i = 0; i < 3; i++) await anim(150, t => k.s.bobY = -Math.sin(Math.PI * t) * 2.2, E.lin); await wait(200); k.eyes('open'); k.mouth('smile'); } },
+];
+const idleLast = {}; let idleBusy = false, idleLog = null;
+function logIdle(s) { if (!idleLog) return; idleLog.textContent = `${new Date().toLocaleTimeString('zh-TW', { hour12: false })}  ${s}\n` + idleLog.textContent.slice(0, 1600); }
+async function playIdle(it, monk = K) {
+  if (idleBusy || L3.busy) { logIdle(`略過 ${it.zh}：${L3.busy ? 'L3 事件進行中' : '另一個表演還沒結束'}`); return; }
+  idleBusy = true; idleLast[it.k] = Date.now(); logIdle(`播放 ${it.zh}（優先 ${it.pri}，冷卻 ${it.cd / 1000}s）`);
+  try { await it.run(monk); } finally { idleBusy = false; }
+}
+function pickIdle(ctx) {
+  const now = Date.now(), ok = IDLE.filter(it => it.when.includes(ctx) && now - (idleLast[it.k] || 0) > it.cd);
+  if (!ok.length) return null;
+  const top = Math.max(...ok.map(it => it.pri)), pool = ok.filter(it => it.pri === top || Math.random() < .35);
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+const patrol = {
+  on: false, token: 0,
+  start(delay = 0) { this.on = true; const tok = ++this.token; (async () => {
+    await wait(delay); if (tok !== this.token) return;
+    K.holdStick(true); K.eyes('open'); K.mouth('smile');
+    const stops = [70, 140, 300, 330, 268];
+    for (let i = 0; tok === this.token; i++) {
+      if (L3.busy) { await wait(500); continue; }
+      await K.walkTo(stops[i % stops.length], 34); if (tok !== this.token) return;
+      await wait(1400);
+      const it = pickIdle('focus'); if (it && tok === this.token) await playIdle(it);
+      await wait(900);
+    }
+  })(); },
+  stop() { this.token++; this.on = false; K.s.moving = false; },
+};
+let homeIdleT = null;
+function homeIdle() { clearTimeout(homeIdleT); homeIdleT = setTimeout(async () => { if (app.dataset.state !== 'home') return; const it = pickIdle('home'); if (it) await playIdle(it); homeIdle(); }, 3500 + Math.random() * 3000); }
+
+/* =====================================================================
+   RESULT CEREMONY: bell → mochi → monk → paper → stamp → record → unlock → actions (skippable)
+   ===================================================================== */
+let skipping = false;
+const beat = ms => skipping ? Promise.resolve() : wait(ms);
+const tw = (ms, fn, e) => skipping ? (fn(1), Promise.resolve()) : anim(ms, fn, e);
+function sealSVG(text = '不動') { return `<svg viewBox="0 0 66 66"><g transform="rotate(-6 33 33)"><rect x="4" y="4" width="58" height="58" rx="7" fill="none" stroke="var(--shu)" stroke-width="4"/>
+  <text x="33" y="30" text-anchor="middle" font-size="21" fill="var(--shu)" style="font-family:var(--f-story);font-weight:700">${text[0]}</text><text x="33" y="54" text-anchor="middle" font-size="21" fill="var(--shu)" style="font-family:var(--f-story);font-weight:700">${text[1]}</text></g></svg>`; }
+async function ceremony() {
+  skipping = false; $('#skipBtn').classList.add('on');
+  const paper = $('#paper'), seal = $('#seal'), stats = $$('.stat', paper), unlock = $('#unlock'), koan = $('.koan', paper), acts = $('.racts', paper);
+  [paper, seal, unlock, koan, acts, ...stats].forEach(el => { el.style.opacity = 0; el.style.transform = ''; });
+  paper.style.transform = 'translateY(24px)'; seal.innerHTML = sealSVG('不動'); $$('.n', paper).forEach(n => n.textContent = '0');
+  $('#unlockIc').innerHTML = `<svg viewBox="-40 -76 80 84">${mochiMiniFace('content')}</svg>`;
+  patrol.stop(); placeSitting('calm'); Object.assign(K.s, { x: 120, y: 254, dir: 1, arm: 0, lean: 0, head: 0 }); K.holdStick(false); K.eyes('open'); K.mouth('smile');
+  await level3(async () => {
+    // 1 bell: one strike, the incense is done
+    bell(); $('#ember', scene).setAttribute('opacity', 0);
+    await beat(700);
+    // 2 the mochi: opens her eyes, stretches up, settles happy
+    await M.blinkOnce(120); M.setFace('peek'); await beat(200);
+    const s = M.s;
+    await Promise.all([tw(380, t => { s.sy = lerp(1, 1.1, t); s.sx = lerp(1, .94, t); }, E.out), M.pose('cheer', 380)]);
+    await Promise.all([tw(420, t => { const k = E.spring(t); s.sy = lerp(1.1, 1, k); s.sx = lerp(.94, 1, k); }, E.lin), M.pose('lap', 380)]);
+    M.setFace('content');
+    // 3 the monk: turns to her, a word
+    await K.face(1); K.eyes('smile'); say('坐得很穩。', K.s.x + 10, K.s.y - 96, skipping ? 0 : 2200);
+    await beat(500);
+    // 4 the paper slides up
+    await tw(420, t => { paper.style.opacity = t; paper.style.transform = `translateY(${(1 - t) * 24}px)`; }, E.out);
+    // 5 the stamp: big, then pressed (the only vermilion)
+    await beat(250);
+    await tw(170, t => { seal.style.opacity = t; seal.style.transform = `scale(${lerp(1.6, .94, t)}) rotate(${lerp(-14, 0, t)}deg)`; }, E.in);
+    if (!skipping) { pop(.25); buzz(12); paper.animate?.([{ transform: 'translateY(0)' }, { transform: 'translateY(2px)' }, { transform: 'translateY(0)' }], { duration: 160 }); }
+    await tw(200, t => seal.style.transform = `scale(${lerp(.94, 1, t)})`, E.out);
+    // 6 the record counts up
+    await beat(200);
+    for (const st of stats) {
+      const n = $('.n', st), to = +n.dataset.to;
+      st.style.opacity = 1; await tw(500, t => n.textContent = Math.round(to * t), E.out);
+    }
+    // 7 unlock (only when there is something new)
+    await beat(250);
+    await tw(320, t => { unlock.style.opacity = t; unlock.style.transform = `translateY(${(1 - t) * 8}px)`; }, E.back);
+    // 8 koan and actions
+    await tw(300, t => koan.style.opacity = t);
+    await tw(300, t => acts.style.opacity = t);
+  });
+  K.eyes('open'); $('#skipBtn').classList.remove('on');
+}
+function mochiMiniFace(face) {
+  const f = FACE[face], eyes = f.eyes === 'dot' ? '<circle cx="-11" cy="-30" r="2.7" fill="var(--line)"/><circle cx="11" cy="-30" r="2.7" fill="var(--line)"/>' : f.eyes;
+  return `<path d="${MOCHI_BODY}" fill="var(--mochi)" class="ln" stroke-width="2.4"/><ellipse cx="-20" cy="-22" rx="5.4" ry="3.2" fill="var(--blush)" opacity=".6"/><ellipse cx="20" cy="-22" rx="5.4" ry="3.2" fill="var(--blush)" opacity=".6"/>${eyes}${f.mouth}${f.fx || ''}`;
+}
+
+/* =====================================================================
+   STATES
+   ===================================================================== */
+let timer = { end: 0, total: 25 * 60000, id: 0 };
+function fmt(ms) { const s = Math.max(0, Math.ceil(ms / 1000)); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; }
+function tickTimer() {
+  if (app.dataset.state !== 'focus') return;
+  const left = timer.end - Date.now();    // wall-clock: a frozen tab, a slow phone or a background trip never bends the time
+  $('#clock').textContent = fmt(left);
+  const p = clamp(left / timer.total, 0, 1); $('#incBar').style.transform = `scaleX(${p})`;
+  const st = $('#incStick', scene), h = 37 * p; st.setAttribute('y', -7 - h); st.setAttribute('height', h); $('#ember', scene).setAttribute('cy', -7 - h);
+  if (left <= 0) { setState('result'); }
+}
+function resetIncense() { const st = $('#incStick', scene); st.setAttribute('y', -44); st.setAttribute('height', 37); $('#ember', scene).setAttribute('cy', -44); $('#ember', scene).setAttribute('opacity', 1); }
+
+function showTags(ms = 2600) { stage.classList.add('show-tags'); clearTimeout(showTags.t); showTags.t = setTimeout(() => stage.classList.remove('show-tags'), ms); }
+
+async function setState(st, { fromStart = false } = {}) {
+  app.dataset.state = st; segSet('segState', st); patrol.stop(); clearTimeout(homeIdleT); hush(); flushTweens(); skipping = true; L3.busy = false; idleBusy = false;
+  $('#skipBtn').classList.remove('on'); clearInterval(timer.id);
+  Object.assign(K.s, { arm: 0, lean: 0, head: 0, squash: 1, bobY: 0, moving: false });
+  updateBefore(); renderDemo(); stage.classList.remove('show-tags'); clearTimeout(showTags.t);
+  if (st === 'home') {
+    placeStanding(); Object.assign(K.s, { ...MONK_HOME, dir: 1 }); K.holdStick(false); $('#rack', scene).setAttribute('opacity', 1); K.eyes('open'); K.mouth('smile'); resetIncense();
+    skipping = false; showTags(); homeIdle();
+  }
+  if (st === 'focus') {
+    $('#rack', scene).setAttribute('opacity', 0); K.holdStick(true); resetIncense();
+    if (fromStart) { placeStanding(); skipping = false; bell(.12); await sitDown(); } else placeSitting('calm');
+    Object.assign(K.s, { x: K.s.x || 72, y: 254 });
+    skipping = false;
+    timer.total = 25 * 60000; timer.end = Date.now() + timer.total; tickTimer(); timer.id = setInterval(tickTimer, 250);
+    patrol.start(600);
+  }
+  if (st === 'result') { $('#rack', scene).setAttribute('opacity', 1); skipping = false; ceremony(); }
+  if (st === 'chars') buildChars();
+}
+
+/* ---------- controls ---------- */
+function segSet(id, v) { $$(`#${id} button`).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v))); }
+$('#segState').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setState(b.dataset.v); });
+$('#segTime').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setTime(b.dataset.v); });
+function setTime(v) { document.documentElement.dataset.time = v; document.body.dataset.time = v; segSet('segTime', v); updateBefore(); }
+$('#optCmp').addEventListener('change', e => { $('#compare').classList.toggle('cmp', e.target.checked); updateBefore(); });
+$('#optLite').addEventListener('change', e => { opt.lite = e.target.checked; document.body.classList.toggle('lite', opt.lite); });
+$('#optRM').addEventListener('change', e => { opt.rm = e.target.checked || sysRM; });
+$('#optSnd').addEventListener('change', e => { opt.snd = e.target.checked; });
+function updateBefore() {
+  const st = app.dataset.state, tm = document.documentElement.dataset.time;
+  const map = { home: tm === 'night' ? 'home_dark' : tm === 'dusk' ? 'scene_dusk_autumn' : 'home_light', focus: 'flow_05_focus', result: 'flow_09_result', chars: 'char_mochi_sit' };
+  $('#beforeImg').src = `img/before/${map[st]}.png`;
+}
+function renderDemo() {
+  const st = app.dataset.state, d = $('#demo'); d.innerHTML = '';
+  const add = (label, fn) => { const b = document.createElement('button'); b.textContent = label; b.onclick = fn; d.appendChild(b); };
+  if (st === 'home') { add('▶ 重播進場', () => setState('home')); add('顯示可點區域（長按場景亦可）', () => showTags(3200)); add('▶ 開始坐禪（跳上蒲團）', () => setState('focus', { fromStart: true })); }
+  if (st === 'focus') { add('模擬：切出畫面 → 被打', () => strike('caught')); add('合掌請打', () => strike('asked')); add('連續分心 ×3（節流）', async () => { strike('caught'); await wait(1500); strike('caught'); await wait(1500); strike('caught'); }); add('快轉到結束', () => { timer.end = Date.now() + 3000; }); }
+  if (st === 'result') { add('▶ 重播儀式', () => setState('result')); }
+}
+$('#startBtn').addEventListener('click', () => setState('focus', { fromStart: true }));
+$('#askBtn').addEventListener('click', () => strike('asked'));
+$('#okBtn').addEventListener('click', () => setState('home'));
+$('#againBtn').addEventListener('click', () => setState('focus', { fromStart: false }));
+$('#skipBtn').addEventListener('click', () => { skipping = true; flushTweens(); });
+stage.addEventListener('click', e => { if (app.dataset.state === 'result' && !e.target.closest('button')) { skipping = true; flushTweens(); } });
+$('#editBtn').addEventListener('click', e => { const o = $('#adjust').classList.toggle('open'); e.currentTarget.setAttribute('aria-expanded', o); e.currentTarget.textContent = o ? '完成' : '調整本次'; });
+$$('.chips').forEach(c => c.addEventListener('click', e => { const b = e.target.closest('.chip'); if (!b) return; $$('.chip', c).forEach(x => x.setAttribute('aria-pressed', String(x === b))); syncPlan(); }));
+function syncPlan() { const v = k => $(`.chips[data-k="${k}"] [aria-pressed="true"]`).textContent; $('#planWhat').textContent = v('task').replace('…', ''); $('#fTask').textContent = v('task').replace('…', ''); $('#planHow').innerHTML = `<b>${v('min')}</b> 分 × <b>${v('rounds')}</b> 炷 · 休息 <b>5</b> 分`; }
+$('#senseChip').addEventListener('click', e => { const o = $('#senseTip').classList.toggle('on'); e.currentTarget.setAttribute('aria-expanded', o); });
+// long-press anywhere on the scene shows every tappable spot
+let lp; stage.addEventListener('pointerdown', e => { if (e.target.closest('.ask,.skip')) return; lp = setTimeout(() => showTags(3000), 450); });
+['pointerup', 'pointerleave', 'pointercancel'].forEach(t => stage.addEventListener(t, () => clearTimeout(lp)));
+$$('.hot').forEach(h => h.addEventListener('click', () => { h.classList.add('pressed'); setTimeout(() => h.classList.remove('pressed'), 180); say(`（打開「${h.getAttribute('aria-label')}」）`, 200, 150, 1100); }));
+
+/* =====================================================================
+   CHARACTERS TAB
+   ===================================================================== */
+let charsBuilt = false, CM, CK, CA, faceMinis = [];
+function viewerSVG(id, vb, inner) { return `<div class="viewer"><svg id="${id}" viewBox="${vb}"><rect x="-400" y="-400" width="1200" height="1200" fill="var(--wall)"/><rect x="-400" y="0" width="1200" height="400" fill="var(--tatami)" opacity=".55"/>${inner}</svg></div>`; }
+function buildChars() {
+  if (charsBuilt) return; charsBuilt = true;
+  const c = $('#chars');
+  c.innerHTML = `
+  <h2>麻糬 Mochi</h2><p class="note">大福輪廓：底部較寬、坐下時下沉 2 單位到蒲團裡，表現重量。外框 2.2、內線 1.4–2.0，暖墨色。手是小圓「nub」，依姿勢移動。</p>
+  ${viewerSVG('vMochi', '-90 -100 180 116', `<g transform="translate(0 0)">${mochiMarkup('cm')}</g>`)}
+  <div class="btnrow" id="mBtns"></div>
+  <h2>表情 12 種</h2><p class="note">眼睛統一在 y −30、嘴在 y −21；切換表情以 70ms 眨眼遮蔽。點一張即套用到上方麻糬。</p>
+  <div class="faces" id="faceGrid"></div>
+  <h2>住持 Monk</h2><p class="note">頭身約 1 : 1.4；袈裟是鐘形，與麻糬同一種圓頂語言。袖子收成兩個圓角塊，摺線只留兩條。</p>
+  ${viewerSVG('vMonk', '-70 -120 140 132', monkMarkup('ck'))}
+  <div class="btnrow" id="kBtns"></div>
+  <div class="log" id="idleLog" aria-live="polite"></div>
+  <h2>配件：身上的衣物</h2><p class="note">衣物以身體做 clipPath、放在 squash 群組內，所以會跟著壓扁拉長；外框最後重描，衣襬永遠不會超出輪廓。帽子是硬物，只跟頂點位置與傾斜，不被壓扁。圍巾尾巴有 follow-through。</p>
+  ${viewerSVG('vAcc', '-90 -112 180 128', mochiMarkup('ca'))}
+  <div class="btnrow" id="aBtns"></div>`;
+  CM = new Mochi($('#vMochi'), 'cm'); CK = new Monk($('#vMonk'), 'ck'); CA = new Mochi($('#vAcc'), 'ca');
+  CK.holdStick(false); CK.s.y = 0; CA.setFace('happy');
+  const btn = (box, label, fn) => { const b = document.createElement('button'); b.className = 'chip'; b.textContent = label; b.onclick = fn; $(box).appendChild(b); };
+  const cm = CM.s;
+  btn('#mBtns', '站', async () => { cm.breathe = 0; cm.feet = 1; await CM.pose('side'); CM.flash('peek', 0); });
+  btn('#mBtns', '坐（呼吸）', async () => { cm.breathe = 1; cm.feet = 0; await CM.pose('lap'); CM.flash('calm', 0); });
+  btn('#mBtns', '跳一下', async () => { await anim(150, t => { cm.sy = lerp(1, .84, t); cm.sx = lerp(1, 1.12, t); }, E.out); await anim(260, t => { cm.lift = Math.sin(Math.PI * t / 2) * 26; cm.sy = lerp(.84, 1.1, t); cm.sx = lerp(1.12, .93, t); }, E.out); await anim(260, t => { cm.lift = 26 * (1 - E.in(t)); cm.sy = lerp(1.1, 1, t); cm.sx = lerp(.93, 1, t); }, E.lin); await anim(80, t => { cm.sy = lerp(1, .8, t); cm.sx = lerp(1, 1.16, t); }, E.out); await anim(380, t => { const k = E.spring(t); cm.sy = lerp(.8, 1, k); cm.sx = lerp(1.16, 1, k); }, E.lin); });
+  btn('#mBtns', '被打（壓扁 0.78 / 1.14）', async () => { CM.setFace('ouch'); cm.sy = .78; cm.sx = 1.14; await wait(70); await anim(520, t => { const k = E.spring(t); cm.sy = lerp(.78, 1, k); cm.sx = lerp(1.14, 1, k); }, E.lin); await CM.pose('rub', 240); await wait(500); await CM.pose(cm.breathe ? 'lap' : 'side', 260); CM.flash('teary', 900, cm.breathe ? 'calm' : 'peek'); });
+  btn('#mBtns', '合掌', async () => { await CM.pose('gassho', 300); CM.flash('focus', 1200, 'calm'); await wait(1300); CM.pose(cm.breathe ? 'lap' : 'side'); });
+  btn('#mBtns', '偷看左右', async () => { CM.setFace('peek'); await anim(260, t => cm.gx = lerp(0, -3, t)); await wait(500); await anim(400, t => cm.gx = lerp(-3, 3, t)); await wait(500); await anim(260, t => cm.gx = lerp(3, 0, t)); });
+  const grid = $('#faceGrid');
+  Object.keys(FACE).forEach(k => {
+    const f = document.createElement('figure'); f.innerHTML = `<svg viewBox="-44 -78 88 88">${mochiMarkup('fm-' + k).replace(/filter="url\(#fBlur2\)"/, '')}</svg><figcaption>${FACE_ZH[k]}</figcaption>`;
+    grid.appendChild(f);
+    const svg = f.querySelector('svg');
+    const m = new Mochi(svg, 'fm-' + k); m.setFace(k); m.s.feet = 0; m.hand = JSON.parse(JSON.stringify(HANDS.lap)); faceMinis.push(m);
+    f.onclick = () => CM.flash(k, 0);
+  });
+  idleLog = $('#idleLog');
+  IDLE.forEach(it => btn('#kBtns', `${it.zh}（P${it.pri}·${it.cd / 1000}s）`, () => playIdle(it, CK)));
+  btn('#kBtns', '自動排程 ▶', async e => {
+    const b = $('#kBtns').lastChild; if (b.dataset.on) { b.dataset.on = ''; b.textContent = '自動排程 ▶'; return; }
+    b.dataset.on = 1; b.textContent = '自動排程 ■'; logIdle('自動排程開始（情境：首頁）');
+    while (b.dataset.on && app.dataset.state === 'chars') { const it = pickIdle('home'); if (it) await playIdle(it, CK); else logIdle('全部在冷卻中 → 只做 L1 呼吸'); await wait(1800); }
+  });
+  ['無', '浴衣', '圍巾', '斗笠'].forEach((zh, i) => btn('#aBtns', zh, () => dress(CA, [null, 'yukata', 'scarf', 'kasa'][i])));
+  btn('#aBtns', '壓扁測試', async () => { const s = CA.s; await anim(150, t => { s.sy = lerp(1, .8, t); s.sx = lerp(1, 1.16, t); }, E.out); await anim(260, t => { s.lift = 26 * E.out(t); s.sy = lerp(.8, 1.12, t); s.sx = lerp(1.16, .92, t); s.rot = lerp(0, 8, t); }, E.out); await anim(300, t => { s.lift = 26 * (1 - E.in(t)); s.sy = lerp(1.12, 1, t); s.sx = lerp(.92, 1, t); s.rot = lerp(8, 0, t); }, E.lin); await anim(80, t => { s.sy = lerp(1, .78, t); s.sx = lerp(1, 1.16, t); }, E.out); await anim(420, t => { const k = E.spring(t); s.sy = lerp(.78, 1, k); s.sx = lerp(1.16, 1, k); }, E.lin); });
+  dress(CA, 'yukata');
+}
+
+/* =====================================================================
+   THE LOOP
+   ===================================================================== */
+let prevT = performance.now();
+function frame(t) {
+  requestAnimationFrame(frame);
+  if (t < frozenUntil) return;   // hit-stop
+  for (const tw of tweens) { const p = Math.min(1, (t - tw.t0) / tw.ms); tw.fn(tw.ease(p)); if (p >= 1) { tweens.delete(tw); tw.res(); } }
+  const st = app.dataset.state;
+  if (st === 'chars') { CM && CM.render(t); CK && CK.render(t); CA && CA.render(t); faceMinis.forEach(m => m.render(t)); return; }
+  M.render(t); K.render(t);
+  // smoke drifts (L1); dust in the day shaft (L1, not in lite)
+  if (!opt.rm) { const sm = $('#smoke', scene); sm.setAttribute('transform', `translate(${Math.sin(t / 900) * 1.4} 0) scale(1 ${1 + Math.sin(t / 1300) * .06})`); }
+  if (!opt.lite && !opt.rm && document.documentElement.dataset.time === 'day') motes.forEach(m => { m.v = (m.v + m.sp / 60) % 1; const y = 90 + m.v * 160, x = 70 + m.v * 90 + m.u * 50 + Math.sin(t / 1500 + m.u * 9) * 3; m.c.setAttribute('cx', x.toFixed(1)); m.c.setAttribute('cy', y.toFixed(1)); m.c.setAttribute('opacity', (Math.sin(m.v * Math.PI) * .8).toFixed(2)); });
+  prevT = t;
+}
+
+/* ---------- boot ---------- */
+const h = new Date().getHours();
+setTime(qs.get('time') || (h >= 19 || h < 5 ? 'night' : h >= 16 ? 'dusk' : 'day'));
+if (opt.lite) { $('#optLite').checked = true; document.body.classList.add('lite'); }
+if (opt.rm) $('#optRM').checked = true;
+if (qs.has('cmp')) { $('#optCmp').checked = true; $('#compare').classList.add('cmp'); }
+setState(qs.get('s') || 'home');
+if (qs.has('tags')) showTags(1e9);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

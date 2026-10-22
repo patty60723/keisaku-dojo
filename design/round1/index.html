@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>香板禪堂 重設計 Round 1</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Huninn&family=Fredoka:wght@500;600&display=swap">
+<style>
+:root {
+  --washi: #f3eee2; --washi-2: #ebe4d4; --paper: #fbf8f1; --edge: #e3d9c5;
+  --ink: #3b2f27; --ink-2: #6b5f51; --ink-3: #988c7c; --ai: #34466e; --ai-soft: #e4e6ec; --shu: #c8432d; --matcha: #7c8a55; --kin: #c99a3e;
+  --f-story: "LXGW WenKai TC", "Kaiti TC", serif; --f-ui: "Huninn", "PingFang TC", "Noto Sans TC", system-ui, sans-serif; --f-num: "Fredoka", ui-rounded, system-ui, sans-serif;
+  --lift: 0 1px 0 rgb(59 47 39 / .05), 0 10px 28px -14px rgb(59 47 39 / .3);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --washi: #1e1c1a; --washi-2: #282521; --paper: #2a2723; --edge: #3a352f; --ink: #ede5d6; --ink-2: #b9ae9d; --ink-3: #8a8072; --ai: #aebde4; --ai-soft: #33363f; --shu: #e8634a;
+  --lift: 0 1px 0 rgb(0 0 0 / .2), 0 12px 30px -14px rgb(0 0 0 / .7); } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--washi); color: var(--ink); font: 16px/1.75 var(--f-ui); -webkit-text-size-adjust: 100%; }
+main { max-width: 980px; margin: 0 auto; padding: 32px 16px 80px; }
+h1 { font: 700 34px/1.25 var(--f-story); letter-spacing: .08em; margin: 0 0 6px; }
+h2 { font: 700 26px/1.3 var(--f-story); margin: 64px 0 12px; padding-top: 20px; border-top: 1.5px solid var(--edge); }
+h2 .no { font: 600 15px/1 var(--f-num); color: var(--ink-3); display: block; margin-bottom: 8px; letter-spacing: .1em; }
+h3 { font: 700 19px/1.4 var(--f-story); margin: 32px 0 8px; }
+p, li { color: var(--ink); } .muted { color: var(--ink-2); }
+a { color: var(--ai); }
+code { font: 13.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--washi-2); padding: 1px 5px; border-radius: 5px; overflow-wrap: anywhere; }
+.lead { font-size: 17px; color: var(--ink-2); max-width: 720px; }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 8px; }
+.cta a { display: inline-flex; align-items: center; min-height: 48px; padding: 0 20px; border-radius: 16px; background: var(--ai); color: var(--paper); text-decoration: none; }
+.cta a.alt { background: var(--ai-soft); color: var(--ai); }
+.card { background: var(--paper); border-radius: 18px; box-shadow: var(--lift); padding: 18px 20px; margin: 14px 0; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+@media (max-width: 720px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+.ba { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; margin: 14px 0; }
+.ba figure { margin: 0; }
+.ba img, figure img { width: 100%; display: block; border-radius: 14px; box-shadow: var(--lift); background: var(--paper); }
+figcaption { font-size: 13px; color: var(--ink-3); margin-top: 6px; }
+.ba .b figcaption::before { content: "BEFORE · "; font-weight: 700; color: var(--ink-2); }
+.ba .a figcaption::before { content: "AFTER · "; font-weight: 700; color: var(--ai); }
+@media (max-width: 560px) { .ba { gap: 8px; } }
+.strip { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.strip.c5 { grid-template-columns: repeat(5, 1fr); }
+@media (max-width: 720px) { .strip, .strip.c5 { grid-template-columns: repeat(3, 1fr); } }
+.strip img { border-radius: 8px; }
+.tw { overflow-x: auto; margin: 12px 0; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14px; line-height: 1.55; background: var(--paper); border-radius: 14px; overflow: hidden; box-shadow: var(--lift); }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--edge); }
+th { background: var(--washi-2); font-weight: 400; color: var(--ink-2); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+.tag { display: inline-block; font-size: 12px; line-height: 1; padding: 5px 8px; border-radius: 8px; white-space: nowrap; }
+.t-code { background: #e3ead6; color: #4a5a2a; } .t-dev { background: #f3e3c8; color: #7a5212; } .t-ux { background: var(--ai-soft); color: var(--ai); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .t-code { background: #33402a; color: #c6d6a6; } :root:not([data-theme="light"]) .t-dev { background: #4a3a20; color: #f0cf96; } }
+.p0 { color: var(--shu); font-weight: 700; } .p1 { color: var(--kin); font-weight: 700; } .p2 { color: var(--ink-3); font-weight: 700; }
+.sw { display: flex; flex-wrap: wrap; gap: 10px; }
+.sw div { width: 112px; font-size: 12px; color: var(--ink-2); }
+.sw i { display: block; height: 52px; border-radius: 12px; margin-bottom: 4px; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .08); }
+.type-row { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: baseline; padding: 8px 0; border-bottom: 1px dashed var(--edge); }
+.type-row:last-child { border-bottom: 0; }
+.type-row small { color: var(--ink-3); font: 12px/1.4 var(--f-ui); }
+.tl { list-style: none; padding: 0; margin: 12px 0; counter-reset: s; }
+.tl li { position: relative; padding: 0 0 12px 40px; }
+.tl li::before { counter-increment: s; content: counter(s); position: absolute; left: 0; top: 2px; width: 28px; height: 28px; border-radius: 50%; background: var(--ai-soft); color: var(--ai); font: 600 14px/28px var(--f-num); text-align: center; }
+.tl b { font-weight: 700; }
+.ms { font: 500 14px/1 var(--f-num); color: var(--ink-2); }
+.decide li { margin-bottom: 8px; }
+.toc { columns: 2; font-size: 15px; } @media (max-width: 560px) { .toc { columns: 1; } }
+.note { font-size: 14px; color: var(--ink-2); }
+svg.diagram { width: 100%; height: auto; display: block; }
+.diagram text { font: 12px var(--f-ui); fill: var(--ink); }
+</style>
+</head>
+<body>
+<main>
+<p class="muted" style="margin:0 0 4px;font-size:14px;letter-spacing:.1em">KEISAKU DOJO · REDESIGN ROUND 1 · 2026-10</p>
+<h1>香板禪堂 UI/UX、角色與動畫重設計</h1>
+<p class="lead">第一輪交付：現況審查、問題清單、新的 Art Direction，以及首頁／專注中／結算與角色的可互動原型。<b>正式版完全沒有改動</b>，所有內容都在 <code>design/round1/</code>，等方向確認後才進入實作。</p>
+<div class="cta"><a href="proto.html">開啟可互動原型</a><a class="alt" href="proto.html?cmp">原型＋對照 v20</a><a class="alt" href="proto.html?s=chars">角色表</a></div>
+<p class="note">原型上方的深色列是原型控制列，不屬於設計：可切換畫面、日／黃昏／夜、低效能、減少動態，以及觸發「被打」「連續分心」「快轉到結束」等示範。寬螢幕勾選「對照 v20」會左右並排，手機上則是 A/B 切換。</p>
+
+<div class="card">
+<b>這一輪的結論，用三句話說：</b>
+<ol style="margin:6px 0 0;padding-left:22px">
+<li>v20 的角色與世界觀很完整，問題不在「缺東西」，在<b>層次</b>：場景是平面的，UI 每一塊都有框，紅色出現的次數太多，主要動作沒有被凸顯。</li>
+<li>首頁應該是「場景 → 開始坐禪 → 這次的計畫 → 其他」，回訪者一鍵就能開始；專注中只留時間；結算變成一段可以略過的小儀式。</li>
+<li>動畫要從「位移」升級為「表演」：預備、停頓、命中、回彈、收尾。並且分三個層級，同一時間只會有一個大事件。</li>
+</ol>
+</div>
+
+<h3>目錄</h3>
+<ol class="toc">
+<li><a href="#s1">現況審查報告</a></li><li><a href="#s2">設計問題清單</a></li><li><a href="#s3">新的 Art Direction</a></li><li><a href="#s4">首頁／專注中／結算 重設計</a></li>
+<li><a href="#s5">麻糬與住持角色規範</a></li><li><a href="#s6">動畫規範與狀態轉換</a></li><li><a href="#s7">分階段實作計畫</a></li><li><a href="#s8">風險、工作量、優先級</a></li><li><a href="#s9">需要你決定的事</a></li>
+</ol>
+
+<!-- ============================================================ -->
+<h2 id="s1"><span class="no">01</span>現況審查報告</h2>
+<p>以下結論都來自閱讀 <code>src/</code> 的程式碼與實際截圖。標記 <span class="tag t-code">程式碼確認</span> 的是我在原始碼裡看到的事實；標記 <span class="tag t-dev">需裝置測試</span> 的是合理推論，必須在你的 Android 手機與 iPhone 上驗證才能下結論。</p>
+
+<div class="grid2">
+<div class="card"><b>做得好的，要保留</b>
+<ul style="margin:6px 0 0;padding-left:20px">
+<li>計時用時間戳記（<code>P.end = Date.now() + …</code>，<code>app.js:1396</code>；<code>tick()</code> 用 <code>P.end - Date.now()</code>），不依賴畫面幀數。背景、降頻都不會讓時間跑掉。</li>
+<li>已經尊重 <code>prefers-reduced-motion</code>（<code>app.js:3</code>，各動畫入口都有檢查）。</li>
+<li>表情動畫改寫 SVG <code>transform</code> 屬性（<code>animateFace</code>），在 iOS 上穩定。新方案沿用這個作法。</li>
+<li>回訪者已經可以兩步開始：「跟上次一樣」→「準備好了」（<code>onboarding</code> <code>app.js:942</code>、<code>readyCheck</code> <code>app.js:1128</code>）。</li>
+<li>新手導覽會實際點亮熱點並要求點擊（<code>tour()</code> <code>app.js:1967</code>），學習效果比文字說明好。</li>
+<li>世界觀一致：悟之窗／迷之窗、坐禪帳、堂規、收藏冊都是場景裡的實物。</li>
+</ul></div>
+<div class="card"><b>主要問題</b>
+<ul style="margin:6px 0 0;padding-left:20px">
+<li><b>場景是平面的</b>：牆面 y 0–176、榻榻米 y 176–280 都是平塗，角色沒有接觸陰影，看起來像貼紙浮在地上。</li>
+<li><b>UI 太多框</b>：對話卡、計時卡、按鈕全部有 1.5px 邊框，視覺重量平均，眼睛找不到主角。</li>
+<li><b>紅色太多</b>：朱紅用在警示文字、連續天數徽章、被打的 toast、印章，降低了「被打」與「印章」的戲劇性。</li>
+<li><b>首頁沒有「開始」按鈕</b>：大大的 25:00 看起來可以按，但真正的入口是住持的問題與選項。</li>
+<li><b>專注中地板被撐高</b>：手機直式時舞台吃掉大半個螢幕，計時被推到最底下。</li>
+<li><b>結算是靜態卡片</b>：場景被模糊掉，麻糬看不見，坐完一炷的成就感沒有被表演出來。</li>
+<li><b>打擊缺少表演節拍</b>：有舉板與 160ms 停頓，但沒有「麻糬察覺」、沒有 hit-stop、沒有回彈與收尾。</li>
+</ul></div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s2"><span class="no">02</span>設計問題清單</h2>
+<p class="muted">P0＝影響第一印象或核心體驗，本輪要定案；P1＝明顯提升品質；P2＝打磨。</p>
+<div class="tw"><table>
+<thead><tr><th>#</th><th>問題</th><th>證據（程式碼位置／畫面）</th><th>類型</th><th>優先</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>首頁沒有明確的主要動作；25:00 大字看起來可以按，但其實不行</td><td>計時面板固定顯示 <code>#clock</code>（<code>body.html</code> 的 <code>.panel</code>）；入口是對話選項 <code>.choice</code>（<code>dialog.css:23</code>）。截圖：首頁 BEFORE</td><td><span class="tag t-code">程式碼確認</span></td><td class="p0">P0</td></tr>
+<tr><td>2</td><td>回訪者每天都要等打字動畫才能選</td><td><code>typeText</code> 每字 34ms（<code>app.js:858</code>）；開場一句約 20 字＝0.7 秒，接著還要「準備好了嗎？」再一句</td><td><span class="tag t-code">程式碼確認</span></td><td class="p0">P0</td></tr>
+<tr><td>3</td><td>專注中舞台被撐高，計時被推到螢幕底部</td><td><code>.stage-wrap { flex: 1 0 auto }</code> 加 CSS 榻榻米背景填滿剩餘高度（<code>dialog.css:323</code>）。截圖：專注中 BEFORE</td><td><span class="tag t-code">程式碼確認</span></td><td class="p0">P0</td></tr>
+<tr><td>4</td><td>偵測說明在專注中一直以朱紅色顯示，像錯誤訊息</td><td><code>.sense { color: var(--shu) }</code>（<code>dialog.css:277</code>），圖示也是朱紅（<code>dialog.css:726</code>）</td><td><span class="tag t-code">程式碼確認</span></td><td class="p0">P0</td></tr>
+<tr><td>5</td><td>結算時場景被模糊，麻糬消失；沒有節奏</td><td><code>showResult</code> 一次填好全部文字並顯示 <code>#result</code>（<code>app.js:1502</code>）。截圖：結算 BEFORE</td><td><span class="tag t-code">程式碼確認</span></td><td class="p0">P0</td></tr>
+<tr><td>6</td><td>角色沒有接觸陰影，地板平塗，沒有前中後景</td><td><code>svg.html</code> 地板只有 <code>.f-tatami</code> 平塗＋橫紋 pattern；<code>#sitter</code>、<code>#monk</code> 下沒有陰影元素</td><td><span class="tag t-code">程式碼確認</span></td><td class="p0">P0</td></tr>
+<tr><td>7</td><td>打擊缺少「察覺 → 預備 → 命中停頓 → 回彈 → 收尾」</td><td><code>strike()</code>（<code>app.js:732</code>）：走過去 → 泡泡 → 420ms → 舉板 380ms → 停 160ms → 揮下 85ms → <code>impact()</code>。麻糬只換成 ouch 臉並套 <code>.ouch</code> class</td><td><span class="tag t-code">程式碼確認</span></td><td class="p0">P0</td></tr>
+<tr><td>8</td><td>連續被打時表演完全相同，第三次開始像懲罰</td><td><code>strike()</code> 沒有依頻率改變演出；<code>impact()</code> 每次都是震動 80ms、畫面晃 .38s、6 顆星</td><td><span class="tag t-code">程式碼確認</span></td><td class="p1">P1</td></tr>
+<tr><td>9</td><td>熱點不易發現：回訪者沒有任何提示，觸控裝置沒有 hover</td><td><code>.hotspot</code> 完全透明，只有 <code>@media (hover:hover)</code> 的淡白底（<code>dialog.css:537–541</code>）</td><td><span class="tag t-code">程式碼確認</span></td><td class="p1">P1</td></tr>
+<tr><td>10</td><td>朱紅用途太多，稀釋了印章與被打的份量</td><td><code>--shu</code> 用於 <code>.streak-badge</code>（<code>dialog.css:519</code>）、<code>.toast.hit</code>（<code>dialog.css:315</code>）、<code>.sense</code>、印章</td><td><span class="tag t-code">程式碼確認</span></td><td class="p1">P1</td></tr>
+<tr><td>11</td><td>全部文字都用霞鶩文楷，小字與按鈕的辨識度不足</td><td><code>--f-display</code>、<code>--f-body</code> 都是 LXGW WenKai TC（<code>style.css:33–34</code>）</td><td><span class="tag t-code">程式碼確認</span> <span class="tag t-dev">需裝置測試</span></td><td class="p1">P1</td></tr>
+<tr><td>12</td><td>連續天數徽章（紅底數字）有「斷掉就可惜」的壓力，與「不強迫連續」的原則衝突</td><td><code>#streakBadge</code> 掛在坐禪帳熱點上；開場台詞「施主已經連續來了 N 天」</td><td><span class="tag t-code">程式碼確認</span> <span class="tag t-ux">UX 判斷</span></td><td class="p1">P1</td></tr>
+<tr><td>13</td><td>住持比例偏寫實（頭小身長），跟大福外形的麻糬語言不一致</td><td><code>#monk</code> 頭 r15、袍高 58（<code>svg.html</code>），約 1:2；麻糬是圓頂</td><td><span class="tag t-code">程式碼確認</span></td><td class="p1">P1</td></tr>
+<tr><td>14</td><td>手機「螢幕朝下」模式下，專注畫面幾乎不會被看到；真正被看到的是拿起來那一刻</td><td><code>readyCheck</code> 文案「請把手機螢幕朝下平放」（<code>app.js:1131</code>）；拿起偵測 <code>Mo.score</code>（<code>app.js:1196</code>）</td><td><span class="tag t-code">程式碼確認</span> <span class="tag t-ux">UX 判斷</span></td><td class="p1">P1</td></tr>
+<tr><td>15</td><td>被打時震動 80ms，在安靜環境偏強；iOS Safari 不支援震動</td><td><code>buzz(80)</code>（<code>app.js:756</code>）；<code>navigator.vibrate</code> 在 iOS Safari 不存在，所以 iPhone 上這段無效</td><td><span class="tag t-code">程式碼確認</span> <span class="tag t-dev">需裝置測試</span></td><td class="p2">P2</td></tr>
+<tr><td>16</td><td>模糊濾鏡與 blend mode 在低階 Android 可能掉幀</td><td>夜間月光已用 <code>feGaussianBlur</code> 與 <code>mix-blend-mode: screen</code>（<code>svg.html</code> <code>#nightLights</code>）；新方案會用更多</td><td><span class="tag t-dev">需裝置測試</span></td><td class="p2">P2</td></tr>
+<tr><td>17</td><td>WenKai 字重偏細，夜間深底上的小字可能發糊</td><td>夜間 <code>--muted: #a39e8f</code> 配 13px 文楷</td><td><span class="tag t-dev">需裝置測試</span></td><td class="p2">P2</td></tr>
+</tbody></table></div>
+
+<h3>BEFORE 截圖（v20 正式版）</h3>
+<div class="grid3">
+<figure><img src="img/before/home_light.png" alt="v20 首頁" loading="lazy"><figcaption>首頁：入口是對話選項，25:00 不能按</figcaption></figure>
+<figure><img src="img/before/flow_05_focus.png" alt="v20 專注中" loading="lazy"><figcaption>專注中：地板被撐高、紅色警示常駐</figcaption></figure>
+<figure><img src="img/before/flow_09_result.png" alt="v20 結算" loading="lazy"><figcaption>結算：場景被模糊，麻糬看不到</figcaption></figure>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s3"><span class="no">03</span>新的 Art Direction</h2>
+<p class="lead">Cozy Zen × Character Animation × Japanese Illustrated Diary<br>像一本手繪的禪堂日記：紙是和紙，墨是暖墨，光從窗戶進來，角色站在地上、有重量。</p>
+
+<h3>場景分層</h3>
+<div class="grid2">
+<div class="card">
+<ol style="margin:0;padding-left:20px">
+<li><b>背景</b>：牆、梁、柱、兩扇窗、床之間（tokonoma）。床之間是新增的凹室，給房間一個「更深的後面」，掛軸與香爐移進去。</li>
+<li><b>中景</b>：透視榻榻米。縫線向消失點 (200, 40) 收斂，三排間距由遠而近 30 → 46 → 38；牆根加一條 18 單位的 AO 漸層。</li>
+<li><b>角色</b>：住持、蒲團、麻糬。蒲團有座布團＋圓柱體兩層；麻糬坐下時下沉 2 單位，前緣蓋過身體底部，看起來真的坐進去。</li>
+<li><b>前景</b>：底部一條緣側木框＋柔和暗角（vignette），把視線收向中央。</li>
+</ol></div>
+<div class="card"><b>光分成五種，各自獨立</b>
+<ul style="margin:6px 0 0;padding-left:20px">
+<li><b>Ambient</b>：整體色溫。黃昏用 multiply 暖色 16%。</li>
+<li><b>Window light</b>：窗戶光柱＋地上光斑。白天柔白、黃昏長而暖（光斑落在麻糬身上）、夜晚從方窗來的冷月光。</li>
+<li><b>Local light</b>：夜間行燈的暖光、香頭的小火點。</li>
+<li><b>Character light</b>：麻糬的徑向漸層體積＋迎光側的 rim light（黃昏在左、夜晚在右）。</li>
+<li><b>Contact shadow</b>：每個角色腳下模糊橢圓；麻糬跳起時陰影縮小變淡。</li>
+</ul>
+<p class="note" style="margin-bottom:0">低效能模式：拿掉所有 <code>feGaussianBlur</code>、灰塵粒子、畫面晃動與 backdrop-filter；陰影改成不透明度 70% 的實心橢圓。結構與光的方向都不變。</p></div>
+</div>
+
+<h3>色彩</h3>
+<div class="sw">
+<div><i style="background:#f3eee2"></i>和紙 washi<br><code>#f3eee2</code></div>
+<div><i style="background:#fbf8f1"></i>紙面 paper<br><code>#fbf8f1</code></div>
+<div><i style="background:#3b2f27"></i>暖墨 ink<br><code>#3b2f27</code></div>
+<div><i style="background:#34466e"></i>藍染 ai（主要動作）<br><code>#34466e</code></div>
+<div><i style="background:#c8432d"></i>朱 shu（只給印章與命中）<br><code>#c8432d</code></div>
+<div><i style="background:#7c8a55"></i>抹茶（新內容提示）<br><code>#7c8a55</code></div>
+<div><i style="background:#c99a3e"></i>金（星星、得意）<br><code>#c99a3e</code></div>
+<div><i style="background:#ece3cf"></i>牆<br><code>#ece3cf</code></div>
+<div><i style="background:#d9ca90"></i>榻榻米<br><code>#d9ca90</code></div>
+<div><i style="background:#6b4a33"></i>木<br><code>#6b4a33</code></div>
+</div>
+<p class="note">規則：<b>朱紅只出現在兩個地方</b>：結算印章，以及被打那一瞬間的特效。警示改用中性墨色＋說明；「有新東西」用抹茶色小圓點。UI 不再用框線分隔，改用紙面＋柔和陰影（elevation），框線只留給輸入元件。</p>
+
+<h3>線條</h3>
+<p>全部角色與道具統一使用暖墨 <code>#3b2f27</code>（夜間 <code>#2a231e</code>），圓頭圓角。外框 2.2、主要內線 1.6–2.0、細節 0.8–1.2。不用純黑，不用不同顏色的描邊。</p>
+
+<h3>字體與字級</h3>
+<div class="card">
+<p style="margin-top:0">三種字體各有職責：<b>文楷</b>是住持的聲音與標題（敘事），<b>粉圓 Huninn</b> 是所有要「操作」的文字（按鈕、標籤、設定、狀態），<b>Fredoka</b> 只用於數字。</p>
+<div class="type-row"><small>Display · 文楷 700<br>22–34 / 1.25</small><span style="font:700 28px/1.25 var(--f-story);letter-spacing:.1em">香板禪堂</span></div>
+<div class="type-row"><small>Timer · Fredoka 600<br>76 / 1（專注中）</small><span style="font:600 56px/1 var(--f-num)">24:59</span></div>
+<div class="type-row"><small>Title · 文楷 700<br>20–24 / 1.3</small><span style="font:700 22px/1.3 var(--f-story)">坐滿 2 炷</span></div>
+<div class="type-row"><small>Dialogue · 文楷 400<br>17 / 1.65</small><span style="font:400 17px/1.65 var(--f-story)">早安。今天也來坐一炷嗎？</span></div>
+<div class="type-row"><small>UI / Body · 粉圓<br>15–18 / 1.5</small><span style="font:400 16px/1.5 var(--f-ui)">開始坐禪　調整本次　暫離</span></div>
+<div class="type-row"><small>Label · 粉圓<br>13 / 1.4</small><span style="font:400 13px/1.4 var(--f-ui);color:var(--ink-2)">一炷多久　坐幾炷　今日坐禪</span></div>
+<div class="type-row"><small>Number · Fredoka 500–600<br>隨字級</small><span style="font:600 28px/1 var(--f-num)">75 <span style="font:13px var(--f-ui);color:var(--ink-3)">分</span></span></div>
+</div>
+<p class="note">粉圓在 Google Fonts 以 unicode-range 分片載入，只會下載用到的字；實際增加的流量要在裝置上量測 <span class="tag t-dev">需裝置測試</span>。觸控目標一律 ≥ 44px，主要按鈕 58px。</p>
+
+<!-- ============================================================ -->
+<h2 id="s4"><span class="no">04</span>首頁／專注中／結算 重設計</h2>
+
+<h3>首頁：3 秒內看懂</h3>
+<p>閱讀順序被設計成：<b>場景</b>（我在禪堂）→ <b>開始坐禪</b>（唯一的藍色大按鈕）→ <b>這次的計畫</b>（讀書・25 分 × 2 炷）→ <b>次要資訊</b>（今日分鐘、本週來堂）。</p>
+<div class="ba">
+<figure class="b"><img src="img/before/home_light.png" alt="" loading="lazy"><figcaption>先回答問題才能開始</figcaption></figure>
+<figure class="a"><img src="img/after/home_day.png" alt="" loading="lazy"><figcaption>一鍵開始；熱點名牌在進場時浮現</figcaption></figure>
+</div>
+<ul>
+<li><b>三層設定</b>：<b>快速開始</b>＝直接按「開始坐禪」，沿用上次計畫（1 次點擊，現在是 2 次＋等打字）。<b>調整本次</b>＝原地展開三排 chip（做什麼／一炷多久／坐幾炷），不跳頁。<b>進階設定</b>＝偵測方式、鐘聲、每日目標，收在「調整本次」最下面的連結與齒輪裡。</li>
+<li><b>住持的話</b>變成場景下緣的一條紙片，跟場景連在一起，而不是另一張獨立卡片。回訪者的問候<b>直接顯示</b>（淡入 200ms）；打字動畫只保留給新手開場與特殊事件，且點一下就跳完。</li>
+<li><b>熱點可發現性</b>：進場時名牌浮現 2.6 秒（前 3 次造訪，之後只在有新內容時）；長按場景任何地方會顯示全部名牌；有新收藏時在收藏冊旁放抹茶色小點，脈衝 3 次後停止。</li>
+<li><b>連續天數</b>改成「本週來堂 4 天」，不顯示紅色徽章，斷掉也不提醒。</li>
+</ul>
+<div class="grid3">
+<figure><img src="img/after/home_dusk.png" alt="" loading="lazy"><figcaption>黃昏：長而暖的窗光落在蒲團上，麻糬左側有 rim light</figcaption></figure>
+<figure><img src="img/after/home_night.png" alt="" loading="lazy"><figcaption>夜：冷月光從方窗進來，行燈是唯一的暖光</figcaption></figure>
+<figure><img src="img/before/home_dark.png" alt="" loading="lazy"><figcaption>對照：v20 夜間</figcaption></figure>
+</div>
+
+<h3>專注中：只留時間</h3>
+<div class="ba">
+<figure class="b"><img src="img/before/flow_05_focus.png" alt="" loading="lazy"><figcaption>舞台被撐高、計時在最底、紅字常駐</figcaption></figure>
+<figure class="a"><img src="img/after/focus_day.png" alt="" loading="lazy"><figcaption>舞台固定 4:3，剩餘高度給時間</figcaption></figure>
+</div>
+<ul>
+<li>舞台固定 4:3；多出來的高度留給時間，<b>大字 76px 置中</b>，下面一條細細的香（進度）與「讀書・第 1 / 2 炷」。</li>
+<li>標題列淡到 35%；「暫離」「出堂」是無底色的 ghost 按鈕。</li>
+<li>偵測說明改成中性的 <code>ⓘ 這次的偵測：切出畫面</code>，點開才有解釋，<b>不再有紅字</b>。</li>
+<li>「合掌請打」變成場景右下的半透明膠囊，不與時間搶位置。</li>
+<li>手機螢幕朝下模式：畫面多半不會被看到，所以<b>拿起手機的那一刻</b>才是重點。建議第 2 輪設計「拿起來」的瞬間畫面：住持已經轉頭看你、時間清楚可見。</li>
+</ul>
+<figure style="max-width:420px"><img src="img/after/focus_night.png" alt="" loading="lazy"><figcaption>專注中・夜</figcaption></figure>
+
+<h3>結算：一段可以略過的小儀式</h3>
+<div class="ba">
+<figure class="b"><img src="img/before/flow_09_result.png" alt="" loading="lazy"><figcaption>靜態卡片蓋住模糊的場景</figcaption></figure>
+<figure class="a"><img src="img/after/result_day.png" alt="" loading="lazy"><figcaption>場景保留；紙從下方滑上來、蓋印</figcaption></figure>
+</div>
+<ol class="tl">
+<li><b>鐘</b> <span class="ms">0 ms</span>：一聲鐘，香頭熄滅。</li>
+<li><b>麻糬</b> <span class="ms">700 ms</span>：睜眼 → 伸懶腰（拉長 1.10 / 0.94，雙手舉高）→ 彈回 → 滿足臉。</li>
+<li><b>住持</b> <span class="ms">≈1.8 s</span>：轉向麻糬、瞇眼笑，泡泡「坐得很穩。」</li>
+<li><b>紙</b> <span class="ms">≈2.3 s</span>：和紙（上緣是毛邊）從下方滑上，蓋住舞台下緣 26px，場景不被模糊。</li>
+<li><b>印</b> <span class="ms">≈2.9 s</span>：印章從 1.6 倍、−14° 落下壓到 0.94 再回 1.0；紙面震一下、輕震動 12ms。唯一的朱紅。</li>
+<li><b>紀錄</b> <span class="ms">≈3.3 s</span>：今日分鐘、本週來堂、被打次數依序數上來。</li>
+<li><b>解鎖</b> <span class="ms">≈5 s</span>：只有在有新東西時出現：新收藏卡片帶 overshoot 滑入。</li>
+<li><b>動作</b> <span class="ms">≈5.6 s</span>：公案淡入，然後「收下」「再一炷」「分享」。</li>
+</ol>
+<p>右上角「略過 ›」或點舞台任何地方，立刻跳到最終狀態。減少動態模式下全部直接顯示終態。從背景回來時也直接是終態，不會重播。</p>
+<figure style="max-width:420px"><img src="img/after/result_dusk.png" alt="" loading="lazy"><figcaption>結算・黃昏，儀式結束後的狀態</figcaption></figure>
+
+<!-- ============================================================ -->
+<h2 id="s5"><span class="no">05</span>麻糬與住持角色規範</h2>
+<figure><img src="img/after/chars_day.png" alt="角色表" loading="lazy" style="max-width:420px"><figcaption>原型「角色」分頁：姿勢、12 種表情、住持待機表演、配件，都可以直接操作</figcaption></figure>
+
+<h3>麻糬</h3>
+<div class="grid2">
+<div class="card"><b>造型</b>
+<ul style="margin:6px 0 0;padding-left:20px">
+<li>大福輪廓，高 68、寬 72，<b>底部最寬</b>，表現重量（舊版是蛋形，底部收窄）。</li>
+<li>路徑：<code>M-34 0 C-38 -10 -36 -30 -26 -48 C-18 -62 -8 -68 0 -68 C8 -68 18 -62 26 -48 C36 -30 38 -10 34 0 C22 4.5 -22 4.5 -34 0 Z</code></li>
+<li>五官偏下：眼睛 y −30、x ±11；嘴 y −21；腮紅 (±20, −22)。fx（汗、Z、愛心、星）在頭的右上 (24–36, −40 – −64)。</li>
+<li>體積：徑向漸層（亮點在左上 36%/26%）＋底部陰影新月＋左上高光；黃昏／夜加 rim light。</li>
+<li>手是小圓「nub」，依姿勢移動：side（站）、lap（坐禪手印）、gassho（合掌）、rub（摸頭）、cheer（舉手）、tuck（預備蜷縮）。</li>
+</ul></div>
+<div class="card"><b>骨架（rig）</b>
+<ul style="margin:6px 0 0;padding-left:20px">
+<li><code>root</code> translate（位置）→ <code>lean</code> rotate（以底部為軸，傾斜與跳躍高度）→ <code>squash</code> scale（以底部為原點，壓扁不會離地）。</li>
+<li>陰影獨立於 lean：跳得越高越小越淡（<code>k = 1 − lift/70</code>）。</li>
+<li>眼睛群組另外有 blink（scaleY）與 gaze（±3 位移）。</li>
+<li>呼吸（L1）：坐著 1.3 rad/s、幅度 1.4%；站著 2.2 rad/s、0.8%。</li>
+<li>壓扁體積守恆的近似：sx ≈ 1 + (1 − sy) × 0.65。</li>
+</ul></div>
+</div>
+
+<h3>表情規格（12 種）</h3>
+<p class="note">共通規則：切換表情一律用 70ms 眨眼遮住（先閉眼、換、再睜眼），避免五官突然跳動。fx 永遠畫在配件之上。</p>
+<div class="tw"><table>
+<thead><tr><th>表情</th><th>眼</th><th>眉</th><th>嘴</th><th>fx／身體</th><th>何時出現</th><th>持續</th></tr></thead>
+<tbody>
+<tr><td>張望 peek</td><td>實心圓點 r2.7，會眨眼、左右看</td><td>—</td><td>短橫線</td><td>站姿，手在兩側</td><td>首頁、站著時</td><td>常駐</td></tr>
+<tr><td>平靜 calm</td><td>下彎弧（閉眼）</td><td>—</td><td>小微笑</td><td>坐姿、呼吸</td><td>坐禪預設</td><td>常駐</td></tr>
+<tr><td>專注 focus</td><td>水平線</td><td>內斜短眉</td><td>短橫</td><td>呼吸</td><td>夜間坐禪、合掌請打前</td><td>常駐</td></tr>
+<tr><td>開心 happy</td><td>上彎弧 ^^</td><td>—</td><td>張口笑（填色）</td><td>跳躍時</td><td>跳上蒲團、選好計畫</td><td>0.6–1.2s</td></tr>
+<tr><td>吃痛 ouch</td><td>&gt; &lt;</td><td>—</td><td>波浪</td><td>汗滴下落；壓扁 0.78/1.14</td><td>命中瞬間</td><td>≈1.0s</td></tr>
+<tr><td>委屈 teary</td><td>水平線＋淚滴</td><td>八字眉</td><td>細波浪</td><td>手揉頭之後</td><td>被打的收尾</td><td>0.9s</td></tr>
+<tr><td>驚訝 surprised</td><td>白眼＋瞳孔</td><td>—</td><td>小 o</td><td>三條衝擊線</td><td>被抓到的「察覺」</td><td>0.2–0.4s</td></tr>
+<tr><td>想睡 sleepy</td><td>半閉</td><td>—</td><td>打哈欠 o</td><td>Z 往上飄</td><td>長炷的後半段</td><td>2–3s</td></tr>
+<tr><td>滿足 content</td><td>^^</td><td>—</td><td>柔和微笑</td><td>愛心往上飄</td><td>完成一炷、結算</td><td>結算全程</td></tr>
+<tr><td>得意 proud</td><td>∧ 尖眼</td><td>—</td><td>歪嘴笑</td><td>眼角金星閃爍</td><td>合掌請打之後、零被打</td><td>1.2s</td></tr>
+<tr><td>害羞 shy</td><td>看向一邊的圓點</td><td>—</td><td>小波浪</td><td>腮紅加斜線</td><td>被稱讚、點麻糬</td><td>1.2s</td></tr>
+<tr><td>發呆 daze</td><td>空心圓</td><td>—</td><td>短橫</td><td>三點依序亮起</td><td>遲到回座</td><td>2s</td></tr>
+</tbody></table></div>
+
+<h3>住持</h3>
+<div class="grid2">
+<div class="card"><b>造型</b>
+<ul style="margin:6px 0 0;padding-left:20px">
+<li>Q 版：頭 r19、身高 53，頭身約 <b>1 : 1.4</b>（舊版約 1 : 2）。</li>
+<li>袈裟是鐘形，與麻糬<b>同一種圓頂語言</b>；袖子收成兩個圓角塊（遠側袖在身後、近側袖在前並握板）。</li>
+<li>摺線只留兩條、透明度 30%；絡子（rakusu）簡化成一塊褐色方片＋兩條肩帶。</li>
+<li>臉是固定的 3/4 側面朝右，轉身用 scaleX 經過 0 的翻轉（180ms）。</li>
+<li>骨架：flip → lean（含 squash）→ bob；頭以脖子 (1, −54) 為軸；手臂以肩 (10, −45) 為軸，香板在手臂群組裡。</li>
+</ul></div>
+<div class="card"><b>表情</b>
+<ul style="margin:6px 0 0;padding-left:20px">
+<li>眼：open（圓點）／smile（^^）／shut（閉）／stern（壓低的眉）／wide。</li>
+<li>嘴：smile／flat／laugh／o／sip。</li>
+<li>一般巡堂是 open＋smile；打人前是 stern＋flat；打完鞠躬是 shut＋smile。</li>
+</ul></div>
+</div>
+
+<h3>住持待機表演：優先級與冷卻</h3>
+<div class="tw"><table>
+<thead><tr><th>表演</th><th>優先</th><th>冷卻</th><th>長度</th><th>可出現的情境</th><th>動作</th></tr></thead>
+<tbody>
+<tr><td>慢眨眼</td><td>1</td><td>6 s</td><td>0.4 s</td><td>首頁、專注、休息</td><td>閉眼 380ms</td></tr>
+<tr><td>看麻糬</td><td>2</td><td>25 s</td><td>1.9 s</td><td>首頁、專注</td><td>轉向麻糬，頭微傾 6°，微笑</td></tr>
+<tr><td>點頭</td><td>2</td><td>30 s</td><td>0.7 s</td><td>首頁、結算</td><td>頭下點 9° 兩次</td></tr>
+<tr><td>整理袖子</td><td>2</td><td>40 s</td><td>1.0 s</td><td>首頁、休息</td><td>手臂上抬 −14° → 6° → 彈回，肩膀微聳</td></tr>
+<tr><td>看窗外</td><td>2</td><td>45 s</td><td>2.4 s</td><td>首頁、專注</td><td>轉身朝窗，抬頭 −9°，停 1.5s</td></tr>
+<tr><td>笑</td><td>3</td><td>60 s</td><td>0.9 s</td><td>首頁、結算（<b>專注中不笑</b>）</td><td>^^＋張口，身體彈三下</td></tr>
+<tr><td>喝茶</td><td>3</td><td>120 s</td><td>2.2 s</td><td>首頁、休息（<b>專注中不喝</b>）</td><td>放下香板，杯子到嘴邊，閉眼</td></tr>
+</tbody></table></div>
+<p class="note">排程規則：從「情境允許＋冷卻已過」的候選中，取最高優先級，並以 35% 機率混入較低優先的，避免太規律。L3 事件進行中一律不排。原型「角色」分頁的「自動排程」會把每一次決定寫進紀錄。</p>
+
+<h3>配件，特別是身上的衣物</h3>
+<div class="card">
+<ul style="margin:0;padding-left:20px">
+<li><b>軟配件（衣物、圍巾本體、腰帶）</b>：以麻糬身體做 <code>clipPath</code>，放在 squash 群組<b>裡面</b>。所以會跟著壓扁拉長，衣襬永遠不會超出輪廓；外框在衣物之後<b>重描一次</b>，邊緣乾淨。</li>
+<li><b>衣物結構</b>（以浴衣為例）：衣領是兩條相交的弧線，在中線 y −10 交會，<b>左襟壓右襟</b>（觀者看到右側那片在上）；白色半襟 3px；腰帶 y −9 到 −2；袖口＝手 nub 換成布料色（<code>--sleeve</code>）並加一條袖口線；下襬就是身體底線。</li>
+<li><b>垂墜物（圍巾尾巴、流蘇）</b>：在 clip 之外，掛在固定錨點，旋轉角跟著垂直速度與身體傾斜<b>延遲</b>（follow-through，lerp 0.12）。</li>
+<li><b>硬配件（帽子、斗笠、花）</b>：放在 squash <b>外面</b>，只跟頂點位置 <code>−64 × sy</code> 與傾斜（延遲 0.18），寬度只跟 50% 的 sx，形狀不被壓扁。</li>
+<li>臉部 fx 永遠畫在硬配件之上（延續 v20 的 <code>.fx</code> 層規則）。</li>
+</ul></div>
+
+<!-- ============================================================ -->
+<h2 id="s6"><span class="no">06</span>動畫規範與狀態轉換</h2>
+
+<h3>三個層級</h3>
+<div class="tw"><table>
+<thead><tr><th>層級</th><th>內容</th><th>規則</th></tr></thead>
+<tbody>
+<tr><td><b>L1 環境</b></td><td>呼吸、眨眼、香煙飄、窗光灰塵、住持站立的微晃</td><td>永遠在跑、不等待、幅度 ≤ 2%；減少動態時停止；hit-stop 時凍結</td></tr>
+<tr><td><b>L2 回饋</b></td><td>跳上蒲團、表情切換、住持待機表演、熱點名牌</td><td>每個角色同時只有一個；遇到 L3 立即取消或延後</td></tr>
+<tr><td><b>L3 事件</b></td><td>打擊、結算儀式、解鎖</td><td><b>互斥</b>：同時只會有一個。進行中又發生的打擊不排隊重播，而是合併成計數，收尾時由住持說「（又分心了 N 次）」</td></tr>
+</tbody></table></div>
+
+<h3>打擊：10 個步驟</h3>
+<figure><div class="strip"><img src="img/after/strike_300.png" alt=""><img src="img/after/strike_700.png" alt=""><img src="img/after/strike_950.png" alt=""><img src="img/after/strike_1080.png" alt=""><img src="img/after/strike_1350.png" alt=""><img src="img/after/strike_2600.png" alt=""></div>
+<figcaption>原型實際截圖：察覺 → 喝！→ 舉板 → 命中（星星、衝擊環）→ 摸頭 → 委屈收尾</figcaption></figure>
+<div class="tw"><table>
+<thead><tr><th>#</th><th>步驟</th><th>時間</th><th>住持</th><th>麻糬</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>觸發</td><td>0</td><td colspan="2">偵測事件發生。UI 不閃、不跳紅字；由場景說故事</td></tr>
+<tr><td>2</td><td>察覺</td><td>200ms</td><td>—</td><td>驚訝臉，視線轉向住持（gaze −2.6）</td></tr>
+<tr><td>3</td><td>轉身</td><td>180ms</td><td>stern 眉，scaleX 翻轉朝麻糬</td><td>—</td></tr>
+<tr><td>4</td><td>走近</td><td>距離 ÷ 170 u/s</td><td>走路 bob、雙腳交替</td><td>—</td></tr>
+<tr><td>5</td><td>舉板（預備）</td><td>380ms, back easing</td><td>手臂 −38°、身體後仰 −4°、微拉長</td><td>縮起來 0.94，換吃痛臉</td></tr>
+<tr><td>6</td><td>停頓</td><td>170ms</td><td colspan="2">「要來了」的那一拍</td></tr>
+<tr><td>7</td><td>揮下</td><td>85ms, ease-in</td><td>手臂 +71°、前傾 5°、微壓扁</td><td>—</td></tr>
+<tr><td>8</td><td>命中＋hit-stop</td><td>70ms 凍結</td><td>啪（合成木聲）、震動 28ms</td><td>壓扁 0.78 / 1.14、傾 3°；星星 ×6、衝擊環、畫面晃 2.2px</td></tr>
+<tr><td>9</td><td>回彈</td><td>520ms spring</td><td>follow-through 再過 −8°</td><td>阻尼彈簧回到 1.0（會過頭一點再回來）</td></tr>
+<tr><td>10</td><td>收尾</td><td>≈1.5s</td><td>香板放下、閉眼微笑點頭</td><td>手揉頭、搖一下 → 委屈臉偷看住持 → 平靜</td></tr>
+</tbody></table></div>
+<div class="card"><b>連續時的節流</b>
+<ul style="margin:6px 0 0;padding-left:20px">
+<li><b>10 秒內再次分心</b>：住持還站在旁邊，跳過步驟 2–4；星星減為 3 顆、晃動減半。</li>
+<li><b>1 分鐘內第 3 次</b>：改成「輕點」：手臂只舉 −12°，沒有喝、沒有星星、沒有晃動、沒有 hit-stop，聲音音量 ⅓；住持說「回來吧。」</li>
+<li>計數規則（P.hits 等）<b>不變</b>，只改演出。是否要改計數語意，留給你決定。</li>
+</ul>
+<p class="note" style="margin-bottom:0">原型專注中按「連續分心 ×3」可以看到三種演出依序出現。</p></div>
+
+<h3>跳上蒲團</h3>
+<figure><div class="strip c5"><img src="img/after/hop_150.png" alt=""><img src="img/after/hop_400.png" alt=""><img src="img/after/hop_700.png" alt=""><img src="img/after/hop_900.png" alt=""><img src="img/after/hop_1300.png" alt=""></div>
+<figcaption>預備蹲（0.84/1.12，後仰）150ms → 起跳拉長 1.12、前傾 → 520ms 拋物線（高 30）→ 落地壓扁 0.8/1.16 → 380ms 彈簧 → 手移到手印 → 閉眼</figcaption></figure>
+
+<h3>狀態轉換</h3>
+<svg class="diagram" viewBox="0 0 900 250" role="img" aria-label="狀態轉換圖">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="currentColor" style="color:var(--ink-2)"/></marker></defs>
+<g fill="var(--paper)" stroke="var(--ink-3)" stroke-width="1.2">
+<rect x="10" y="90" width="120" height="56" rx="14"/><rect x="185" y="90" width="120" height="56" rx="14"/><rect x="360" y="90" width="120" height="56" rx="14"/><rect x="535" y="90" width="120" height="56" rx="14"/><rect x="710" y="90" width="150" height="56" rx="14"/>
+<rect x="360" y="190" width="120" height="44" rx="14"/><rect x="535" y="10" width="120" height="44" rx="14"/><rect x="360" y="10" width="120" height="44" rx="14"/>
+</g>
+<g text-anchor="middle"><text x="70" y="116">首頁 home</text><text x="70" y="134" style="fill:var(--ink-3)">站著・待機表演</text>
+<text x="245" y="116">入座 settle</text><text x="245" y="134" style="fill:var(--ink-3)">跳上蒲團・三聲鐘</text>
+<text x="420" y="116">專注 focus</text><text x="420" y="134" style="fill:var(--ink-3)">巡堂・L1</text>
+<text x="595" y="116">休息 break</text><text x="595" y="134" style="fill:var(--ink-3)">喝茶・整理袖子</text>
+<text x="785" y="116">結算 ceremony</text><text x="785" y="134" style="fill:var(--ink-3)">L3・可略過</text>
+<text x="420" y="217">打擊 strike（L3）</text><text x="595" y="37">暫離 leave</text><text x="420" y="37">拿起手機 pickup</text></g>
+<g stroke="var(--ink-2)" stroke-width="1.4" fill="none" marker-end="url(#ar)">
+<path d="M130 118 H183"/><path d="M305 118 H358"/><path d="M480 112 H533"/><path d="M535 126 H482"/><path d="M655 118 H708"/>
+<path d="M410 146 V188"/><path d="M432 188 V148"/><path d="M480 98 Q520 70 560 56"/><path d="M590 56 Q560 76 500 92"/><path d="M420 88 V56"/><path d="M440 56 V88"/>
+<path d="M785 146 Q785 230 120 160"/></g>
+<g style="font-size:11px;fill:var(--ink-3)"><text x="135" y="110">開始坐禪</text><text x="490" y="105">一炷完</text><text x="660" y="110">最後一炷</text><text x="300" y="178">收下／再一炷</text></g>
+</svg>
+<ul>
+<li>每個狀態進入時先 <b>flush</b> 前一個狀態的所有 tween（直接套用終值），不留殘影。</li>
+<li>打擊只能從「專注」進入，結束一定回到「專注」；結算期間不可能被打。</li>
+<li>從背景回來（<code>visibilitychange</code>）：所有進行中的動畫直接跳到終態，不補播。</li>
+</ul>
+
+<h3>技術規範</h3>
+<div class="grid2">
+<div class="card"><b>做法</b>
+<ul style="margin:6px 0 0;padding-left:20px">
+<li>單一 <code>requestAnimationFrame</code> 迴圈；每幀寫入 SVG <code>transform</code> <b>屬性</b>（不是 CSS transform），iOS Safari 一致。</li>
+<li>tween 以 <code>performance.now()</code> 計算進度，掉幀只會少畫幾格，不會變慢。</li>
+<li>計時仍以 <code>Date.now()</code> 的結束時間戳記為準，與動畫完全脫鉤。</li>
+<li>hit-stop 用「凍結到某時間點」實作，不阻塞計時。</li>
+<li>UI 小動畫（紙、印章）可以用 WAAPI；角色一律走 rAF。</li>
+<li>音效用 WebAudio 即時合成（鐘、木聲、蓋印），不需要額外檔案；正式版可沿用 v20 的音色。</li>
+</ul></div>
+<div class="card"><b>降級</b>
+<ul style="margin:6px 0 0;padding-left:20px">
+<li><b>prefers-reduced-motion</b>：沒有跳躍弧線、晃動、粒子、呼吸；表情仍會換；儀式直接顯示終態。</li>
+<li><b>低效能</b>（自動偵測：連續 2 秒 &lt; 40fps，或手動）：去 blur、去 blend、去粒子、去 backdrop-filter。</li>
+<li><b>Android Chrome</b>：<code>navigator.vibrate</code> 可用；音效需要使用者手勢後才能開始。</li>
+<li><b>iOS Safari</b>：沒有震動，只靠聲音與畫面；PWA 背景計時以通知補足（v20 已有）。</li>
+</ul></div>
+</div>
+
+<h3>聲音、觸覺、無障礙</h3>
+<div class="tw"><table>
+<thead><tr><th>時刻</th><th>聲音</th><th>觸覺（Android）</th><th>無障礙</th></tr></thead>
+<tbody>
+<tr><td>開始</td><td>三聲鐘（沿用）</td><td>—</td><td>計時加 <code>role="timer"</code>，<code>aria-live="off"</code>，每 5 分鐘 polite 報一次</td></tr>
+<tr><td>跳上蒲團</td><td>輕「啵」</td><td>8ms</td><td>—</td></tr>
+<tr><td>命中</td><td>木聲「啪」（輕點時 ⅓ 音量）</td><td>28ms（輕點 10ms；舊版 80ms）</td><td>螢幕閱讀器播報「住持敲了一下肩膀」</td></tr>
+<tr><td>結算印章</td><td>悶「咚」</td><td>12ms</td><td>結算區域 <code>aria-live="polite"</code> 只播最終結果，不播動畫過程</td></tr>
+<tr><td>熱點</td><td>—</td><td>—</td><td>每個熱點都是 <code>&lt;button&gt;</code> 並有 <code>aria-label</code>；focus-visible 外框</td></tr>
+</tbody></table></div>
+<p class="note">對比：紙面 #fbf8f1 上的暖墨 #3b2f27 約 12:1；次要字 #6b5f51 約 5.9:1；最淡的 #988c7c 約 3.1:1，只用於 ≥13px 的標籤與輔助說明。</p>
+
+<!-- ============================================================ -->
+<h2 id="s7"><span class="no">07</span>分階段實作計畫</h2>
+<div class="tw"><table>
+<thead><tr><th>Phase</th><th>內容</th><th>完成條件（驗收）</th><th>估計</th></tr></thead>
+<tbody>
+<tr><td><b>0 定案</b></td><td>你審本原型；決定第 9 節的問題；在 Android 與 iPhone 上試原型（含低效能模式）</td><td>方向確認；裝置測試假設（#11、#15、#16、#17）有結果</td><td>—</td></tr>
+<tr><td><b>1 基礎</b></td><td>Design tokens（色、字、陰影、圓角）；引入粉圓；移除框線改 elevation；朱紅收斂；<code>.sense</code> 改中性</td><td>所有畫面套用新 token；朱紅只剩印章與命中；舊資料無影響</td><td>1.5 天</td></tr>
+<tr><td><b>2 場景</b></td><td>viewBox 改 400×300；床之間、透視榻榻米、AO、前景框、五種光、接觸陰影；低效能分支；熱點位置重算</td><td>日／黃昏／夜 × 四季全部正確；低階 Android ≥ 50fps；所有熱點可點</td><td>3 天</td></tr>
+<tr><td><b>3 角色</b></td><td>麻糬大福輪廓與新 rig；12 表情重繪；住持 Q 版重繪；<b>所有既有配件</b>依新 clip／硬配件規則移植</td><td>收藏冊每一項在站／坐／跳／被打四種狀態下都沒有破綻（逐張截圖）</td><td>4–5 天</td></tr>
+<tr><td><b>4 動作</b></td><td>tween 引擎與 L1/L2/L3 排程；跳上蒲團；10 步打擊與節流；住持待機表演</td><td>動作只改演出、不改計數；背景回來無殘影；減少動態正確</td><td>3 天</td></tr>
+<tr><td><b>5 畫面</b></td><td>首頁（一鍵開始、調整本次、熱點名牌）；專注中（固定舞台）；結算儀式（可略過）；開場打字只留給新手</td><td>回訪者 1 次點擊開始；3 秒測試；結算可略過；既有 e2e 測試通過（必要時更新選擇器）</td><td>3 天</td></tr>
+<tr><td><b>6 打磨</b></td><td>聲音與觸覺微調；拿起手機的瞬間畫面；收藏冊與坐禪帳套新風格；多裝置截圖 review</td><td>多裝置截圖無破綻；你在手機上確認後上版</td><td>2–3 天</td></tr>
+</tbody></table></div>
+<p class="note">每個 Phase 都會先出 preview／debug 版給你在手機上試，說「上版」才合併。資料格式（<code>keisaku-log-v2</code>、<code>keisaku-collect-v1</code> 等）在整個計畫中都不改。</p>
+
+<!-- ============================================================ -->
+<h2 id="s8"><span class="no">08</span>風險、工作量、優先級</h2>
+<div class="tw"><table>
+<thead><tr><th>風險</th><th>影響</th><th>對策</th><th>優先</th></tr></thead>
+<tbody>
+<tr><td>配件移植量大：每個配件都要對新輪廓重畫，數量多</td><td>Phase 3 可能超時</td><td>先做衣物類（最容易出破綻），帽子類大多只需調錨點；用截圖腳本逐項比對</td><td class="p0">P0</td></tr>
+<tr><td>viewBox 改 400×300 會影響熱點、星星、toast、季節窗景等所有座標</td><td>位置錯亂</td><td>集中成一份座標表；e2e 測試加熱點可點檢查</td><td class="p0">P0</td></tr>
+<tr><td>模糊與 blend 在低階 Android 掉幀</td><td>卡頓、耗電</td><td>低效能自動偵測；陰影可預先畫成漸層而不是濾鏡</td><td class="p1">P1</td></tr>
+<tr><td>新增粉圓字體的流量與首次載入</td><td>首次開啟變慢</td><td>只用於 UI、按需分片；Service Worker 快取；量測後決定</td><td class="p1">P1</td></tr>
+<tr><td>角色換造型，老使用者可能不習慣</td><td>「麻糬變了」</td><td>保留五官與顏色的辨識度；在更新說明讓住持介紹「麻糬換了新衣服」</td><td class="p2">P2</td></tr>
+<tr><td>結算儀式變長，每天看可能嫌煩</td><td>拖慢節奏</td><td>全程可略過；同一天第二次起自動縮短為 1.5 秒版本（建議）</td><td class="p2">P2</td></tr>
+</tbody></table></div>
+<p>總工作量約 <b>17–19 個工作天</b>（不含 Phase 0 的等待）。若要先拿到最大效益，建議順序：<b>Phase 1 → 5 的首頁與專注中 → 4 的打擊</b>，這三項就能解決 P0 的 #1–#4、#7；場景與角色重繪（Phase 2、3）是最大的一塊，可以獨立排程。</p>
+
+<!-- ============================================================ -->
+<h2 id="s9"><span class="no">09</span>需要你決定的事</h2>
+<ol class="decide">
+<li><b>整體方向</b>：場景深度、新麻糬輪廓、Q 版住持，這個方向對嗎？還是要更接近 v20？</li>
+<li><b>連續天數</b>：改成「本週來堂 N 天」、拿掉紅色徽章，可以嗎？</li>
+<li><b>首頁開場</b>：回訪者不再被問「今天想做什麼」，直接顯示上次計畫＋「開始坐禪」。住持仍會說一句問候。可以嗎？</li>
+<li><b>連續分心的計數</b>：演出會節流，但被打次數照算（不改語意）。要不要也合併計數？（我建議不改）</li>
+<li><b>結算印章「喝」</b>：被打很多次時的印章是「喝」，配文「肩膀辛苦了」。我覺得不算羞辱，可以保留；你想換嗎？</li>
+<li><b>字體</b>：功能文字改用粉圓，敘事保留文楷。可以接受多載入一套字嗎？</li>
+<li><b>（上一輪留下的）表情</b>：在收藏冊選的「平常表情」，坐禪時目前會換成平靜／專注。要不要讓坐禪時也維持所選表情？</li>
+</ol>
+<p class="muted" style="margin-top:40px;font-size:13px">原型的程式在 <code>design/round1/proto.html</code>；截圖在 <code>design/round1/img/</code>。正式版 <code>src/</code> 沒有任何改動。</p>
+</main>
+</body>
+</html>
