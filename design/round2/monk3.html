@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>住持 v3 結構審查</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Huninn&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="r1-tokens.css">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--washi); color: var(--ink); font: 16px/1.75 var(--f-ui); -webkit-text-size-adjust: 100%; }
+main { max-width: 1080px; margin: 0 auto; padding: 32px 16px 80px; }
+h1 { font: 700 32px/1.25 var(--f-story); letter-spacing: .08em; margin: 0 0 6px; }
+h2 { font: 700 24px/1.3 var(--f-story); margin: 56px 0 10px; padding-top: 18px; border-top: 1.5px solid var(--paper-edge); }
+h2 .no { font: 600 14px/1 var(--f-num); color: var(--ink-3); display: block; margin-bottom: 8px; letter-spacing: .1em; }
+h3 { font: 700 18px/1.4 var(--f-story); margin: 26px 0 6px; }
+p, li { max-width: 780px; } .muted { color: var(--ink-2); } .note { font-size: 14px; color: var(--ink-2); }
+a { color: var(--ai); }
+.tile { background: var(--wall); border-radius: 16px; box-shadow: var(--lift); padding: 8px; margin: 0; }
+.tile.paper { background: var(--paper); }
+.tile figcaption { font-size: 13px; color: var(--ink-2); text-align: center; margin-top: 4px; line-height: 1.45; }
+.tile svg { display: block; width: 100%; height: auto; }
+.grid { display: grid; gap: 12px; }
+.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } .g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } .g5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@media (max-width: 760px) { .g4, .g5 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .g3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }
+.card { background: var(--paper); border-radius: 16px; box-shadow: var(--lift); padding: 14px 18px; margin: 12px 0; }
+.legend { margin: 8px 0 0; padding: 0; list-style: none; font-size: 14px; line-height: 1.55; }
+.legend li { display: grid; grid-template-columns: 26px 1fr; gap: 6px; margin-bottom: 5px; }
+.n { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--ai); color: #fff; font: 600 11px/1 var(--f-num); }
+.n.bad { background: var(--shu); }
+.sw { display: inline-block; width: 22px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.tw { overflow-x: auto; margin: 12px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; line-height: 1.55; background: var(--paper); border-radius: 14px; overflow: hidden; box-shadow: var(--lift); }
+th, td { text-align: left; vertical-align: top; padding: 8px 12px; border-bottom: 1px solid var(--paper-edge); }
+th { background: var(--washi-2); font-weight: 400; color: var(--ink-2); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+.scene { width: 368px; max-width: 100%; border-radius: 18px; overflow: hidden; box-shadow: var(--lift); }
+.scene svg { display: block; width: 100%; height: auto; }
+.steps .tile figcaption b { display: block; color: var(--ink); }
+
+/* Round 1 scene + v2 */
+.ln { stroke: var(--line); stroke-linecap: round; stroke-linejoin: round; }
+.cshadow { fill: #1f1610; opacity: var(--shadow-o); }
+[data-time="day"] .dusk-only, [data-time="day"] .night-only, [data-time="dusk"] .day-only, [data-time="dusk"] .night-only, [data-time="night"] .day-only, [data-time="night"] .dusk-only { opacity: 0; }
+.m2 { --robe-in: #1d2741; }
+.m2p { fill: var(--sil, var(--flat, var(--c))); stroke: var(--sil, var(--inner, var(--line))); stroke-width: var(--sw, 1.3); stroke-linejoin: round; }
+.m2det { display: var(--det, inline); }
+.m2-sil { --sil: var(--line); --sw: 4; --det: none; }
+.m2l { fill: none; stroke: var(--inner, var(--line)); stroke-width: var(--w, 1); stroke-linecap: round; stroke-linejoin: round; }
+.m2f { fill: var(--flat, var(--c)); }
+.m2s { stroke: var(--inner, var(--line)); stroke-width: var(--w, 1.3); stroke-linejoin: round; }
+.m2ink { fill: var(--inner, var(--line)); }
+.m2band-o { fill: none; stroke: var(--inner, var(--line)); stroke-width: 4.4; }
+.m2band { fill: none; stroke: var(--flat, var(--robe-lo)); stroke-width: 2.2; }
+.m2strap { fill: none; stroke: var(--inner, #5a3b22); stroke-width: 1.3; stroke-linecap: round; }
+.m2ring { fill: none; stroke: var(--flat, #eadcbf); stroke-width: 1.2; }
+.m2stick rect { fill: var(--flat, #c69b62); stroke: var(--inner, var(--line)); stroke-width: 1.1; }
+.m2shadow { fill: #1f1610; opacity: .2; }
+
+/* v3 */
+.m3p { fill: var(--sil, var(--c)); stroke: var(--sil, none); stroke-width: var(--sw, 0); stroke-linejoin: round; }
+.m3p[data-s] { stroke: var(--sil, var(--line)); stroke-width: var(--sw, 1.3); }
+.m3-sil { --sil: var(--line); --sw: 4.4; --det: none; }
+.m3det { display: var(--det, inline); }
+.m3L { fill: none; stroke-width: var(--w); stroke-linecap: round; stroke-linejoin: round; }
+.m3shadow { fill: #1f1610; opacity: .2; }
+
+/* overlays */
+.sk { fill: none; stroke: var(--shu); stroke-width: .9; stroke-linecap: round; }
+.sk-d { fill: none; stroke: var(--shu); stroke-width: .8; stroke-dasharray: 1.8 1.4; }
+.sk-j { fill: #fff; stroke: var(--shu); stroke-width: .8; }
+.sk-t { font: 3.2px var(--f-ui); fill: var(--shu); }
+.fx { fill: none; stroke: #1f7a52; stroke-width: .9; marker-end: url(#arrow); }
+.fx-t { font: 3px var(--f-ui); fill: #1f7a52; }
+.mk circle.r { fill: none; stroke-width: .5; }
+.mk text { font: 600 1.7px var(--f-num); fill: #fff; text-anchor: middle; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" id="globalDefs"></svg>
+<main>
+<p class="muted" style="margin:0 0 4px;font-size:14px;letter-spacing:.1em">KEISAKU DOJO · ROUND 2 · SECOND STRUCTURE REVIEW</p>
+<h1>住持 v3：肩膀、衣領、袖子的結構修正</h1>
+<p class="muted">頭部、臉、頭身比例、配色沿用 v2。這次只重做三個區域：<b>左肩與袖身</b>、<b>衣領與肩頸</b>、<b>右側袖口與袖袋</b>。動畫沒動，正式版也沒動。<a href="monk.html">← v2 審查頁</a></p>
+
+<h2><span class="no">00</span>這次的工作順序</h2>
+<p>沒有微調 v2 的 path。先畫人體，再讓衣服包上去，確定布料怎麼受重力和遮擋，最後才簡化線條、轉成 SVG。下面每一列是同一個姿勢的五個步驟。</p>
+<div class="grid g5 steps" id="stepsCarry"></div>
+<div class="grid g5 steps" id="stepsTuck" style="margin-top:12px"></div>
+
+<h2><span class="no">01</span>v2 與 v3 等比例對照</h2>
+<div class="grid g4" id="cmp"></div>
+
+<h2><span class="no">02</span>v3 四倍放大</h2>
+<p class="note">以手機場景中的大小為 1 倍，這裡是 4 倍。</p>
+<div class="row" id="big"></div>
+
+<h2><span class="no">03</span>三個問題區域・8 倍特寫</h2>
+
+<h3>A　左側肩膀與袖身</h3>
+<div class="grid g2" id="zoomA"></div>
+<div class="grid g2">
+  <div class="card"><b>v2 的問題</b><ul class="legend" id="legA0"></ul></div>
+  <div class="card"><b>v3 每條線代表什麼</b><ul class="legend" id="legA1"></ul></div>
+</div>
+
+<h3>B　衣領與肩頸</h3>
+<div class="grid g4" id="zoomB"></div>
+<div class="grid g2">
+  <div class="card"><b>v2 的問題</b><ul class="legend" id="legB0"></ul></div>
+  <div class="card"><b>v3 每個區塊與線代表什麼</b><ul class="legend" id="legB1"></ul>
+    <p class="note" style="margin:8px 0 0">由內到外只有四層：頸部 → 白色內衣領 → 深色衣領 → 絡子帶。兩條衣領相交於 ⑨，<b>穿著者的左襟在上</b>；交叉點藏在絡子下，拿掉絡子就看得到（第 3 張）。</p></div>
+</div>
+
+<h3>C　右側袖口、袖袋與手臂（袖手）</h3>
+<div class="grid g3" id="zoomC"></div>
+<div class="grid g2">
+  <div class="card"><b>v2 的問題</b><ul class="legend" id="legC0"></ul></div>
+  <div class="card"><b>v3 每條線代表什麼</b><ul class="legend" id="legC1"></ul></div>
+</div>
+
+<h2><span class="no">04</span>人體結構草圖</h2>
+<p class="note">紅線是骨架。持香板時遠側的手臂自然垂下，被肚子擋住，所以不畫出來（虛線）；袖手時兩隻前臂在肚子前交叉，各自伸進對方的袖子。</p>
+<div class="grid g2" id="skel"></div>
+<div class="tw"><table>
+<thead><tr><th>關節</th><th>持香板</th><th>袖手</th></tr></thead>
+<tbody id="skelTable"></tbody></table></div>
+
+<h2><span class="no">05</span>不含衣褶與陰影的基本色塊</h2>
+<p class="note">左兩張：平塗色塊＋結構輪廓，沒有衣褶、沒有陰影、沒有高光（v3 本來就沒有衣褶線）。右兩張：完全不畫內線，每個部件換一個顏色，直接看出前後遮擋。袖子的方向、袖口、交疊在這裡就要看得懂。</p>
+<div class="grid g4" id="flat"></div>
+<p class="note" style="margin-top:6px"><span class="sw" style="background:#9fb8e6"></span>前側袖　<span class="sw" style="background:#f2c9a0"></span>後側袖　<span class="sw" style="background:#cfd8ee"></span>衣身　<span class="sw" style="background:#5d6f9c"></span>下層衣領　<span class="sw" style="background:#e0864a"></span>上層衣領　<span class="sw" style="background:#7a5230"></span>絡子帶　<span class="sw" style="background:#e9b89a"></span>頸部</p>
+
+<h2><span class="no">06</span>完整描邊</h2>
+<p class="note">左兩張依意義上色，右兩張是完稿。沒有任何衣褶線；每一條內線都對應一個服裝結構。</p>
+<div class="grid g4" id="lines"></div>
+<p class="note" id="lineKey" style="margin-top:6px"></p>
+
+<h2><span class="no">07</span>驗收：拿掉絡子、拿掉頭</h2>
+<p class="note">拿掉絡子後，僧袍本身必須完整；拿掉頭後，肩膀與衣領必須能獨立成立。</p>
+<div class="grid g3" id="hide"></div>
+<div class="grid g3" id="hideT" style="margin-top:12px"></div>
+
+<h2><span class="no">08</span>左右轉向</h2>
+<p class="note">朝左時衣領重新計算：仍然是穿著者的左襟在上（白色內衣領的交叉方向也跟著換）。其他部件是鏡像。</p>
+<div class="grid g4" id="dirs"></div>
+
+<h2><span class="no">09</span>在正式場景中的實際大小</h2>
+<p class="note">場景寬 368px，等於手機直式時舞台的實際寬度。</p>
+<div class="row" id="scenes"></div>
+
+<h2><span class="no">10</span>還需要你確認的地方</h2>
+<div class="card"><ol style="margin:0;padding-left:22px">
+  <li><b>後頸的衣領</b>立在頭的後面，頭與肩之間不再有缺口。頭後方會多出一小段深色衣領；請確認你覺得這樣比 v2 的凹口自然。</li>
+  <li><b>上層衣領一路到下襬</b>：這是和服前襟的邊，讓「哪一片在上面」在任何姿勢都看得出來。如果你覺得中間這條太明顯，可以只畫到腰部，下面只留一條線。</li>
+  <li><b>持香板時遠側手臂不畫</b>：它垂在身體遠側，被肚子擋住。v2 那塊露出來的袖子容易被看成肚子的一部分。</li>
+</ol></div>
+</main>
+
+<script src="r1-scene.js"></script>
+<script src="monk2.js"></script>
+<script src="monk3.js"></script>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+document.getElementById('globalDefs').innerHTML = sceneDefs() + `<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="3" markerHeight="3" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1f7a52"/></marker></defs>`;
+let uid = 0; const nid = p => `${p}${++uid}`;
+const v2 = o => monkV2(Object.assign({ id: nid('m2-') }, o));
+const v3 = o => monkV3(Object.assign({ id: nid('m3-') }, o));
+const tile = (vb, inner, cap, cls = '') => `<figure class="tile ${cls}"><svg viewBox="${vb}">${inner}</svg>${cap ? `<figcaption>${cap}</figcaption>` : ''}</figure>`;
+const VB = { carry: '-46 -100 76 106', tuck: '-30 -100 62 106', carryL: '-30 -100 76 106', tuckL: '-32 -100 62 106' };
+
+/* markers */
+const mk = (n, x, y, bad, r = 1.15) => `<g class="mk"><circle cx="${x}" cy="${y}" r="${r}" style="fill:${bad ? 'var(--shu)' : 'var(--ai)'};stroke:#fff;stroke-width:.25"/><text x="${x}" y="${y + .62}" style="font-size:${r * 1.45}px">${n}</text></g>`;
+const ring = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" style="fill:none;stroke:var(--shu);stroke-width:.45;stroke-dasharray:1 .7"/>`;
+const legend = (el, items, bad) => { $(el).innerHTML = items.map(([n, t]) => `<li><span class="n ${bad ? 'bad' : ''}">${n}</span><span>${t}</span></li>`).join(''); };
+
+/* ---------- skeleton & fabric overlays ---------- */
+function skel(pose, labels = true) {
+  const S = MONK3_SKELETON[pose], P = p => `${p[0]} ${p[1]}`;
+  const lbl = (p, t, dx = 2, dy = -1.2) => labels ? `<text class="sk-t" x="${p[0] + dx}" y="${p[1] + dy}">${t}</text>` : '';
+  const j = p => `<circle class="sk-j" cx="${p[0]}" cy="${p[1]}" r="1.1"/>`;
+  const far = S.hidF ? 'sk-d' : 'sk';
+  return `<g>
+    <circle class="sk-d" cx="${S.head[0]}" cy="${S.head[1]}" r="20"/>
+    <path class="sk" d="M${P(S.head)} m0 20 L${P(S.neck)}"/>
+    <ellipse class="sk-d" cx="1" cy="-27" rx="19" ry="25"/>
+    <path class="sk" d="M${P(S.shN)} L${P(S.shF)}"/>
+    <path class="sk" d="M${P(S.shN)} L${P(S.elN)} L${P(S.wrN)}"/><circle class="sk" cx="${S.hdN[0]}" cy="${S.hdN[1]}" r="3"/>
+    <path class="${far}" d="M${P(S.shF)} L${P(S.elF)} L${P(S.wrF)}"/>${S.hdF ? `<circle class="sk-d" cx="${S.hdF[0]}" cy="${S.hdF[1]}" r="3"/>` : ''}
+    ${[S.shN, S.shF, S.elN, S.elF, S.wrN, S.wrF].map(j).join('')}
+    ${lbl(S.shN, '肩', -6, -1.5)}${lbl(S.elN, '肘', -6.4, 1)}${lbl(S.wrN, '腕', pose === 'carry' ? -6 : 0, pose === 'carry' ? 4 : -2.6)}
+    ${lbl(S.shF, '肩', 1.6, -1.6)}${lbl(S.elF, '肘', 1.8, -1)}${pose === 'tuck' ? lbl([2.6, -25.6], '雙手交疊', -2, 5.4) : lbl(S.wrF, '（被肚子擋住）', -9, 5)}
+  </g>`;
+}
+function fabric(pose, text = true) {
+  const a = (x1, y1, x2, y2) => `<path class="fx" d="M${x1} ${y1} L${x2} ${y2}"/>`;
+  const t = (x, y, s) => text ? `<text class="fx-t" x="${x}" y="${y}">${s}</text>` : '';
+  const low = (x, y) => `<path d="M${x - 1.4} ${y + 1.4} L${x + 1.4} ${y + 1.4} L${x} ${y + 3.2} Z" style="fill:#1f7a52"/>`;
+  if (pose === 'carry') return a(-15, -27, -15, -12.6) + t(-29, -17, '重力') + low(-14, -9.6) + t(-24.6, -3.6, '最低點') + a(-7.2, -21, -1.2, -16.6) + t(-3, -27.4, '袖口朝向') + `<path d="M-19.4 -46 L-20.6 -31.6 L-8.2 -23.4" style="fill:none;stroke:#1f7a52;stroke-width:.6;stroke-dasharray:1 1"/>` + t(-30, -40, '袖頂順著手臂');
+  return a(-8, -27, -8, -13) + a(16, -26.6, 16, -13) + low(-19, -9.4) + low(21, -9.6) + t(-12, -5, '兩個最低點都在手肘側') + a(6.8, -25.2, 11.4, -25.2) + t(8.4, -33, '前側袖口朝向') + `<path d="M3.6 -23 L-0.8 -23" class="fx" style="stroke-dasharray:1 .8"/>` + t(-9, -33, '前') + t(19, -21, '後');
+}
+
+/* ---------- 00 steps ---------- */
+function steps(pose) {
+  const vb = VB[pose];
+  return [
+    tile(vb, skel(pose), '<b>1 人體結構</b>頭、軀幹、肩、肘、腕、手', 'paper'),
+    tile(vb, `<g opacity=".7">${v3({ pose, mode: 'blocks', shadow: false })}</g>${skel(pose, false)}`, '<b>2 服裝包覆</b>衣身、衣領、寬袖包上去', 'paper'),
+    tile(vb, `${v3({ pose, mode: 'plain', shadow: false })}${fabric(pose)}`, '<b>3 布料邏輯</b>重力、最低點、袖口朝向、前後', 'paper'),
+    tile(vb, v3({ pose, mode: 'lines', shadow: false }), '<b>4 線條簡化</b>只留有結構意義的線', 'paper'),
+    tile(vb, v3({ pose }), '<b>5 SVG 化</b>完稿'),
+  ].join('');
+}
+$('#stepsCarry').innerHTML = steps('carry');
+$('#stepsTuck').innerHTML = steps('tuck');
+
+/* ---------- 01 compare ---------- */
+$('#cmp').innerHTML = tile('-46 -100 76 106', v2({}), 'v2・持香板') + tile('-46 -100 76 106', v3({}), 'v3・持香板') + tile('-30 -100 62 106', v2({ pose: 'tuck' }), 'v2・袖手') + tile('-30 -100 62 106', v3({ pose: 'tuck' }), 'v3・袖手');
+
+/* ---------- 02 4x ---------- */
+$('#big').innerHTML = `<figure class="tile" style="width:${76 * 3.7 + 16}px">${`<svg viewBox="${VB.carry}" width="${76 * 3.7}">${v3({})}</svg>`}<figcaption>v3・持香板・4 倍</figcaption></figure>` +
+  `<figure class="tile" style="width:${62 * 3.7 + 16}px"><svg viewBox="${VB.tuck}" width="${62 * 3.7}">${v3({ pose: 'tuck' })}</svg><figcaption>v3・袖手・4 倍</figcaption></figure>`;
+
+/* ---------- 03 zooms ---------- */
+const zA = '-28 -66 32 40';
+$('#zoomA').innerHTML =
+  tile(zA, v2({}) + ring(-7, -45, 6) + mk(1, -2.6, -49.6, 1) + ring(-19.6, -49.4, 3) + mk(2, -22.6, -53, 1) + mk(3, -9, -30.4, 1), 'v2') +
+  tile(zA, v3({}) + mk(1, -13.6, -60.2) + mk(2, -16.9, -50.4) + mk(3, -21.4, -49.8) + mk(4, -16.6, -35.4) + mk(5, -11.2, -27.2) + mk(6, -24.6, -32) + mk(7, -9.4, -20.4), 'v3');
+legend('#legA0', [[1, '內側弧線從脖子一路畫到手肘，與外輪廓圍成一個封閉的橢圓，袖子像一塊貼上去的圓餅。'], [2, '看不出肩點：衣身的肩線和袖子沒有交界。'], [3, '手肘、前臂、袖袋之間沒有轉折，看不出手臂往哪裡伸。']], 1);
+legend('#legA1', [
+  [1, '後領：衣領繞過後頸、立在頭的後面。頭與肩之間由它銜接，不再有凹口。'],
+  [2, '肩線：屬於衣身，從後領一路順下到肩點，中間沒有接縫。絡子帶從背後越過這裡，壓在衣領上。'],
+  [3, '肩點：袖子從這裡開始；香板就靠在這裡。'],
+  [4, '上臂前緣：從腋下開始往下（起點藏在香板後），不再從脖子畫下來，所以不會圍成橢圓。'],
+  [5, '前臂上緣：手肘內側 → 手腕，往前下方。'],
+  [6, '袖後緣：從肩點順著上臂直落，袖子包住整條上臂。'],
+  [7, '袖口：袖端的上半段是開口，深色是袖子內側，手從這裡伸出握住香板。'],
+]);
+
+const zB = '-17 -66 32 30';
+$('#zoomB').innerHTML =
+  tile(zB, v2({}) + ring(4.8, -51, 4.4) + mk(1, 9.6, -55.4, 1) + ring(-3.4, -56.6, 3.2) + mk(2, -6.8, -60, 1) + ring(13.6, -50.6, 3) + mk(3, 16.6, -54, 1), 'v2') +
+  tile(zB, v3({}) + mk(1, 4.2, -51.2) + mk(2, 0.3, -51.4) + mk(3, 0.8, -48) + mk(4, 10.4, -50.2) + mk(5, -8.6, -51.2) + mk(6, 12.6, -47.6) + mk(7, -12.8, -59) + mk(8, 7, -55.4), 'v3') +
+  tile(zB, v3({ hide: { rakusu: 1 } }) + mk(9, 6.6, -45) + mk(3, 0.8, -48) + mk(4, 10.4, -50.2), 'v3・拿掉絡子') +
+  tile(zB, v3({ hide: { head: 1 } }) + mk(1, 4.2, -55) + mk(7, -12.6, -60), 'v3・拿掉頭');
+legend('#legB0', [[1, '白色內衣領、衣襟、粗描邊與帶子在頸下交錯，形成幾個說不出是什麼的小三角形。'], [2, '頭與肩之間有一個凹口，看不出脖子與衣領怎麼接。'], [3, '絡子的細繩跟衣領線擠在一起。']], 1);
+legend('#legB1', [
+  [1, '頸部（皮膚，稍暗，因為在下巴的陰影裡）。'],
+  [2, '白色內衣領：沿著外衣領內側露出的一條，左右各一。'],
+  [3, '下層衣領（穿著者的右襟）：從近側頸邊斜下，到交叉點後被上層衣襟蓋住。'],
+  [4, '上層衣領（穿著者的左襟）：從遠側頸邊斜下，壓過下層衣領後一路到下襬。'],
+  [5, '絡子帶：貼著衣領外側，越過肩膀繞到背後；與衣領之間沒有縫隙。'],
+  [6, '遠側的絡子帶（被遠近透視壓窄）。'],
+  [7, '後領：立在後頸，銜接頭與肩。'],
+  [8, '頭部下緣：一條遮擋線，蓋住頸部上段。'],
+  [9, '衣襟交叉點：平常藏在絡子下面。'],
+]);
+
+const zC = '-4 -42 31 36';
+$('#zoomC').innerHTML =
+  tile(zC, v2({ pose: 'tuck' }) + ring(19.6, -18.6, 8.4) + mk(1, 26, -28, 1) + mk(2, 18, -21.6, 1) + ring(9.6, -23, 3.4) + mk(3, 6.6, -18, 1), 'v2') +
+  tile(zC, v3({ pose: 'tuck' }) + mk(1, 4.8, -18.2) + mk(2, 4, -25.4) + mk(3, 13, -31.4) + mk(4, 21.8, -38.2) + mk(5, 26.4, -19) + mk(6, 21.4, -7.4) + mk(7, 10.4, -9), 'v3') +
+  tile(zC, `<g opacity=".45">${v3({ pose: 'tuck', mode: 'flat', shadow: false })}</g>${skel('tuck', false)}${fabric('tuck', false)}`, 'v3・骨架（紅）與布料方向（綠）：重力、最低點、袖口朝向');
+legend('#legC0', [[1, '袖袋被畫成一個封閉的大圓弧，看不出它掛在哪裡。'], [2, '內部有幾條方向不同的弧線與斜線，分不出哪條是袖口、哪條是衣褶。'], [3, '看不出袖口開在哪裡、手藏在哪裡、哪一片在前。']], 1);
+legend('#legC1', [
+  [1, '前側袖的袖端：從手腕垂直落下，壓在後側袖上（前後關係只靠這一條線）。'],
+  [2, '前側袖的袖口：後側那隻手從這裡伸進去，所以看不到開口的深色。'],
+  [3, '後側前臂的上緣：從前側袖端後面冒出來，往手肘方向。'],
+  [4, '手肘：上臂從這裡往後回到胸口後面，跟身體輪廓相接。'],
+  [5, '後側袖袋的外緣：從手肘垂直落下（重力）。'],
+  [6, '袖袋最低點：在手肘那一側。'],
+  [7, '袖袋底往手的方向上收，最後收進前側袖的轉角後面。'],
+]);
+
+/* ---------- 04 skeleton ---------- */
+$('#skel').innerHTML = tile(VB.carry, `<g opacity=".18">${v3({ shadow: false })}</g>${skel('carry')}`, '持香板', 'paper') + tile(VB.tuck, `<g opacity=".18">${v3({ pose: 'tuck', shadow: false })}</g>${skel('tuck')}`, '袖手', 'paper');
+const S = MONK3_SKELETON, fmt = p => p ? `(${p[0]}, ${p[1]})` : '—';
+$('#skelTable').innerHTML = [['頭部中心', 'head'], ['近側肩關節', 'shN'], ['遠側肩關節', 'shF'], ['近側手肘', 'elN'], ['近側手腕', 'wrN'], ['近側手', 'hdN'], ['遠側手肘', 'elF'], ['遠側手腕', 'wrF'], ['遠側手', 'hdF']]
+  .map(([n, k]) => `<tr><td>${n}</td><td>${fmt(S.carry[k])}${k.endsWith('F') && S.carry.hidF ? '（被肚子擋住）' : ''}</td><td>${fmt(S.tuck[k])}</td></tr>`).join('') +
+  `<tr><td>袖袋最低點</td><td>(−14, −9.4)</td><td>近側 (−19, −9.4)、遠側 (21, −9.6)</td></tr><tr><td>袖口朝向</td><td>沿前臂往前下方</td><td>近側朝右（遠側手伸入），遠側朝左（藏在前側袖後）</td></tr>`;
+
+/* ---------- 05 flat ---------- */
+$('#flat').innerHTML = tile(VB.carry, v3({ mode: 'plain' }), '色塊＋結構輪廓・持香板') + tile(VB.tuck, v3({ pose: 'tuck', mode: 'plain' }), '色塊＋結構輪廓・袖手') +
+  tile(VB.carry, v3({ mode: 'blocks' }), '部件分色・持香板', 'paper') + tile(VB.tuck, v3({ pose: 'tuck', mode: 'blocks' }), '部件分色・袖手', 'paper');
+
+/* ---------- 06 lines ---------- */
+$('#lines').innerHTML = tile(VB.carry, v3({ mode: 'lines' }), '依意義上色・持香板', 'paper') + tile(VB.tuck, v3({ pose: 'tuck', mode: 'lines' }), '依意義上色・袖手', 'paper') +
+  tile(VB.carry, v3({}), '完稿・持香板') + tile(VB.tuck, v3({ pose: 'tuck' }), '完稿・袖手');
+const K = MONK3_KCOL, KN = { occ: '遮擋線（前面的東西壓在後面的東西上）', seam: '袖付け（肩點 → 腋下）', col: '下層衣領的邊', top: '上層衣領的邊（交叉、一路到下襬）', und: '內衣領與頸部的交界', str: '絡子帶', cuf: '袖口邊緣' };
+$('#lineKey').innerHTML = '黑＝外輪廓（只有一條）　' + Object.entries(KN).map(([k, t]) => `<span class="sw" style="background:${K[k]}"></span>${t}`).join('　');
+
+/* ---------- 07 hide ---------- */
+$('#hide').innerHTML = tile(VB.carry, v3({ hide: { rakusu: 1 } }), '拿掉絡子') + tile(VB.carry, v3({ hide: { head: 1 } }), '拿掉頭') + tile(VB.carry, v3({ hide: { rakusu: 1, head: 1 } }), '兩者都拿掉');
+$('#hideT').innerHTML = tile(VB.tuck, v3({ pose: 'tuck', hide: { rakusu: 1 } }), '袖手・拿掉絡子') + tile(VB.tuck, v3({ pose: 'tuck', hide: { head: 1 } }), '袖手・拿掉頭') + tile(VB.tuck, v3({ pose: 'tuck', hide: { rakusu: 1, head: 1 } }), '袖手・兩者都拿掉');
+
+/* ---------- 08 directions ---------- */
+$('#dirs').innerHTML = tile(VB.carry, v3({}), '朝右・持香板') + tile(VB.carryL, v3({ facing: 'left' }), '朝左・持香板') + tile(VB.tuck, v3({ pose: 'tuck' }), '朝右・袖手') + tile(VB.tuckL, v3({ pose: 'tuck', facing: 'left' }), '朝左・袖手');
+
+/* ---------- 09 scene ---------- */
+function sceneWith(time, monkSvg, x = 120) {
+  const mid = nid('sm'), host = document.createElement('div');
+  host.innerHTML = `<div class="scene" data-time="${time}"><svg viewBox="0 0 400 300">${sceneMarkup()}</svg></div>`;
+  const s = host.querySelector('svg');
+  s.querySelector('#monkSlot').innerHTML = `<g transform="translate(${x} 254)">${monkSvg}</g>`;
+  s.querySelector('#mochiSlot').innerHTML = mochiMarkup(mid);
+  s.querySelector('#' + mid).setAttribute('transform', 'translate(206 257)');
+  const f = FACE.calm; s.querySelector(`#${mid}-face`).innerHTML = `<ellipse cx="-20" cy="-22" rx="5.4" ry="3.2" fill="var(--blush)" opacity=".6"/><ellipse cx="20" cy="-22" rx="5.4" ry="3.2" fill="var(--blush)" opacity=".6"/>${f.eyes}${f.mouth}`;
+  s.querySelector(`#${mid}-feet`).setAttribute('opacity', 0);
+  HANDS.lap.forEach(([cx, cy, rx, ry, r], i) => { const e = s.querySelector(`#${mid}-${i ? 'hr' : 'hl'}`); Object.entries({ cx, cy, rx, ry, transform: `rotate(${r} ${cx} ${cy})` }).forEach(([k, v]) => e.setAttribute(k, v)); });
+  s.querySelector('#seatLip').setAttribute('opacity', 1); s.querySelector('#rack').setAttribute('opacity', 0);
+  return host.innerHTML;
+}
+$('#scenes').innerHTML = `<figure style="margin:0">${sceneWith('day', v3({}))}<figcaption class="note">v3・白天・持香板</figcaption></figure>` +
+  `<figure style="margin:0">${sceneWith('night', v3({ pose: 'tuck' }), 110)}<figcaption class="note">v3・夜・袖手</figcaption></figure>` +
+  `<figure style="margin:0">${sceneWith('day', v2({}))}<figcaption class="note">對照：v2</figcaption></figure>`;
+</script>
+</body>
+</html>
