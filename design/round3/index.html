@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>住持 Round 3 重新設計</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Huninn&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="../round2/r1-tokens.css">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--washi); color: var(--ink); font: 16px/1.75 var(--f-ui); -webkit-text-size-adjust: 100%; }
+main { max-width: 1080px; margin: 0 auto; padding: 32px 16px 80px; }
+h1 { font: 700 32px/1.25 var(--f-story); letter-spacing: .08em; margin: 0 0 6px; }
+h2 { font: 700 24px/1.3 var(--f-story); margin: 56px 0 10px; padding-top: 18px; border-top: 1.5px solid var(--paper-edge); }
+h2 .no { font: 600 14px/1 var(--f-num); color: var(--ink-3); display: block; margin-bottom: 8px; letter-spacing: .1em; }
+h3 { font: 700 18px/1.4 var(--f-story); margin: 24px 0 6px; }
+p, li { max-width: 780px; } .muted { color: var(--ink-2); } .note { font-size: 14px; color: var(--ink-2); }
+a { color: var(--ai); }
+.tile { background: var(--wall); border-radius: 16px; box-shadow: var(--lift); padding: 8px; margin: 0; }
+.tile.paper { background: var(--paper); }
+.tile figcaption { font-size: 13px; color: var(--ink-2); text-align: center; margin-top: 4px; line-height: 1.45; }
+.tile svg { display: block; width: 100%; height: auto; }
+.grid { display: grid; gap: 12px; }
+.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } .g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 760px) { .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }
+.card { background: var(--paper); border-radius: 16px; box-shadow: var(--lift); padding: 14px 18px; margin: 12px 0; }
+.scheme { margin-bottom: 18px; }
+.scheme h3 { margin-top: 0; } .scheme h3 small { font: 13px var(--f-ui); color: var(--ink-3); margin-left: 6px; }
+.pick { outline: 3px solid var(--matcha); outline-offset: 4px; border-radius: 18px; }
+.tw { overflow-x: auto; margin: 12px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; line-height: 1.55; background: var(--paper); border-radius: 14px; overflow: hidden; box-shadow: var(--lift); }
+th, td { text-align: left; vertical-align: top; padding: 8px 12px; border-bottom: 1px solid var(--paper-edge); }
+th { background: var(--washi-2); font-weight: 400; color: var(--ink-2); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+.stars { color: var(--kin); letter-spacing: 1px; white-space: nowrap; }
+.scene { width: 368px; max-width: 100%; border-radius: 18px; overflow: hidden; box-shadow: var(--lift); }
+.scene svg { display: block; width: 100%; height: auto; }
+.beat { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.beat .tile figcaption b { display: block; color: var(--ink); }
+@media (max-width: 560px) { .beat { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Round 1 scene & mochi, v2, v3 */
+.ln { stroke: var(--line); stroke-linecap: round; stroke-linejoin: round; }
+.cshadow { fill: #1f1610; opacity: var(--shadow-o); }
+[data-time="day"] .dusk-only, [data-time="day"] .night-only, [data-time="dusk"] .day-only, [data-time="dusk"] .night-only, [data-time="night"] .day-only, [data-time="night"] .dusk-only { opacity: 0; }
+.m2 { --robe-in: #1d2741; }
+.m2p { fill: var(--sil, var(--flat, var(--c))); stroke: var(--sil, var(--inner, var(--line))); stroke-width: var(--sw, 1.3); stroke-linejoin: round; }
+.m2det { display: var(--det, inline); }
+.m2-sil { --sil: var(--line); --sw: 4; --det: none; }
+.m2l { fill: none; stroke: var(--inner, var(--line)); stroke-width: var(--w, 1); stroke-linecap: round; stroke-linejoin: round; }
+.m2f { fill: var(--flat, var(--c)); } .m2s { stroke: var(--inner, var(--line)); stroke-width: var(--w, 1.3); stroke-linejoin: round; } .m2ink { fill: var(--inner, var(--line)); }
+.m2band-o { fill: none; stroke: var(--inner, var(--line)); stroke-width: 4.4; } .m2band { fill: none; stroke: var(--flat, var(--robe-lo)); stroke-width: 2.2; }
+.m2strap { fill: none; stroke: var(--inner, #5a3b22); stroke-width: 1.3; stroke-linecap: round; } .m2ring { fill: none; stroke: var(--flat, #eadcbf); stroke-width: 1.2; }
+.m2stick rect { fill: var(--flat, #c69b62); stroke: var(--inner, var(--line)); stroke-width: 1.1; } .m2shadow { fill: #1f1610; opacity: .2; }
+.m3p { fill: var(--sil, var(--c)); stroke: var(--sil, none); stroke-width: var(--sw, 0); stroke-linejoin: round; }
+.m3p[data-s] { stroke: var(--sil, var(--line)); stroke-width: var(--sw, 1.3); }
+.m3-sil { --sil: var(--line); --sw: 4.4; --det: none; } .m3det { display: var(--det, inline); }
+.m3L { fill: none; stroke-width: var(--w); stroke-linecap: round; stroke-linejoin: round; } .m3shadow { fill: #1f1610; opacity: .2; }
+/* Round 3 */
+.m4p { fill: var(--sil, var(--c)); stroke: var(--sil, none); stroke-width: var(--sw, 0); stroke-linejoin: round; }
+.m4p[data-s] { stroke: var(--sil, var(--line)); stroke-width: var(--sw, 1.1); }
+.m4-sil { --sil: var(--line); --sw: 4.4; --det: none; }
+.m4det { display: var(--det, inline); }
+.m4shadow { fill: #1f1610; opacity: .2; }
+.guide { stroke: var(--shu); stroke-width: .5; stroke-dasharray: 1.6 1.2; }
+.guide-t { font: 3.4px var(--f-ui); fill: var(--shu); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" id="globalDefs"></svg>
+<main>
+<p class="muted" style="margin:0 0 4px;font-size:14px;letter-spacing:.1em">KEISAKU DOJO · ROUND 3 · CHARACTER REDESIGN</p>
+<h1>住持：Cozy Storybook Monk</h1>
+<p class="muted">這一輪不再修補接縫，而是從剪影重新建立住持的造型語言。臉、耳朵、白眉、微笑、腮紅沿用；身體、袖子、香板、持握重新設計。動畫還沒做，正式版沒動。舊版保留：<a href="../round2/monk.html">v2</a>、<a href="../round2/monk3.html">v3</a>。</p>
+<div class="card"><b>這次的做法</b>
+<ul style="margin:6px 0 0;padding-left:20px">
+  <li>所有身體形狀都是穿過少數幾個點的平滑曲線，跟麻糬同一種柔軟的形狀語言；不再用幾何形狀拼接。</li>
+  <li><b>袖子就是身體的兩側</b>：從下巴下方的柔和肩膀垂下，構成外輪廓。袖口比下襬略寬，這個小台階讓手臂在純剪影裡也看得出來。</li>
+  <li>三種姿勢共用同一個頭、同一件袍子、同一組袖子外緣和雙腳；姿勢只改變袖子內側、手和香板。</li>
+  <li>內部線條只留有用的：前側袖的前緣（手臂在哪）、袖子交疊、衣領交叉、手的手指。</li>
+</ul></div>
+
+<h2><span class="no">01</span>Phase 1：三種剪影</h2>
+<p class="note">同一個頭、同一雙腳，只改身體。每個方案都有三種姿勢：正常站姿、袖手、持香板。</p>
+<div id="sil"></div>
+<div class="tw"><table>
+<thead><tr><th>評估</th><th>A 圓潤鐘形</th><th>B 柔和水滴形</th><th>C 短胖梯形</th></tr></thead>
+<tbody>
+<tr><td>親和力、溫暖</td><td class="stars">★★★☆☆</td><td class="stars">★★★★★</td><td class="stars">★★★★☆</td></tr>
+<tr><td>沉穩感</td><td class="stars">★★★★★</td><td class="stars">★★★★☆</td><td class="stars">★★★☆☆</td></tr>
+<tr><td>幽默感</td><td class="stars">★★☆☆☆</td><td class="stars">★★★☆☆</td><td class="stars">★★★★★</td></tr>
+<tr><td>年齡感（不像幼兒）</td><td class="stars">★★★★★</td><td class="stars">★★★★☆</td><td class="stars">★★☆☆☆</td></tr>
+<tr><td>手臂在剪影中可讀</td><td class="stars">★★☆☆☆</td><td class="stars">★★★★★</td><td class="stars">★★★★☆</td></tr>
+<tr><td>與麻糬的形狀語言</td><td class="stars">★★★☆☆</td><td class="stars">★★★★★</td><td class="stars">★★★★☆</td></tr>
+<tr><td>動畫延伸（揮香板、喝茶）</td><td class="stars">★★★☆☆</td><td class="stars">★★★★★</td><td class="stars">★★★☆☆</td></tr>
+<tr><td>觀察</td><td>袖子收在身側、下襬最寬，很穩但上半身拘謹，手臂被吃進輪廓裡。</td><td>肩膀從下巴下方自然收合，袖子垂下形成水滴兩側；輪廓柔軟，手臂清楚，留有表演空間。</td><td>最可愛、最有喜感，但頭身比接近幼兒，「慈祥的長者」被削弱。</td></tr>
+</tbody></table></div>
+<p><b>選擇 B。</b>它在「讓人安心」與「動作可讀」之間平衡最好。C 的喜感可以留到動畫裡：被逗笑時身體縮一下、蹲低一點，就能借到 C 的可愛，而不必讓他永遠是幼兒比例。</p>
+
+<h2><span class="no">02</span>Phase 3：同一位住持，三種姿勢</h2>
+<p class="note">紅色虛線是共用的比例：頭頂、下巴、肩膀、袖口、下襬、地面。四張的頭、肩寬、袖子外緣、下襬、雙腳完全一樣，只有手、袖子內側和香板不同。右邊是四種姿勢的外輪廓疊在一起。</p>
+<div class="grid g4" id="consist"></div>
+<div class="grid g2" style="margin-top:12px"><div id="overlay"></div><div class="card" style="margin:0">
+  <b>共用比例（單位：場景座標）</b>
+  <ul style="margin:6px 0 0;padding-left:20px;font-size:14px">
+    <li>總高 95；頭 40（約 2/5）；袍子 61。頭身約 1 : 1.5。</li>
+    <li>肩寬（兩袖外緣在肩下）：35；袖口最寬：53；下襬：43；雙腳：31。</li>
+    <li>袖口高度 −15（膝蓋上方），下襬 0。袖口比下襬寬 5，形成手臂的台階。</li>
+    <li>頭微微朝前傾 2°，視線朝前方。</li>
+  </ul></div></div>
+
+<h2><span class="no">03</span>Phase 2：完整彩色角色（方案 B）</h2>
+<div class="grid g4" id="color"></div>
+<h3>左右轉向</h3>
+<p class="note">朝左是鏡像，但衣領重新疊：仍然是穿著者的左襟在上。</p>
+<div class="grid g4" id="dirs"></div>
+<h3>移除內部線條後</h3>
+<p class="note">左兩張是完稿，右兩張拿掉所有內部線條（只剩色塊與外輪廓）。角色仍然成立：袖子的台階、手、香板、衣領 V 字都還看得出來。</p>
+<div class="grid g4" id="nolines"></div>
+
+<h2><span class="no">04</span>與前幾版等比例比較</h2>
+<div class="grid g4" id="cmp"></div>
+
+<h2><span class="no">05</span>與麻糬並排</h2>
+<p class="note">住持比站著的麻糬高約 1.4 倍；兩人共用同樣的圓頂、同樣粗細的外輪廓與暖墨色。</p>
+<div class="tile" style="max-width:640px"><svg id="withMochi" viewBox="-56 -104 250 112"></svg></div>
+
+<h2><span class="no">06</span>Phase 4：正式禪堂場景中的實際大小</h2>
+<p class="note">場景寬 368px，等於手機直式時舞台的實際寬度。</p>
+<div class="row" id="scenes"></div>
+
+<h2><span class="no">07</span>表情與香板</h2>
+<h3>溫柔 → 突然認真 → 回到慈祥</h3>
+<p class="note">住持最重要的反差：平時慈祥安靜；麻糬分心時，他會突然拿起香板；提醒完又恢復笑容。四個表情只換五官與眉毛，頭的傾斜跟著變。</p>
+<div class="beat" id="beat"></div>
+<h3>香板與持握</h3>
+<p class="note">香板改成「短而圓的握柄＋綁帶＋長而平的板身」，板身微微變寬、端部方中帶圓，一側有一條較深的邊表示厚度。手是包住握柄的拳頭，握柄的尾端露在拳頭上方，板身從拳頭下方延伸。</p>
+<div class="grid g4" id="sticks"></div>
+
+<h2><span class="no">08</span>Phase 5：動畫可行性</h2>
+<div class="tw"><table>
+<thead><tr><th>部件</th><th>怎麼動</th><th>備註</th></tr></thead>
+<tbody>
+<tr><td>頭（含臉、耳、眉）</td><td>以下巴下方 (3, −56) 為軸傾斜 ±10°；表情換五官</td><td>點頭、看麻糬、嚴肅前的停頓都只靠這一層</td></tr>
+<tr><td>袍子＋袖子外緣</td><td>整體 squash／stretch（以腳底為原點），走路時左右輕晃</td><td>外輪廓永遠是同一個，所以不會因為換姿勢而「換了一個人」</td></tr>
+<tr><td>前側袖內側＋手</td><td>四種姿勢之間切換（站、袖手、垂板、舉板），中間用 2–3 格過渡</td><td>袖子內側是一條線＋一個開口，換姿勢不必重畫整隻袖子</td></tr>
+<tr><td>香板</td><td>跟著手，繞握柄末端旋轉：垂放 204° → 舉起 −14° → 揮下約 70°</td><td>揮下時可以誇張地拉長、加速度線；靜止時維持現在的大小</td></tr>
+<tr><td>遠側手</td><td>站姿露出指尖；喝茶時伸到前面</td><td>平時幾乎看不見，不增加雜訊</td></tr>
+<tr><td>雙腳</td><td>走路時交替抬起</td><td>沿用 Round 1 的走路節奏</td></tr>
+</tbody></table></div>
+<p class="note">這一頁通過之後才會拆部件、接動畫；在那之前不碰動畫，也不改正式版。</p>
+
+<h2><span class="no">09</span>需要你確認的地方</h2>
+<div class="card"><ol style="margin:0;padding-left:22px">
+  <li>方向：選 B（柔和水滴形）。如果你更喜歡 C 的喜感，可以把身體再壓矮一點，但年齡感會變弱。</li>
+  <li>待機持板：香板垂在身側、板身朝下並稍微往後。另一個選項是把香板立在肩旁（板身朝上），剪影更醒目，但比較像隨時準備打人。</li>
+  <li>袖手時兩隻袖子在腹前交疊，雙手完全藏在袖子裡，只用一條袖端線和一條遠側袖的上緣說明。</li>
+</ol></div>
+</main>
+
+<script src="../round2/r1-scene.js"></script>
+<script src="../round2/monk2.js"></script>
+<script src="../round2/monk3.js"></script>
+<script src="monk4.js"></script>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+document.getElementById('globalDefs').innerHTML = sceneDefs();
+let uid = 0; const nid = p => `${p}${++uid}`;
+const M = MONK4, art = o => M.art(Object.assign({ id: nid('m4-') }, o));
+const tile = (vb, inner, cap, cls = '') => `<figure class="tile ${cls}"><svg viewBox="${vb}">${inner}</svg>${cap ? `<figcaption>${cap}</figcaption>` : ''}</figure>`;
+const VB = '-40 -100 76 106', VBL = '-36 -100 76 106';
+const POSES = [['stand', '正常站姿'], ['tuck', '袖手'], ['idle', '持香板（垂放）']];
+
+/* 01 silhouettes */
+$('#sil').innerHTML = ['A', 'B', 'C'].map(k => `<div class="scheme ${k === 'B' ? 'pick' : ''}"><h3>${k}　${M.SCHEME[k].name}${k === 'B' ? '<small>選用</small>' : ''}</h3>
+  <div class="grid g3">${POSES.map(([p, n]) => tile(VB, M.silhouette({ scheme: k, pose: p }), n, 'paper')).join('')}</div></div>`).join('');
+
+/* 02 consistency */
+const G = [[-94, '頭頂', -39], [-55, '下巴', -39], [-50, '肩', 28], [-15, '袖口', -39], [0, '地面', -39]];
+const guides = G.map(([y, t, x]) => `<line class="guide" x1="-40" x2="36" y1="${y}" y2="${y}"/><text class="guide-t" x="${x}" y="${y - 1}">${t}</text>`).join('');
+$('#consist').innerHTML = [['stand', '站姿'], ['tuck', '袖手'], ['idle', '持香板・垂放'], ['ready', '持香板・舉起']].map(([p, n]) => tile(VB, art({ pose: p, face: p === 'ready' ? 'stern' : 'kind' }) + guides, n)).join('');
+const COLS = { stand: '#2f74d0', tuck: '#e0681e', idle: '#2f9e5b', ready: '#8e44ad' };
+$('#overlay').innerHTML = tile(VB, Object.entries(COLS).map(([p, c]) => `<g opacity=".28">${M.silhouette({ scheme: 'B', pose: p }).replaceAll('fill:#2a2420', `fill:${c}`)}</g>`).join('') + guides,
+  '剪影半透明疊合（重疊越多越深）：<span style="color:#2f74d0">站姿</span>・<span style="color:#e0681e">袖手</span>・<span style="color:#2f9e5b">垂放</span>・<span style="color:#8e44ad">舉起</span>', 'paper');
+
+/* 03 colour */
+$('#color').innerHTML = tile(VB, art({ pose: 'stand' }), '站姿') + tile(VB, art({ pose: 'tuck' }), '袖手') + tile(VB, art({ pose: 'idle' }), '持香板・垂放') + tile(VB, art({ pose: 'ready', face: 'stern' }), '持香板・舉起');
+$('#dirs').innerHTML = tile(VB, art({ pose: 'stand' }), '朝右') + tile(VBL, art({ pose: 'stand', facing: 'left' }), '朝左') + tile(VB, art({ pose: 'idle' }), '朝右・持香板') + tile(VBL, art({ pose: 'idle', facing: 'left' }), '朝左・持香板');
+$('#nolines').innerHTML = tile(VB, art({ pose: 'stand' }), '完稿・站姿') + tile(VB, art({ pose: 'tuck' }), '完稿・袖手') + tile(VB, art({ pose: 'stand', lines: false }), '無內線・站姿') + tile(VB, art({ pose: 'tuck', lines: false }), '無內線・袖手');
+
+/* 04 compare */
+const r1 = () => { const id = nid('r1m'); return monkMarkup(id).replace(`<g id="${id}-eyes"></g>`, `<g id="${id}-eyes">${MONK_EYES.open}</g>`).replace(`<g id="${id}-mouth"></g>`, `<g id="${id}-mouth">${MONK_MOUTH.smile}</g>`); };
+$('#cmp').innerHTML = tile('-46 -112 82 118', r1(), 'Round 1') + tile('-46 -112 82 118', monkV2({ id: nid('m2-') }), 'v2') + tile('-46 -112 82 118', monkV3({ id: nid('m3-') }), 'v3') + tile('-46 -112 82 118', art({ pose: 'idle' }), 'Round 3');
+
+/* 05 with the mochi */
+function mochiStatic(face = 'peek', sit = false) {
+  const id = nid('mo'), host = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  host.innerHTML = mochiMarkup(id);
+  const f = FACE[face], eyes = f.eyes === 'dot' ? '<circle cx="-11" cy="-30" r="2.7" fill="var(--line)"/><circle cx="11" cy="-30" r="2.7" fill="var(--line)"/>' : f.eyes;
+  host.querySelector(`#${id}-face`).innerHTML = `<ellipse cx="-20" cy="-22" rx="5.4" ry="3.2" fill="var(--blush)" opacity=".6"/><ellipse cx="20" cy="-22" rx="5.4" ry="3.2" fill="var(--blush)" opacity=".6"/>${eyes}${f.mouth}`;
+  (sit ? HANDS.lap : HANDS.side).forEach(([cx, cy, rx, ry, r], i) => { const e = host.querySelector(`#${id}-${i ? 'hr' : 'hl'}`); Object.entries({ cx, cy, rx, ry, transform: `rotate(${r} ${cx} ${cy})` }).forEach(([k, v]) => e.setAttribute(k, v)); });
+  if (sit) host.querySelector(`#${id}-feet`).setAttribute('opacity', 0);
+  return host.innerHTML;
+}
+$('#withMochi').innerHTML = `<rect x="-56" y="0" width="250" height="8" fill="var(--tatami)" opacity=".7"/>
+  <g transform="translate(-8 0)">${art({ pose: 'stand' })}</g>
+  <g transform="translate(72 0)">${mochiStatic('peek')}</g>
+  <g transform="translate(152 0)">${mochiStatic('calm', true)}</g>
+  <line class="guide" x1="-50" x2="190" y1="-94" y2="-94"/><line class="guide" x1="-50" x2="190" y1="-68" y2="-68"/>
+  <text class="guide-t" x="-56" y="-95">住持 95</text><text class="guide-t" x="-56" y="-69">麻糬 68</text>`;
+
+/* 06 scene */
+function scene(time, monk, mochiSit = true, x = 120) {
+  const host = document.createElement('div'); host.innerHTML = `<div class="scene" data-time="${time}"><svg viewBox="0 0 400 300">${sceneMarkup()}</svg></div>`;
+  const s = host.querySelector('svg');
+  s.querySelector('#monkSlot').innerHTML = `<g transform="translate(${x} 254)">${monk}</g>`;
+  s.querySelector('#mochiSlot').innerHTML = `<g transform="translate(${mochiSit ? '206 257' : '140 276'})">${mochiStatic(mochiSit ? 'calm' : 'peek', mochiSit)}</g>`;
+  s.querySelector('#seatLip').setAttribute('opacity', mochiSit ? 1 : 0); s.querySelector('#rack').setAttribute('opacity', 0);
+  return host.innerHTML;
+}
+$('#scenes').innerHTML = `<figure style="margin:0">${scene('day', art({ pose: 'stand' }), false, 74)}<figcaption class="note">首頁・白天・站姿</figcaption></figure>` +
+  `<figure style="margin:0">${scene('day', art({ pose: 'idle' }))}<figcaption class="note">專注中・巡堂（持香板垂放）</figcaption></figure>` +
+  `<figure style="margin:0">${scene('dusk', art({ pose: 'ready', face: 'stern' }), true, 150)}<figcaption class="note">黃昏・察覺分心，舉起香板</figcaption></figure>` +
+  `<figure style="margin:0">${scene('night', art({ pose: 'tuck', face: 'relief' }), true, 110)}<figcaption class="note">夜・袖手</figcaption></figure>`;
+
+/* 07 expressions and sticks */
+const VBH = '-26 -100 56 58';
+$('#beat').innerHTML = [['kind', 2, '1 平靜微笑', '平常巡堂'], ['notice', 6, '2 察覺', '眼睛睜大、一邊眉毛抬起，看向麻糬'], ['stern', 0, '3 認真', '眉頭壓低、嘴抿成一線，舉起香板'], ['relief', 4, '4 恢復慈祥', '提醒完瞇眼笑，腮紅最明顯']]
+  .map(([f, t, a, b]) => tile(VBH, art({ pose: 'stand', face: f, tilt: t, shadow: false }), `<b>${a}</b>${b}`)).join('');
+$('#sticks').innerHTML = tile(VB, art({ pose: 'idle' }), 'Round 3・垂放（待機）') + tile(VB, art({ pose: 'ready', face: 'notice', tilt: 5 }), 'Round 3・稍微舉起（準備）') +
+  tile('-46 -112 82 118', monkV3({ id: nid('m3-') }), '對照 v3：像長棍斜跨肩上') +
+  tile('-12 -36 26 40', `<g transform="translate(0 0)">${M.stick({ x: 0, y: 0, rot: 0 }, { grip: '#8a6240', blade: '#d8b177', edge: '#a27a48', band: '#5e3d22' }, 'var(--line)')}</g>`, '香板：握柄 7・板身 23・寬 4.6 → 7.6', 'paper');
+</script>
+</body>
+</html>
