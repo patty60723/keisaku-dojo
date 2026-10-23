@@ -82,6 +82,39 @@
       far: FAR_STAND, farBehind: true, farHand: FAR_HAND,
       stick: { x: -15.2, y: -41.4, rot: -14 },
     },
+
+    /* ---- posture fix (Round 3.1): the arm is placed first, the sleeve follows it ----
+       shoulder joints stay where the torso has them; elbows, forearms and wrists move with the pose,
+       and the sleeves' outline is allowed to change with them. */
+    tuck2: {   // both forearms folded across the belly, each hand inside the other sleeve; shoulders down, elbows relaxed
+      v2: true,
+      farBack: [[12.4, -55.4], [17.8, -50.6], [22.4, -42], [25.4, -34.4], [24.6, -29.6], [19.6, -30.4], [15, -34], [13.6, -46]],
+      // the far forearm: from its elbow at the front of the belly toward the middle; its sleeve hangs below it, lowest under the elbow
+      farFront: [[7.6, -29.4], [13, -31], [18.4, -33.2], [22.6, -35], [25.8, -31.8], [26.9, -25.4], [26.2, -19], [23.2, -14.6], [17.6, -13.2], [11.4, -14], [6.8, -16.2]],
+      farLines: [[[8.6, -29.6], [13, -31], [18.4, -33.2], [22.4, -34.8]], [[26, -18.6], [22.8, -14.4], [17.4, -13.2], [11.4, -14]]],
+      // the near arm: upper arm hangs by the side, the elbow bends forward, the forearm crosses in front and its cuff rests over the far forearm
+      near: [[-12.6, -55.6], [-17.6, -50.2], [-22.4, -41], [-24.8, -33.4], [-25.6, -27], [-25, -20], [-22.6, -14.6], [-17.6, -12.4], [-9, -13.2], [-0.6, -15], [5.6, -17.6], [9.4, -21.4], [9.4, -26.2], [6.4, -29.6], [0, -30.2], [-7, -31], [-11.4, -32.8], [-12.6, -38], [-12.4, -48]],
+      nearLines: [
+        [[-12.2, -43], [-12, -36.4], [-10.8, -32.2], [-6.4, -30.8], [0, -30.2], [6.4, -29.6], [9.4, -26.2], [9.4, -21.4], [5.6, -17.6], [-0.6, -15], [-9, -13.2], [-17.6, -12.4], [-22.6, -14.6]],
+      ],
+      folds: [[[-12.4, -31.2], [-15.2, -26.6], [-15.8, -21.4]]],   // the one fold: where the sleeve turns at the elbow
+      cuffO: { cx: 8.2, cy: -24.4, rx: 1.2, ry: 4.4, r: -8 },
+    },
+    ready2: {  // shoulder → elbow out and down → forearm up and a little forward → wrist cocked along the grip → keisaku
+      v2: true,
+      far: FAR_STAND, farBehind: true, farHand: FAR_HAND,
+      // the sleeve follows the arm: the elbow pushes it out, the bag hangs straight down from the raised forearm and is shorter
+      near: [[-12.6, -55.6], [-17.6, -50.6], [-23.6, -45], [-28.4, -38.6], [-30.6, -33], [-29.8, -26.6], [-27.4, -20.8], [-22.8, -18.6], [-18.6, -20.4], [-16.6, -25], [-17.4, -30.4], [-20.1, -35.9], [-25.9, -39.5], [-21.4, -43.6], [-16, -46.6], [-12.8, -50.4]],
+      nearLines: [
+        [[-20.1, -35.9], [-17.4, -30.4], [-16.6, -25], [-18.6, -20.4], [-22.8, -18.6], [-27.4, -20.8]],   // forearm underside → the bag hanging from it
+      ],
+      folds: [[[-25, -31.4], [-24.4, -26.6], [-23.2, -22.4]]],   // the bag hangs from the elbow
+      cuffO: { cx: -23, cy: -37.7, rx: 3.6, ry: 1.5, r: 32 },
+      skin: [[-21.2, -36.6], [-24.8, -38.8], [-22.4, -42.7], [-18.8, -40.5]],   // the wrist shows where the sleeve has slid back
+      hand: [[-21.8, -46.8], [-17.6, -47.6], [-15.6, -44.6], [-16.6, -41], [-20.6, -40.6], [-22.6, -43.6]],
+      handLine: [[-18.4, -46.8], [-17.4, -44.4], [-18.6, -41.8]],
+      stick: { x: -17.1, y: -41.1, rot: -34 },
+    },
   };
 
   /* the keisaku: a short round grip with a binding, then a long flat board that widens a little toward a
@@ -113,7 +146,7 @@
     const S = SCHEME[o.scheme], p = POSE[o.pose], TS = pts => pts.map(S.sleeve), TB = pts => pts.map(S.body || S.sleeve);
     const robe = S.robe || TB(ROBE);
     let s = `<path d="${spline(robe)}"/><path d="${spline(TB(FEET.far))}"/><path d="${spline(TB(FEET.near))}"/>`;
-    s += `<path d="${spline(TS(p.near))}"/><path d="${spline(TS(p.far))}"/>`;
+    s += `<path d="${spline(TS(p.near))}"/>` + (p.far ? `<path d="${spline(TS(p.far))}"/>` : '') + (p.farBack ? `<path d="${spline(TS(p.farBack))}"/>` : '') + (p.skin ? `<path d="${spline(TS(p.skin))}"/>` : '');
     if (p.farFront) s += `<path d="${spline(TS(p.farFront))}"/>`;
     if (p.hand) s += `<path d="${spline(TS(p.hand))}"/>`;
     if (p.farHand) s += `<path d="${spline(TS(p.farHand))}"/>`;
@@ -149,6 +182,7 @@
     const Ln = (pts, w = 1.15, op = 1) => lines ? L(spline(pts, false), w, op) : '';
     const out = [];
     if (p.farBehind) out.push(fill(spline(p.far), ART.robe) + (p.farHand ? fill(spline(p.farHand), ART.skin, 1) : ''));
+    if (p.farBack) out.push(fill(spline(p.farBack), ART.robe));
     out.push(fill(spline(FEET.far), ART.foot) + fill(spline(FEET.near), ART.foot) + det(lines ? L('M1.6 -0.8 C1.6 1 -1 1.6 -4 1.7', .9, .5) : ''));
     out.push(fill(spline(ROBE), ART.robe));
     // one soft shade low on the robe, the side away from the window
@@ -169,8 +203,17 @@
     // rakusu: a small panel hanging from the crossing (its cords go up under the collar)
     out.push(det(`<path d="${spline([[-0.6, -44.6], [6.6, -45.4], [14, -44.4], [14.4, -39.4], [13.6, -35.4], [6.4, -34.8], [-0.4, -35.6], [-1.2, -40]])}" style="fill:${ART.kesa};stroke:${ink};stroke-width:1.1"/>
       ${lines ? `<path d="${spline([[1.4, -42.8], [6.6, -43.4], [12, -42.6], [12.2, -39.6], [11.6, -37.2], [6.4, -36.8], [1.6, -37.4], [1, -40]])}" style="fill:none;stroke:${ART.bandC};stroke-width:.7;opacity:.55"/>` : ''}`));
-    if (p.farFront) out.push(fill(spline(p.farFront), ART.robe) + det(Ln(p.farLine) + Ln(p.farLine2)));
-    if (o.pose === 'idle' || o.pose === 'ready') out.push(fill(spline(p.near), ART.robe) + det(Ln(p.nearLine) + (p.tube ? Ln(p.tube, 1.1) : '') + (p.cuffO ? `<ellipse cx="${p.cuffO.cx}" cy="${p.cuffO.cy}" rx="${p.cuffO.rx}" ry="${p.cuffO.ry}" transform="rotate(${p.cuffO.r} ${p.cuffO.cx} ${p.cuffO.cy})" style="fill:#26345a;stroke:${ink};stroke-width:1"/>` : '')) + det(stick(p.stick, { ...ART, band: ART.bandC }, ink)) + fill(spline(p.hand), ART.skin, 1) + det(Ln(p.handLine, .8, .55)));
+    if (p.farFront && !p.v2) out.push(fill(spline(p.farFront), ART.robe) + det(Ln(p.farLine) + Ln(p.farLine2)));
+    if (p.v2) {
+      if (p.farFront) out.push(fill(spline(p.farFront), ART.robe) + det(p.farLines.map(l => Ln(l)).join('')));
+      out.push(fill(spline(p.near), ART.robe) + det(p.nearLines.map(l => Ln(l)).join('') + (p.folds || []).map(l => Ln(l, .85, .45)).join('')));
+      if (p.cuffO) out.push(det(`<ellipse cx="${p.cuffO.cx}" cy="${p.cuffO.cy}" rx="${p.cuffO.rx}" ry="${p.cuffO.ry}" transform="rotate(${p.cuffO.r} ${p.cuffO.cx} ${p.cuffO.cy})" style="fill:#26345a;stroke:${ink};stroke-width:1"/>`));
+      if (p.skin) out.push(fill(spline(p.skin), ART.skin, 1));
+      if (p.stick) out.push(det(stick(p.stick, { ...ART, band: ART.bandC }, ink)));
+      if (p.hand) out.push(fill(spline(p.hand), ART.skin, 1) + det(Ln(p.handLine, .8, .55)));
+    }
+    if (p.v2) {}
+    else if (o.pose === 'idle' || o.pose === 'ready') out.push(fill(spline(p.near), ART.robe) + det(Ln(p.nearLine) + (p.tube ? Ln(p.tube, 1.1) : '') + (p.cuffO ? `<ellipse cx="${p.cuffO.cx}" cy="${p.cuffO.cy}" rx="${p.cuffO.rx}" ry="${p.cuffO.ry}" transform="rotate(${p.cuffO.r} ${p.cuffO.cx} ${p.cuffO.cy})" style="fill:#26345a;stroke:${ink};stroke-width:1"/>` : '')) + det(stick(p.stick, { ...ART, band: ART.bandC }, ink)) + fill(spline(p.hand), ART.skin, 1) + det(Ln(p.handLine, .8, .55)));
     else out.push((p.hand ? fill(spline(p.hand), ART.skin, 1) + det(Ln(p.handLine, .8, .55)) : '') + fill(spline(p.near), ART.robe) + det(Ln(p.nearLine)));
     // head (v2)
     out.push(`<g transform="rotate(${o.tilt ?? 2} 3 -56)">` + fill(HEAD, ART.skin) + det(`<g clip-path="url(#${id}-head)"><path d="M-6 -95 C-15 -88 -17 -74 -13 -64 C-10 -58.6 -6 -56 -1 -54.6 L-30 -50 L-30 -100 Z" style="fill:var(--skin-lo);opacity:.5"/></g>` + L(HEAD_LOWER, 1.25))
@@ -185,5 +228,9 @@
     </g>`;
   }
 
-  window.MONK4 = { silhouette, art, SCHEME, POSE, spline, stick, STICK };
+  const SKELETON = {
+    tuck2: { shN: [-15, -48], elN: [-19.6, -29.6], wrN: [4.4, -24.4], hdN: [8.4, -23.6], shF: [13.5, -49], elF: [22, -31.6], wrF: [1.6, -25.6], hdF: [-2.4, -25] },
+    ready2: { shN: [-15, -48], elN: [-26, -33], wrN: [-20.6, -41.6], hdN: [-19.1, -44], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
+  };
+  window.MONK4 = { silhouette, art, SCHEME, POSE, spline, stick, STICK, SKELETON };
 })();

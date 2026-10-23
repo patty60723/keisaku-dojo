@@ -75,6 +75,7 @@ tr:last-child td { border-bottom: 0; }
 <main>
 <p class="muted" style="margin:0 0 4px;font-size:14px;letter-spacing:.1em">KEISAKU DOJO · ROUND 3 · CHARACTER REDESIGN</p>
 <h1>住持：Cozy Storybook Monk</h1>
+<p class="note" style="background:var(--paper);padding:8px 12px;border-radius:12px">Round 3.1 更新：修正袖手與舉香板兩個姿勢，見 <a href="#fix">07.5 姿勢修正</a>。頁面上其他地方也已換成修正後的姿勢。</p>
 <p class="muted">這一輪不再修補接縫，而是從剪影重新建立住持的造型語言。臉、耳朵、白眉、微笑、腮紅沿用；身體、袖子、香板、持握重新設計。動畫還沒做，正式版沒動。舊版保留：<a href="../round2/monk.html">v2</a>、<a href="../round2/monk3.html">v3</a>。</p>
 <div class="card"><b>這次的做法</b>
 <ul style="margin:6px 0 0;padding-left:20px">
@@ -102,7 +103,7 @@ tr:last-child td { border-bottom: 0; }
 <p><b>選擇 B。</b>它在「讓人安心」與「動作可讀」之間平衡最好。C 的喜感可以留到動畫裡：被逗笑時身體縮一下、蹲低一點，就能借到 C 的可愛，而不必讓他永遠是幼兒比例。</p>
 
 <h2><span class="no">02</span>Phase 3：同一位住持，三種姿勢</h2>
-<p class="note">紅色虛線是共用的比例：頭頂、下巴、肩膀、袖口、下襬、地面。四張的頭、肩寬、袖子外緣、下襬、雙腳完全一樣，只有手、袖子內側和香板不同。右邊是四種姿勢的外輪廓疊在一起。</p>
+<p class="note">紅色虛線是共用的比例：頭頂、下巴、肩膀、袖口、下襬、地面。四張的頭、軀幹、肩關節、雙腳一樣；袖子隨手臂姿勢改變（Round 3.1 修正後）。右邊是四種姿勢的剪影疊在一起。</p>
 <div class="grid g4" id="consist"></div>
 <div class="grid g2" style="margin-top:12px"><div id="overlay"></div><div class="card" style="margin:0">
   <b>共用比例（單位：場景座標）</b>
@@ -140,6 +141,25 @@ tr:last-child td { border-bottom: 0; }
 <h3>香板與持握</h3>
 <p class="note">香板改成「短而圓的握柄＋綁帶＋長而平的板身」，板身微微變寬、端部方中帶圓，一側有一條較深的邊表示厚度。手是包住握柄的拳頭，握柄的尾端露在拳頭上方，板身從拳頭下方延伸。</p>
 <div class="grid g4" id="sticks"></div>
+
+<h2 id="fix"><span class="no">07.5</span>姿勢修正（Round 3.1）：袖手、舉香板</h2>
+<div class="card"><b>規則調整</b>
+<ul style="margin:6px 0 0;padding-left:20px;font-size:15px">
+  <li><b>固定</b>：頭身比例、軀幹（袍子）體積、肩關節在軀幹上的位置、頭與臉、雙腳。</li>
+  <li><b>允許改變</b>：上臂、手肘、前臂、手腕的位置；袖子外輪廓與袖袋跟著手臂動。先決定手臂怎麼擺，再畫袖子，最後才放香板。</li>
+  <li>站姿、垂放香板兩個姿勢沒有改動。</li>
+</ul></div>
+<h3>A　袖手：修改前／修改後</h3>
+<p class="note">三張同一個比例、同一個視角。修改後：上臂自然垂在身側、肩膀不聳；手肘往前彎，前臂在腹前交疊；近側袖口蓋在遠側前臂上（袖端那條深色細縫是開口的側面，遠側的手從這裡伸進去）；兩個袖袋都在手肘下方最低，往手的方向收起。手肘內側只留一條順著彎曲方向的布紋。</p>
+<div class="grid g3" id="fixTuck"></div>
+<h3>B　舉香板：修改前／修改後</h3>
+<p class="note">修改前是把香板轉到角度、再把手放到握柄旁，手肘和前臂沒有交代。修改後由手臂決定香板：肩膀 → 手肘往外下方 → 前臂往上偏前 → 袖子順著前臂滑下、露出手腕 → 拳頭握住握柄。握柄大致垂直於前臂，手腕再往拇指側偏一點，所以香板自然往後斜、不擋臉；板身的重量落在手的上後方。手肘把袖子往外撐，袖袋從前臂直直垂下，比站姿短。</p>
+<div class="grid g3" id="fixReady"></div>
+<h3>修改後的完整彩色角色</h3>
+<div class="grid g4" id="fixColor"></div>
+<h3>手機實際尺寸</h3>
+<p class="note">場景寬 368px，和手機直式舞台一樣大。</p>
+<div class="row" id="fixScenes"></div>
 
 <h2><span class="no">08</span>Phase 5：動畫可行性</h2>
 <div class="tw"><table>
@@ -183,15 +203,15 @@ $('#sil').innerHTML = ['A', 'B', 'C'].map(k => `<div class="scheme ${k === 'B' ?
 /* 02 consistency */
 const G = [[-94, '頭頂', -39], [-55, '下巴', -39], [-50, '肩', 28], [-15, '袖口', -39], [0, '地面', -39]];
 const guides = G.map(([y, t, x]) => `<line class="guide" x1="-40" x2="36" y1="${y}" y2="${y}"/><text class="guide-t" x="${x}" y="${y - 1}">${t}</text>`).join('');
-$('#consist').innerHTML = [['stand', '站姿'], ['tuck', '袖手'], ['idle', '持香板・垂放'], ['ready', '持香板・舉起']].map(([p, n]) => tile(VB, art({ pose: p, face: p === 'ready' ? 'stern' : 'kind' }) + guides, n)).join('');
-const COLS = { stand: '#2f74d0', tuck: '#e0681e', idle: '#2f9e5b', ready: '#8e44ad' };
+$('#consist').innerHTML = [['stand', '站姿'], ['tuck2', '袖手'], ['idle', '持香板・垂放'], ['ready2', '持香板・舉起']].map(([p, n]) => tile(VB, art({ pose: p, face: p === 'ready2' ? 'stern' : 'kind' }) + guides, n)).join('');
+const COLS = { stand: '#2f74d0', tuck2: '#e0681e', idle: '#2f9e5b', ready2: '#8e44ad' };
 $('#overlay').innerHTML = tile(VB, Object.entries(COLS).map(([p, c]) => `<g opacity=".28">${M.silhouette({ scheme: 'B', pose: p }).replaceAll('fill:#2a2420', `fill:${c}`)}</g>`).join('') + guides,
   '剪影半透明疊合（重疊越多越深）：<span style="color:#2f74d0">站姿</span>・<span style="color:#e0681e">袖手</span>・<span style="color:#2f9e5b">垂放</span>・<span style="color:#8e44ad">舉起</span>', 'paper');
 
 /* 03 colour */
-$('#color').innerHTML = tile(VB, art({ pose: 'stand' }), '站姿') + tile(VB, art({ pose: 'tuck' }), '袖手') + tile(VB, art({ pose: 'idle' }), '持香板・垂放') + tile(VB, art({ pose: 'ready', face: 'stern' }), '持香板・舉起');
+$('#color').innerHTML = tile(VB, art({ pose: 'stand' }), '站姿') + tile(VB, art({ pose: 'tuck2' }), '袖手') + tile(VB, art({ pose: 'idle' }), '持香板・垂放') + tile(VB, art({ pose: 'ready2', face: 'stern' }), '持香板・舉起');
 $('#dirs').innerHTML = tile(VB, art({ pose: 'stand' }), '朝右') + tile(VBL, art({ pose: 'stand', facing: 'left' }), '朝左') + tile(VB, art({ pose: 'idle' }), '朝右・持香板') + tile(VBL, art({ pose: 'idle', facing: 'left' }), '朝左・持香板');
-$('#nolines').innerHTML = tile(VB, art({ pose: 'stand' }), '完稿・站姿') + tile(VB, art({ pose: 'tuck' }), '完稿・袖手') + tile(VB, art({ pose: 'stand', lines: false }), '無內線・站姿') + tile(VB, art({ pose: 'tuck', lines: false }), '無內線・袖手');
+$('#nolines').innerHTML = tile(VB, art({ pose: 'stand' }), '完稿・站姿') + tile(VB, art({ pose: 'tuck2' }), '完稿・袖手') + tile(VB, art({ pose: 'stand', lines: false }), '無內線・站姿') + tile(VB, art({ pose: 'tuck2', lines: false }), '無內線・袖手');
 
 /* 04 compare */
 const r1 = () => { const id = nid('r1m'); return monkMarkup(id).replace(`<g id="${id}-eyes"></g>`, `<g id="${id}-eyes">${MONK_EYES.open}</g>`).replace(`<g id="${id}-mouth"></g>`, `<g id="${id}-mouth">${MONK_MOUTH.smile}</g>`); };
@@ -225,16 +245,40 @@ function scene(time, monk, mochiSit = true, x = 120) {
 }
 $('#scenes').innerHTML = `<figure style="margin:0">${scene('day', art({ pose: 'stand' }), false, 74)}<figcaption class="note">首頁・白天・站姿</figcaption></figure>` +
   `<figure style="margin:0">${scene('day', art({ pose: 'idle' }))}<figcaption class="note">專注中・巡堂（持香板垂放）</figcaption></figure>` +
-  `<figure style="margin:0">${scene('dusk', art({ pose: 'ready', face: 'stern' }), true, 150)}<figcaption class="note">黃昏・察覺分心，舉起香板</figcaption></figure>` +
-  `<figure style="margin:0">${scene('night', art({ pose: 'tuck', face: 'relief' }), true, 110)}<figcaption class="note">夜・袖手</figcaption></figure>`;
+  `<figure style="margin:0">${scene('dusk', art({ pose: 'ready2', face: 'stern' }), true, 150)}<figcaption class="note">黃昏・察覺分心，舉起香板</figcaption></figure>` +
+  `<figure style="margin:0">${scene('night', art({ pose: 'tuck2', face: 'relief' }), true, 110)}<figcaption class="note">夜・袖手</figcaption></figure>`;
 
 /* 07 expressions and sticks */
 const VBH = '-26 -100 56 58';
 $('#beat').innerHTML = [['kind', 2, '1 平靜微笑', '平常巡堂'], ['notice', 6, '2 察覺', '眼睛睜大、一邊眉毛抬起，看向麻糬'], ['stern', 0, '3 認真', '眉頭壓低、嘴抿成一線，舉起香板'], ['relief', 4, '4 恢復慈祥', '提醒完瞇眼笑，腮紅最明顯']]
   .map(([f, t, a, b]) => tile(VBH, art({ pose: 'stand', face: f, tilt: t, shadow: false }), `<b>${a}</b>${b}`)).join('');
-$('#sticks').innerHTML = tile(VB, art({ pose: 'idle' }), 'Round 3・垂放（待機）') + tile(VB, art({ pose: 'ready', face: 'notice', tilt: 5 }), 'Round 3・稍微舉起（準備）') +
+$('#sticks').innerHTML = tile(VB, art({ pose: 'idle' }), 'Round 3・垂放（待機）') + tile(VB, art({ pose: 'ready2', face: 'notice', tilt: 5 }), 'Round 3.1・稍微舉起（準備）') +
   tile('-46 -112 82 118', monkV3({ id: nid('m3-') }), '對照 v3：像長棍斜跨肩上') +
   tile('-12 -36 26 40', `<g transform="translate(0 0)">${M.stick({ x: 0, y: 0, rot: 0 }, { grip: '#8a6240', blade: '#d8b177', edge: '#a27a48', band: '#5e3d22' }, 'var(--line)')}</g>`, '香板：握柄 7・板身 23・寬 4.6 → 7.6', 'paper');
+
+/* 07.5 posture fix */
+const SKL = MONK4.SKELETON;
+function skel(k) {
+  const q = SKL[k], P = p => p.join(' ');
+  const j = p => `<circle cx="${p[0]}" cy="${p[1]}" r="1.1" style="fill:#fff;stroke:var(--shu);stroke-width:.7"/>`;
+  return `<g style="fill:none;stroke:var(--shu);stroke-width:.9;stroke-linecap:round;stroke-linejoin:round">
+    <path d="M${P(q.shN)} L${P(q.elN)} L${P(q.wrN)} L${P(q.hdN)}"/>
+    <path d="M${P(q.shF)} L${P(q.elF)} L${P(q.wrF)} L${P(q.hdF)}" style="stroke-dasharray:1.6 1.2"/>
+    ${[q.shN, q.elN, q.wrN, q.shF, q.elF, q.wrF].map(j).join('')}
+    <text x="${q.shN[0] + 1.6}" y="${q.shN[1] - 1.4}" style="fill:var(--shu);stroke:none;font:3.2px var(--f-ui)">肩</text>
+    <text x="${q.elN[0] - 6}" y="${q.elN[1] + 1}" style="fill:var(--shu);stroke:none;font:3.2px var(--f-ui)">肘</text>
+    <text x="${q.wrN[0] + (k === 'tuck2' ? -1 : 1.8)}" y="${q.wrN[1] + (k === 'tuck2' ? 5 : 1)}" style="fill:var(--shu);stroke:none;font:3.2px var(--f-ui)">腕</text>
+  </g>`;
+}
+$('#fixTuck').innerHTML = tile(VB, art({ pose: 'tuck' }), '修改前') + tile(VB, art({ pose: 'tuck2' }), '修改後') +
+  tile(VB, `<g opacity=".35">${art({ pose: 'tuck2', shadow: false })}</g>${skel('tuck2')}`, '骨架：實線＝近側手臂，虛線＝遠側手臂（藏在衣袖裡）', 'paper');
+$('#fixReady').innerHTML = tile(VB, art({ pose: 'ready', face: 'stern' }), '修改前') + tile(VB, art({ pose: 'ready2', face: 'stern' }), '修改後') +
+  tile(VB, `<g opacity=".35">${art({ pose: 'ready2', face: 'stern', shadow: false })}</g>${skel('ready2')}`, '骨架：肩 → 肘 → 腕 → 握柄', 'paper');
+$('#fixColor').innerHTML = tile(VB, art({ pose: 'tuck2' }), '袖手') + tile(VBL, art({ pose: 'tuck2', facing: 'left' }), '袖手・朝左') +
+  tile(VB, art({ pose: 'ready2', face: 'stern' }), '舉香板') + tile(VBL, art({ pose: 'ready2', face: 'stern', facing: 'left' }), '舉香板・朝左');
+$('#fixScenes').innerHTML = `<figure style="margin:0">${scene('night', art({ pose: 'tuck2', face: 'relief' }), true, 110)}<figcaption class="note">修改後・夜・袖手</figcaption></figure>` +
+  `<figure style="margin:0">${scene('dusk', art({ pose: 'ready2', face: 'stern' }), true, 150)}<figcaption class="note">修改後・黃昏・舉香板</figcaption></figure>` +
+  `<figure style="margin:0">${scene('dusk', art({ pose: 'ready', face: 'stern' }), true, 150)}<figcaption class="note">對照：修改前・舉香板</figcaption></figure>`;
 </script>
 </body>
 </html>
