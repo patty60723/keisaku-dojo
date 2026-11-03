@@ -131,13 +131,55 @@
       handLine: [[-9.4, -40.4], [-7.6, -37.8], [-6.8, -35.4]],
       stick: { x: -5.7, y: -35.2, rot: -50 },
     },
+    /* ---- Phase 5 key poses: wind-up, strike, follow-through. The keisaku lands on the mochi's shoulder,
+       as a real keisaku does, so the hand never has to come up across his own face. ---- */
+    windup: {  // the arm draws back: elbow up and out at shoulder height, forearm up, fist beside the head, board pointing back
+      v2: true, lean: -4, sy: 1.025,
+      far: FAR_STAND, farBehind: true, farHand: FAR_HAND,
+      // the sleeve hangs from the raised upper arm; the bag drops below the elbow
+      near: [[-12.6, -55.6], [-19, -55.2], [-25.4, -54.4], [-29.6, -52.4], [-32.4, -48.4], [-32.8, -41], [-30.6, -33.6], [-25.6, -30.2], [-20.4, -31.6], [-16.4, -36.4], [-13.8, -42], [-12.6, -47.4]],
+      nearLines: [[[-12.8, -46.4], [-14.2, -41.4], [-17, -35.6], [-21.4, -31.2], [-26.4, -30.2], [-30.4, -33.4]]],
+      folds: [[[-27.4, -48], [-26.8, -42], [-25.4, -36.4]]],
+      cuffO: { cx: -25.5, cy: -52.8, rx: 3.4, ry: 1.4, r: 34 },
+      skin: [[-23.8, -51.7], [-27.2, -53.9], [-24.1, -58.5], [-20.7, -56.3]],
+      fist: [-21, -59.6],
+      stick: { rot: -80 },
+    },
+    strike: { // shoulder leads, the forearm and wrist whip forward and down; the board stretches a little; the bag streams behind
+      v2: true, lean: 5, sx: 1.03, sy: .965,
+      far: FAR_STAND, farBehind: true, farHand: FAR_HAND,
+      near: [[-12.6, -55.6], [-8, -54.2], [-3, -53], [0.9, -51.4], [-0.8, -45.3], [-6, -44.4], [-11.6, -41.2], [-18.6, -37.4], [-24.4, -34.4], [-27.6, -35.6], [-26.4, -40.6], [-22.4, -45.6], [-17.6, -50.4]],
+      nearLines: [[[-0.8, -45.3], [-6, -44.4], [-11.6, -41.2], [-18.6, -37.4], [-24.4, -34.4], [-27.4, -35.8]]],
+      cuffO: { cx: 0.05, cy: -48.35, rx: 1.4, ry: 3.2, r: 15 },
+      skin: [[0.58, -50.3], [-0.48, -46.4], [4.5, -45.1], [5.5, -48.9]],
+      fist: [8, -46],
+      stick: { rot: 118, stretch: 1.15 },
+      swoosh: true, impact: true,
+    },
+    follow: { // after the hit: the weight settles back, the arm relaxes forward and down, the bag swings back under the arm
+      v2: true, lean: 1.5,
+      far: FAR_STAND, farBehind: true, farHand: FAR_HAND,
+      near: [[-12.6, -55.6], [-17.6, -50.4], [-21.6, -44], [-21.6, -36.4], [-20.6, -29.4], [-17, -24.6], [-10.6, -23.4], [-5.4, -26.6], [-4.4, -31.4], [-5.7, -34.8], [-3.3, -40.8], [-9, -43.4], [-12.6, -50]],
+      nearLines: [[[-5.7, -34.8], [-4.4, -31.4], [-5.4, -26.6], [-10.6, -23.4], [-17, -24.6], [-20.8, -29.8]], [[-12.6, -50.2], [-9, -43.4], [-3.3, -40.8]]],
+      cuffO: { cx: -4.5, cy: -37.8, rx: 1.4, ry: 3.2, r: 22 },
+      skin: [[-5.2, -35.8], [-3.7, -39.8], [0.7, -38], [-0.8, -34]],
+      fist: [2.6, -35.4],
+      stick: { rot: 128 },
+    },
   };
+
+  const FIST = [[-2.8, -2.6], [1.2, -3.6], [3.6, -0.8], [2.8, 2.8], [-1, 3.4], [-3.4, 0.6]], FIST_LINE = [[-0.8, -2.8], [0.4, -0.2], [-0.6, 2.4]];
+  for (const k of ['windup', 'strike', 'follow']) {
+    const q = POSE[k], [cx, cy] = q.fist, r = q.stick.rot * Math.PI / 180, d = [Math.sin(r), -Math.cos(r)];
+    q.hand = FIST.map(([x, y]) => [cx + x, cy + y]); q.handLine = FIST_LINE.map(([x, y]) => [cx + x, cy + y]);
+    Object.assign(q.stick, { x: cx - 3.5 * d[0], y: cy - 3.5 * d[1] });
+  }
 
   /* the keisaku: a short round grip with a binding, then a long flat board that widens a little toward a
      squared, softly rounded end. We see its broad face; a thin darker strip along one edge gives it thickness. */
   const STICK = { grip: 7, blade: 23, w0: 4.6, w1: 7.6 };
   function stick(s, c, line, sil) {
-    const g = STICK.grip, b = STICK.blade, e = g + b, h0 = STICK.w0 / 2, h1 = STICK.w1 / 2;
+    const g = STICK.grip, b = STICK.blade * (s.stretch || 1), e = g + b, h0 = STICK.w0 / 2, h1 = STICK.w1 / 2;
     const board = `M${-h0} ${-g} L${h0} ${-g} L${h1} ${-e + 1.8} Q${h1} ${-e} ${h1 - 1.8} ${-e} L${-h1 + 1.8} ${-e} Q${-h1} ${-e} ${-h1} ${-e + 1.8} Z`;
     return `<g transform="translate(${s.x} ${s.y}) rotate(${s.rot})">
       <rect x="-1.25" y="${-g - .4}" width="2.5" height="${g + 2.4}" rx="1.25" style="fill:${c.grip};stroke:${line};stroke-width:1"/>
@@ -174,6 +216,7 @@
   /* ---------- faces: v2's face kept; four moods for the "gentle → suddenly serious → gentle" beat ---------- */
   const eyeDot = (x, y, rx, ry) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" style="fill:${ink}"/>`;
   const BROW = {
+    calm:   ['M4.4 -77.8 C5.8 -80.4 9.6 -80.8 11.4 -78.4 C10 -77.6 6.6 -77.2 4.4 -77.8 Z', 'M14.2 -78 C15.6 -80.2 18.6 -80.6 20 -78.6 C18.6 -77.6 16 -77.2 14.2 -78 Z'],
     kind:   ['M4.4 -77.4 C5.6 -80.4 9.6 -81 11.4 -78.6 C10 -77.6 6.6 -77 4.4 -77.4 Z', 'M14.4 -78.4 C15.6 -80.8 18.8 -80.8 20 -78.4 C18.8 -77.6 16 -77.4 14.4 -78.4 Z'],
     notice: ['M4.2 -79.6 C5.6 -82.8 9.8 -83.2 11.6 -80.8 C10 -79.8 6.6 -79.2 4.2 -79.6 Z', 'M14.4 -78.4 C15.6 -80.8 18.8 -80.8 20 -78.4 C18.8 -77.6 16 -77.4 14.4 -78.4 Z'],
     stern:  ['M4.8 -79.8 C7 -80.8 10.4 -79.6 12 -76.6 C9.6 -76.4 6.6 -77.4 4.8 -79.8 Z', 'M13.4 -76.8 C14.8 -79.4 18 -80.4 19.8 -79.6 C18.4 -77.4 15.8 -76.6 13.4 -76.8 Z'],
@@ -184,8 +227,9 @@
     notice: () => eyeDot(9.4, -72.8, 2, 2.6) + eyeDot(17.4, -72.8, 1.7, 2.4) + `<circle cx="10" cy="-73.6" r=".6" style="fill:#fff"/><circle cx="17.9" cy="-73.6" r=".5" style="fill:#fff"/>` + L('M12.4 -63.8 q1.6 .6 3.2 0', 1.3),
     stern:  () => eyeDot(8.6, -72.2, 1.9, 1.8) + eyeDot(16.8, -72.2, 1.6, 1.7) + L('M11.6 -63.6 h4.8', 1.5),
     relief: () => L('M6.2 -72.2 q2.2 -2.8 4.4 0 M14.6 -72.2 q2 -2.6 4 0', 1.5) + L('M10.8 -64.6 q3.2 2.8 6.4 -.4', 1.4),
+    calm:   () => eyeDot(8.4, -72.4, 1.9, 2.1) + eyeDot(16.6, -72.4, 1.6, 2) + L('M11.8 -63.8 q2.2 .9 4.4 0', 1.4),
   };
-  const BLUSH = { kind: .6, notice: .4, stern: .25, relief: .9 };
+  const BLUSH = { kind: .6, notice: .4, stern: .25, relief: .9, calm: .45 };
   const brow = d => `<path d="${d}" style="fill:#f6f1e6;stroke:${ink};stroke-width:1;stroke-linejoin:round"/>`;
 
   const ART = { robe: 'var(--robe)', robeLo: 'var(--robe-lo)', band: '#2b395e', white: '#f6f2e8', neck: 'var(--skin-lo)', skin: 'var(--skin)', kesa: 'var(--kesa)', foot: '#f2ede2', grip: '#8a6240', blade: '#d8b177', edge: '#a27a48', bandC: '#5e3d22' };
@@ -222,11 +266,15 @@
     if (p.farFront && !p.v2) out.push(fill(spline(p.farFront), ART.robe) + det(Ln(p.farLine) + Ln(p.farLine2)));
     if (p.v2) {
       if (p.farFront) out.push(fill(spline(p.farFront), ART.robe) + det(p.farLines.map(l => Ln(l)).join('')));
+      if (p.swoosh) out.push(det(`<path d="M16 -97 C36 -90 46 -66 40 -38" style="fill:none;stroke:#fffaf0;stroke-width:7;stroke-linecap:round;opacity:.5"/>
+        <path d="M24 -96 C42 -86 50 -66 46 -46" style="fill:none;stroke:#fffaf0;stroke-width:1.3;stroke-linecap:round;opacity:.8"/>
+        <path d="M30 -92 C46 -80 52 -66 50 -54" style="fill:none;stroke:#fffaf0;stroke-width:1;stroke-linecap:round;opacity:.6"/>`));
       out.push(fill(spline(p.near), ART.robe) + det(p.nearLines.map(l => Ln(l)).join('') + (p.folds || []).map(l => Ln(l, .85, .45)).join('')));
       if (p.cuffO) out.push(det(`<ellipse cx="${p.cuffO.cx}" cy="${p.cuffO.cy}" rx="${p.cuffO.rx}" ry="${p.cuffO.ry}" transform="rotate(${p.cuffO.r} ${p.cuffO.cx} ${p.cuffO.cy})" style="fill:#26345a;stroke:${ink};stroke-width:1"/>`));
       if (p.skin) out.push(fill(spline(p.skin), ART.skin, 1));
       if (p.stick) out.push(det(stick(p.stick, { ...ART, band: ART.bandC }, ink)));
       if (p.hand) out.push(fill(spline(p.hand), ART.skin, 1) + det(Ln(p.handLine, .8, .55)));
+      if (p.impact) out.push(det(`<g style="fill:none;stroke:var(--kin);stroke-width:1.3;stroke-linecap:round"><path d="M38 -38 l2.4 -4.6 M41.6 -32.6 l5 -1.4 M40 -26.6 l4.4 2.6"/></g>`));
     }
     if (p.v2) {}
     else if (o.pose === 'idle' || o.pose === 'ready') out.push(fill(spline(p.near), ART.robe) + det(Ln(p.nearLine) + (p.tube ? Ln(p.tube, 1.1) : '') + (p.cuffO ? `<ellipse cx="${p.cuffO.cx}" cy="${p.cuffO.cy}" rx="${p.cuffO.rx}" ry="${p.cuffO.ry}" transform="rotate(${p.cuffO.r} ${p.cuffO.cx} ${p.cuffO.cy})" style="fill:#26345a;stroke:${ink};stroke-width:1"/>` : '')) + det(stick(p.stick, { ...ART, band: ART.bandC }, ink)) + fill(spline(p.hand), ART.skin, 1) + det(Ln(p.handLine, .8, .55)));
@@ -240,13 +288,16 @@
     return `<g class="m4" id="${id}">
       <defs><clipPath id="${id}-robe"><path d="${spline(ROBE)}"/></clipPath><clipPath id="${id}-head"><path d="${HEAD}"/></clipPath><g id="${id}-art">${out.join('')}</g></defs>
       ${o.shadow !== false ? '<ellipse cx="1" cy="1.4" rx="27" ry="4.2" class="m4shadow"/>' : ''}
-      <g${flip}><use href="#${id}-art" class="m4-sil"/><use href="#${id}-art"/></g>
+      <g${flip}><g transform="rotate(${p.lean || 0}) scale(${p.sx || 1} ${p.sy || 1})"><use href="#${id}-art" class="m4-sil"/><use href="#${id}-art"/></g></g>
     </g>`;
   }
 
   const SKELETON = {
     tuck2: { shN: [-15, -48], elN: [-19.6, -29.6], wrN: [4.4, -24.4], hdN: [8.4, -23.6], shF: [13.5, -49], elF: [22, -31.6], wrF: [1.6, -25.6], hdF: [-2.4, -25] },
     ready2: { shN: [-15, -48], elN: [-26, -33], wrN: [-20.6, -41.6], hdN: [-19.1, -44], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
+    windup: { shN: [-15, -48], elN: [-28, -49], wrN: [-22.4, -57.4], hdN: [-21, -59.6], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
+    strike: { shN: [-15, -48], elN: [-6, -50], wrN: [5, -47], hdN: [8, -46], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
+    follow: { shN: [-15, -48], elN: [-10, -40], wrN: [0, -36], hdN: [2.6, -35.4], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
     ready3: { shN: [-15, -48], elN: [-21.4, -29.6], wrN: [-10.6, -36], hdN: [-8.4, -37.5], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
   };
   window.MONK4 = { silhouette, art, SCHEME, POSE, spline, stick, STICK, SKELETON };
