@@ -115,6 +115,22 @@
       handLine: [[-18.4, -46.8], [-17.4, -44.4], [-18.6, -41.8]],
       stick: { x: -17.1, y: -41.1, rot: -34 },
     },
+    ready3: {  // final fix: the elbow stays low by the side, the forearm comes forward and up in front of the chest,
+               // the wrist shows out of the cuff, the fist is in front of the body (not at the shoulder), and the wrist
+               // tips the keisaku back over the shoulder so the board clears the face
+      v2: true,
+      far: FAR_STAND, farBehind: true, farHand: FAR_HAND,
+      near: [[-12.6, -55.6], [-17.6, -50.4], [-23, -42.6], [-26.2, -35.6], [-27.2, -29.6], [-26.6, -23.4], [-24, -18.4], [-19, -16.8], [-14.6, -18], [-12.4, -22.6], [-11.8, -28.4], [-12.4, -30.8], [-16, -36.2], [-17.2, -38.8], [-14.6, -44], [-12.8, -50.4]],
+      nearLines: [
+        [[-12.4, -30.8], [-11.8, -28.4], [-12.4, -22.6], [-14.6, -18], [-19, -16.8], [-24, -18.4]],   // forearm underside → the bag hanging from it
+        [[-16.2, -38.8], [-18.4, -35.8], [-20.6, -33.2]],                                         // inside of the elbow: the bend (kept clear of the keisaku)
+      ],
+      cuffO: { cx: -14.2, cy: -33.5, rx: 3.4, ry: 1.4, r: 56 },
+      skin: [[-13.1, -31.8], [-15.3, -35.2], [-11.7, -37.7], [-9.5, -34.3]],
+      hand: [[-11.2, -40.2], [-7.2, -41.2], [-4.8, -38.4], [-5.6, -34.8], [-9.4, -34.2], [-11.6, -37]],
+      handLine: [[-9.4, -40.4], [-7.6, -37.8], [-6.8, -35.4]],
+      stick: { x: -5.7, y: -35.2, rot: -50 },
+    },
   };
 
   /* the keisaku: a short round grip with a binding, then a long flat board that widens a little toward a
@@ -231,6 +247,7 @@
   const SKELETON = {
     tuck2: { shN: [-15, -48], elN: [-19.6, -29.6], wrN: [4.4, -24.4], hdN: [8.4, -23.6], shF: [13.5, -49], elF: [22, -31.6], wrF: [1.6, -25.6], hdF: [-2.4, -25] },
     ready2: { shN: [-15, -48], elN: [-26, -33], wrN: [-20.6, -41.6], hdN: [-19.1, -44], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
+    ready3: { shN: [-15, -48], elN: [-21.4, -29.6], wrN: [-10.6, -36], hdN: [-8.4, -37.5], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
   };
   window.MONK4 = { silhouette, art, SCHEME, POSE, spline, stick, STICK, SKELETON };
 })();

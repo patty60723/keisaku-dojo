@@ -75,7 +75,7 @@ tr:last-child td { border-bottom: 0; }
 <main>
 <p class="muted" style="margin:0 0 4px;font-size:14px;letter-spacing:.1em">KEISAKU DOJO · ROUND 3 · CHARACTER REDESIGN</p>
 <h1>住持：Cozy Storybook Monk</h1>
-<p class="note" style="background:var(--paper);padding:8px 12px;border-radius:12px">Round 3.1 更新：修正袖手與舉香板兩個姿勢，見 <a href="#fix">07.5 姿勢修正</a>。頁面上其他地方也已換成修正後的姿勢。</p>
+<p class="note" style="background:var(--paper);padding:8px 12px;border-radius:12px">Round 3.1 更新：修正袖手與舉香板，見 <a href="#fix">07.5 姿勢修正</a>。Round 3.2：舉香板最後修正，見 <a href="#fix2">07.6</a>（頁面其他地方的舉香板仍是 3.1，等你確認後再換）。</p>
 <p class="muted">這一輪不再修補接縫，而是從剪影重新建立住持的造型語言。臉、耳朵、白眉、微笑、腮紅沿用；身體、袖子、香板、持握重新設計。動畫還沒做，正式版沒動。舊版保留：<a href="../round2/monk.html">v2</a>、<a href="../round2/monk3.html">v3</a>。</p>
 <div class="card"><b>這次的做法</b>
 <ul style="margin:6px 0 0;padding-left:20px">
@@ -160,6 +160,13 @@ tr:last-child td { border-bottom: 0; }
 <h3>手機實際尺寸</h3>
 <p class="note">場景寬 368px，和手機直式舞台一樣大。</p>
 <div class="row" id="fixScenes"></div>
+
+<h2 id="fix2"><span class="no">07.6</span>舉香板：最後修正（Round 3.2）</h2>
+<p class="note">只改持板的手臂。修改前（3.1）拳頭幾乎貼在肩關節前，袖袋在肩旁往外鼓，拳頭和袖子之間像一個小突起。修改後：手肘留在身側偏低處，前臂從手肘往前上方伸到胸前，袖口順著前臂滑下、露出一小段手腕，拳頭在胸前握住握柄；手腕把香板往後放到肩膀上方，板身不擋臉。袖袋從前臂下方直直垂下，肩膀旁不再鼓起；手肘內側只留一條短線表示彎曲。頭身比例、軀幹、臉與另外三個姿勢都沒有改。</p>
+<div class="grid g3" id="fix2Cmp"></div>
+<h3>手機實際尺寸</h3>
+<p class="note">場景寬 368px，和手機直式舞台一樣大。上面是修改前，下面是修改後；兩張的住持位置、比例完全相同。</p>
+<div class="row" id="fix2Scenes"></div>
 
 <h2><span class="no">08</span>Phase 5：動畫可行性</h2>
 <div class="tw"><table>
@@ -279,6 +286,13 @@ $('#fixColor').innerHTML = tile(VB, art({ pose: 'tuck2' }), '袖手') + tile(VBL
 $('#fixScenes').innerHTML = `<figure style="margin:0">${scene('night', art({ pose: 'tuck2', face: 'relief' }), true, 110)}<figcaption class="note">修改後・夜・袖手</figcaption></figure>` +
   `<figure style="margin:0">${scene('dusk', art({ pose: 'ready2', face: 'stern' }), true, 150)}<figcaption class="note">修改後・黃昏・舉香板</figcaption></figure>` +
   `<figure style="margin:0">${scene('dusk', art({ pose: 'ready', face: 'stern' }), true, 150)}<figcaption class="note">對照：修改前・舉香板</figcaption></figure>`;
+
+/* 07.6 final raised-keisaku fix */
+$('#fix2Cmp').innerHTML = tile(VB, art({ pose: 'ready2', face: 'stern' }), '修改前（Round 3.1）') + tile(VB, art({ pose: 'ready3', face: 'stern' }), '修改後（Round 3.2）') +
+  tile(VB, `<g opacity=".35">${art({ pose: 'ready3', face: 'stern', shadow: false })}</g>${skel('ready3')}`, '骨架：肩 → 肘（身側偏低）→ 腕 → 握柄', 'paper');
+$('#fix2Scenes').innerHTML = `<figure style="margin:0">${scene('dusk', art({ pose: 'ready2', face: 'stern' }), true, 150)}<figcaption class="note">修改前（3.1）</figcaption></figure>` +
+  `<figure style="margin:0">${scene('dusk', art({ pose: 'ready3', face: 'stern' }), true, 150)}<figcaption class="note">修改後（3.2）</figcaption></figure>` +
+  `<figure style="margin:0">${scene('day', art({ pose: 'ready3', face: 'notice', tilt: 5 }), true, 150)}<figcaption class="note">修改後・白天・察覺分心</figcaption></figure>`;
 </script>
 </body>
 </html>
