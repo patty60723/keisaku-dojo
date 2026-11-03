@@ -3,6 +3,15 @@
 可愛的番茄鐘專注 App。靈感來自禪寺的坐禪:巡香的師父拿著香板在禪堂裡來回走,
 有人打瞌睡或分心,就會被「啪」地打一下。
 
+👉 **https://patty60723.github.io/keisaku-dojo/**
+
+**技術**：原生 JavaScript（Python 腳本打包成單一 HTML）· DeviceMotion 感測器 · Page Visibility API · Screen Wake Lock · Web Audio 即時合成環境音 · 中／日／英三語 · Node.js test 與 Playwright 測試
+
+**亮點**
+- **用感測器抓分心**：拿起手機、切到別的 App，住持就會衝過來拿香板「啪」你一下
+- **RPG 式開場**：跟住持對話設定番茄鐘，有新手導覽，回訪可一鍵沿用上次設定
+- **聲音全部即時合成**：雨聲、海浪、森林與和弦風鈴都用 Web Audio 產生，不需要音檔
+
 中文名是「香板禪堂」,日文版是「警策道場」,英文版是「Keisaku Dojo」。repo 名稱 `keisaku-dojo` 不變。
 
 ## 玩法
