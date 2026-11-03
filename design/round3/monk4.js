@@ -192,7 +192,7 @@
 
   /* full colour (scheme B): o = { id, pose, face, facing, lines (false = no inner lines), shadow } */
   function art(o) {
-    const p = POSE[o.pose], face = o.face || 'kind', left = o.facing === 'left', id = o.id, lines = o.lines !== false;
+    const p = o.poseObj || POSE[o.pose], face = o.face || 'kind', left = o.facing === 'left', id = o.id, lines = o.lines !== false;
     const fill = (d, c, s) => `<path class="m4p" d="${d}" style="--c:${c}" ${s ? 'data-s="1"' : ''}/>`;
     const det = s => `<g class="m4det">${s}</g>`;
     const Ln = (pts, w = 1.15, op = 1) => lines ? L(spline(pts, false), w, op) : '';
