@@ -240,7 +240,7 @@
     const fill = (d, c, s) => `<path class="m4p" d="${d}" style="--c:${c}" ${s ? 'data-s="1"' : ''}/>`;
     const det = s => `<g class="m4det">${s}</g>`;
     const Ln = (pts, w = 1.15, op = 1) => lines ? L(spline(pts, false), w, op) : '';
-    const out = [];
+    const out = [], front = [];
     if (p.farBehind) out.push(fill(spline(p.far), ART.robe) + (p.farHand ? fill(spline(p.farHand), ART.skin, 1) : ''));
     if (p.farBack) out.push(fill(spline(p.farBack), ART.robe));
     out.push(fill(spline(FEET.far), ART.foot) + fill(spline(FEET.near), ART.foot) + det(lines ? L('M1.6 -0.8 C1.6 1 -1 1.6 -4 1.7', .9, .5) : ''));
@@ -269,12 +269,15 @@
       if (p.swoosh) out.push(det(`<path d="M16 -97 C36 -90 46 -66 40 -38" style="fill:none;stroke:#fffaf0;stroke-width:7;stroke-linecap:round;opacity:.5"/>
         <path d="M24 -96 C42 -86 50 -66 46 -46" style="fill:none;stroke:#fffaf0;stroke-width:1.3;stroke-linecap:round;opacity:.8"/>
         <path d="M30 -92 C46 -80 52 -66 50 -54" style="fill:none;stroke:#fffaf0;stroke-width:1;stroke-linecap:round;opacity:.6"/>`));
-      out.push(fill(spline(p.near), ART.robe) + det(p.nearLines.map(l => Ln(l)).join('') + (p.folds || []).map(l => Ln(l, .85, .45)).join('')));
+      out.push(fill(spline(p.near), ART.robe) + det(p.nearLines.map(l => Ln(l)).join('') + (p.folds || []).map(l => Ln(l, .85, .45)).join('') + (p.extraLines || []).map(l => l.op > .02 ? Ln(l.pts, l.w || 1.1, l.op) : '').join('')));
       if (p.cuffO) out.push(det(`<ellipse cx="${p.cuffO.cx}" cy="${p.cuffO.cy}" rx="${p.cuffO.rx}" ry="${p.cuffO.ry}" transform="rotate(${p.cuffO.r} ${p.cuffO.cx} ${p.cuffO.cy})" style="fill:#26345a;stroke:${ink};stroke-width:1"/>`));
       if (p.skin) out.push(fill(spline(p.skin), ART.skin, 1));
-      if (p.stick) out.push(det(stick(p.stick, { ...ART, band: ART.bandC }, ink)));
-      if (p.hand) out.push(fill(spline(p.hand), ART.skin, 1) + det(Ln(p.handLine, .8, .55)));
-      if (p.impact) out.push(det(`<g style="fill:none;stroke:var(--kin);stroke-width:1.3;stroke-linecap:round"><path d="M38 -38 l2.4 -4.6 M41.6 -32.6 l5 -1.4 M40 -26.6 l4.4 2.6"/></g>`));
+      // split: the keisaku and the fist holding it go on their own layer (above the mochi), the rest stays behind
+      const top = o.split && !o.stickBack ? front : out;
+      if (o.frontUnder) top.push(det(o.frontUnder));
+      if (p.stick) top.push(det(stick(p.stick, { ...ART, band: ART.bandC }, ink)));
+      if (p.hand) top.push(fill(spline(p.hand), ART.skin, 1) + det(Ln(p.handLine, .8, .55)));
+      if (p.impact) top.push(det(`<g style="fill:none;stroke:var(--kin);stroke-width:1.3;stroke-linecap:round"><path d="M38 -38 l2.4 -4.6 M41.6 -32.6 l5 -1.4 M40 -26.6 l4.4 2.6"/></g>`));
     }
     if (p.v2) {}
     else if (o.pose === 'idle' || o.pose === 'ready') out.push(fill(spline(p.near), ART.robe) + det(Ln(p.nearLine) + (p.tube ? Ln(p.tube, 1.1) : '') + (p.cuffO ? `<ellipse cx="${p.cuffO.cx}" cy="${p.cuffO.cy}" rx="${p.cuffO.rx}" ry="${p.cuffO.ry}" transform="rotate(${p.cuffO.r} ${p.cuffO.cx} ${p.cuffO.cy})" style="fill:#26345a;stroke:${ink};stroke-width:1"/>` : '')) + det(stick(p.stick, { ...ART, band: ART.bandC }, ink)) + fill(spline(p.hand), ART.skin, 1) + det(Ln(p.handLine, .8, .55)));
@@ -285,6 +288,12 @@
       + `<ellipse cx="5.6" cy="-66.4" rx="3.6" ry="2" style="fill:var(--blush);opacity:${BLUSH[face]}"/><ellipse cx="19.6" cy="-66.2" rx="1.8" ry="1.6" style="fill:var(--blush);opacity:${BLUSH[face]}"/>`
       + FACE[face]() + BROW[face].map(brow).join('')) + '</g>');
     const flip = left ? ' transform="scale(-1 1)"' : '';
+    const body = `rotate(${p.lean || 0}) scale(${p.sx || 1} ${p.sy || 1})`;
+    if (o.split) return {
+      back: `<g class="m4" id="${id}"><defs><clipPath id="${id}-robe"><path d="${spline(ROBE)}"/></clipPath><clipPath id="${id}-head"><path d="${HEAD}"/></clipPath><g id="${id}-art">${out.join('')}</g></defs>
+        ${o.shadow !== false ? '<ellipse cx="1" cy="1.4" rx="27" ry="4.2" class="m4shadow"/>' : ''}<g${flip}><g transform="${body}"><use href="#${id}-art" class="m4-sil"/><use href="#${id}-art"/></g></g></g>`,
+      front: `<g class="m4"><defs><g id="${id}-fr">${front.join('')}</g></defs><g${flip}><g transform="${body}"><use href="#${id}-fr" class="m4-sil"/><use href="#${id}-fr"/>${o.frontTop || ''}</g></g></g>`,
+    };
     return `<g class="m4" id="${id}">
       <defs><clipPath id="${id}-robe"><path d="${spline(ROBE)}"/></clipPath><clipPath id="${id}-head"><path d="${HEAD}"/></clipPath><g id="${id}-art">${out.join('')}</g></defs>
       ${o.shadow !== false ? '<ellipse cx="1" cy="1.4" rx="27" ry="4.2" class="m4shadow"/>' : ''}
@@ -300,5 +309,5 @@
     follow: { shN: [-15, -48], elN: [-10, -40], wrN: [0, -36], hdN: [2.6, -35.4], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
     ready3: { shN: [-15, -48], elN: [-21.4, -29.6], wrN: [-10.6, -36], hdN: [-8.4, -37.5], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
   };
-  window.MONK4 = { silhouette, art, SCHEME, POSE, spline, stick, STICK, SKELETON };
+  window.MONK4 = { silhouette, art, SCHEME, POSE, spline, stick, STICK, SKELETON, FIST, FIST_LINE };
 })();
