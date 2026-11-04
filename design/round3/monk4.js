@@ -31,6 +31,44 @@
     return spline(A, false) + ' L' + spline(B.reverse(), false).slice(1) + ' Z';
   }
 
+  /* Round 3.5 — points on a drawn curve. resample: evenly by length along a polyline. onSpline: SUB points per span
+     of the spline() above (same tangents). curve: n points on spline(pts), evenly by arc length.
+     The hanging pose (idle) draws its sleeve through curve(…, DENSE) so the animation, which carries exactly these
+     points, ends on the very same path. */
+  const lerp = (a, b, t) => a + (b - a) * t, dist = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]);
+  function resample(pts, n, closed) {
+    const Q = closed ? [...pts, pts[0]] : pts, L = [0];
+    for (let i = 1; i < Q.length; i++) L.push(L[i - 1] + dist(Q[i - 1], Q[i]));
+    const T = L[L.length - 1], out = [];
+    for (let k = 0; k < n; k++) {
+      const d = closed ? T * k / n : T * k / (n - 1); let i = 1; while (i < L.length - 1 && L[i] < d) i++;
+      const u = (d - L[i - 1]) / ((L[i] - L[i - 1]) || 1); out.push([lerp(Q[i - 1][0], Q[i][0], u), lerp(Q[i - 1][1], Q[i][1], u)]);
+    }
+    return out;
+  }
+  /* Catmull-Rom points ON the curve that MONK4.spline draws (same tangents), resampled evenly by arc length.
+     Round 3.5: every key's sleeve outline is carried this way, so a frame that lands on a key pose draws that
+     pose's own curve (to within 0.05 units), not a re-fitted approximation of it. */
+  function onSpline(pts, closed, SUB) {   // SUB points per spline segment, evenly in the curve parameter
+    const m = pts.length, Pq = i => closed ? pts[(i + m) % m] : pts[Math.max(0, Math.min(m - 1, i))], dense = [];
+    const segs = closed ? m : m - 1;
+    for (let i = 0; i < segs; i++) {
+      const p0 = Pq(i - 1), p1 = Pq(i), p2 = Pq(i + 1), p3 = Pq(i + 2);
+      const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6], c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+      for (let k = 0; k < SUB; k++) { const t = k / SUB, a = (1 - t) ** 3, b = 3 * t * (1 - t) ** 2, c = 3 * t * t * (1 - t), d = t ** 3;
+        dense.push([a * p1[0] + b * c1[0] + c * c2[0] + d * p2[0], a * p1[1] + b * c1[1] + c * c2[1] + d * p2[1]]); }
+    }
+    if (!closed) dense.push(pts[m - 1].slice());
+    return dense;
+  }
+  function curve(pts, n, closed) {          // n points on the curve, evenly by arc length
+    const out = resample(onSpline(pts, closed, 24), n, closed);
+    if (!closed) out[n - 1] = pts[pts.length - 1].slice();
+    out[0] = pts[0].slice();
+    return out;
+  }
+  const DENSE = { near: 288, line: 91 };
+
   /* ---------- shared proportions (scheme B): every pose uses these ---------- */
   const HEAD = 'M2 -94 C-9 -94 -17.5 -86 -17.5 -75 C-17.5 -66 -13 -59 -6 -56.2 C-1 -54.4 6 -54.2 11 -55.4 C17 -57 21.5 -62 22.2 -68.5 C23 -76 21.5 -84 16 -89.5 C12 -92.8 7 -94 2 -94 Z';
   const HEAD_LOWER = 'M-17.5 -75 C-17.5 -66 -13 -59 -6 -56.2 C-1 -54.4 6 -54.2 11 -55.4 C17 -57 21.5 -62 22.2 -68.5';
@@ -240,6 +278,18 @@
     const fill = (d, c, s) => `<path class="m4p" d="${d}" style="--c:${c}" ${s ? 'data-s="1"' : ''}/>`;
     const det = s => `<g class="m4det">${s}</g>`;
     const Ln = (pts, w = 1.15, op = 1) => lines ? L(spline(pts, false), w, op) : '';
+    /* Round 3.5 — the hand holding the keisaku. Before, it was part of the silhouette (and, on the split front layer,
+       had a silhouette copy of its own), so it got the 4.4-wide outer ring on top of its own 1.1 stroke: a dark ring
+       right next to the cuff and the grip. Now the fist and the bare wrist are drawn with their own single stroke and
+       stay out of the silhouette; the finger line is lighter. o.fistLegacy = the drawing before 3.5 (for comparisons). */
+    const FL = !!o.fistLegacy;
+    const fistD = pts => FL ? fill(spline(pts), ART.skin, 1) : det(`<path d="${spline(pts)}" style="fill:${ART.skin};stroke:${ink};stroke-width:1.2;stroke-linejoin:round"/>`);
+    const fingers = pts => Ln(pts, FL ? .8 : .7, FL ? .55 : .42);
+    const cuffW = FL ? 1 : .85;
+    const wristD = (pts, w) => FL ? fill(spline(pts), ART.skin, 1) : det(`<path d="${spline(pts)}" style="fill:${ART.skin};stroke:${ink};stroke-width:${(.9 * Math.min(1, w ?? 1)).toFixed(3)};stroke-linejoin:round"/>`);
+    // (the animation passes the near sleeve as many points sampled ON the key poses' curves; the same spline through
+    // them reproduces those curves, so nothing special is needed to draw them)
+    const shape = (pts, closed) => spline(pts, closed);
     const out = [], front = [], late = [];
     if (p.farBehind) out.push(fill(spline(p.far), ART.robe) + (p.farHand ? fill(spline(p.farHand), ART.skin, 1) : ''));
     if (p.farBack) out.push(fill(spline(p.farBack), ART.robe));
@@ -272,18 +322,18 @@
       // while the near arm swings over the head it is drawn in front of the head (it is the arm nearer to us);
       // it then needs its own outline where it crosses the face
       const arm = o.armOverHead ? late : out;
-      arm.push(fill(spline(p.near), ART.robe) + det(p.nearLines.map(l => Ln(l)).join('') + (p.folds || []).map(l => Ln(l, .85, .45)).join('') + (p.extraLines || []).map(l => l.op > .02 ? Ln(l.pts, l.w || 1.1, l.op) : '').join('') + (o.armOverHead ? L(spline(p.near), 1.2) : '')));
-      if (p.cuffO) arm.push(det(`<ellipse cx="${p.cuffO.cx}" cy="${p.cuffO.cy}" rx="${p.cuffO.rx}" ry="${p.cuffO.ry}" transform="rotate(${p.cuffO.r} ${p.cuffO.cx} ${p.cuffO.cy})" style="fill:#26345a;stroke:${ink};stroke-width:1"/>`));
-      if (p.skin) arm.push(fill(spline(p.skin), ART.skin, 1));
+      arm.push(fill(shape(p.near, true), ART.robe) + det(p.nearLines.map(l => Ln(l)).join('') + (p.folds || []).map(l => Ln(l, .85, .45)).join('') + (p.extraLines || []).map(l => l.op > .02 ? Ln(l.pts, l.w || 1.1, l.op) : '').join('') + (o.armOverHead ? L(shape(p.near, true), 1.2) : '')));
+      if (p.cuffO) arm.push(det(`<ellipse cx="${p.cuffO.cx}" cy="${p.cuffO.cy}" rx="${p.cuffO.rx}" ry="${p.cuffO.ry}" transform="rotate(${p.cuffO.r} ${p.cuffO.cx} ${p.cuffO.cy})" style="fill:#26345a;stroke:${ink};stroke-width:${cuffW}"/>`));
+      if (p.skin && (p.skinW ?? 1) > .02) arm.push(wristD(p.skin, p.skinW));
       // split: the keisaku and the fist holding it go on their own layer (above the mochi), the rest stays behind
       const top = o.split && !o.stickBack ? front : (o.armOverHead ? late : out);
       if (o.frontUnder) top.push(det(o.frontUnder));
       if (p.stick) top.push(det(stick(p.stick, { ...ART, band: ART.bandC }, ink)));
-      if (p.hand) top.push(fill(spline(p.hand), ART.skin, 1) + det(Ln(p.handLine, .8, .55)));
+      if (p.hand) top.push(fistD(p.hand) + det(fingers(p.handLine)));
       if (p.impact) top.push(det(`<g style="fill:none;stroke:var(--kin);stroke-width:1.3;stroke-linecap:round"><path d="M38 -38 l2.4 -4.6 M41.6 -32.6 l5 -1.4 M40 -26.6 l4.4 2.6"/></g>`));
     }
     if (p.v2) {}
-    else if (o.pose === 'idle' || o.pose === 'ready') out.push(fill(spline(p.near), ART.robe) + det(Ln(p.nearLine) + (p.tube ? Ln(p.tube, 1.1) : '') + (p.cuffO ? `<ellipse cx="${p.cuffO.cx}" cy="${p.cuffO.cy}" rx="${p.cuffO.rx}" ry="${p.cuffO.ry}" transform="rotate(${p.cuffO.r} ${p.cuffO.cx} ${p.cuffO.cy})" style="fill:#26345a;stroke:${ink};stroke-width:1"/>` : '')) + det(stick(p.stick, { ...ART, band: ART.bandC }, ink)) + fill(spline(p.hand), ART.skin, 1) + det(Ln(p.handLine, .8, .55)));
+    else if (o.pose === 'idle' || o.pose === 'ready') out.push(fill(spline(o.pose === 'idle' ? curve(p.near, DENSE.near, true) : p.near), ART.robe) + det(Ln(o.pose === 'idle' ? curve(p.nearLine, DENSE.line, false) : p.nearLine) + (p.tube ? Ln(p.tube, 1.1) : '') + (p.cuffO ? `<ellipse cx="${p.cuffO.cx}" cy="${p.cuffO.cy}" rx="${p.cuffO.rx}" ry="${p.cuffO.ry}" transform="rotate(${p.cuffO.r} ${p.cuffO.cx} ${p.cuffO.cy})" style="fill:#26345a;stroke:${ink};stroke-width:${cuffW}"/>` : '')) + det(stick(p.stick, { ...ART, band: ART.bandC }, ink)) + fistD(p.hand) + det(fingers(p.handLine)));
     else out.push((p.hand ? fill(spline(p.hand), ART.skin, 1) + det(Ln(p.handLine, .8, .55)) : '') + fill(spline(p.near), ART.robe) + det(Ln(p.nearLine)));
     // head (v2)
     out.push(`<g transform="rotate(${o.tilt ?? 2} 3 -56)">` + fill(HEAD, ART.skin) + det(`<g clip-path="url(#${id}-head)"><path d="M-6 -95 C-15 -88 -17 -74 -13 -64 C-10 -58.6 -6 -56 -1 -54.6 L-30 -50 L-30 -100 Z" style="fill:var(--skin-lo);opacity:.5"/></g>` + L(HEAD_LOWER, 1.25))
@@ -296,7 +346,7 @@
     if (o.split) return {
       back: `<g class="m4" id="${id}"><defs><clipPath id="${id}-robe"><path d="${spline(ROBE)}"/></clipPath><clipPath id="${id}-head"><path d="${HEAD}"/></clipPath><g id="${id}-art">${out.join('')}</g></defs>
         ${o.shadow !== false ? '<ellipse cx="1" cy="1.4" rx="27" ry="4.2" class="m4shadow"/>' : ''}<g${flip}><g transform="${body}"><use href="#${id}-art" class="m4-sil"/><use href="#${id}-art"/></g></g></g>`,
-      front: `<g class="m4"><defs><g id="${id}-fr">${front.join('')}</g></defs><g${flip}><g transform="${body}"><use href="#${id}-fr" class="m4-sil"/><use href="#${id}-fr"/>${o.frontTop || ''}</g></g></g>`,
+      front: `<g class="m4"><defs><g id="${id}-fr">${front.join('')}</g></defs><g${flip}><g transform="${body}">${FL ? `<use href="#${id}-fr" class="m4-sil"/>` : ''}<use href="#${id}-fr"/>${o.frontTop || ''}</g></g></g>`,
     };
     return `<g class="m4" id="${id}">
       <defs><clipPath id="${id}-robe"><path d="${spline(ROBE)}"/></clipPath><clipPath id="${id}-head"><path d="${HEAD}"/></clipPath><g id="${id}-art">${out.join('')}</g></defs>
@@ -311,7 +361,9 @@
     windup: { shN: [-15, -48], elN: [-28, -49], wrN: [-22.4, -57.4], hdN: [-21, -59.6], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
     strike: { shN: [-15, -48], elN: [-6, -50], wrN: [5, -47], hdN: [8, -46], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
     follow: { shN: [-15, -48], elN: [-10, -40], wrN: [0, -36], hdN: [2.6, -35.4], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
+    // the hanging pose (Round 3.5: the end of the return); the wrist is where its cuff is, the fist is the hand's centre
+    idle: { shN: [-15, -48], elN: [-19.4, -31], wrN: [-11.6, -24.8], hdN: [-9.0667, -25], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
     ready3: { shN: [-15, -48], elN: [-21.4, -29.6], wrN: [-10.6, -36], hdN: [-8.4, -37.5], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
   };
-  window.MONK4 = { silhouette, art, SCHEME, POSE, spline, stick, STICK, SKELETON, FIST, FIST_LINE };
+  window.MONK4 = { silhouette, art, SCHEME, POSE, spline, stick, STICK, SKELETON, FIST, FIST_LINE, resample, onSpline, curve, DENSE };
 })();

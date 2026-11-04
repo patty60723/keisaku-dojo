@@ -13,10 +13,12 @@
    • Body lean / squash interpolate with the same curve. The scene is not rotated as a whole.
    • Layers: the robe, sleeves and head stay behind the mochi; only the keisaku and the fist holding it are on
      their own layer above it.
+   • Round 3.5: after the follow-through the arm returns to the hanging pose (POSE.idle, as drawn) and the last frame
+     is that pose exactly; endCheck() measures it.
    ===================================================================== */
 (function () {
   'use strict';
-  const M = MONK4, P = M.POSE, SK = M.SKELETON;
+  const M = MONK4, P = M.POSE, SK = M.SKELETON, { resample, onSpline, curve } = M;
   const SH = [-15, -48], TORSO = [[-13.2, -57.4], [-12.4, -46]];
   const MONK_AT = [132, 254], MOCHI_AT = [206, 257];
   const R = Math.PI / 180;
@@ -26,16 +28,6 @@
   const lerp = (a, b, t) => a + (b - a) * t;
   const lerpP = (A, B, t) => A.map((q, i) => [lerp(q[0], B[i][0], t), lerp(q[1], B[i][1], t)]);
   const unwrap = (prev, a) => { while (a - prev > 180) a -= 360; while (a - prev < -180) a += 360; return a; };
-  function resample(pts, n, closed) {
-    const Q = closed ? [...pts, pts[0]] : pts, L = [0];
-    for (let i = 1; i < Q.length; i++) L.push(L[i - 1] + dist(Q[i - 1], Q[i]));
-    const T = L[L.length - 1], out = [];
-    for (let k = 0; k < n; k++) {
-      const d = closed ? T * k / n : T * k / (n - 1); let i = 1; while (i < L.length - 1 && L[i] < d) i++;
-      const u = (d - L[i - 1]) / ((L[i] - L[i - 1]) || 1); out.push([lerp(Q[i - 1][0], Q[i][0], u), lerp(Q[i - 1][1], Q[i][1], u)]);
-    }
-    return out;
-  }
   function segDist(p, a, b) {
     const dx = b[0] - a[0], dy = b[1] - a[1], l2 = dx * dx + dy * dy || 1;
     const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / l2));
@@ -45,22 +37,37 @@
   const toLocal = (P, f) => { const d = [P[0] - f.p0[0], P[1] - f.p0[1]]; return [(d[0] * f.e[0] + d[1] * f.e[1]) / f.L, d[0] * f.n[0] + d[1] * f.n[1]]; };
   const fromLocal = ([u, v], f) => [f.p0[0] + f.e[0] * u * f.L + f.n[0] * v, f.p0[1] + f.e[1] * u * f.L + f.n[1] * v];
 
-  /* ---------- key poses, as data ---------- */
-  const KEYS = { ready3: { face: 'stern', tilt: 4 }, windup: { face: 'stern', tilt: 2 }, strike: { face: 'stern', tilt: 6 }, follow: { face: 'calm', tilt: 3 } };
+  // The 3.3 keys drew a spline through their outline resampled to 48 (line: 16) points; those keys now carry points on
+  // exactly that drawn curve (6 per span), so their frames do not move. idle carries points on its own drawn curve.
+  const SUB = 6, NEAR_N = M.DENSE.near, LINE_N = M.DENSE.line;   // 288 = 48 × 6, 91 = 15 × 6 + 1
+
+  /* ---------- key poses, as data ----------
+     Round 3.5 adds 'idle' (the existing 香板垂放 pose, read as it is) and, per key, a few values that used to be
+     constants: the cuff's size and its angle relative to the forearm, the bare wrist's width and where the keisaku's
+     origin sits relative to the fist. The four keys from 3.3 get exactly the old constants, so their frames are
+     unchanged; idle gets its own drawing's values. */
+  const KEYS = { ready3: { face: 'stern', tilt: 4 }, windup: { face: 'stern', tilt: 2 }, strike: { face: 'stern', tilt: 6 }, follow: { face: 'calm', tilt: 3 }, idle: { face: 'kind', tilt: 2, own: true } };
   let prev = null;
-  for (const k of ['ready3', 'windup', 'strike', 'follow']) {
-    const q = SK[k], pz = P[k], el = q.elN, wr = q.wrN;
+  for (const k of ['ready3', 'windup', 'strike', 'follow', 'idle']) {
+    const q = SK[k], pz = P[k], el = q.elN, wr = q.wrN, own = KEYS[k].own;
     const hc = pz.hand.reduce((a, v) => [a[0] + v[0] / pz.hand.length, a[1] + v[1] / pz.hand.length], [0, 0]);
     const fist = pz.fist || hc;
     let a1 = ang(SH, el), a2 = ang(el, wr), sr = (pz.stick.rot - 90) - a2;
     if (prev) { a1 = unwrap(prev.a1, a1); a2 = unwrap(prev.a2, a2); sr = unwrap(prev.sr, sr); }
-    const u = dir(a2), c = pz.cuffO;
+    const u = dir(a2), c = pz.cuffO, nv = dir(a2 + 90);
+    // the keisaku's origin in its own (rotated) frame, measured from the fist; 3.3 keys: 3.5 back along the board
+    let stickOff = [0, 3.5];
+    if (own) { const rr = pz.stick.rot * R, dx = pz.stick.x - fist[0], dy = pz.stick.y - fist[1]; stickOff = [dx * Math.cos(rr) + dy * Math.sin(rr), -dx * Math.sin(rr) + dy * Math.cos(rr)]; }
+    let cuffRel = own ? c.r - a2 : 0; if (own) { while (cuffRel > 90) cuffRel -= 180; while (cuffRel < -90) cuffRel += 180; }
     const key = Object.assign(KEYS[k], {
       name: k, a1, a2, sr, L1: dist(SH, el), L2: dist(el, wr), fd: dist(wr, fist), fa: ang(wr, fist) - a2,
       cf: ((c.cx - el[0]) * u[0] + (c.cy - el[1]) * u[1]) / dist(el, wr),
+      cv: own ? (c.cx - el[0]) * nv[0] + (c.cy - el[1]) * nv[1] : 0,
+      cuffRx: own ? c.rx : 1.4, cuffRy: own ? c.ry : 3.3, cuffRel, skinW: own ? 0 : 2, stickOff,
       stretch: pz.stick.stretch || 1, lean: pz.lean || 0, sx: pz.sx || 1, sy: pz.sy || 1,
       hand: pz.hand.map(v => [v[0] - fist[0], v[1] - fist[1]]), handLine: pz.handLine.map(v => [v[0] - fist[0], v[1] - fist[1]]),
     });
+    const lines0 = pz.nearLines || [pz.nearLine];
     // bind the sleeve outline and its lines to this key's own skeleton
     const fu = frame(SH, el), ff = frame(el, wr);
     const bind = pts => pts.map(Pt => {
@@ -68,9 +75,11 @@
       const w = [1 / (dT * dT + 1), 1 / (dU * dU + 1), 1 / (dF * dF + 1)], s = w[0] + w[1] + w[2];
       return { P: Pt, w: w.map(x => x / s), lu: toLocal(Pt, fu), lf: toLocal(Pt, ff), bag: Math.min(dU, dF) > 6.5 };
     });
-    key.near = bind(resample(pz.near, 48, true));
-    key.line0 = bind(resample(pz.nearLines[0], 16, false));
-    key.extras = pz.nearLines.slice(1).concat(pz.folds || []).map(l => bind(l));
+    // 3.3 keys: the 48 / 16 control points are skinned (as in 3.3) and the drawn spline is sampled afterwards;
+    // idle: points on its own drawn curve are skinned directly. Both end up as NEAR_N / LINE_N points.
+    key.near = bind(own ? curve(pz.near, NEAR_N, true) : resample(pz.near, 48, true)); key.near.ctrl = !own; key.near.closed = true;
+    key.line0 = bind(own ? curve(lines0[0], LINE_N, false) : resample(lines0[0], 16, false)); key.line0.ctrl = !own; key.line0.closed = false;
+    key.extras = lines0.slice(1).concat(pz.folds || []).map(l => bind(l));
     prev = key;
   }
   // the hold: the arm keeps drawing back a touch, the body settles a little further back (alive, not frozen)
@@ -82,11 +91,14 @@
     lin: t => t, inOut: t => t < .5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2,
     in: t => t * t * t, out: t => 1 - (1 - t) ** 3, sine: t => .5 - Math.cos(Math.PI * t) / 2,
   };
-  const T = { pre: 200, windup: 340, hold: 160, swing: 90, stop: 135, follow: 260, post: 460 };
+  // Round 3.5: the old 460 ms 'post' hold is replaced by settle (follow-through held) → return (back to the hanging
+  // pose) → rest (held, so the lagging sleeve bag lands too). Everything up to the follow-through is unchanged.
+  const T = { pre: 200, windup: 340, hold: 160, swing: 90, stop: 135, follow: 260, settle: 120, return: 520, rest: 120 };
   let SEG = [];
   function build() {
     const plan = [['pre', '舉起', 'ready3', 'ready3', 'lin'], ['windup', '預備', 'ready3', 'windup', 'inOut'], ['hold', '停頓', 'windup', 'windupPlus', 'sine'],
-      ['swing', '揮下', 'windupPlus', 'strike', 'in'], ['stop', '命中停格', 'strike', 'strike', 'lin'], ['follow', '收勢', 'strike', 'follow', 'out'], ['post', '收勢（停）', 'follow', 'follow', 'lin']];
+      ['swing', '揮下', 'windupPlus', 'strike', 'in'], ['stop', '命中停格', 'strike', 'strike', 'lin'], ['follow', '收勢', 'strike', 'follow', 'out'], ['settle', '收勢（停）', 'follow', 'follow', 'lin'],
+      ['return', '收板歸位', 'follow', 'idle', 'inOut'], ['rest', '待機', 'idle', 'idle', 'lin']];
     let t0 = 0; SEG = plan.map(([id, zh, a, b, e]) => { const s = { id, zh, a, b, e, t0, t1: t0 + T[id] }; t0 = s.t1; return s; });
   }
   build();
@@ -101,9 +113,15 @@
     const fd = lerp(A.fd, B.fd, e), fa = lerp(A.fa, B.fa, e), fist = [wr[0] + fd * dir(a2 + fa)[0], wr[1] + fd * dir(a2 + fa)[1]];
     const sr = lerp(A.sr, B.sr, e), rot = a2 + sr + 90, d = [Math.sin(rot * R), -Math.cos(rot * R)];
     const stretch = lerp(A.stretch, B.stretch, e);
-    return { t, s, A, B, e, el, wr, fist, a2, rot, d, stretch, origin: [fist[0] - 3.5 * d[0], fist[1] - 3.5 * d[1]],
+    const off = [lerp(A.stickOff[0], B.stickOff[0], e), lerp(A.stickOff[1], B.stickOff[1], e)], cr = Math.cos(rot * R), sn = Math.sin(rot * R);
+    let face = e < .5 ? A.face : B.face, tilt = lerp(A.tilt, B.tilt, e);
+    if (s.id === 'return') {   // calm → the eyes close into the kind smile → kind; one slow nod on the way down
+      face = u < .25 ? 'calm' : u < .8 ? 'relief' : 'kind';
+      tilt += 4 * Math.sin(Math.PI * u) ** 2;
+    }
+    return { t, s, A, B, e, u, el, wr, fist, a2, rot, d, stretch, origin: [fist[0] + off[0] * cr - off[1] * sn, fist[1] + off[0] * sn + off[1] * cr],
       tipLen: M.STICK.grip + M.STICK.blade * stretch, lean: lerp(A.lean, B.lean, e), sx: lerp(A.sx, B.sx, e), sy: lerp(A.sy, B.sy, e),
-      face: e < .5 ? A.face : B.face, tilt: lerp(A.tilt, B.tilt, e) };
+      face, tilt, a1, L1, L2, sr };
   }
   const tipLocal = j => [j.origin[0] + j.tipLen * j.d[0], j.origin[1] + j.tipLen * j.d[1]];
   function toWorld(p, j) {   // monk art coords → scene coords (lean + squash about the feet, then placement)
@@ -120,16 +138,18 @@
   const LAG = 50;
   function poseAt(t, opts = {}) {
     const j = joints(t), lag = joints(t - LAG), A = j.A, B = j.B, e = j.e;
-    const blend = (key) => lerpP(skin(A[key], j, lag), skin(B[key], j, lag), e);
-    const c = [lerp(j.el[0], j.wr[0], lerp(A.cf, B.cf, e)), lerp(j.el[1], j.wr[1], lerp(A.cf, B.cf, e))], n = dir(j.a2 + 90);
+    const carried = b => { const q = skin(b, j, lag); return b.ctrl ? onSpline(q, b.closed, SUB) : q; };
+    const blend = (key) => lerpP(carried(A[key]), carried(B[key]), e);
+    const cf = lerp(A.cf, B.cf, e), cv = lerp(A.cv, B.cv, e), n = dir(j.a2 + 90);
+    const c = [lerp(j.el[0], j.wr[0], cf) + cv * n[0], lerp(j.el[1], j.wr[1], cf) + cv * n[1]], hw = lerp(A.skinW, B.skinW, e);
     const hand = lerpP(A.hand, B.hand, e).map(v => [v[0] + j.fist[0], v[1] + j.fist[1]]);
     const handLine = lerpP(A.handLine, B.handLine, e).map(v => [v[0] + j.fist[0], v[1] + j.fist[1]]);
     const extraLines = A.extras.map(l => ({ pts: skin(l, j, lag), op: 1 - e })).concat(B.extras.map(l => ({ pts: skin(l, j, lag), op: e })));
     const p = {
       v2: true, far: P.stand.far, farBehind: true, farHand: P.stand.farHand,
       near: blend('near'), nearLines: [blend('line0')], extraLines,
-      cuffO: { cx: c[0], cy: c[1], rx: 1.4, ry: 3.3, r: j.a2 },
-      skin: [[c[0] + 2 * n[0], c[1] + 2 * n[1]], [c[0] - 2 * n[0], c[1] - 2 * n[1]], [j.wr[0] - 2 * n[0], j.wr[1] - 2 * n[1]], [j.wr[0] + 2 * n[0], j.wr[1] + 2 * n[1]]],
+      cuffO: { cx: c[0], cy: c[1], rx: lerp(A.cuffRx, B.cuffRx, e), ry: lerp(A.cuffRy, B.cuffRy, e), r: j.a2 + lerp(A.cuffRel, B.cuffRel, e) },
+      skin: [[c[0] + hw * n[0], c[1] + hw * n[1]], [c[0] - hw * n[0], c[1] - hw * n[1]], [j.wr[0] - hw * n[0], j.wr[1] - hw * n[1]], [j.wr[0] + hw * n[0], j.wr[1] + hw * n[1]]], skinW: hw / 2,
       hand, handLine, stick: { x: j.origin[0], y: j.origin[1], rot: j.rot, stretch: j.stretch },
       lean: j.lean, sx: j.sx, sy: j.sy, impact: j.s.id === 'stop',
     };
@@ -180,7 +200,42 @@
     return { inside, path, hit: tipH, hitLocal: [lx, ly] };
   }
 
+  /* ---------- Round 3.5: does the return land exactly on the hanging pose? (repeatable; numbers only) ---------- */
+  function endCheck() {
+    const segD = (p, a, b) => segDist(p, a, b);
+    const polyDist = (p, Q, closed) => { let m = 1e9; for (let i = 0; i < Q.length - (closed ? 0 : 1); i++) m = Math.min(m, segD(p, Q[i], Q[(i + 1) % Q.length])); return m; };
+    const haus = (A, B, closed) => Math.max(...A.map(p => polyDist(p, B, closed)), ...B.map(p => polyDist(p, A, closed)));
+    const maxPt = (A, B) => Math.max(...A.map((q, i) => dist(q, B[i])));
+    const tEnd = total(), FR = 1000 / 60, I = P.idle, Q = SK.idle, end = poseAt(tEnd), j = end.j, p = end.p;
+    const fistIdle = I.hand.reduce((a, v) => [a[0] + v[0] / I.hand.length, a[1] + v[1] / I.hand.length], [0, 0]);
+    const ref = { near: curve(I.near, 3000, true), line: curve(I.nearLine, 1500, false) };
+    const lag = joints(tEnd - LAG);
+    const joint = { elbow: dist(j.el, Q.elN), wrist: dist(j.wr, Q.wrN), fist: dist(j.fist, fistIdle), shoulder: 0 };
+    const stickR = { origin: dist([p.stick.x, p.stick.y], [I.stick.x, I.stick.y]), rot: Math.abs(p.stick.rot - I.stick.rot), length: Math.abs(j.tipLen - (M.STICK.grip + M.STICK.blade)), stretch: Math.abs(j.stretch - 1) };
+    const c = p.cuffO, ci = I.cuffO;
+    const outline = { near: haus(p.near, ref.near, true), line: haus(p.nearLines[0], ref.line, false), hand: maxPt(p.hand, I.hand), handLine: maxPt(p.handLine, I.handLine),
+      cuff: Math.max(Math.abs(c.cx - ci.cx), Math.abs(c.cy - ci.cy), Math.abs(c.rx - ci.rx), Math.abs(c.ry - ci.ry), Math.abs(c.r - ci.r)), wrist: p.skinW };
+    const state = { lean: Math.abs(j.lean), sx: Math.abs(j.sx - 1), sy: Math.abs(j.sy - 1), tilt: Math.abs(j.tilt - 2), face: j.face, trail: end.trail === '' , impact: !!p.impact,
+      extras: Math.max(0, ...p.extraLines.map(l => l.op)), armOverHead: j.s.id === 'swing', stickFront: stickFrontAt(j), lag: Math.max(dist(lag.el, j.el), dist(lag.wr, j.wr)), seg: j.s.id };
+    // speeds across the boundary: units (and degrees) per 60 fps frame, for the last frames of the animation and the
+    // first frame of the static idle that follows (which does not move: 0)
+    const tip = t => { const q = joints(t); return tipLocal(q); };
+    const speed = t => { const a = poseAt(t - FR), b = poseAt(t); return { t: Math.round(t), joints: Math.max(dist(a.j.el, b.j.el), dist(a.j.wr, b.j.wr), dist(a.j.fist, b.j.fist)),
+      tip: dist(tip(t - FR), tip(t)), rot: Math.abs(b.j.rot - a.j.rot), sleeve: maxPt(a.p.near, b.p.near) }; };
+    const S = SEG.find(x => x.id === 'return'), R2 = SEG.find(x => x.id === 'rest');
+    const speeds = [S.t1 - 2 * FR, S.t1, R2.t0 + 3 * FR, tEnd].map(speed);
+    const peak = (() => { let m = { joints: 0, tip: 0, rot: 0, sleeve: 0 }; for (let t = S.t0 + FR; t <= tEnd; t += FR) { const v = speed(t); for (const k in m) m[k] = Math.max(m[k], v[k]); } return m; })();
+    return { tEnd, joint, stick: stickR, outline, state, speeds, peak };
+  }
+
   /* ---------- views ---------- */
+  // the keisaku's layer: over the mochi from the swing on; halfway through the return (when it is down by his side,
+  // far from the mochi and the head) it goes back to the body layer, where the static hanging pose has it
+  function stickFrontAt(j, legacy) {
+    const u = (j.t - j.s.t0) / ((j.s.t1 - j.s.t0) || 1);
+    if (legacy) return ['stop', 'follow', 'settle'].includes(j.s.id) || (j.s.id === 'swing' && u > .8) || (j.s.id === 'return' && u < .5);
+    return ['swing', 'stop', 'follow', 'settle'].includes(j.s.id) || (j.s.id === 'return' && u < .5);
+  }
   let views = 0;
   function makeView(el, vb) {
     el.innerHTML = `<svg viewBox="${vb}" style="display:block;width:100%;height:auto">${sceneMarkup()}<g class="ov"></g></svg>`;
@@ -194,8 +249,8 @@
     const u = (j.t - j.s.t0) / ((j.s.t1 - j.s.t0) || 1);
     // opts.legacy = the 3.3 layering (board behind the head until the last 20% of the swing), kept for the comparison
     const swinging = !opts.legacy && j.s.id === 'swing';
-    const stickFront = opts.legacy ? (['stop', 'follow', 'post'].includes(j.s.id) || (j.s.id === 'swing' && u > .8)) : (j.s.id === 'swing' || ['stop', 'follow', 'post'].includes(j.s.id));
-    const r = M.art({ id, poseObj: p, face: j.face, tilt: j.tilt, split: true, stickBack: !stickFront, armOverHead: swinging, frontUnder: trail, frontTop: top });
+    const stickFront = stickFrontAt(j, opts.legacy);
+    const r = M.art({ id, poseObj: p, face: j.face, tilt: j.tilt, split: true, stickBack: !stickFront, armOverHead: swinging, frontUnder: trail, frontTop: top, fistLegacy: opts.fistLegacy });
     view.monk.innerHTML = `<g transform="translate(${MONK_AT[0]} ${MONK_AT[1]})">${r.back}</g>`;
     view.front.innerHTML = `<g transform="translate(${MONK_AT[0]} ${MONK_AT[1]})">${r.front}</g>`;
     view.mochi.innerHTML = `<g transform="translate(${MOCHI_AT[0]} ${MOCHI_AT[1]}) scale(${m.sx.toFixed(3)} ${m.sy.toFixed(3)})">${mochiStatic(m.face, true)}</g>`;
@@ -203,5 +258,5 @@
     return j;
   }
 
-  window.KEISAKU_ANIM = { stickFrontAt: t => { const j = joints(t), u = (j.t - j.s.t0) / ((j.s.t1 - j.s.t0) || 1); return ['swing', 'stop', 'follow', 'post'].includes(j.s.id); }, T, build, total, SEG: () => SEG, joints, poseAt, mochiAt, analyse, makeView, draw, toWorld, tipLocal, MONK_AT, MOCHI_AT };
+  window.KEISAKU_ANIM = { stickFrontAt: t => stickFrontAt(joints(t)), T, build, total, SEG: () => SEG, joints, poseAt, mochiAt, analyse, makeView, draw, toWorld, tipLocal, MONK_AT, MOCHI_AT, KK, SH, LAG, curve, NEAR_N, LINE_N, endCheck };
 })();

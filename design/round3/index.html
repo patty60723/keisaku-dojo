@@ -69,6 +69,7 @@ tr:last-child td { border-bottom: 0; }
 .guide { stroke: var(--shu); stroke-width: .5; stroke-dasharray: 1.6 1.2; }
 .guide-t { font: 3.4px var(--f-ui); fill: var(--shu); }
 .chipbtn { min-height: 38px; padding: 0 14px; border-radius: 19px; border: 1.5px solid var(--paper-edge); background: var(--paper); color: var(--ink); font: 14px var(--f-ui); cursor: pointer; }
+@media (max-width: 760px) { .rtg { grid-template-columns: minmax(0, 1fr); } }
 .chipbtn:active { background: var(--washi-2); }
 </style>
 </head>
@@ -267,7 +268,7 @@ tr:last-child td { border-bottom: 0; }
 <div class="grid g4" id="pvFrames"></div>
 
 <h3 id="swingfix">揮下中段的可見性修正（Round 3.4）</h3>
-<p class="note">修改前（3.3）：為了不擋臉，香板在揮下最後 20% 之前都畫在頭後面，767 ms 那一格整根香板和手臂都被頭蓋住，只剩速度殘影。修改後：靠近鏡頭的那隻手臂越過頭頂時本來就在頭的前面，所以整段揮下（700–790 ms）讓手臂、拳頭、香板都畫在頭前面；手臂加一條自己的外框線，和臉分開。量過每一格：香板只經過耳朵與後腦那一側（最左到 x −7），眼睛與眉毛所在的範圍（x 3–22、y −83～−68）沒有任何一格被蓋到。命中位置、時間、預備、停頓、收勢都沒有改。</p>
+<p class="note">修改前（3.3）：為了不擋臉，香板在揮下最後 20% 之前都畫在頭後面，767 ms 那一格整根香板和手臂都被頭蓋住，只剩速度殘影。修改後：靠近鏡頭的那隻手臂越過頭頂時本來就在頭的前面，所以整段揮下（700–790 ms）讓手臂、拳頭、香板都畫在頭前面；手臂加一條自己的外框線，和臉分開。量過每一格：香板只經過耳朵與後腦那一側（最左到 x −7），眼睛與眉毛所在的範圍（x 3–22、y −83～−68）沒有任何一格被蓋到。命中位置、時間、預備、停頓、收勢都沒有改。（本段是 3.4 的紀錄，拳頭仍用 3.4 當時的畫法；3.5 的拳頭修正見下方。）</p>
 <h3>連續影格：733・750・767・783・800 ms</h3>
 <div class="grid" id="swFrames" style="grid-template-columns:repeat(5,minmax(0,1fr))"></div>
 <h3>手機實際尺寸：修改前／修改後（767 ms）</h3>
@@ -283,6 +284,55 @@ tr:last-child td { border-bottom: 0; }
   <li><b>接到 Round 1 原型</b>（design/round1/proto.html）：用新住持替換舊住持，套上第 1–7 段的時間表，你在手機上試。</li>
   <li><b>確認後才進正式版</b>：沿用正式版現有的計時與偵測邏輯，只換住持的畫法與動作。</li>
 </ol>
+
+<h2 id="r35"><span class="no">08.5</span>Round 3.5 — 收板歸位與拳頭線條修正</h2>
+<p class="note">補上最後一段：收勢後，住持把香板收回身側，回到原本的「香板垂放」待機姿勢。終點直接讀取既有的 <code>POSE.idle</code> 與它的骨架，不另畫近似版本。關節、香板、袖子、袖袋延遲、身體規則全部沿用 3.4 的系統。舉起到收勢的所有段落時間與軌跡都沒有改，原本最後 460 ms 的「收勢（停）」拆成三段：收勢停留 120 → <b>收板歸位 520</b> → 待機停留 120 ms。另外修正持板拳頭的線條（共用繪製，所有姿勢一起套用）。</p>
+
+<h3>完整播放：舉起 → 提醒 → 回到待機</h3>
+<div class="card" id="rtCtl" style="display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center">
+  <button class="chipbtn" data-a="play">▶ 播放</button>
+  <button class="chipbtn" data-a="replay">↺ 重播</button>
+  <span><label><input type="radio" name="rtSpeed" value="1" checked> 正常速度</label>　<label><input type="radio" name="rtSpeed" value=".25"> 0.25 倍</label></span>
+  <span><button class="chipbtn" data-a="prev">◀ 上一格</button> <button class="chipbtn" data-a="next">下一格 ▶</button></span>
+  <label><input type="checkbox" data-a="sk"> 骨架</label>
+  <input type="range" data-a="scrub" min="0" max="1000" step="1" value="0" style="flex:1 1 260px">
+  <span data-a="read" style="font:14px var(--f-num);min-width:220px"></span>
+</div>
+<div class="grid g2 rtg" style="align-items:start">
+  <figure class="tile" style="margin:0"><div id="rtPhone" style="width:368px;max-width:100%;margin:0 auto;border-radius:14px;overflow:hidden"></div><figcaption>手機實際大小 368px・完整播放</figcaption></figure>
+  <figure class="tile" style="margin:0"><div id="rtBig"></div><figcaption>放大檢查（同一格）</figcaption></figure>
+</div>
+
+<h3>時間軸</h3>
+<p class="note">上排是段落（朱色＝本輪新增）。下面幾排由實際計算的動畫取樣畫出，不是手填：麻糬回彈幅度、表情、點頭、袖袋延遲量、香板所在圖層。直線是播放位置。</p>
+<div class="card" style="padding:10px 12px"><div id="rtTimeline"></div></div>
+<div class="tw"><table>
+<thead><tr><th>段落</th><th>時間</th><th>曲線</th><th>做什麼</th></tr></thead>
+<tbody id="rtSegTable"></tbody></table></div>
+
+<h3>收板過程：起點・25%・50%・75%・終點</h3>
+<p class="note">上排彩色，下排同一格加骨架。手肘、手腕沿弧線往下回到身側（上臂與前臂角度內插，不走直線）；香板每一格仍由拳頭與手腕角度算出，順時針轉約 76° 從身前斜放轉為垂在身側；袖口跟著前臂，袖袋用晚 50 ms 的骨架，最後才落定。表情：平靜 → 瞇眼笑 → 慈祥，途中點頭一次（頭傾 +4° 再回來）；身體由前傾 1.5° 回正。</p>
+<div class="grid" id="rtFrames" style="grid-template-columns:repeat(5,minmax(0,1fr))"></div>
+<div class="grid" id="rtFramesSk" style="grid-template-columns:repeat(5,minmax(0,1fr));margin-top:8px"></div>
+
+<h3>終點比對：動畫最後一格 vs. 原本的待機姿勢</h3>
+<p class="note">同一個場景、同一個比例。左：動畫算出的最後一格；中：原本的靜態「香板垂放」（<code>MONK4.art({ pose: 'idle' })</code>）；右：兩者的半透明剪影疊合（藍＝動畫終點，橘＝原本待機；完全重疊時只看得到混合色，沒有單色邊）。</p>
+<div class="grid g3" id="rtCmp"></div>
+
+<h3>自動銜接檢查</h3>
+<div class="card" id="rtCheck"></div>
+
+<div class="card"><b>資料結構的擴充（向下相容）</b><ul style="margin:6px 0 0;padding-left:20px;font-size:14px">
+  <li><code>SKELETON.idle</code>：新增垂放姿勢的骨架（肘 (−19.4, −31)、腕 (−11.6, −24.8)、拳頭＝手的中心），姿勢本身直接用既有的 <code>POSE.idle</code>。</li>
+  <li>關鍵姿勢多了幾個原本寫死的值：袖口大小 <code>cuffRx/cuffRy</code>、袖口相對前臂的角度 <code>cuffRel</code>、袖口離前臂的距離 <code>cv</code>、露出手腕的寬度 <code>skinW</code>、香板原點相對拳頭的位置 <code>stickOff</code>。舉起、預備、揮下、收勢四個舊姿勢填的就是 3.3 的常數（1.4、3.3、0、0、2、[0, 3.5]），所以它們的每一格都沒變；垂放填自己圖上的值。</li>
+  <li>袖子輪廓：舊姿勢照 3.3 先把 48 個控制點綁骨架，之後才取樣成曲線上的點（每段 6 點）；垂放直接取自己曲線上的 288 點。靜態的「香板垂放」也改用同一組點畫出（幾何相同），動畫最後一格因此和它畫出同一條路徑。和 3.4 比，0–1200 ms 每一格的袖子差距 &lt; 0.06（取樣誤差），關節、香板 0 差。</li>
+  <li>時間軸：<code>post 460</code> 換成 <code>settle 120 → return 520 → rest 120</code>；其他段落時間不變。<code>return</code> 段另有表情（平靜 → 瞇眼笑 → 慈祥）與點頭（+4°，sin² 起訖速度為 0）。</li>
+  <li>繪製選項：<code>art({ fistLegacy: true })</code> 重現 3.5 以前的拳頭畫法（只用在比較圖與 3.4 紀錄）。</li>
+</ul></div>
+<h3>拳頭線條：修改前／修改後（手機實際尺寸）</h3>
+<p class="note" id="rtFistNote"></p>
+<div class="grid" id="rtFistZoom" style="grid-template-columns:repeat(5,minmax(0,1fr))"></div>
+<div class="row" id="rtFistPhone" style="margin-top:12px"></div>
 
 <h2><span class="no">09</span>需要你確認的地方</h2>
 <div class="card"><ol style="margin:0;padding-left:22px">
@@ -507,7 +557,7 @@ $('#keyScenes').innerHTML = `<figure style="margin:0">${sceneFront('day', art({ 
   function renderFrames() {
     const S = A.SEG(), at = (i, f) => S[i].t0 + (S[i].t1 - S[i].t0) * f, snap = x => Math.min(A.total(), Math.ceil(x / FR - 1e-6) * FR);
     const list = [[0, '舉起（起點）'], [at(1, .5), '預備 50%'], [at(1, 1), '預備完成'], [at(2, 1), '停頓末'], [at(3, 1 / 3), '揮下 1/3'], [at(3, 2 / 3), '揮下 2/3'],
-      [at(4, 0), '命中'], [at(4, 1) - 1.5 * FR, '命中停格末'], [at(5, .35), '收勢 35%'], [at(5, .7), '收勢 70%'], [at(5, 1), '收勢完成'], [A.total(), '結束（麻糬回彈後）']];
+      [at(4, 0), '命中'], [at(4, 1) - 1.5 * FR, '命中停格末'], [at(5, .35), '收勢 35%'], [at(5, .7), '收勢 70%'], [at(5, 1), '收勢完成'], [A.total(), '結束（3.5：回到待機）']];
     $('#pvFrames').innerHTML = list.map(([x, n], i) => `<figure class="tile" style="margin:0" data-frame="${i}"><div class="pvf"></div><figcaption>${n}・${Math.round(snap(x))} ms</figcaption></figure>`).join('');
     $('#pvFrames').querySelectorAll('.pvf').forEach((el, i) => { const v = A.makeView(el, '80 140 176 132'); A.draw(v, snap(list[i][0]), { skeleton: true, trace: false }); });
   }
@@ -520,11 +570,127 @@ $('#keyScenes').innerHTML = `<figure style="margin:0">${sceneFront('day', art({ 
   const T5 = [733, 750, 767, 783, 800];
   const cell = (t, opts, cap) => { const f = document.createElement('figure'); f.className = 'tile'; f.style.margin = 0; f.innerHTML = `<div></div><figcaption>${cap}</figcaption>`; const v = A.makeView(f.firstChild, '80 140 176 132'); A.draw(v, t, opts); return f; };
   const row = $('#swFrames');
-  T5.forEach(t => row.appendChild(cell(t, { legacy: true }, `修改前・${t} ms`)));
-  T5.forEach(t => row.appendChild(cell(t, {}, `修改後・${t} ms`)));
+  // (Round 3.5) this record keeps the fist as it was drawn in 3.4
+  T5.forEach(t => row.appendChild(cell(t, { legacy: true, fistLegacy: true }, `修改前・${t} ms`)));
+  T5.forEach(t => row.appendChild(cell(t, { fistLegacy: true }, `修改後・${t} ms`)));
   const phone = (t, opts, cap) => { const f = document.createElement('figure'); f.style.margin = 0; f.innerHTML = `<div style="width:368px;max-width:100%;border-radius:14px;overflow:hidden"></div><figcaption class="note">${cap}</figcaption>`; const v = A.makeView(f.firstChild, '0 0 400 300'); A.draw(v, t, opts); return f; };
-  $('#swPhone').append(phone(767, { legacy: true }, '修改前・767 ms'), phone(767, {}, '修改後・767 ms'));
-  $('#swTrail').append(phone(767, { trailOp: .5 }, '殘影 0.5（原本）・767 ms'), phone(767, { trailOp: .3 }, '殘影 0.3（採用）・767 ms'), phone(783, { trailOp: .5 }, '殘影 0.5（原本）・783 ms'), phone(783, { trailOp: .3 }, '殘影 0.3（採用）・783 ms'));
+  const L = { fistLegacy: true };
+  $('#swPhone').append(phone(767, { ...L, legacy: true }, '修改前・767 ms'), phone(767, L, '修改後・767 ms'));
+  $('#swTrail').append(phone(767, { ...L, trailOp: .5 }, '殘影 0.5（原本）・767 ms'), phone(767, { ...L, trailOp: .3 }, '殘影 0.3（採用）・767 ms'), phone(783, { ...L, trailOp: .5 }, '殘影 0.5（原本）・783 ms'), phone(783, { ...L, trailOp: .3 }, '殘影 0.3（採用）・783 ms'));
+})();
+</script>
+<script>
+/* Round 3.5: the return to the hanging pose, its end-connection checks, and the fist outline before/after */
+(() => {
+  const A = KEISAKU_ANIM, M = MONK4, $ = s => document.querySelector(s), FR = 1000 / 60;
+  const SEGS = () => A.SEG(), seg = id => SEGS().find(s => s.id === id);
+  /* ---- player ---- */
+  const ctl = $('#rtCtl'), q = a => ctl.querySelector(`[data-a="${a}"]`);
+  const phone = A.makeView($('#rtPhone'), '0 0 400 300'), big = A.makeView($('#rtBig'), '80 140 176 132');
+  let t = 0, playing = false, speed = 1, last = 0, head = () => {};
+  function render() {
+    const o = { skeleton: q('sk').checked }, j = A.draw(phone, t, o); A.draw(big, t, o);
+    q('scrub').value = Math.round(t); q('read').textContent = `${Math.round(t)} ms・第 ${Math.round(t / FR)} 格・${j.s.zh}`; head(t);
+  }
+  function loop(now) {
+    if (!playing) return;
+    const dt = Math.min(50, now - last); last = now; t += dt * speed;
+    if (t >= A.total()) { t = A.total(); play(false); }
+    render(); if (playing) requestAnimationFrame(loop);
+  }
+  function play(on) { playing = on; q('play').textContent = on ? '❚❚ 暫停' : '▶ 播放'; if (on) { if (t >= A.total()) t = 0; last = performance.now(); requestAnimationFrame(loop); } }
+  q('play').onclick = () => play(!playing);
+  q('replay').onclick = () => { t = 0; render(); play(true); };
+  ctl.querySelectorAll('input[name=rtSpeed]').forEach(r => r.onchange = () => speed = +r.value);
+  q('prev').onclick = () => { play(false); t = Math.max(0, Math.round(t / FR - 1) * FR); render(); };
+  q('next').onclick = () => { play(false); t = Math.min(A.total(), Math.round(t / FR + 1) * FR); render(); };
+  q('scrub').oninput = e => { play(false); t = +e.target.value; render(); };
+  q('sk').onchange = render;
+  q('scrub').max = Math.round(A.total());
+
+  /* ---- timeline (sampled from the animation itself) ---- */
+  const NEW = ['settle', 'return', 'rest'], TOT = A.total(), X0 = 104, PW = 780, W = X0 + PW + 8, x = v => X0 + v / TOT * PW, RH = 30;
+  const samples = []; for (let s = 0; s <= TOT; s += 5) { const j = A.joints(s), lag = A.joints(s - A.LAG), m = A.mochiAt(s);
+    samples.push({ t: s, face: j.face, tilt: j.tilt, mface: m.face, bounce: Math.abs(m.sy - 1), lag: Math.hypot(lag.wr[0] - j.wr[0], lag.wr[1] - j.wr[1]) + Math.hypot(lag.el[0] - j.el[0], lag.el[1] - j.el[1]), front: A.stickFrontAt(s) }); }
+  const runs = k => { const r = []; samples.forEach(sm => { const v = sm[k]; if (!r.length || r[r.length - 1].v !== v) r.push({ v, a: sm.t, b: sm.t }); r[r.length - 1].b = sm.t + 5; }); return r; };
+  const FACE = { stern: '認真', calm: '平靜', relief: '瞇眼笑', kind: '慈祥', ouch: '痛', teary: '含淚', true: '麻糬前面', false: '身體圖層' };
+  const FC = { stern: '#c9b79a', calm: '#e3d6bd', relief: '#f2c7a8', kind: '#f6dcc4', ouch: '#e9b9a4', teary: '#d9cbe0', true: '#e8d3a8', false: '#dfe3d6' };
+  const spark = (k, y, max) => { const pts = samples.map(sm => `${x(sm.t).toFixed(1)} ${(y + RH - 6 - Math.min(1, sm[k] / max) * (RH - 10)).toFixed(1)}`); return `<path d="M${x(0)} ${y + RH - 6} L${pts.join(' L')} L${x(TOT)} ${y + RH - 6} Z" style="fill:var(--shu);opacity:.22"/><path d="M${pts.join(' L')}" style="fill:none;stroke:var(--shu);stroke-width:1.2"/>`; };
+  const band = (k, y) => runs(k).map(r => `<rect x="${x(r.a).toFixed(1)}" y="${y + 4}" width="${(x(r.b) - x(r.a)).toFixed(1)}" height="${RH - 8}" rx="4" style="fill:${FC[r.v]};stroke:#fff;stroke-width:1"/>` + (x(r.b) - x(r.a) > 34 ? `<text x="${((x(r.a) + x(r.b)) / 2).toFixed(1)}" y="${y + RH / 2 + 4.5}" text-anchor="middle" style="font:12px var(--f-ui);fill:var(--ink)">${FACE[r.v]}</text>` : '')).join('');
+  const rows = [['段落', y => SEGS().map(s => `<rect x="${x(s.t0).toFixed(1)}" y="${y + 3}" width="${(x(s.t1) - x(s.t0)).toFixed(1)}" height="${RH - 6}" rx="4" style="fill:${NEW.includes(s.id) ? 'var(--shu)' : '#cdbf9f'};opacity:${NEW.includes(s.id) ? .85 : .7};stroke:#fff;stroke-width:1"/>`
+      + `<text x="${((x(s.t0) + x(s.t1)) / 2).toFixed(1)}" y="${y + RH / 2 + 4.5}" text-anchor="middle" style="font:${x(s.t1) - x(s.t0) > 44 ? 12 : 10}px var(--f-ui);fill:${NEW.includes(s.id) ? '#fff' : 'var(--ink)'}">${x(s.t1) - x(s.t0) > 30 ? s.zh.replace('（停）', '停') : ''}</text>`).join('')],
+    ['麻糬回彈', y => spark('bounce', y, .12)], ['麻糬表情', y => band('mface', y)], ['住持表情', y => band('face', y)],
+    ['點頭（頭傾）', y => spark('tilt', y, 7)], ['袖袋延遲', y => spark('lag', y, Math.max(...samples.map(v => v.lag)))], ['香板圖層', y => band('front', y)]];
+  const H = rows.length * RH + 26;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="${W}" style="display:block;max-width:none">`;
+  rows.forEach(([n, f], i) => { const y = i * RH; svg += `<text x="0" y="${y + RH / 2 + 4.5}" style="font:13px var(--f-ui);fill:var(--ink-2)">${n}</text>${f(y)}`; });
+  for (let s = 0; s <= TOT; s += 250) svg += `<line x1="${x(s)}" x2="${x(s)}" y1="0" y2="${rows.length * RH}" style="stroke:var(--ink-2);stroke-width:.5;opacity:.25"/><text x="${x(s)}" y="${rows.length * RH + 16}" text-anchor="middle" style="font:11px var(--f-num);fill:var(--ink-2)">${s}</text>`;
+  const ret = seg('return');
+  svg += `<rect x="${x(ret.t0)}" y="0" width="${x(ret.t1) - x(ret.t0)}" height="${rows.length * RH}" style="fill:none;stroke:var(--shu);stroke-width:1.2;stroke-dasharray:4 3"/>`;
+  svg += `<line id="rtHead" x1="${X0}" x2="${X0}" y1="0" y2="${rows.length * RH}" style="stroke:var(--ink);stroke-width:1.4"/></svg>`;
+  $('#rtTimeline').innerHTML = `<div style="overflow-x:auto">${svg}</div>`;
+  const hl = $('#rtHead'); head = s => { hl.setAttribute('x1', x(s)); hl.setAttribute('x2', x(s)); };
+  const EZ = { lin: '—', inOut: '緩入緩出', in: '加速', out: '減速', sine: '正弦' };
+  const DESC = { pre: '舉起姿勢', windup: '手肘往後上抬', hold: '停頓、再拉一點', swing: '揮下', stop: '命中停格', follow: '回彈、放鬆',
+    settle: '<b>新增</b>：收勢姿勢停一下（麻糬仍在回彈）', return: '<b>新增</b>：收板回身側；表情轉慈祥、點頭；與麻糬回彈尾段重疊', rest: '<b>新增</b>：待機姿勢；袖袋晚 50 ms 落定，之後完全靜止' };
+  $('#rtSegTable').innerHTML = SEGS().map(s => `<tr${NEW.includes(s.id) ? ' style="background:var(--washi-2)"' : ''}><td>${s.zh}</td><td>${Math.round(s.t0)}–${Math.round(s.t1)} ms（${Math.round(s.t1 - s.t0)}）</td><td>${EZ[s.e]}</td><td>${DESC[s.id]}</td></tr>`).join('');
+
+  /* ---- return frames ---- */
+  const cell = (host, tt, opts, cap) => { const f = document.createElement('figure'); f.className = 'tile'; f.style.margin = 0; f.innerHTML = `<div></div><figcaption>${cap}</figcaption>`; host.appendChild(f); A.draw(A.makeView(f.firstChild, '80 140 176 132'), tt, opts); return f; };
+  [0, .25, .5, .75, 1].forEach(u => { const tt = ret.t0 + u * (ret.t1 - ret.t0), n = u === 0 ? '收板起點' : u === 1 ? '收板終點' : `收板 ${u * 100}%`;
+    cell($('#rtFrames'), tt, {}, `${n}・${Math.round(tt)} ms`); cell($('#rtFramesSk'), tt, { skeleton: true }, `骨架・${Math.round(tt)} ms`); });
+
+  /* ---- end vs the static hanging pose ---- */
+  const tEnd = A.total();
+  cell($('#rtCmp'), tEnd, {}, `動畫最後一格・${Math.round(tEnd)} ms`);
+  const c2 = cell($('#rtCmp'), tEnd, {}, '原本的「香板垂放」（靜態）');
+  { const v = c2.querySelector('svg'); v.querySelector('#monkSlot').innerHTML = `<g transform="translate(${A.MONK_AT[0]} ${A.MONK_AT[1]})">${M.art({ id: 'rtIdle', pose: 'idle' })}</g>`; v.querySelector('#fxSlot').innerHTML = ''; }
+  const endArt = id => { const { p, j } = A.poseAt(tEnd), r = M.art({ id, poseObj: p, face: j.face, tilt: j.tilt, split: true, stickBack: !A.stickFrontAt(tEnd) }); return r.back + r.front; };
+  const tint = (id, c) => `<filter id="${id}" x="-20%" y="-20%" width="140%" height="140%"><feFlood flood-color="${c}"/><feComposite in2="SourceAlpha" operator="in"/></filter>`;
+  const ov = document.createElement('figure'); ov.className = 'tile paper'; ov.style.margin = 0;
+  ov.innerHTML = `<svg viewBox="80 140 176 132"><defs>${tint('rtTintA', '#2f6fd6')}${tint('rtTintB', '#e0681e')}</defs><rect x="80" y="140" width="176" height="132" style="fill:#fbf7ee"/>
+    <g transform="translate(${A.MONK_AT[0]} ${A.MONK_AT[1]})"><g filter="url(#rtTintA)" opacity=".5">${endArt('rtOvA')}</g><g filter="url(#rtTintB)" opacity=".5">${M.art({ id: 'rtOvB', pose: 'idle' })}</g></g></svg>
+    <figcaption>剪影疊合（藍＝動畫終點，橘＝原本待機）</figcaption>`;
+  $('#rtCmp').appendChild(ov);
+
+  /* ---- automatic checks ---- */
+  const C = A.endCheck(), ok = b => b ? '<span style="color:#2e7d4f">✓</span>' : '<span style="color:var(--shu)">✗</span>', e = v => v < 1e-9 ? '0' : v < .001 ? v.toExponential(1) : v.toFixed(3);
+  const TOL = 1e-6, OUT = .1;
+  const R = [
+    ['關節', `肘 ${e(C.joint.elbow)}・腕 ${e(C.joint.wrist)}・拳頭中心 ${e(C.joint.fist)}（肩固定）`, `< ${TOL}`, Math.max(C.joint.elbow, C.joint.wrist, C.joint.fist) < TOL],
+    ['香板', `原點 ${e(C.stick.origin)}・角度 ${e(C.stick.rot)}°・長度 ${e(C.stick.length)}・拉長 ${e(C.stick.stretch)}`, `< ${TOL}`, Math.max(C.stick.origin, C.stick.rot, C.stick.length, C.stick.stretch) < TOL],
+    ['袖子外輪廓', `與原本曲線最大距離 ${e(C.outline.near)}`, `< ${OUT}（取樣誤差）`, C.outline.near < OUT],
+    ['前臂下緣線', `最大距離 ${e(C.outline.line)}`, `< ${OUT}`, C.outline.line < OUT],
+    ['手與手指線', `${e(C.outline.hand)}・${e(C.outline.handLine)}`, `< ${TOL}`, Math.max(C.outline.hand, C.outline.handLine) < TOL],
+    ['袖口', `位置、大小、角度最大差 ${e(C.outline.cuff)}`, `< ${TOL}`, C.outline.cuff < TOL],
+    ['狀態重設', `前傾 ${e(C.state.lean)}°・壓扁 ${e(Math.max(C.state.sx, C.state.sy))}・頭傾差 ${e(C.state.tilt)}°・表情「${FACE[C.state.face]}」・殘影 ${C.state.trail ? '無' : '有'}・命中線 ${C.state.impact ? '有' : '無'}・收勢摺線 ${e(C.state.extras)}・手臂在頭前 ${C.state.armOverHead ? '是' : '否'}・香板 ${C.state.stickFront ? '麻糬前' : '身體圖層'}・袖袋延遲 ${e(C.state.lag)}・露出手腕寬 ${e(C.outline.wrist)}`, '全部歸零／與待機相同',
+      C.state.lean + C.state.sx + C.state.sy + C.state.tilt + C.state.extras + C.state.lag + C.outline.wrist < TOL && C.state.face === 'kind' && C.state.trail && !C.state.impact && !C.state.armOverHead && !C.state.stickFront],
+    ['速度（每 1/60 秒）', C.speeds.map(v => `${v.t} ms：關節 ${e(v.joints)}・尖端 ${e(v.tip)}・角速度 ${e(v.rot)}°・袖子 ${e(v.sleeve)}`).join('<br>') + `<br>待機第一格：0（靜止）`, '最後一格 = 0', C.speeds[C.speeds.length - 1].joints + C.speeds[C.speeds.length - 1].sleeve + C.speeds[C.speeds.length - 1].rot < TOL],
+    ['收板段峰值', `關節 ${e(C.peak.joints)}・尖端 ${e(C.peak.tip)}・角速度 ${e(C.peak.rot)}°・袖子 ${e(C.peak.sleeve)}（每格；揮下段尖端每格約 ${e((() => { let m = 0; const sw = seg('swing'); for (let s = sw.t0 + FR; s <= sw.t1; s += FR) { const a = A.tipLocal(A.joints(s - FR)), b = A.tipLocal(A.joints(s)); m = Math.max(m, Math.hypot(a[0] - b[0], a[1] - b[1])); } return m; })())}）`, '參考', true],
+  ];
+  $('#rtCheck').innerHTML = `<b>自動檢查（每次開頁面重新計算：<code>KEISAKU_ANIM.endCheck()</code>）</b><div class="tw" style="margin:6px 0 0"><table><thead><tr><th>項目</th><th>結果（單位：住持座標，頭高約 40）</th><th>標準</th><th></th></tr></thead><tbody>`
+    + R.map(r => `<tr><td>${r[0]}</td><td style="font-size:13px">${r[1]}</td><td>${r[2]}</td><td>${ok(r[3])}</td></tr>`).join('') + `<tr id="rtImgRow"><td>影像疊合</td><td style="font-size:13px">讀取中…</td><td></td><td></td></tr></tbody></table></div>`;
+  fetch('anim-frames/r35/return-check.json', { cache: 'no-store' }).then(r => r.json()).then(J => {
+    $('#rtImgRow').innerHTML = `<td>影像疊合（像素）</td><td style="font-size:13px">${J.cases.map(c => `${c.name}：${c.w}×${c.h} 像素中，差異 > ${J.threshold}/255 的有 <b>${c.over}</b> 個（最大差 ${c.max}）`).join('<br>')}<br><span class="note">由 <code>design/round3/checks/return-check.mjs</code> 截圖後逐像素比對（${J.date}）。</span></td><td>差異像素 = 0</td><td>${ok(J.cases.every(c => c.over === 0))}</td>`;
+  }).catch(() => { $('#rtImgRow').lastElementChild.previousElementSibling.previousElementSibling.textContent = '尚未執行 checks/return-check.mjs'; });
+
+  /* ---- the fist: before / after ---- */
+  const FT = [[seg('windup').t1, '預備完成'], [767, '揮下 767 ms'], [800, '命中 800 ms'], [seg('follow').t1, '收勢完成'], [tEnd, '收板結束']];
+  const zoomHost = $('#rtFistZoom'), phoneHost = $('#rtFistPhone');
+  const box = (tt, w, h) => { const j = A.joints(tt), c = A.toWorld(j.fist, j); return `${(c[0] - w / 2).toFixed(1)} ${(c[1] - h / 2).toFixed(1)} ${w} ${h}`; };
+  for (const legacy of [true, false]) FT.forEach(([tt, n]) => {
+    const f = document.createElement('figure'); f.className = 'tile'; f.style.margin = 0; f.innerHTML = `<div></div><figcaption>${legacy ? '修改前' : '修改後'}・${n}</figcaption>`; zoomHost.appendChild(f);
+    A.draw(A.makeView(f.firstChild, box(tt, 30, 22)), tt, { fistLegacy: legacy });
+  });
+  FT.forEach(([tt, n]) => {
+    const f = document.createElement('figure'); f.style.margin = 0;
+    f.innerHTML = `<div style="display:flex;gap:4px"><div style="width:92px"></div><div style="width:92px"></div></div><figcaption class="note" style="text-align:center">${n}<br>前｜後</figcaption>`; phoneHost.appendChild(f);
+    const [a, b] = f.firstChild.children; A.draw(A.makeView(a, '92 150 100 112'), tt, { fistLegacy: true }); A.draw(A.makeView(b, '92 150 100 112'), tt, {});
+  });
+  $('#rtFistNote').innerHTML = '上兩排：以拳頭為中心放大（約 7 倍），比較線條。下排：手機實際大小（場景 368px 時住持附近的原尺寸裁切，每張 92px 寬），左＝修改前、右＝修改後。<br>'
+    + '問題來源：持板的拳頭原本算在角色剪影裡，香板提到麻糬前面那一層時，那一層還另外畫了一次剪影，所以拳頭外面多了一圈 2.2 寬的深色外框，再加上它自己的 1.1 描邊，緊貼袖口（描邊 1）和握柄。<br>'
+    + '修改（共用繪製，待機・舉起・預備・揮下・命中・收勢・收板都一樣）：拳頭和露出的手腕不再進剪影，只保留自己的一條描邊（拳頭 1.2、手腕 0.9）；前景層不再畫剪影；袖口描邊 1 → 0.85；手指線 0.8／55% → 0.7／42%。拳頭大小、骨架、握法、軌跡都沒有動。';
+  render();
 })();
 </script>
 </body>
