@@ -266,6 +266,16 @@ tr:last-child td { border-bottom: 0; }
 <p class="note">依目前時間表取出的影格（60 fps 時間點）。同樣的影格也存成圖片放在 <code>design/round3/anim-frames/</code>。</p>
 <div class="grid g4" id="pvFrames"></div>
 
+<h3 id="swingfix">揮下中段的可見性修正（Round 3.4）</h3>
+<p class="note">修改前（3.3）：為了不擋臉，香板在揮下最後 20% 之前都畫在頭後面，767 ms 那一格整根香板和手臂都被頭蓋住，只剩速度殘影。修改後：靠近鏡頭的那隻手臂越過頭頂時本來就在頭的前面，所以整段揮下（700–790 ms）讓手臂、拳頭、香板都畫在頭前面；手臂加一條自己的外框線，和臉分開。量過每一格：香板只經過耳朵與後腦那一側（最左到 x −7），眼睛與眉毛所在的範圍（x 3–22、y −83～−68）沒有任何一格被蓋到。命中位置、時間、預備、停頓、收勢都沒有改。</p>
+<h3>連續影格：733・750・767・783・800 ms</h3>
+<div class="grid" id="swFrames" style="grid-template-columns:repeat(5,minmax(0,1fr))"></div>
+<h3>手機實際尺寸：修改前／修改後（767 ms）</h3>
+<div class="row" id="swPhone"></div>
+<h3>速度殘影：原本／降低透明度（修改後，手機尺寸）</h3>
+<p class="note" id="swTrailNote">兩種都已套用修改後的圖層。手機尺寸下，0.5 的殘影在頭頂上方像一圈光環，比香板本身還搶眼；0.3 仍看得出揮動方向，香板更突出。<b>採用 0.3</b>（預覽與影格都已換成 0.3）。</p>
+<div class="row" id="swTrail"></div>
+
 <h3>實作計畫</h3>
 <ol>
   <li><b>骨架與關鍵姿勢資料</b>：每個姿勢記錄肩、肘、腕、拳頭位置與袖子輪廓。已具備：站姿、袖手、垂放、舉起、預備、揮下、收勢（見上方「關鍵姿勢」）→ 等你確認。</li>
@@ -465,7 +475,7 @@ $('#keyScenes').innerHTML = `<figure style="margin:0">${sceneFront('day', art({ 
     $('#pvCheck').innerHTML = `<b>自動檢查</b><ul style="margin:6px 0 0;padding-left:20px;font-size:14px">
       <li>命中點（香板尖端，命中停格開始時）在麻糬座標 (${lx.toFixed(1)}, ${ly.toFixed(1)})：麻糬高 68、寬 72，落在${side}側、離底部約 ${Math.round(-ly / 68 * 100)}% 高（大約眼睛高度）的側面，不是頭頂正上方（頭頂在 (0, −68)）。</li>
       <li>香板外側 40% 進入麻糬身體的影格：${data.inside.length ? data.inside.map(x => `${x.t} ms（${x.seg}）`).join('、') : '<b>沒有</b>（每 1/60 秒檢查一次，命中停格與麻糬被壓扁時也算）'}。</li>
-      <li>香板位置每一格都由拳頭與手腕角度計算，沒有獨立的香板動畫。</li><li>圖層：香板在揮下最後 20%、命中、收勢時才移到麻糬前面；經過住持頭頂的那幾格走在頭後面，所以不會蓋住臉。</li></ul>`;
+      <li>香板位置每一格都由拳頭與手腕角度計算，沒有獨立的香板動畫。</li><li>圖層（3.4）：整段揮下時手臂、拳頭、香板都畫在頭前面，香板只經過耳朵與後腦一側，不遮眼睛與眉毛；揮下、命中、收勢時香板在麻糬前面一層，住持身體始終在麻糬後面。</li></ul>`;
     $('#pvTotal').textContent = `總長 ${Math.round(A.total())} ms（含前後各一段靜止）；提醒段（預備＋停頓＋揮下＋停格）${A.T.windup + A.T.hold + A.T.swing + A.T.stop} ms。`;
     $('#pvScrub').max = Math.round(A.total());
     renderFrames();
@@ -502,6 +512,19 @@ $('#keyScenes').innerHTML = `<figure style="margin:0">${sceneFront('day', art({ 
     $('#pvFrames').querySelectorAll('.pvf').forEach((el, i) => { const v = A.makeView(el, '80 140 176 132'); A.draw(v, snap(list[i][0]), { skeleton: true, trace: false }); });
   }
   analyseAll(); render();
+})();
+</script>
+<script>
+(() => {
+  const A = KEISAKU_ANIM, $ = s => document.querySelector(s), FR = 1000 / 60;
+  const T5 = [733, 750, 767, 783, 800];
+  const cell = (t, opts, cap) => { const f = document.createElement('figure'); f.className = 'tile'; f.style.margin = 0; f.innerHTML = `<div></div><figcaption>${cap}</figcaption>`; const v = A.makeView(f.firstChild, '80 140 176 132'); A.draw(v, t, opts); return f; };
+  const row = $('#swFrames');
+  T5.forEach(t => row.appendChild(cell(t, { legacy: true }, `修改前・${t} ms`)));
+  T5.forEach(t => row.appendChild(cell(t, {}, `修改後・${t} ms`)));
+  const phone = (t, opts, cap) => { const f = document.createElement('figure'); f.style.margin = 0; f.innerHTML = `<div style="width:368px;max-width:100%;border-radius:14px;overflow:hidden"></div><figcaption class="note">${cap}</figcaption>`; const v = A.makeView(f.firstChild, '0 0 400 300'); A.draw(v, t, opts); return f; };
+  $('#swPhone').append(phone(767, { legacy: true }, '修改前・767 ms'), phone(767, {}, '修改後・767 ms'));
+  $('#swTrail').append(phone(767, { trailOp: .5 }, '殘影 0.5（原本）・767 ms'), phone(767, { trailOp: .3 }, '殘影 0.3（採用）・767 ms'), phone(783, { trailOp: .5 }, '殘影 0.5（原本）・783 ms'), phone(783, { trailOp: .3 }, '殘影 0.3（採用）・783 ms'));
 })();
 </script>
 </body>

@@ -138,7 +138,7 @@
     if (j.s.id === 'swing' || j.s.id === 'stop') {
       const pts = []; for (let k = 0; k <= 10; k++) pts.push(tipLocal(joints(Math.max(SEG[3].t0, j.t - 70 + 7 * k))));
       const mid = pts.map(q => q.map(v => v.toFixed(1)).join(' ')).join(' L');
-      trail = `<path d="M${mid}" style="fill:none;stroke:#fffaf0;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;opacity:.5"/>`;
+      trail = `<path d="M${mid}" style="fill:none;stroke:#fffaf0;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;opacity:${opts.trailOp ?? .3}"/>`;
     }
     let top = '';
     if (opts.skeleton) {
@@ -192,8 +192,10 @@
     // layering: the keisaku only comes up over the mochi for the end of the swing and after; while it passes over his
     // head it stays on the body layer, under the head, so it never covers his face
     const u = (j.t - j.s.t0) / ((j.s.t1 - j.s.t0) || 1);
-    const stickFront = ['stop', 'follow', 'post'].includes(j.s.id) || (j.s.id === 'swing' && u > .8);
-    const r = M.art({ id, poseObj: p, face: j.face, tilt: j.tilt, split: true, stickBack: !stickFront, frontUnder: trail, frontTop: top });
+    // opts.legacy = the 3.3 layering (board behind the head until the last 20% of the swing), kept for the comparison
+    const swinging = !opts.legacy && j.s.id === 'swing';
+    const stickFront = opts.legacy ? (['stop', 'follow', 'post'].includes(j.s.id) || (j.s.id === 'swing' && u > .8)) : (j.s.id === 'swing' || ['stop', 'follow', 'post'].includes(j.s.id));
+    const r = M.art({ id, poseObj: p, face: j.face, tilt: j.tilt, split: true, stickBack: !stickFront, armOverHead: swinging, frontUnder: trail, frontTop: top });
     view.monk.innerHTML = `<g transform="translate(${MONK_AT[0]} ${MONK_AT[1]})">${r.back}</g>`;
     view.front.innerHTML = `<g transform="translate(${MONK_AT[0]} ${MONK_AT[1]})">${r.front}</g>`;
     view.mochi.innerHTML = `<g transform="translate(${MOCHI_AT[0]} ${MOCHI_AT[1]}) scale(${m.sx.toFixed(3)} ${m.sy.toFixed(3)})">${mochiStatic(m.face, true)}</g>`;
@@ -201,5 +203,5 @@
     return j;
   }
 
-  window.KEISAKU_ANIM = { stickFrontAt: t => { const j = joints(t), u = (j.t - j.s.t0) / ((j.s.t1 - j.s.t0) || 1); return ['stop', 'follow', 'post'].includes(j.s.id) || (j.s.id === 'swing' && u > .8); }, T, build, total, SEG: () => SEG, joints, poseAt, mochiAt, analyse, makeView, draw, toWorld, tipLocal, MONK_AT, MOCHI_AT };
+  window.KEISAKU_ANIM = { stickFrontAt: t => { const j = joints(t), u = (j.t - j.s.t0) / ((j.s.t1 - j.s.t0) || 1); return ['swing', 'stop', 'follow', 'post'].includes(j.s.id); }, T, build, total, SEG: () => SEG, joints, poseAt, mochiAt, analyse, makeView, draw, toWorld, tipLocal, MONK_AT, MOCHI_AT };
 })();

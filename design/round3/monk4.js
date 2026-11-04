@@ -240,7 +240,7 @@
     const fill = (d, c, s) => `<path class="m4p" d="${d}" style="--c:${c}" ${s ? 'data-s="1"' : ''}/>`;
     const det = s => `<g class="m4det">${s}</g>`;
     const Ln = (pts, w = 1.15, op = 1) => lines ? L(spline(pts, false), w, op) : '';
-    const out = [], front = [];
+    const out = [], front = [], late = [];
     if (p.farBehind) out.push(fill(spline(p.far), ART.robe) + (p.farHand ? fill(spline(p.farHand), ART.skin, 1) : ''));
     if (p.farBack) out.push(fill(spline(p.farBack), ART.robe));
     out.push(fill(spline(FEET.far), ART.foot) + fill(spline(FEET.near), ART.foot) + det(lines ? L('M1.6 -0.8 C1.6 1 -1 1.6 -4 1.7', .9, .5) : ''));
@@ -269,11 +269,14 @@
       if (p.swoosh) out.push(det(`<path d="M16 -97 C36 -90 46 -66 40 -38" style="fill:none;stroke:#fffaf0;stroke-width:7;stroke-linecap:round;opacity:.5"/>
         <path d="M24 -96 C42 -86 50 -66 46 -46" style="fill:none;stroke:#fffaf0;stroke-width:1.3;stroke-linecap:round;opacity:.8"/>
         <path d="M30 -92 C46 -80 52 -66 50 -54" style="fill:none;stroke:#fffaf0;stroke-width:1;stroke-linecap:round;opacity:.6"/>`));
-      out.push(fill(spline(p.near), ART.robe) + det(p.nearLines.map(l => Ln(l)).join('') + (p.folds || []).map(l => Ln(l, .85, .45)).join('') + (p.extraLines || []).map(l => l.op > .02 ? Ln(l.pts, l.w || 1.1, l.op) : '').join('')));
-      if (p.cuffO) out.push(det(`<ellipse cx="${p.cuffO.cx}" cy="${p.cuffO.cy}" rx="${p.cuffO.rx}" ry="${p.cuffO.ry}" transform="rotate(${p.cuffO.r} ${p.cuffO.cx} ${p.cuffO.cy})" style="fill:#26345a;stroke:${ink};stroke-width:1"/>`));
-      if (p.skin) out.push(fill(spline(p.skin), ART.skin, 1));
+      // while the near arm swings over the head it is drawn in front of the head (it is the arm nearer to us);
+      // it then needs its own outline where it crosses the face
+      const arm = o.armOverHead ? late : out;
+      arm.push(fill(spline(p.near), ART.robe) + det(p.nearLines.map(l => Ln(l)).join('') + (p.folds || []).map(l => Ln(l, .85, .45)).join('') + (p.extraLines || []).map(l => l.op > .02 ? Ln(l.pts, l.w || 1.1, l.op) : '').join('') + (o.armOverHead ? L(spline(p.near), 1.2) : '')));
+      if (p.cuffO) arm.push(det(`<ellipse cx="${p.cuffO.cx}" cy="${p.cuffO.cy}" rx="${p.cuffO.rx}" ry="${p.cuffO.ry}" transform="rotate(${p.cuffO.r} ${p.cuffO.cx} ${p.cuffO.cy})" style="fill:#26345a;stroke:${ink};stroke-width:1"/>`));
+      if (p.skin) arm.push(fill(spline(p.skin), ART.skin, 1));
       // split: the keisaku and the fist holding it go on their own layer (above the mochi), the rest stays behind
-      const top = o.split && !o.stickBack ? front : out;
+      const top = o.split && !o.stickBack ? front : (o.armOverHead ? late : out);
       if (o.frontUnder) top.push(det(o.frontUnder));
       if (p.stick) top.push(det(stick(p.stick, { ...ART, band: ART.bandC }, ink)));
       if (p.hand) top.push(fill(spline(p.hand), ART.skin, 1) + det(Ln(p.handLine, .8, .55)));
@@ -287,6 +290,7 @@
       + fill(EAR, ART.skin, 1) + det(L('M-15 -74 q-2 1.8 -.4 4.4', .9, .55) + '<path d="M-7.4 -88.6 q5 -4.2 11 -4.6" style="fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;opacity:.5"/>'
       + `<ellipse cx="5.6" cy="-66.4" rx="3.6" ry="2" style="fill:var(--blush);opacity:${BLUSH[face]}"/><ellipse cx="19.6" cy="-66.2" rx="1.8" ry="1.6" style="fill:var(--blush);opacity:${BLUSH[face]}"/>`
       + FACE[face]() + BROW[face].map(brow).join('')) + '</g>');
+    out.push(...late);
     const flip = left ? ' transform="scale(-1 1)"' : '';
     const body = `rotate(${p.lean || 0}) scale(${p.sx || 1} ${p.sy || 1})`;
     if (o.split) return {
