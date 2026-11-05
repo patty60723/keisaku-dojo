@@ -31,6 +31,7 @@ a { color: var(--ai); }
 <h1>香板禪堂 Round 4：住持動畫整合原型</h1>
 <p class="note">分支 <code>feature/round4-monk-integration</code>（從 main <code>68a414f</code> 建立）。原型：<a href="./">design/round4/</a>。正式版（<code>src/</code>、<code>index.html</code>）、Round 1 原型與 Round 3 審查頁都沒有被覆蓋。</p>
 
+<div class="card"><b>Round 4.2A-1</b>：新視角美術修正候選 A／B 見 <a href="pose-refinement-review.html">pose-refinement-review.html</a>（P3 中間、背面 3/4、正面、背面、側面、面向左但香板仍在右手；原始／A／B 並排、頭與耳放大、禪堂預覽）。頭部五官、耳朵、衣領、胸前衣片改由同一個轉向角度決定（<code>monk-views2.js</code>）。尚未選定。</div>
 <div class="card"><b>Round 4.2A</b>：
 <ul style="margin:4px 0 0;padding-left:20px">
 <li><b>合掌請打移到舞台外</b>：放在舞台下方與「暫離／出堂」同一列（版面 B，預設）；另一個候選是舞台正下方單獨一列（版面 A，<code>?ask=a</code>）。<code>?ask=stage</code> 可以看回原本在舞台上的位置做對照。顯示規則不變（只在坐禪中出現；暫離、落座、出堂、結算時隱藏；提醒進行中按了不處理）。底部加了安全區留白；測試列可以收起。截圖：<code>shots/layout/</code>（before＝原本、candA、candB；360×780、390×844、412×915、360×640、740×360）。</li>
