@@ -24,9 +24,10 @@
   const EYES = { open: 'kind', smile: 'relief', shut: 'relief', stern: 'stern' };
 
   class MonkActor {
-    constructor(back, front, { rm = () => false } = {}) {
-      this.back = back; this.front = front; this.rm = rm;
-      this.s = { x: 72, y: 254, dir: 1, head: 0, bobY: 0, arm: 0, lean: 0, squash: 1, moving: false };
+    constructor(back, front, { rm = () => false, depth = () => 1 } = {}) {
+      this.back = back; this.front = front; this.rm = rm; this.depthOf = depth;
+      // depth: Round 4.1 — a limited scale for nearer / farther on the floor (1 at y = 254, where he strikes)
+      this.s = { x: 72, y: 254, dir: 1, head: 0, bobY: 0, arm: 0, lean: 0, squash: 1, moving: false, depth: 1 };
       this.stickOn = true; this.faceK = 'kind'; this.walk = 0; this.sway = 1; this.t = 0;
       this.mv = null; this.turnTo = null; this.perf = null; this.key = ''; this.stats = { redraws: 0, ms: 0 };
     }
@@ -41,6 +42,13 @@
       if (d < 1 || this.rm()) { this.s.x = x; return Promise.resolve(); }
       this.s.dir = x > from ? 1 : -1;
       return new Promise(done => { this.mv = { from, to: x, t: 0, ms: d / speed * 1000, done: () => { this.mv = null; this.s.moving = false; done(); } }; });
+    }
+    /* Round 4.1: walk along a leg from patrol-paths.js (positions and timing come from the leg; he faces the way he
+       is going across the screen, and keeps his facing on legs that mostly go toward or away from us) */
+    walkLeg(leg) {
+      if (this.mv) this.mv.done();
+      if (this.rm()) { const q = leg.at(leg.total); this.s.x = q.x; this.s.y = q.y; return Promise.resolve(); }
+      return new Promise(done => { this.mv = { leg, t: 0, done: () => { this.mv = null; this.s.moving = false; done(); } }; });
     }
     face(dir) {
       if (this.s.dir === dir) return Promise.resolve();
@@ -96,7 +104,12 @@
       const s = this.s, rm = this.rm(), t0 = performance.now();
       this.t += dt;
       // walking and turning (between performances)
-      if (this.mv) { const m = this.mv; m.t += dt; const u = Math.min(1, m.t / m.ms); s.x = lerp(m.from, m.to, inOut(u)); s.moving = true; if (u >= 1) { s.x = m.to; m.done(); } }
+      if (this.mv && this.mv.leg) {
+        const m = this.mv; m.t += dt; const q = m.leg.at(m.t); s.x = q.x; s.y = q.y; s.moving = true;
+        if (Math.abs(q.tx) > .35 && !this.turnTo && Math.sign(q.tx) !== Math.sign(s.dir)) this.face(Math.sign(q.tx));
+        if (m.t >= m.leg.total) m.done();
+      } else if (this.mv) { const m = this.mv; m.t += dt; const u = Math.min(1, m.t / m.ms); s.x = lerp(m.from, m.to, inOut(u)); s.moving = true; if (u >= 1) { s.x = m.to; m.done(); } }
+      s.depth = this.depthOf(s.y);
       if (this.turnTo) { const m = this.turnTo; m.t += dt; const u = Math.min(1, m.t / m.ms); s.dir = lerp(m.from, m.to, inOut(u)); if (u >= 1) { s.dir = m.to; m.done(); } }
       const p = this.perf;
       let html, front = '', key, walking = s.moving;
@@ -130,7 +143,7 @@
       const step = walking && !rm ? Math.sin(this.walk) : 0;
       const bob = -Math.abs(step) * 2.2 + s.bobY + (rm ? 0 : Math.sin(now / 1000 * 1.6) * .35 * this.sway);
       const sc = Math.max(.05, Math.abs(s.dir));
-      const place = `translate(${s.x.toFixed(2)} ${(s.y + bob).toFixed(2)}) scale(${sc.toFixed(3)} 1)`;
+      const dp = s.depth || 1, place = `translate(${s.x.toFixed(2)} ${(s.y + bob).toFixed(2)}) scale(${(sc * dp).toFixed(3)} ${dp.toFixed(3)})`;
       this.back.setAttribute('transform', place); this.front.setAttribute('transform', place);
       // held poses (walking over, the call, the hit-stop, settling) give the same markup frame after frame: only the
       // placement changes then, so the SVG is not re-parsed

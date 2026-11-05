@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>巡堂路徑審查</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Huninn&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="../round2/r1-tokens.css">
+<style>
+body { margin: 0; background: var(--washi); color: var(--ink); font: 15px/1.65 var(--f-ui); }
+main { max-width: 880px; margin: 0 auto; padding: 18px 16px 60px; }
+h1 { font: 700 24px/1.3 var(--f-story); margin: 0 0 4px; }
+h2 { font: 700 18px/1.35 var(--f-story); margin: 28px 0 8px; }
+.note { color: var(--ink-2); font-size: 14px; }
+.card { background: var(--paper); border-radius: 16px; box-shadow: var(--lift); padding: 12px 16px; margin: 10px 0; }
+.ctl { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.ctl label { display: inline-flex; align-items: center; gap: 4px; min-height: 34px; font-size: 14px; }
+.btn { min-height: 38px; padding: 0 14px; border-radius: 19px; border: 1.5px solid var(--paper-edge); background: var(--paper); color: var(--ink); font: 14px var(--f-ui); cursor: pointer; }
+.btn.on { background: var(--ai); color: var(--on-ai); border-color: var(--ai); }
+select { min-height: 36px; font: 14px var(--f-ui); border-radius: 10px; border: 1.5px solid var(--paper-edge); background: var(--paper); color: var(--ink); }
+/* the stage: the prototype's, same 4:3 and the same 合掌請打 pill (so its real size at this width is measured) */
+.stage { position: relative; border-radius: var(--r-lg); overflow: hidden; aspect-ratio: 4 / 3; box-shadow: var(--lift); background: var(--wall); isolation: isolate; max-width: 560px; }
+.stage svg { display: block; width: 100%; height: 100%; }
+.ask { position: absolute; right: 10px; bottom: 10px; z-index: 2; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px 0 10px;
+  border: 0; border-radius: 22px; background: color-mix(in srgb, var(--paper) 82%, transparent); color: var(--ink-2); font: 14px/1 var(--f-ui);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); pointer-events: none; }
+.ask svg { width: 20px; height: 20px; }
+.noask .ask { display: none; }
+#read { font: 13px/1.5 var(--f-num), var(--f-ui); color: var(--ink-2); margin-top: 6px; min-height: 40px; }
+.tw { overflow-x: auto; margin: 8px 0; }
+table { border-collapse: collapse; width: 100%; min-width: 600px; font-size: 13px; background: var(--paper); border-radius: 12px; overflow: hidden; }
+th, td { text-align: left; vertical-align: top; padding: 6px 9px; border-bottom: 1px solid var(--washi-2); }
+th { background: var(--washi-2); }
+.ok { color: #2e7d4f; font-weight: 700; } .no { color: var(--shu); font-weight: 700; } .warn { color: #8a6a14; font-weight: 700; }
+/* scene classes from the Round 1 prototype */
+.ln { stroke: var(--line); stroke-linecap: round; stroke-linejoin: round; }
+.cshadow { fill: #1f1610; opacity: var(--shadow-o); }
+[data-time="day"] .dusk-only, [data-time="day"] .night-only, [data-time="dusk"] .day-only, [data-time="dusk"] .night-only, [data-time="night"] .day-only, [data-time="night"] .dusk-only { opacity: 0; }
+.m4p { fill: var(--sil, var(--c)); stroke: var(--sil, none); stroke-width: var(--sw, 0); stroke-linejoin: round; }
+.m4p[data-s] { stroke: var(--sil, var(--line)); stroke-width: var(--sw, 1.1); }
+.m4-sil { --sil: var(--line); --sw: 4.4; --det: none; }
+.m4det { display: var(--det, inline); }
+.m4shadow { fill: #1f1610; opacity: .2; }
+</style>
+</head>
+<body data-time="day">
+<main>
+<h1>巡堂路徑審查（Round 4.1）</h1>
+<p class="note">只驗證住持在禪堂裡走的路線、與麻糬的距離和遮擋。沒有新增日常動作；提醒動畫是 Round 3.5 驗收版，沒有改。路線固定，每次播放都一樣。座標是舞台 400 × 300 的 viewBox 單位。</p>
+
+<div class="stage" id="stage"><svg id="scene" viewBox="0 0 400 300" role="img" aria-label="禪堂：麻糬與住持的巡堂路徑"></svg>
+  <button class="ask" id="askBtn" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V8.5c0-2 .9-4 2.6-5.3.5 2.2 1.4 4 1.4 6.6V15l2 3.2"/><path d="M12 20V8.5c0-2-.9-4-2.6-5.3-.5 2.2-1.4 4-1.4 6.6V15l-2 3.2"/></svg>合掌請打</button>
+</div>
+<div id="read"></div>
+<div class="card ctl" id="ctl">
+  <button class="btn" data-route="back">後方巡堂</button>
+  <button class="btn" data-route="left">左側繞行</button>
+  <button class="btn" data-route="right">右側繞行</button>
+  <button class="btn" data-route="around">左前 → 右前（繞回後方）</button>
+  <span>從 <select id="fromNode"></select> <button class="btn" id="toStance">回到提醒站位 → 提醒 → 恢復巡堂</button></span>
+  <button class="btn" id="stop">停止</button>
+</div>
+<div class="card ctl">
+  <span><label><input type="radio" name="spd" value="1" checked> 正常速度</label> <label><input type="radio" name="spd" value=".25"> 0.25 倍</label></span>
+  <label><input type="checkbox" id="tPath" checked> 路徑線</label>
+  <label><input type="checkbox" id="tStops" checked> 停留點</label>
+  <label><input type="checkbox" id="tSafe" checked> 麻糬安全區</label>
+  <label><input type="checkbox" id="tBox"> 住持外框（檢查用）</label>
+  <label><input type="checkbox" id="tAsk" checked> 合掌請打按鈕（坐禪中才出現）</label>
+  <span><label><input type="radio" name="tm" value="day" checked> 日</label> <label><input type="radio" name="tm" value="night"> 夜</label></span>
+</div>
+
+
+
+<h2>路點</h2>
+<div class="tw"><table><thead><tr><th>路點</th><th>位置 (x, y)</th><th>深度比例</th><th>圖層</th><th>地面安全區</th><th>合掌請打按鈕</th></tr></thead><tbody id="stops"></tbody></table></div>
+
+<h2>自動檢查（這個寬度、每 1/60 秒一格，曲線中間也檢查）</h2>
+<div class="tw"><table><thead><tr><th>路段</th><th>格數</th><th>地面</th><th>畫面遮擋</th><th>橫穿正前方</th><th>邊界</th><th>跳動／直角</th><th>與麻糬最近距離</th><th>按鈕重疊</th></tr></thead><tbody id="checks"></tbody></table></div>
+<p class="note" id="checkNote"></p>
+
+<h2>需要新角色姿勢的路段</h2>
+<div class="tw"><table><thead><tr><th>路段</th><th>為什麼</th><th>本輪的處理</th></tr></thead><tbody id="poses"></tbody></table></div>
+
+<h2>空間限制與衝突</h2>
+<div class="card" id="conflicts"></div>
+</main>
+
+<script src="../round2/r1-scene.js"></script>
+<script src="../round3/monk4.js"></script>
+<script src="../round3/anim.js"></script>
+<script src="monk-actor.js"></script>
+<script src="patrol-paths.js"></script>
+<script>
+'use strict';
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)], NS = 'http://www.w3.org/2000/svg', P = PATROL, A = KEISAKU_ANIM;
+const scene = $('#scene');
+document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style="position:absolute" aria-hidden="true">${sceneDefs()}</svg>`);
+scene.innerHTML = sceneMarkup() + '<g id="overlay" style="pointer-events:none"></g>';
+$('#rack', scene).setAttribute('opacity', 0); $('#seatLip', scene).setAttribute('opacity', 1);
+// the mochi, seated and calm (the Round 1 drawing), with the reminder's squash applied when he strikes
+const mochiG = document.createElementNS(NS, 'g'); $('#mochiSlot', scene).appendChild(mochiG);
+function drawMochi(face = 'calm', sx = 1, sy = 1) {
+  const f = FACE[face], eyes = f.eyes === 'dot' ? '<circle cx="-11" cy="-30" r="2.7" fill="var(--line)"/><circle cx="11" cy="-30" r="2.7" fill="var(--line)"/>' : f.eyes;
+  mochiG.setAttribute('transform', `translate(${P.MOCHI.x} ${P.MOCHI.y}) scale(${sx.toFixed(3)} ${sy.toFixed(3)})`);
+  if (mochiG.dataset.face === face) return; mochiG.dataset.face = face;
+  mochiG.innerHTML = mochiMarkup('mo');
+  mochiG.querySelector('#mo-face').innerHTML = `<ellipse cx="-20" cy="-22" rx="5.4" ry="3.2" fill="var(--blush)" opacity=".6"/><ellipse cx="20" cy="-22" rx="5.4" ry="3.2" fill="var(--blush)" opacity=".6"/>${eyes}${f.mouth}`;
+  HANDS.lap.forEach(([cx, cy, rx, ry, r], i) => { const e = mochiG.querySelector(`#mo-${i ? 'hr' : 'hl'}`); Object.entries({ cx, cy, rx, ry, transform: `rotate(${r} ${cx} ${cy})` }).forEach(([k, v]) => e.setAttribute(k, v)); });
+  mochiG.querySelector('#mo-feet').setAttribute('opacity', 0);
+}
+drawMochi();
+// the monk: body by depth (behind her, or in front of her and her cushion), the keisaku's strike layer above her
+const back = document.createElementNS(NS, 'g'), front = document.createElementNS(NS, 'g');
+$('#monkSlot', scene).appendChild(back); $('#fxSlot', scene).appendChild(front);
+const K = new MonkActor(back, front, { depth: P.depth });
+function layer() {
+  const inFront = P.inFront(K.s.y), want = inFront ? $('#seatLip', scene) : $('#monkSlot', scene);
+  if (inFront && back.parentNode === $('#monkSlot', scene)) $('#seatLip', scene).after(back);
+  if (!inFront && back.parentNode !== $('#monkSlot', scene)) $('#monkSlot', scene).appendChild(back);
+}
+
+/* ---------- overlay: paths, stops, safe zones, his outline box ---------- */
+const pts = a => a.map(p => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' L');
+function overlay() {
+  let o = '';
+  if ($('#tSafe').checked) {
+    o += `<path d="M${pts(P.GROUND.zafu)} Z M${pts(P.GROUND.mat)} Z" style="fill:#c8432d;opacity:.14;stroke:#c8432d;stroke-width:.6;stroke-dasharray:2 1.5"/>`;
+    o += `<path d="M${pts(P.SCREEN.body)} Z M${pts(P.SCREEN.zafu)} Z" style="fill:none;stroke:#c8432d;stroke-width:.7;opacity:.8"/>`;
+    o += `<rect x="${P.FRONT.x0}" y="${P.FRONT.y}" width="${P.FRONT.x1 - P.FRONT.x0}" height="${P.FLOOR.front - P.FRONT.y}" style="fill:url(#hatch);opacity:.5"/>`;
+  }
+  if ($('#tPath').checked) {
+    for (const [a, b] of P.EDGES) { const l = P.makeLeg([a, b]); o += `<path d="M${pts(l.pts)}" style="fill:none;stroke:#34466e;stroke-width:.9;stroke-dasharray:3 2;opacity:.55"/>`; }
+    for (const k of Object.keys(P.ROUTES)) for (const l of P.makeRoute(k).legs) o += `<path d="M${pts(l.pts)}" style="fill:none;stroke:#34466e;stroke-width:1.3;opacity:.5"/>`;
+  }
+  if ($('#tStops').checked) for (const [k, n] of Object.entries(P.N)) o += `<g transform="translate(${n.x} ${n.y})"><circle r="2.6" style="fill:${k === 'ST' ? '#c99a3e' : '#fff'};stroke:#34466e;stroke-width:1"/><text x="4" y="-4" style="font:7px var(--f-ui);fill:#26344f;paint-order:stroke;stroke:#fff;stroke-width:2">${k}</text></g>`;
+  o += `<g id="liveBox"></g>`;
+  $('#overlay').innerHTML = `<defs><pattern id="hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0 V4" stroke="#c8432d" stroke-width="1"/></pattern></defs>` + o;
+}
+['tPath', 'tStops', 'tSafe'].forEach(id => $('#' + id).onchange = overlay);
+$('#tAsk').onchange = () => { $('#stage').classList.toggle('noask', !$('#tAsk').checked); };
+$$('input[name=tm]').forEach(r => r.onchange = () => { document.body.dataset.time = r.value; document.documentElement.dataset.time = r.value; });
+document.documentElement.dataset.time = 'day';
+overlay();
+
+/* ---------- playing routes (fixed, repeatable) ---------- */
+let speed = 1, run = 0, at = 'BL', legNow = null;
+$$('input[name=spd]').forEach(r => r.onchange = () => speed = +r.value);
+const pause = ms => new Promise(r => { let t = 0; const id = setInterval(() => { t += 16 * speed; if (t >= ms) { clearInterval(id); r(); } }, 16); });
+function place(n, dir) { K.s.x = P.N[n].x; K.s.y = P.N[n].y; if (dir) K.s.dir = dir; at = n; }
+const faceMochi = () => K.face(Math.sign(P.MOCHI.x - K.s.x) || 1);
+async function playRoute(key) {
+  const tok = ++run, r = P.makeRoute(key); place(r.start); if (r.startFace === 'mochi') K.s.dir = Math.sign(P.MOCHI.x - K.s.x) || 1;
+  for (const l of r.legs) {
+    legNow = l; await K.walkLeg(l); if (tok !== run) return;
+    at = l.names[l.names.length - 1];
+    if (l.face === 'mochi') await faceMochi();
+    if (l.dwell) await pause(l.dwell); if (tok !== run) return;
+  }
+  legNow = null;
+}
+async function toStance() {
+  const tok = ++run, from = $('#fromNode').value; place(from);
+  const l = P.legToStance(from); legNow = l; await K.walkLeg(l); if (tok !== run) return;
+  at = 'ST'; await K.face(1); if (tok !== run) return;
+  await K.perform({}); if (tok !== run) return;   // the accepted Round 3.5 reminder: he is already at the stance, so no approach
+  drawMochi('calm');
+  const back = P.makeLeg(['ST', 'BL']); legNow = back; await K.walkLeg(back); at = 'BL'; legNow = null;
+}
+$$('[data-route]').forEach(b => b.onclick = () => playRoute(b.dataset.route));
+$('#fromNode').innerHTML = Object.entries(P.N).filter(([k]) => k !== 'ST').map(([k, n]) => `<option value="${k}">${n.zh}</option>`).join('');
+$('#fromNode').value = 'RF';
+$('#toStance').onclick = toStance;
+$('#stop').onclick = () => { run++; if (K.busy) K.abort(); if (K.mv) K.mv.done(); };
+place('BL', 1);
+
+/* ---------- the loop ---------- */
+let prevT = performance.now();
+function frame(t) {
+  requestAnimationFrame(frame);
+  const dt = Math.min(50, Math.max(0, t - prevT)) * speed; prevT = t;
+  const m = K.mochi(); if (m) drawMochi(m.face, m.sx, m.sy);
+  K.render(dt, t); layer();
+  const s = K.s, r = P.monkRect(s.x, s.y);
+  const lb = $('#liveBox'); if (lb) lb.innerHTML = $('#tBox').checked ? `<rect x="${r.x0.toFixed(1)}" y="${r.y0.toFixed(1)}" width="${(r.x1 - r.x0).toFixed(1)}" height="${(r.y1 - r.y0).toFixed(1)}" style="fill:none;stroke:#e0681e;stroke-width:.8"/><ellipse cx="${s.x.toFixed(1)}" cy="${s.y.toFixed(1)}" rx="${(P.FOOT.rx * s.depth).toFixed(1)}" ry="${(P.FOOT.ry * s.depth).toFixed(1)}" style="fill:none;stroke:#e0681e;stroke-width:.8"/>` : '';
+  const st = K.state();
+  $('#read').textContent = `位置 (${s.x.toFixed(1)}, ${s.y.toFixed(1)})・比例 ${s.depth.toFixed(3)}・${P.inFront(s.y) ? '在麻糬前面一層' : '在麻糬後面'}・面向${s.dir > 0 ? '右' : '左'}・${st.performing ? '提醒：' + st.seg : K.mv ? '走路中' : '停留：' + (P.N[at] ? P.N[at].zh : at)}`;
+}
+requestAnimationFrame(frame);
+
+/* ---------- reports ---------- */
+function askRect() {   // the 合掌請打 pill as this phone shows it, in scene units
+  const sv = scene.getBoundingClientRect(), b = $('#askBtn').getBoundingClientRect(), k = 400 / sv.width;
+  return { x0: (b.left - sv.left) * k, y0: (b.top - sv.top) * k, x1: (b.right - sv.left) * k, y1: (b.bottom - sv.top) * k };
+}
+const yes = '<span class="ok">✓</span>', no = n => `<span class="no">✗ ${n}</span>`, warn = t => `<span class="warn">${t}</span>`;
+function report() {
+  const ask = askRect(), R = P.checkAll(ask);
+  window.__PATROL_REPORT = { ...R, ask };
+  $('#stops').innerHTML = R.stops.map(s => `<tr><td>${s.k}・${s.zh}</td><td>(${s.x}, ${s.y})</td><td>${s.s}</td><td>${s.front ? '麻糬前面' : '麻糬後面'}</td><td>${s.ground.length ? (s.groundRaw.length ? no('碰到 ' + s.groundRaw.join('、')) : warn('在邊距內（未碰到蒲團與坐墊）')) : yes}</td><td>${s.ask ? warn('被按鈕蓋到') : yes}</td></tr>`).join('');
+  const c = (a, f = n => no(n)) => a && a.length ? f(a.length) : yes;
+  $('#checks').innerHTML = R.legs.map(l => l.unreachable ? `<tr><td>${l.label}</td><td colspan="8">${no('走不到')}</td></tr>` :
+    `<tr><td>${l.label}</td><td>${l.frames}</td><td>${c(l.ground)}${l.stanceMargin.length ? '<br>' + warn(`進站位的最後 ${l.stanceMargin.length} 格在邊距內`) : ''}</td><td>${c(l.screen)}</td><td>${c(l.crossFront)}</td><td>${c(l.bounds)}</td><td>${l.jumps.length || l.corners.length ? no(l.jumps.length + l.corners.length) : yes} <span class="note">每格最多 ${l.maxStep.toFixed(2)}</span></td><td>${isFinite(l.minClear) ? l.minClear.toFixed(1) : '<span class="note">（都在後面）</span>'}</td><td>${l.ask.length ? warn(l.ask.length + ' 格') : yes}</td></tr>`).join('');
+  const joinsOk = R.joins.every(j => j.gap < 1e-6), allOk = R.legs.every(l => l.ok);
+  $('#checkNote').innerHTML = `路段之間的接點：${joinsOk ? '全部 0 間距（沒有跳動）' : '有跳動'}。全部路段${allOk ? '<b>通過</b>' : '<b class="no">有不通過</b>'}地面、遮擋、正前方、邊界與跳動檢查。合掌請打按鈕在這個寬度佔場景 x ${ask.x0.toFixed(0)}–${ask.x1.toFixed(0)}、y ${ask.y0.toFixed(0)}–${ask.y1.toFixed(0)}。`;
+  // where his 3/4 views do not fit the movement
+  const rows = []; for (const k of Object.keys(P.ROUTES)) P.makeRoute(k).legs.forEach((l, i) => { const ch = P.check(l); if (ch.needsPose.length) rows.push([`${P.ROUTES[k].zh}・第 ${i + 1} 段（${l.names.map(n => P.N[n].zh).join(' → ')}）`, ch.needsPose.length]); });
+  $('#poses').innerHTML = rows.map(([n, f]) => `<tr><td>${n}</td><td>${f} 格主要是往前（朝鏡頭）或往後（背對鏡頭）走，只有 3/4 左右側面的住持看起來像在橫著滑。</td><td>維持原本的朝向（不翻來翻去），只用比例變化表現遠近。需要：<b>正面走、背面走</b>兩組走路姿勢，以及<b>側面 → 正面／背面的轉身</b>。</td></tr>`).join('')
+    + `<tr><td>停在左前、右前時轉向麻糬</td><td>從往前走轉成面對麻糬（橫向）。</td><td>用既有的左右翻轉（180 ms 壓扁翻面），不是真正的轉身。需要：<b>正面 → 3/4 側面的轉身</b>。</td></tr>`
+    + `<tr><td>後方中（站在麻糬正後方）</td><td>只露出頭與肩，身體被麻糬擋住；側面朝向沒有問題。</td><td>不需要新姿勢。</td></tr>`;
+  const st = R.stops.find(s => s.k === 'ST');
+  $('#conflicts').innerHTML = `<ol style="margin:0;padding-left:20px">
+    <li><b>前方的地板很淺。</b>坐墊前緣在 y 274，地板到 y 291，只剩 17 單位：住持只能走到麻糬的<b>左前、右前</b>，不可能從她正前方經過，也站不進她前面。左右換邊一律繞回後方（左前 → 左側 → 後方左 → 後方中 → 後方右 → 右側 → 右前）。</li>
+    <li><b>右側被「合掌請打」按鈕蓋住。</b>按鈕在坐禪中固定在場景右下角，這個寬度佔 x ${ask.x0.toFixed(0)}–${ask.x1.toFixed(0)}、y ${ask.y0.toFixed(0)}–${ask.y1.toFixed(0)}；麻糬右邊能站的地方（x ≥ 283，避開坐墊與安全區）全部在按鈕底下，所以右側繞行入口與右前停留點都會被蓋住一部分（見上表「按鈕重疊」）。左右不對稱就是因為這個。要解決需要移動按鈕（UI 決定），本輪沒有改。</li>
+    <li><b>Round 3.5 的提醒站位 (132, 254) 在安全邊距內。</b>它離坐墊左上角約 4 單位，沒有碰到坐墊和蒲團本身${st && !st.groundRaw.length ? '（已驗證）' : ''}，但在我設的 4 單位邊距裡。站位已驗收、不能改，所以只有「走進站位的最後幾格」記為例外，其他路段都必須在邊距外。</li>
+    <li><b>2D 場景的限制。</b>前後只能用往上／往下移動加上 0.9–1.1 倍的比例表現；左側、右側的繞行在畫面上幾乎是直上直下的。沒有用整體旋轉或俯視角去假裝轉身。</li>
+    <li><b>後方的高度。</b>後方巡堂線在 y 220–224（地板從 y 189 開始）。站在麻糬正後方時只露出頭與肩，這是遮擋，麻糬的臉與輪廓都在上面一層，沒有被遮到。</li>
+  </ol>`;
+}
+document.fonts.ready.then(report);
+window.addEventListener('resize', report);
+window.__K = K; window.__review = { playRoute, toStance, place, report, K, setSpeed: v => { speed = v; }, legNow: () => legNow };
+</script>
+</body>
+</html>
