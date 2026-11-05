@@ -92,6 +92,9 @@ button { font: inherit; color: inherit; }
 /* ---------- prototype control bar (not part of the design) ---------- */
 .pbar { position: sticky; top: 0; z-index: 50; background: #26282c; color: #e9e9e6; font: 13px/1.3 system-ui, sans-serif;
   padding: 8px 12px calc(8px); display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; box-shadow: 0 2px 10px rgb(0 0 0 / .25); }
+.pbar { padding-top: max(8px, env(safe-area-inset-top)); }
+.pbar.min > :not(.tag):not(#barToggle) { display: none !important; }
+#barToggle { margin-left: auto; border: 1px solid #55595f; background: #31343a; color: #f1f1ee; border-radius: 8px; padding: 4px 10px; min-height: 32px; cursor: pointer; }
 .pbar .tag { font-weight: 700; letter-spacing: .04em; color: #f3c46b; margin-right: 2px; }
 .pbar a { color: #9fc3ff; }
 .seg { display: inline-flex; background: #3a3d42; border-radius: 9px; padding: 2px; }
@@ -103,7 +106,8 @@ button { font: inherit; color: inherit; }
 .pbar .demo button:active { background: #464a51; }
 
 /* ---------- layout: after (and before, when comparing) ---------- */
-.compare { position: relative; z-index: 1; display: flex; justify-content: center; gap: 28px; padding: 18px 16px 48px; }
+.compare { position: relative; z-index: 1; display: flex; justify-content: center; gap: 28px;
+  padding: 18px max(16px, env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
 .col { width: 100%; max-width: 420px; }
 .col-label { font: 600 12px/1 system-ui, sans-serif; letter-spacing: .08em; color: var(--ink-3); margin: 0 0 10px 4px; }
 .before { display: none; }
@@ -142,12 +146,17 @@ button { font: inherit; color: inherit; }
 @keyframes ring { 0% { opacity: .9; transform: scale(.5); } 100% { opacity: 0; transform: scale(1.5); } }
 .hot.pressed { background: rgb(255 255 255 / .16); }
 
-/* request-a-strike pill on the scene while sitting */
-.ask { position: absolute; right: 10px; bottom: 10px; z-index: 2; display: none; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px 0 10px;
-  border: 0; border-radius: 22px; background: color-mix(in srgb, var(--paper) 82%, transparent); color: var(--ink-2); font: 14px/1 var(--f-ui); cursor: pointer;
-  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-.lite .ask { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--paper); }
+/* request-a-strike: Round 4.2A — off the stage (the stage is where the characters walk), in the focus pane under it.
+   Layout B (default): in the row of actions with 暫離 / 出堂. Layout A (?ask=a): its own row right under the stage. */
+.ask { display: none; align-items: center; justify-content: center; gap: 6px; min-height: 48px; padding: 0 16px 0 12px;
+  border: 1.5px solid var(--paper-edge); border-radius: 24px; background: var(--paper); color: var(--ink); font: 15px/1 var(--f-ui); cursor: pointer; box-shadow: var(--lift); }
 .ask svg { width: 20px; height: 20px; }
+.ask:active { background: var(--washi-2); }
+.ask.onstage { position: absolute; right: 10px; bottom: 10px; z-index: 2; min-height: 44px; padding: 0 14px 0 10px; border: 0; box-shadow: none; font-size: 14px; color: var(--ink-2);
+  background: color-mix(in srgb, var(--paper) 82%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.askrow { display: flex; justify-content: flex-end; margin: 12px 2px -4px; }
+.askrow:empty { display: none; }
+.factions { flex-wrap: wrap; }
 [data-state="focus"] .ask { display: inline-flex; }
 
 /* the monk's line under the scene: one paper strip, not a separate card */
@@ -257,6 +266,7 @@ button { font: inherit; color: inherit; }
 <body>
 <div class="pbar" role="toolbar" aria-label="原型控制列">
   <span class="tag">Round 4 整合原型</span>
+  <button id="barToggle" aria-expanded="true">收起測試列 ▴</button>
   <div class="seg" id="segState" aria-label="畫面">
     <button data-v="home" aria-pressed="true">首頁</button><button data-v="focus">專注中</button><button data-v="result">結算</button>
   </div>
@@ -287,7 +297,7 @@ button { font: inherit; color: inherit; }
         <button class="hot" data-k="collect" style="left:44%;top:16%;width:12%;height:35%" aria-label="收藏冊"><span class="t">收藏冊</span><span class="dot" title="有新收藏"></span></button>
         <button class="hot" data-k="swin" style="left:71.5%;top:22%;width:15.5%;height:21%" aria-label="迷之窗"><span class="t">迷之窗</span></button>
         <button class="hot" data-k="ledger" style="left:89%;top:15%;width:7%;height:25%" aria-label="坐禪帳"><span class="t">坐禪帳</span></button>
-        <button class="ask" id="askBtn" aria-label="合掌請打"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V8.5c0-2 .9-4 2.6-5.3.5 2.2 1.4 4 1.4 6.6V15l2 3.2"/><path d="M12 20V8.5c0-2-.9-4-2.6-5.3-.5 2.2-1.4 4-1.4 6.6V15l-2 3.2"/></svg>合掌請打</button>
+
         <button class="skip" id="skipBtn">略過 ›</button>
         <div class="bubble" id="bubble"></div>
       </div>
@@ -316,7 +326,8 @@ button { font: inherit; color: inherit; }
         <div class="clock" id="clock" role="timer" aria-live="off">25:00</div>
         <div class="incense"><i id="incBar"></i></div>
         <p class="fmeta"><span id="fTask">讀書</span> · 第 <b>1</b> / <b>2</b> 炷</p>
-        <div class="factions"><button class="ghost" id="leaveBtn">暫離</button><button class="ghost" id="quitBtn">出堂</button></div>
+        <div class="askrow" id="askRow"></div>
+        <div class="factions"><button class="ask" id="askBtn" aria-label="合掌請打"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V8.5c0-2 .9-4 2.6-5.3.5 2.2 1.4 4 1.4 6.6V15l2 3.2"/><path d="M12 20V8.5c0-2-.9-4-2.6-5.3-.5 2.2-1.4 4-1.4 6.6V15l-2 3.2"/></svg>合掌請打</button><button class="ghost" id="leaveBtn">暫離</button><button class="ghost" id="quitBtn">出堂</button></div>
         <p class="fstate" id="fState">坐禪中</p>
         <button class="sensechip" id="senseChip" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5" stroke-linecap="round"/></svg>這次的偵測：切出畫面</button>
         <p class="sensetip" id="senseTip">這台裝置沒有動作感測，所以住持只看得到你有沒有切走畫面。拿起手機但沒切走，他是不會知道的。</p>
@@ -368,6 +379,7 @@ button { font: inherit; color: inherit; }
 <script src="../round3/monk4.js"></script>
 <script src="../round3/anim.js"></script>
 <script src="monk-actor.js"></script>
+<script src="patrol-paths.js"></script>
 <script>
 'use strict';
 /* =====================================================================
@@ -762,7 +774,7 @@ const M = new Mochi(scene, 'mochi');
 // the Round 3.5 monk: his body behind the mochi (monkSlot), the keisaku and its fist above her while he strikes (fxSlot)
 const monkBack = document.createElementNS(NS, 'g'), monkFront = document.createElementNS(NS, 'g');
 $('#monkSlot', scene).appendChild(monkBack); $('#fxSlot', scene).prepend(monkFront);
-const K = new MonkActor(monkBack, monkFront, { rm: () => opt.rm });
+const K = new MonkActor(monkBack, monkFront, { rm: () => opt.rm, depth: PATROL.depth });   // depth: 1 on the patrol line (y 254), as before
 const SEAT = { x: 206, y: 257 }, STAND = { x: 140, y: 276 }, MONK_HOME = { x: 72, y: 254 };
 
 /* dust motes in the day shaft: L1, removed in lite */
@@ -1198,7 +1210,10 @@ const perfMeter = {
 };
 setInterval(() => { if (performance.memory) { perfMeter.mem.push(performance.memory.usedJSHeapSize); if (perfMeter.mem.length > 600) perfMeter.mem.shift(); } }, 1000);
 // for the integration tests
-window.__R4 = { G, P, K: () => K, detect, awayFor, setState, startLeave, endLeave, quitEarly, complete: () => { P.end = Date.now(); tickTimer(); }, state: () => ({ phase: P.phase, app: app.dataset.state, hits: G.hits, asks: G.asks, queue: G.queue.length, playing: G.playing && G.playing.id, merged: G.merged, impacts: G.impacts, performed: G.performed, dropped: G.dropped, ignored: G.ignored, monk: K.state(), mochi: { sx: M.s.sx, sy: M.s.sy, face: M.faceName }, left: P.phase === 'focus' ? P.end - Date.now() : P.left }), perf: perfMeter };
+// (Round 4.2A, for review screenshots and tests) stand the monk at a Round 4.1 waypoint; layer by depth as in patrol-review
+function placeMonk(n, dir) { patrol.stop(); const q = PATROL.N[n]; Object.assign(K.s, { x: q.x, y: q.y }); if (dir) K.s.dir = dir;
+  const lip = $('#seatLip', scene); if (PATROL.inFront(q.y)) lip.after(monkBack); else $('#monkSlot', scene).appendChild(monkBack); }
+window.__R4 = { placeMonk, G, P, K: () => K, detect, awayFor, setState, startLeave, endLeave, quitEarly, complete: () => { P.end = Date.now(); tickTimer(); }, state: () => ({ phase: P.phase, app: app.dataset.state, hits: G.hits, asks: G.asks, queue: G.queue.length, playing: G.playing && G.playing.id, merged: G.merged, impacts: G.impacts, performed: G.performed, dropped: G.dropped, ignored: G.ignored, monk: K.state(), mochi: { sx: M.s.sx, sy: M.s.sy, face: M.faceName }, left: P.phase === 'focus' ? P.end - Date.now() : P.left }), perf: perfMeter };
 /* =====================================================================
    THE LOOP
    ===================================================================== */
@@ -1215,6 +1230,15 @@ function frame(t) {
   if (!opt.lite && !opt.rm && document.documentElement.dataset.time === 'day') motes.forEach(m => { m.v = (m.v + m.sp / 60) % 1; const y = 90 + m.v * 160, x = 70 + m.v * 90 + m.u * 50 + Math.sin(t / 1500 + m.u * 9) * 3; m.c.setAttribute('cx', x.toFixed(1)); m.c.setAttribute('cy', y.toFixed(1)); m.c.setAttribute('opacity', (Math.sin(m.v * Math.PI) * .8).toFixed(2)); });
   perfMeter.frame(gap, performance.now() - w0, km);
 }
+
+/* ---------- Round 4.2A: where 合掌請打 sits, and the dev bar ---------- */
+// ?ask=stage keeps the Round 4 pill on the stage, only to compare before / after
+const ASK_LAYOUT = ['a', 'stage'].includes(qs.get('ask')) ? qs.get('ask') : 'b';
+if (ASK_LAYOUT === 'a') $('#askRow').appendChild($('#askBtn'));
+if (ASK_LAYOUT === 'stage') { $('#stage').appendChild($('#askBtn')); $('#askBtn').classList.add('onstage'); }
+document.body.dataset.ask = ASK_LAYOUT;
+$('#barToggle').addEventListener('click', e => { const min = $('.pbar').classList.toggle('min'); e.currentTarget.textContent = min ? '展開測試列 ▾' : '收起測試列 ▴'; e.currentTarget.setAttribute('aria-expanded', String(!min)); });
+if (qs.has('bar0')) $('#barToggle').click();
 
 /* ---------- boot ---------- */
 const h = new Date().getHours();

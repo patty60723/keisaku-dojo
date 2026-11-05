@@ -28,7 +28,7 @@ select { min-height: 36px; font: 14px var(--f-ui); border-radius: 10px; border: 
   border: 0; border-radius: 22px; background: color-mix(in srgb, var(--paper) 82%, transparent); color: var(--ink-2); font: 14px/1 var(--f-ui);
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); pointer-events: none; }
 .ask svg { width: 20px; height: 20px; }
-.noask .ask { display: none; }
+.noask .ask { visibility: hidden; }   /* still measured: the Round 4.1 record of where it was */
 #read { font: 13px/1.5 var(--f-num), var(--f-ui); color: var(--ink-2); margin-top: 6px; min-height: 40px; }
 .tw { overflow-x: auto; margin: 8px 0; }
 table { border-collapse: collapse; width: 100%; min-width: 600px; font-size: 13px; background: var(--paper); border-radius: 12px; overflow: hidden; }
@@ -51,7 +51,7 @@ th { background: var(--washi-2); }
 <h1>巡堂路徑審查（Round 4.1）</h1>
 <p class="note">只驗證住持在禪堂裡走的路線、與麻糬的距離和遮擋。沒有新增日常動作；提醒動畫是 Round 3.5 驗收版，沒有改。路線固定，每次播放都一樣。座標是舞台 400 × 300 的 viewBox 單位。</p>
 
-<div class="stage" id="stage"><svg id="scene" viewBox="0 0 400 300" role="img" aria-label="禪堂：麻糬與住持的巡堂路徑"></svg>
+<div class="stage noask" id="stage"><svg id="scene" viewBox="0 0 400 300" role="img" aria-label="禪堂：麻糬與住持的巡堂路徑"></svg>
   <button class="ask" id="askBtn" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V8.5c0-2 .9-4 2.6-5.3.5 2.2 1.4 4 1.4 6.6V15l2 3.2"/><path d="M12 20V8.5c0-2-.9-4-2.6-5.3-.5 2.2-1.4 4-1.4 6.6V15l-2 3.2"/></svg>合掌請打</button>
 </div>
 <div id="read"></div>
@@ -69,7 +69,7 @@ th { background: var(--washi-2); }
   <label><input type="checkbox" id="tStops" checked> 停留點</label>
   <label><input type="checkbox" id="tSafe" checked> 麻糬安全區</label>
   <label><input type="checkbox" id="tBox"> 住持外框（檢查用）</label>
-  <label><input type="checkbox" id="tAsk" checked> 合掌請打按鈕（坐禪中才出現）</label>
+  <label><input type="checkbox" id="tAsk"> Round 4.1 時的合掌請打位置（4.2A 已移到舞台外）</label>
   <span><label><input type="radio" name="tm" value="day" checked> 日</label> <label><input type="radio" name="tm" value="night"> 夜</label></span>
 </div>
 
@@ -85,6 +85,11 @@ th { background: var(--washi-2); }
 <h2>需要新角色姿勢的路段</h2>
 <div class="tw"><table><thead><tr><th>路段</th><th>為什麼</th><th>本輪的處理</th></tr></thead><tbody id="poses"></tbody></table></div>
 
+<h2>各路段建議的朝向（Round 4.2A 候選姿勢，靜態對照）</h2>
+<p class="note">只是姿勢與路段的對照，不是走路動畫。每格是該路段上一個實際的點（已套用深度比例與圖層）。新姿勢見 <a href="pose-review.html">pose-review.html</a>。</p>
+<div class="tw"><table><thead><tr><th>路段</th><th>移動方向</th><th>建議姿勢</th><th>對照</th></tr></thead><tbody id="orient"></tbody></table></div>
+<div class="card" id="orientNote"></div>
+
 <h2>空間限制與衝突</h2>
 <div class="card" id="conflicts"></div>
 </main>
@@ -94,6 +99,7 @@ th { background: var(--washi-2); }
 <script src="../round3/anim.js"></script>
 <script src="monk-actor.js"></script>
 <script src="patrol-paths.js"></script>
+<script src="monk-views.js"></script>
 <script>
 'use strict';
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)], NS = 'http://www.w3.org/2000/svg', P = PATROL, A = KEISAKU_ANIM;
@@ -214,13 +220,48 @@ function report() {
   const st = R.stops.find(s => s.k === 'ST');
   $('#conflicts').innerHTML = `<ol style="margin:0;padding-left:20px">
     <li><b>前方的地板很淺。</b>坐墊前緣在 y 274，地板到 y 291，只剩 17 單位：住持只能走到麻糬的<b>左前、右前</b>，不可能從她正前方經過，也站不進她前面。左右換邊一律繞回後方（左前 → 左側 → 後方左 → 後方中 → 後方右 → 右側 → 右前）。</li>
-    <li><b>右側被「合掌請打」按鈕蓋住。</b>按鈕在坐禪中固定在場景右下角，這個寬度佔 x ${ask.x0.toFixed(0)}–${ask.x1.toFixed(0)}、y ${ask.y0.toFixed(0)}–${ask.y1.toFixed(0)}；麻糬右邊能站的地方（x ≥ 283，避開坐墊與安全區）全部在按鈕底下，所以右側繞行入口與右前停留點都會被蓋住一部分（見上表「按鈕重疊」）。左右不對稱就是因為這個。要解決需要移動按鈕（UI 決定），本輪沒有改。</li>
+    <li><b>（Round 4.2A 已解決）</b><b>右側被「合掌請打」按鈕蓋住。</b>按鈕在坐禪中固定在場景右下角，這個寬度佔 x ${ask.x0.toFixed(0)}–${ask.x1.toFixed(0)}、y ${ask.y0.toFixed(0)}–${ask.y1.toFixed(0)}；麻糬右邊能站的地方（x ≥ 283，避開坐墊與安全區）全部在按鈕底下，所以右側繞行入口與右前停留點都會被蓋住一部分（見上表「按鈕重疊」）。左右不對稱就是因為這個。要解決需要移動按鈕（UI 決定），本輪沒有改。<br><b>Round 4.2A：按鈕已移到舞台下方的操作列（design/round4/index.html），舞台上不再有任何按鈕；上表「按鈕重疊」欄保留的是 4.1 當時的量測。</b></li>
     <li><b>Round 3.5 的提醒站位 (132, 254) 在安全邊距內。</b>它離坐墊左上角約 4 單位，沒有碰到坐墊和蒲團本身${st && !st.groundRaw.length ? '（已驗證）' : ''}，但在我設的 4 單位邊距裡。站位已驗收、不能改，所以只有「走進站位的最後幾格」記為例外，其他路段都必須在邊距外。</li>
     <li><b>2D 場景的限制。</b>前後只能用往上／往下移動加上 0.9–1.1 倍的比例表現；左側、右側的繞行在畫面上幾乎是直上直下的。沒有用整體旋轉或俯視角去假裝轉身。</li>
     <li><b>後方的高度。</b>後方巡堂線在 y 220–224（地板從 y 189 開始）。站在麻糬正後方時只露出頭與肩，這是遮擋，麻糬的臉與輪廓都在上面一層，沒有被遮到。</li>
   </ol>`;
 }
 document.fonts.ready.then(report);
+
+/* ---------- Round 4.2A: which view on which leg (static) ---------- */
+(function orient() {
+  let n = 0;
+  const thumb = (pts, cap) => {   // pts: [[waypoint or {x,y}, view, facing]]
+    const host = document.createElement('div'); host.innerHTML = `<svg viewBox="70 140 290 150" style="display:block;width:100%;height:auto">${sceneMarkup()}</svg>`; const sv = host.firstChild;
+    sv.querySelector('#rack').setAttribute('opacity', 0); sv.querySelector('#seatLip').setAttribute('opacity', 1);
+    sv.querySelector('#mochiSlot').innerHTML = `<g transform="translate(${P.MOCHI.x} ${P.MOCHI.y})">${mochiG.innerHTML}</g>`;
+    for (const [w, k, facing] of pts) {
+      const q = typeof w === 'string' ? P.N[w] : w, s = P.depth(q.y), id = 'or' + (++n);
+      const m = k === 'accepted' ? MONK4.art({ id, pose: 'idle', facing }) : MONK_VIEWS.view(k, { id });
+      const g = `<g transform="translate(${q.x.toFixed(1)} ${q.y.toFixed(1)}) scale(${s.toFixed(3)})">${m}</g>`;
+      if (P.inFront(q.y)) sv.querySelector('#seatLip').insertAdjacentHTML('afterend', g); else sv.querySelector('#monkSlot').insertAdjacentHTML('beforeend', g);
+    }
+    return `<figure style="margin:0;width:150px;display:inline-block;vertical-align:top;margin:0 6px 6px 0"><div style="border-radius:8px;overflow:hidden">${host.innerHTML}</div><figcaption class="note" style="font-size:12px;text-align:center">${cap}</figcaption></figure>`;
+  };
+  const mid = (a, b) => { const l = P.makeLeg(a === b ? [a] : [a, b]); return l.at(l.total / 2); };
+  const rows = [
+    ['後方巡堂（後方左 ↔ 後方中 ↔ 後方右）', '橫向', '既有 3/4，面向走的方向（往左走時是鏡像）', [[mid('BL', 'BC'), 'accepted', 'right']], '往右'],
+    ['', '', '', [[mid('BC', 'BR'), 'accepted', 'left']], '往左（鏡像）'],
+    ['左側往前（後方左 → 左側 → 左前）', '朝鏡頭（往下）', 'P1 正面', [[mid('LS', 'LF'), 'front']], '左側往前'],
+    ['左前停下、轉向麻糬', '原地', 'P3：正面 → 中間 → 3/4 面向右', [['LF', 'front'], ['LF', 'p3_1'], ['LF', 'accepted', 'right']], ['正面', 'P3 中間', '3/4 面向右']],
+    ['左側回後方（左前 → 左側 → 後方左）', '背對鏡頭（往上）', 'P2 背面', [[mid('LS', 'BL'), 'back']], '左側往後'],
+    ['右側往前（後方右 → 右側 → 右前）', '朝鏡頭（往下）', 'P1 正面', [[mid('RS', 'RF'), 'front']], '右側往前'],
+    ['右前停下、轉向麻糬', '原地', '正面 → 3/4 面向左。<b>問題：既有面向左的 3/4 是鏡像，香板會換到另一隻手</b>', [['RF', 'front'], ['RF', 'accepted', 'left']], ['正面（香板在右手）', '3/4 面向左（換到左手）']],
+    ['右側回後方（右前 → 右側 → 後方右）', '背對鏡頭（往上）', 'P2 背面', [[mid('RS', 'BR'), 'back']], '右側往後'],
+    ['回到提醒站位（後方左 → 站位）', '斜向朝鏡頭', '既有 3/4 面向右（提醒的起點，3.5 驗收）', [['ST', 'accepted', 'right']], '站位'],
+  ];
+  $('#orient').innerHTML = rows.map(([a, b, c, pts, cap]) => `<tr><td>${a}</td><td>${b}</td><td>${c}</td><td>${Array.isArray(cap) ? pts.map((q, i) => thumb([q], cap[i])).join('') : thumb(pts, cap)}</td></tr>`).join('');
+  $('#orientNote').innerHTML = `<b>2D 的限制與最小調整</b><ol style="margin:4px 0 0;padding-left:20px">
+    <li><b>換手</b>：Round 1 起，面向左的住持就是面向右的鏡像，所以往左走時香板在另一隻手。只有 3/4 側面時看不太出來；有了正面、背面之後（正面時香板明確在他的右手、畫面左邊），在右前從正面轉成面向左時會看到香板換手。最小調整二選一：(a) 接受鏡像慣例，把換手藏在轉身最快的那一格；(b) 另畫一張「面向左、香板在遠側手」的 3/4（新姿勢，需要美術驗收）。我建議 (b)，但這是要你決定的美術問題。</li>
+    <li><b>左右側的上下段幾乎是直上直下</b>（2D 場景只有上下＋比例 0.9–1.1），用正面／背面靜態姿勢配上原本的上下晃動即可讀出「朝我們走來／走遠」；完整的正面、背面走路循環屬於 Round 4.2B。</li>
+    <li><b>正面 ↔ 背面不能直接切換</b>：在左前停下時從「往下走的正面」轉成「往上走的背面」要經過 P4 的側面，否則像瞬間翻面；從正面轉回後方應該依序：正面 → P3 中間 → 3/4 → P4 側面 → 背面 3/4 → 背面。</li>
+  </ol>`;
+})();
 window.addEventListener('resize', report);
 window.__K = K; window.__review = { playRoute, toStance, place, report, K, setSpeed: v => { speed = v; }, legNow: () => legNow };
 </script>
