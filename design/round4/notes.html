@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Round 4 整合說明</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../round2/r1-tokens.css">
+<style>
+body { margin: 0; background: var(--washi); color: var(--ink); font: 16px/1.7 var(--f-ui); }
+main { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { font: 700 26px/1.3 var(--f-story); margin: 0 0 6px; }
+h2 { font: 700 20px/1.35 var(--f-story); margin: 34px 0 10px; border-top: 1px solid var(--paper-edge); padding-top: 18px; }
+h3 { font-size: 16px; margin: 20px 0 6px; }
+.card { background: var(--paper); border-radius: 16px; box-shadow: var(--lift); padding: 14px 18px; margin: 12px 0; }
+.tw { overflow-x: auto; margin: 10px 0; }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; background: var(--paper); border-radius: 12px; overflow: hidden; }
+th, td { text-align: left; vertical-align: top; padding: 7px 10px; border-bottom: 1px solid var(--washi-2); }
+th { background: var(--washi-2); font-weight: 700; }
+code { font: 13px ui-monospace, Menlo, monospace; background: var(--washi-2); padding: 1px 4px; border-radius: 4px; overflow-wrap: anywhere; }
+.note { color: var(--ink-2); font-size: 14px; }
+.ok { color: #2e7d4f; font-weight: 700; } .no { color: var(--shu); font-weight: 700; } .nt { color: #8a6a14; font-weight: 700; }
+.shots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.shots figure { margin: 0; } .shots img { width: 100%; border-radius: 10px; display: block; } .shots figcaption { font-size: 12px; color: var(--ink-2); text-align: center; }
+@media (max-width: 620px) { .shots { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+a { color: var(--ai); }
+</style>
+</head>
+<body>
+<main>
+<h1>香板禪堂 Round 4：住持動畫整合原型</h1>
+<p class="note">分支 <code>feature/round4-monk-integration</code>（從 main <code>68a414f</code> 建立）。原型：<a href="./">design/round4/</a>。正式版（<code>src/</code>、<code>index.html</code>）、Round 1 原型與 Round 3 審查頁都沒有被覆蓋。</p>
+
+<h2>1. 盤點結果</h2>
+<div class="tw"><table>
+<thead><tr><th>項目</th><th>Round 1 原型（design/round1/proto.html）</th><th>正式版（src/app.js）</th></tr></thead>
+<tbody>
+<tr><td>入口與狀態</td><td>單一 HTML；畫面 home / focus / result / chars；一個 rAF 迴圈＋tween 引擎</td><td>build.py 組成 index.html；<code>P.phase</code>：idle → settle → focus ⇄ leave → break → ready … → result</td></tr>
+<tr><td>計時</td><td>25 分、牆上時鐘、沒有暫停</td><td>牆上時鐘；暫離一炷一次（暫停）；背景中到時，回來才結束</td></tr>
+<tr><td>分心觸發</td><td>只有示範按鈕</td><td>切出畫面 ≥ 2 秒（回來時打）、≥ 90 秒再補一下；平衡儀拿起手機（之後每 20 秒再打）；合掌請打</td></tr>
+<tr><td>連續分心</td><td>L3 互斥：進行中的打擊<b>合併成計數</b>不重播；10 秒內省略察覺／走近；1 分鐘內第 3 次輕點</td><td><b>全部排隊</b>依序播放，每一下在命中時計數；忙碌時合掌請打不處理</td></tr>
+<tr><td>住持／麻糬繪製</td><td>舊住持（Monk 類別、手臂整塊旋轉）；麻糬 Mochi 類別（表情、手、呼吸）</td><td>舊住持 SVG；香板整根旋轉</td></tr>
+<tr><td>背景化</td><td>回來時把 tween 直接跳到結束狀態</td><td>只處理計時與分心判定</td></tr>
+</tbody></table></div>
+
+<h2>2. 整合方式</h2>
+<div class="card"><ul style="margin:0;padding-left:20px">
+<li><b>不另畫住持</b>：直接載入 <code>../round3/monk4.js</code>（造型）與 <code>../round3/anim.js</code>（關鍵姿勢、關節、蒙皮、滯後、時間軸）。</li>
+<li><b>anim.js 的向下相容擴充</b>：多一個「時間軸」參數（<code>makePlan</code>），可以在已驗收的段落前面接上察覺、舉板、走近；不帶參數時與 3.5 完全相同（逐格比對 467 格，差 0；3.5 的終點像素比對仍是 0 差異）。新增 <code>idleNotice</code>（垂放姿勢、頭轉向麻糬傾 6°、察覺表情）；角度改成每段各自展開（對既有段落沒有影響）。</li>
+<li><b>動畫控制介面</b> <code>design/round4/monk-actor.js</code>（<code>MonkActor</code>）：遊戲只呼叫 <code>perform({ onImpact, onSeg })</code>、<code>abort()</code>、<code>walkTo()</code>、<code>face()</code>；演出完全由 3.5 的系統計算。它有自己的時鐘，只在畫面有繪製時前進。</li>
+<li><b>提醒的時間軸</b>：察覺 450 → 舉板 420（60% 轉嚴肅）→ 走近（距離 ÷ 170，Round 1 速度）→（需要時轉身 180）→ 喝 300 → <b>已驗收的</b> 舉起 200・預備 340・停頓 160・揮下 90・命中停格 135・收勢 260・收勢停 120・收板歸位 520・待機 120。</li>
+<li><b>命中位置</b>：住持站在 x = 132（3.5 驗收時的位置），所以命中點、麻糬反應與 3.5 相同。Round 1 原本走到 x = 140。</li>
+<li><b>麻糬</b>：沿用 Round 1 的 Mochi（表情、呼吸）。命中後的壓扁 1.07／0.88、停格、阻尼回彈與表情（吃痛 → 委屈）直接取 3.5 的 <code>mochiAt</code>；命中前的「驚訝、看向住持」與收尾的「委屈 → 平靜」沿用 Round 1。</li>
+<li><b>圖層</b>：住持身體在麻糬後面（monkSlot），揮下到收板一半時香板與拳頭在麻糬前面（fxSlot），與 3.5 相同。</li>
+</ul></div>
+
+<h2>3. 連續分心：規則差異與建議</h2>
+<p>Round 1 規格與正式版的實作不同。我沒有自行決定，原型裡兩種都做了，測試面板可以切換（預設為正式版）。</p>
+<div class="tw"><table>
+<thead><tr><th>情況</th><th>正式版規則（預設）</th><th>Round 1 規格</th></tr></thead>
+<tbody>
+<tr><td>提醒播放中又分心</td><td>排隊，播完再播下一個</td><td>合併，不重播；結束時說「又分心了 N 次」</td></tr>
+<tr><td>計數</td><td>每個事件在<b>命中那一刻</b>算一次</td><td>規格寫「計數規則不變，只改演出」→ 被合併的在發生時就算</td></tr>
+<tr><td>10 秒內再分心</td><td>照常完整演出</td><td>省略察覺與走近（香板仍要從垂放舉起，因為新住持待機時香板是垂著的）</td></tr>
+<tr><td>1 分鐘內第 3 次</td><td>照常</td><td>輕點。<b>新住持沒有設計過輕點姿勢</b>，這裡只把星星、晃動拿掉、音量降到約 1/3，動作還是完整的一下</td></tr>
+<tr><td>播放中合掌請打</td><td>不處理</td><td>合併（不計入被打）</td></tr>
+</tbody></table></div>
+<div class="card"><b>建議（需要你決定）</b>：計數用正式版的語意（每一次分心都算），演出用 Round 1 的合併（播放中再分心只加計數、不再排隊重播）。理由：排隊時離開畫面 95 秒會連打兩次，連續 3 次會連續看 10 秒以上同一段動畫，越來越像懲罰；合併則畫面只演一次、紀錄仍正確。「輕點」若要保留，需要另外設計一組小幅度的關鍵姿勢（屬於美術工作，本輪沒做）。</div>
+
+<h3>兩種規則都遵守的保護</h3>
+<ul>
+<li>只有「坐禪中」會接受分心事件；落座、暫離、計時完成、出堂後的事件一律不處理，並寫進紀錄。</li>
+<li>每個事件只計數一次（命中時），重播、合併都不會再算。</li>
+<li>暫離：計時立刻停；排隊中的提醒取消；<b>正在播放的那一下播完</b>（它發生在坐禪中，照正式版算一下），播完麻糬才起身。正式版沒有取消排隊這一步（暫離後排隊的還會繼續打），這是本原型的差異，建議正式版也這樣做。</li>
+<li>出堂（重設）：正在播放的提醒立即中止，住持直接回到垂放姿勢，尚未命中的不計數；排隊全部取消。</li>
+<li>計時完成：之後的事件不處理；正在播放的那一下播完才進結算。</li>
+<li>背景化：沒有影格時住持的時鐘不走，回來從同一格繼續（不跳格、不重播）；離開時間依正式版規則判定（≥ 2 秒打一下、≥ 90 秒再補一下）。</li>
+</ul>
+
+<h2>4. 測試</h2>
+<h3>新增的整合測試 <code>tests/round4.test.mjs</code>（12 項）</h3>
+<div class="tw"><table><thead><tr><th>#</th><th>內容</th><th>結果</th></tr></thead><tbody>
+<tr><td>1</td><td>專注中：計時在走、住持巡堂、不會自己打</td><td class="ok">通過</td></tr>
+<tr><td>2</td><td>首次分心：完整演出、命中前不計數、命中時計一次、回到垂放、麻糬比例回到 1</td><td class="ok">通過</td></tr>
+<tr><td>3</td><td>離開 &lt; 2 秒不算；≥ 90 秒打兩下</td><td class="ok">通過</td></tr>
+<tr><td>4</td><td>正式版規則：連續 3 次排隊、各打一次；忙碌時合掌請打不處理</td><td class="ok">通過</td></tr>
+<tr><td>5</td><td>Round 1 規則：播放中的合併、計數、只演一次</td><td class="ok">通過</td></tr>
+<tr><td>6</td><td>揮下途中再分心：不會重複命中、第一下不會算兩次</td><td class="ok">通過</td></tr>
+<tr><td>7</td><td>提醒途中暫離：計時停、排隊取消、暫離中不接受事件、回座從原處繼續</td><td class="ok">通過</td></tr>
+<tr><td>8</td><td>揮下途中出堂：住持立即回到垂放、不計數、進結算</td><td class="ok">通過</td></tr>
+<tr><td>9</td><td>提醒途中計時完成：那一下播完才結算，之後不計</td><td class="ok">通過</td></tr>
+<tr><td>10</td><td>背景化（不給影格 2 秒）：住持時鐘不前進，回來從原處繼續</td><td class="ok">通過</td></tr>
+<tr><td>11</td><td>減少動態：仍有提醒（停在關鍵姿勢、不揮、不走），計數一次</td><td class="ok">通過</td></tr>
+<tr><td>12</td><td>真的 visibilitychange：離開 ≥ 2 秒回來被抓一次；暫離中離開不算</td><td class="ok">通過</td></tr>
+</tbody></table></div>
+<p class="note">另外：Round 3 審查頁使用的預設時間軸與 3.5 版逐格比對差 0；<code>design/round3/checks/return-check.mjs</code> 仍是 0 差異像素。</p>
+
+<h3>既有測試失敗：collect.test.mjs「雪」</h3>
+<div class="card">
+<p style="margin-top:0"><b>原因</b>：與日期有關的測試資料，不是產品問題。「雪」的條件是<b>冬天坐滿 10 炷</b>。測試用 <code>tenDays()</code> 產生「今天往回連續 10 天」的紀錄，並期待當季的掛軸已解鎖。今天是 11 月初，10 天裡有一部分落在 10 月（秋天），冬天只有 11 月那幾天，不到 10 炷，所以「雪」仍鎖著——產品的判斷是對的。</p>
+<p><b>什麼時候會失敗</b>：每季第一個月的 1–9 號（2、5、8、11 月），四季都一樣；其他日子會通過。與時區無關（季節用的是本地月份，測試和頁面在同一台機器）。這個測試檔與 <code>src/</code> 在本分支都沒有改動，整合前後結果相同。</p>
+<p style="margin-bottom:0"><b>修正方案（獨立，不放進本分支）</b>：只改測試、不改季節規則。在這個測試固定時鐘，例如用 Playwright 的 <code>context.clock.setSystemTime(new Date('2026-12-20T10:00:00'))</code>，並讓 <code>entry()</code>／<code>day()</code> 用同一個時間；或讓該測試的 10 筆紀錄都落在同一季內（以季中某天為基準往回 10 天）。等你同意後另開分支處理。</p>
+</div>
+
+<h2>5. 效能（無頭瀏覽器，<span class="nt">不是實機</span>）</h2>
+<div class="tw"><table><thead><tr><th>條件</th><th>提醒期間影格間隔（中位／95%）</th><th>超過 25 ms 的格</th><th>每格 JS 工作（中位／95%）</th></tr></thead><tbody>
+<tr><td>桌機 CPU（不降速）</td><td>16.7／16.8 ms</td><td>0 / 約 190 格</td><td>1.6／2.6 ms</td></tr>
+<tr><td>CPU 降速 4 倍（模擬中階手機）</td><td>16.7–33／33 ms</td><td>約 40–55%</td><td>7.5／14 ms</td></tr>
+<tr><td>CPU 降速 6 倍（模擬低階手機）</td><td>33／50–67 ms</td><td>約 90%</td><td>11／20 ms</td></tr>
+</tbody></table></div>
+<ul>
+<li>負擔來源：提醒期間（約 3.5 秒）住持每格整個重建 SVG（約 25 KB 字串；計算姿勢 0.23、組字串 0.49、解析與排版 1.0 ms／桌機）。巡堂、待機時只改位置，不重建。內容沒變的格（走近、停格等）已略過重建。</li>
+<li>記憶體：連續 20 次提醒後 JS heap 從 2.1 增加到 2.5 MB（強制 GC 後），DOM 節點數不變，沒有看到持續成長。</li>
+<li>建議（下一步，會動到已驗收的繪製結構，所以本輪沒做）：把頭、袍身、衣領、遠側袖等不變的部分只畫一次，每格只重建近側手臂、袖子與香板，預期可省一半以上；改完需再跑 3.5 的像素比對。</li>
+<li>原型的測試面板會即時顯示上一次提醒的影格間隔、掉格數、住持重繪時間、JS 記憶體（Chrome／Android 才有）與裝置像素比，請在手機上看這些數字。</li>
+</ul>
+
+<h2>6. 手機版面</h2>
+<div class="shots">
+<figure><img src="shots/phone_390_home.png" alt=""><figcaption>首頁 390</figcaption></figure>
+<figure><img src="shots/phone_390_focus.png" alt=""><figcaption>專注中 390</figcaption></figure>
+<figure><img src="shots/phone_390_leave.png" alt=""><figcaption>暫離 390</figcaption></figure>
+<figure><img src="shots/phone_360_hit.png" alt=""><figcaption>命中 360</figcaption></figure>
+<figure><img src="shots/phone_390_hit.png" alt=""><figcaption>命中 390</figcaption></figure>
+<figure><img src="shots/phone_412_hit.png" alt=""><figcaption>命中 412</figcaption></figure>
+<figure><img src="shots/phone_390_back_to_idle.png" alt=""><figcaption>收板回到待機 390</figcaption></figure>
+<figure><img src="shots/phone_390_result.png" alt=""><figcaption>提早出堂的結算 390</figcaption></figure>
+<figure><img src="shots/phone_390_test_panel.png" alt=""><figcaption>測試面板</figcaption></figure>
+</div>
+<p class="note">360、390、412 寬與 844×390 橫向都沒有水平捲動。場景是固定 400×300 的 viewBox，住持與麻糬比例在各寬度一致。</p>
+
+<h2>7. 與 Round 1 原型行為的差異</h2>
+<ul>
+<li>住持換成 Round 3.5 版；打擊改成 3.5 的時間軸（Round 1 的「舉板 380、停頓 170、揮下 85、hit-stop 70」由 3.5 的段落取代，命中停格就是 135 ms 的姿勢停格，不再凍結整個畫面）。</li>
+<li>舉板改為「從垂放舉到肩上」再走近（新住持待機時香板是垂著的）。走近停在 x = 132。</li>
+<li>麻糬命中後的「揉頭、左右搖」沒有接（3.5 驗收的是壓扁、停格、回彈與表情）。</li>
+<li>Round 1 住持的待機表演只保留慢眨眼、看窗外、看麻糬、點頭、笑（用新住持的表情與頭部傾斜做）；「整理袖子」「喝茶」需要新住持沒有的手臂姿勢，<b>沒有接</b>。</li>
+<li>加上正式版的暫離／回座、出堂確認、背景時間判定；計時長度可選 1 分（測試用）。</li>
+<li>拿掉「角色」頁與「對照 v20」（都是舊住持）。</li>
+</ul>
+
+<h2>8. 尚未測試（Not tested）</h2>
+<ul>
+<li class="nt">Android 實機瀏覽器與已安裝的 PWA：影格時間、掉格、記憶體、背景化回來的行為。</li>
+<li class="nt">iPhone Safari。</li>
+<li class="nt">平衡儀（拿起手機）的真實偵測：本原型只有模擬按鈕；正式版的偵測與每 20 秒補打沒有移植。</li>
+<li class="nt">手機安全區域：Round 1 原型沒有處理 <code>env(safe-area-inset-*)</code>，在瀏海機以全螢幕 PWA 開啟時頂部控制列可能被遮；一般瀏覽器分頁沒有問題。</li>
+<li class="nt">休息（break）與多炷流程：Round 1 原型只有一炷，沒有接。</li>
+<li class="nt">實際的高密度螢幕上的線條清晰度（無頭瀏覽器只截了 2 倍圖）。</li>
+</ul>
+</main>
+</body>
+</html>
