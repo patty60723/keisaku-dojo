@@ -380,6 +380,8 @@ button { font: inherit; color: inherit; }
 <script src="../round3/anim.js"></script>
 <script src="monk-actor.js"></script>
 <script src="patrol-paths.js"></script>
+<script src="monk-views2.js"></script>
+<script src="natural-patrol.js"></script>
 <script>
 'use strict';
 /* =====================================================================
@@ -775,6 +777,11 @@ const M = new Mochi(scene, 'mochi');
 const monkBack = document.createElementNS(NS, 'g'), monkFront = document.createElementNS(NS, 'g');
 $('#monkSlot', scene).appendChild(monkBack); $('#fxSlot', scene).prepend(monkFront);
 const K = new MonkActor(monkBack, monkFront, { rm: () => opt.rm, depth: PATROL.depth });   // depth: 1 on the patrol line (y 254), as before
+// Round 4.2B: the natural patrol (candidate B views on the Round 4.1 paths) draws him while he patrols, and hands him to
+// the actor at the reminder stance. ?seed=N replays the same patrol.
+const npDefs = document.createElementNS(NS, 'defs'); scene.appendChild(npDefs);
+const NP_SEED = qs.has('seed') ? +qs.get('seed') || 1 : 1 + Math.floor(Math.random() * 99999);
+const NP = new NaturalPatrol({ actor: K, defs: npDefs, lip: $('#seatLip', scene), slot: $('#monkSlot', scene), seed: NP_SEED, rm: () => opt.rm, log: t => logEv(t, 'patrol') });
 const SEAT = { x: 206, y: 257 }, STAND = { x: 140, y: 276 }, MONK_HOME = { x: 72, y: 254 };
 
 /* dust motes in the day shaft: L1, removed in lite */
@@ -885,11 +892,15 @@ const HIT_PT = (() => { const A = KEISAKU_ANIM, j = A.joints(A.SEG().find(s => s
 async function remind(ev) {
   const tok = G.token, now = Date.now(); G.recent.push(now); while (G.recent.length && now - G.recent[0] > 60000) G.recent.shift();
   const r1 = G.rule === 'r1', quick = r1 && now < G.near && Math.abs(K.s.x - MONK_HIT_X) < 1, gentle = r1 && G.recent.length >= 3, asked = ev.kind === 'ask', ms = M.s;
-  patrol.stop(); idleBusy = false;
+  idleBusy = false;
   logEv(`#${ev.id} 演出開始${quick ? '（10 秒內：省略察覺、走近）' : ''}${gentle ? '（1 分鐘內第 3 次：較輕）' : ''}`);
   if (!quick) { M.setFace(asked ? 'focus' : 'surprised'); anim(200, t => ms.gx = lerp(0, -2.6, t), E.out); }
   G.performed++; renderCounts();
-  const res = await K.perform({ quick,
+  // 1–4: he stops, notices, and walks by the safe paths to the accepted stance (Round 4.2B natural patrol)
+  patrol.on = false; const r0 = await NP.toStance({ quick }); if (r0.aborted || tok !== G.token) { logEv(`#${ev.id} 中止（${PH[P.phase]}），住持直接回到待機`, 'skip'); perfMeter.seg(null); return; }
+  if (Math.abs(K.s.x - MONK_HIT_X) > 1) logEv(`#${ev.id} 未在站位（${K.s.x.toFixed(1)}）`, 'skip');
+  // 5–9: the accepted Round 3.5 reminder, from the stance (he is already there, so no walk inside it)
+  const res = await K.perform({ quick: true,
     onSeg: id => {
       perfMeter.seg(id);
       if (id === 'call') { if (asked) say('請。', K.s.x + 10, K.s.y - 96, 900); else if (!gentle) say('喝！', K.s.x + 10, K.s.y - 96, 900, true); }
@@ -927,6 +938,7 @@ function cancelReminders(why, abort) {
   if (abort) {
     G.token++; G.merged = 0; G.onSwing = null;
     if (K.busy) K.abort();
+    if (NP.pendingStance) NP.halt();
     Object.assign(M.s, { sx: 1, sy: 1, gx: 0 });
   }
   renderCounts();
@@ -954,21 +966,11 @@ function pickIdle(ctx) {
   const top = Math.max(...ok.map(it => it.pri)), pool = ok.filter(it => it.pri === top || Math.random() < .35);
   return pool[Math.floor(Math.random() * pool.length)];
 }
+// (Round 1's patrol walked a straight line and played idle beats; Round 4.2B replaces it with the natural patrol)
 const patrol = {
-  on: false, token: 0,
-  start(delay = 0) { this.on = true; const tok = ++this.token; (async () => {
-    await wait(delay); if (tok !== this.token) return;
-    K.holdStick(true); K.eyes('open'); K.mouth('smile');
-    const stops = [70, 140, 300, 330, 268];
-    for (let i = 0; tok === this.token; i++) {
-      if (G.playing) { await wait(500); continue; }
-      await K.walkTo(stops[i % stops.length], 34); if (tok !== this.token) return;
-      await wait(1400);
-      const it = pickIdle('focus'); if (it && tok === this.token) await playIdle(it);
-      await wait(900);
-    }
-  })(); },
-  stop() { this.token++; this.on = false; K.s.moving = false; },
+  on: false,
+  start(delay = 0) { this.on = true; if (app.dataset.state === 'focus') NP.start(delay); },
+  stop() { this.on = false; NP.halt(); },
 };
 let homeIdleT = null;
 function homeIdle() { clearTimeout(homeIdleT); homeIdleT = setTimeout(async () => { if (app.dataset.state !== 'home') return; const it = pickIdle('home'); if (it) await playIdle(it); homeIdle(); }, 3500 + Math.random() * 3000); }
@@ -1091,7 +1093,7 @@ async function endLeave() {
 }
 async function setState(st, { fromStart = false, early = false } = {}) {
   cancelReminders('切換畫面', true); clearTimeout(afterT);
-  app.dataset.state = st; segSet('segState', st); patrol.stop(); clearTimeout(homeIdleT); hush(); flushTweens(); skipping = true; L3.busy = false; idleBusy = false;
+  app.dataset.state = st; segSet('segState', st); patrol.stop(); NP.off(); clearTimeout(homeIdleT); hush(); flushTweens(); skipping = true; L3.busy = false; idleBusy = false;
   $('#skipBtn').classList.remove('on');
   Object.assign(K.s, { arm: 0, lean: 0, head: 0, squash: 1, bobY: 0, moving: false });
   updateBefore(); renderDemo(); stage.classList.remove('show-tags'); clearTimeout(showTags.t);
@@ -1211,9 +1213,8 @@ const perfMeter = {
 setInterval(() => { if (performance.memory) { perfMeter.mem.push(performance.memory.usedJSHeapSize); if (perfMeter.mem.length > 600) perfMeter.mem.shift(); } }, 1000);
 // for the integration tests
 // (Round 4.2A, for review screenshots and tests) stand the monk at a Round 4.1 waypoint; layer by depth as in patrol-review
-function placeMonk(n, dir) { patrol.stop(); const q = PATROL.N[n]; Object.assign(K.s, { x: q.x, y: q.y }); if (dir) K.s.dir = dir;
-  const lip = $('#seatLip', scene); if (PATROL.inFront(q.y)) lip.after(monkBack); else $('#monkSlot', scene).appendChild(monkBack); }
-window.__R4 = { placeMonk, G, P, K: () => K, detect, awayFor, setState, startLeave, endLeave, quitEarly, complete: () => { P.end = Date.now(); tickTimer(); }, state: () => ({ phase: P.phase, app: app.dataset.state, hits: G.hits, asks: G.asks, queue: G.queue.length, playing: G.playing && G.playing.id, merged: G.merged, impacts: G.impacts, performed: G.performed, dropped: G.dropped, ignored: G.ignored, monk: K.state(), mochi: { sx: M.s.sx, sy: M.s.sy, face: M.faceName }, left: P.phase === 'focus' ? P.end - Date.now() : P.left }), perf: perfMeter };
+function placeMonk(n, dir) { patrol.stop(); NP.placeAt(n, dir < 0 ? 'L' : 'R'); }
+window.__R4 = { placeMonk, NP: () => NP, G, P, K: () => K, detect, awayFor, setState, startLeave, endLeave, quitEarly, complete: () => { P.end = Date.now(); tickTimer(); }, state: () => ({ phase: P.phase, app: app.dataset.state, hits: G.hits, asks: G.asks, queue: G.queue.length, playing: G.playing && G.playing.id, merged: G.merged, impacts: G.impacts, performed: G.performed, dropped: G.dropped, ignored: G.ignored, monk: K.state(), patrol: NP.state(), mochi: { sx: M.s.sx, sy: M.s.sy, face: M.faceName }, left: P.phase === 'focus' ? P.end - Date.now() : P.left }), perf: perfMeter };
 /* =====================================================================
    THE LOOP
    ===================================================================== */
@@ -1224,7 +1225,8 @@ function frame(t) {
   for (const tw of tweens) { const p = Math.min(1, (t - tw.t0) / tw.ms); tw.fn(tw.ease(p)); if (p >= 1) { tweens.delete(tw); tw.res(); } }
   // while the monk performs, the mochi's squash, bounce and face come from the same timeline (Round 3.5)
   const mr = K.mochi(); if (mr) { M.s.sx = mr.sx; M.s.sy = mr.sy; if (mr.face !== M.faceName) M.setFace(mr.face); }
-  M.render(t); const km = K.render(dt, t);
+  const npm = NP.update(dt, t);
+  M.render(t); const km = K.render(dt, t) + npm;
   // smoke drifts (L1); dust in the day shaft (L1, not in lite)
   if (!opt.rm) { const sm = $('#smoke', scene); sm.setAttribute('transform', `translate(${Math.sin(t / 900) * 1.4} 0) scale(1 ${1 + Math.sin(t / 1300) * .06})`); }
   if (!opt.lite && !opt.rm && document.documentElement.dataset.time === 'day') motes.forEach(m => { m.v = (m.v + m.sp / 60) % 1; const y = 90 + m.v * 160, x = 70 + m.v * 90 + m.u * 50 + Math.sin(t / 1500 + m.u * 9) * 3; m.c.setAttribute('cx', x.toFixed(1)); m.c.setAttribute('cy', y.toFixed(1)); m.c.setAttribute('opacity', (Math.sin(m.v * Math.PI) * .8).toFixed(2)); });

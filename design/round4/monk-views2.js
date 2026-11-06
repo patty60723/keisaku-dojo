@@ -32,6 +32,14 @@
   const rs = (pts, n, closed = true) => curve(pts, n, closed);
   function mxr(pts) { const m = mx(pts).reverse(); let k = 0; m.forEach((q, i) => { if (q[0] + q[1] < m[k][0] + m[k][1]) k = i; }); return m.slice(k).concat(m.slice(0, k)); }
   const lerpP = (A, B, t) => A.map((q, i) => [q[0] + (B[i][0] - q[0]) * t, q[1] + (B[i][1] - q[1]) * t]);
+  // Round 4.2B: walking moves parts rigidly about a joint; a zero move returns the very same array
+  const rotP = (pts, [px, py], deg) => { if (!deg) return pts; const c = Math.cos(deg * RAD), s2 = Math.sin(deg * RAD); return pts.map(([x, y]) => [px + (x - px) * c - (y - py) * s2, py + (x - px) * s2 + (y - py) * c]); };
+  const rotStick = (st, piv, deg) => { if (!deg) return st; const [o] = rotP([[st.x, st.y]], piv, deg); return { ...st, x: o[0], y: o[1], rot: st.rot + deg }; };
+  const rotCuff = (cf, piv, deg) => { if (!deg || !cf) return cf; const [o] = rotP([[cf.cx, cf.cy]], piv, deg); return { ...cf, cx: o[0], cy: o[1], r: cf.r + deg }; };
+  const movP = (pts, d) => (!d || (!d[0] && !d[1])) ? pts : pts.map(([x, y]) => [x + d[0], y + d[1]]);
+  const hemP = (pts, dx) => !dx ? pts : pts.map(([x, y]) => { const u = clamp((y + 14) / 14, 0, 1); return [x + dx * u * u * (3 - 2 * u), y]; });
+  // mirror a closed outline keeping its point order's meaning (point i ↔ the mirror of point n − i): robes and the like
+  const mxIdx = pts => pts.map((_, i) => { const q = pts[(pts.length - i) % pts.length]; return [-q[0], q[1]]; });
   function cubicPts(d) {
     const n = d.match(/-?\d*\.?\d+/g).map(Number), out = []; let x = n[0], y = n[1];
     for (let i = 2; i + 5 < n.length; i += 6) { const [a, b, c, e, f, g] = n.slice(i, i + 6);
@@ -81,6 +89,7 @@
     out.shade = Math.abs(th) > 10 && Math.abs(th) < 120 ? (th > 0 ? 'side' : 'sideR') : Math.abs(th) >= 110 ? 'nape' : '';
     out.tilt = clamp(2 * sn(th) / sn(35), -2, 2) * (Math.abs(th) > 120 ? .5 : 1);
     out.face = face; out.c = c;
+    if (face === 'stern') out.eyes.forEach(e => { e.ry *= .78; e.y = -72.2; });
     return out;
   }
   function drawHead(h, id) {
@@ -93,11 +102,14 @@
     const eye = e => e.show ? `<ellipse cx="${f2(e.x)}" cy="${f2(e.y)}" rx="${f2(e.rx)}" ry="${f2(e.ry)}" style="fill:${ink}"/>` : '';
     const brow = (b, i) => b.show ? `<path d="${B[0]}" transform="translate(${f2(b.x)} 0) scale(${f2((b.mirror ? -1 : 1) * b.sx)} 1) translate(-7.9 0)" style="fill:#f6f1e6;stroke:${ink};stroke-width:1;stroke-linejoin:round"/>` : '';
     const blush = b => b.show ? `<ellipse cx="${f2(b.x)}" cy="${f2(b.y)}" rx="${f2(b.rx)}" ry="${f2(b.ry)}" style="fill:var(--blush);opacity:${blushO}"/>` : '';
-    const m = h.mouth, mouth = m.show ? `<g transform="translate(${f2(m.x)} 0) scale(${f2(m.sx)} 1) translate(-13.9 0)">${L('M11.4 -64 q2.6 2 5 -.2', 1.4)}</g>` : '';
-    return `<g transform="rotate(${f2(h.tilt)} 3 -56)">` + h.ears.filter(e => !e.onTop).map(earD).join('') + fill(P(h.outline), ART.skin)
+    const MD = h.face === 'stern' ? ['M11.6 -63.6 h4.8', 14, 1.5] : ['M11.4 -64 q2.6 2 5 -.2', 13.9, 1.4];
+    const m = h.mouth, mouth = m.show ? `<g transform="translate(${f2(m.x)} 0) scale(${f2(m.sx)} 1) translate(${-MD[1]} 0)">${L(MD[0], MD[2])}</g>` : '';
+    // the light comes from the window on our left; a view facing left is the accepted mirror image, so its highlight is mirrored too
+    const hl = `<path${h.th < 0 ? ' transform="scale(-1 1)"' : ''} d="M-7.4 -88.6 q5 -4.2 11 -4.6" style="fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;opacity:.5"/>`;
+    return `<g transform="rotate(${f2(h.tilt + (h.tiltAdd || 0))} 3 -56)">` + h.ears.filter(e => !e.onTop).map(earD).join('') + fill(P(h.outline), ART.skin)
       + det(`<g clip-path="url(#${id}-head)">${shade}</g>` + L(P(lower, false), 1.25))
       + h.ears.filter(e => e.onTop).map(earD).join('')
-      + det(h.ears.map(earLine).join('') + '<path d="M-7.4 -88.6 q5 -4.2 11 -4.6" style="fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;opacity:.5"/>'
+      + det(h.ears.map(earLine).join('') + hl
         + `<g clip-path="url(#${id}-head)">` + h.blush.map(blush).join('') + h.eyes.map(eye).join('') + mouth + h.brows.map(brow).join('') + '</g>') + '</g>';
   }
 
@@ -172,8 +184,26 @@
     rightProfileA: sl(tr(IDLE.near, 11), 'front'), rightProfileB: sl(tr(IDLE.near, 10.5), 'front'), leftProfile: sl(tr(PT.FAR_STAND, -12), 'back'),
     rightBack: sl(mx(IDLE.near), 'front', true), leftBackA: sl(IDLE.near, 'front', true), leftBackB: sl(STAND.near, 'front', true),
   };
+  // the left-facing family, for turning between the front / back and the left-facing 3/4 (q34L): his right arm,
+  // with the keisaku, is now the far one; his left arm hangs empty in front. Built from the same parts, mirrored.
+  const ROBE_LM = mxIdx(PT.ROBE), PROFILE_BL = mxIdx(PROFILE_B);
+  const KG = () => { const k = keepGrip('B'); return { x: -k.stick.x, y: k.stick.y, rot: 360 - k.stick.rot, stretch: k.stick.stretch }; };
+  const leftBodies = {
+    p3midL: () => ({ th: -17.5, robe: lerpP(ROBE_LM, ROBE_B, .5), feet: feetMix([mxr(PT.FEET.far), mxr(PT.FEET.near)], FEET.front, .5),
+      right: slBlend(ARM.rightFront, sl(mx(PT.FAR_STAND), 'back'), .5, 'back'), left: ARM.leftFrontB,
+      cuff: null, fist: { pts: mx(MK.FIST).map(([x, y]) => [x - 19.4, y - 25.4]), line: mx(MK.FIST_LINE).map(([x, y]) => [x - 19.4, y - 25.4]), layer: 'behindRobe' },
+      leftHand: { pts: mxr(STAND.hand), line: mx(STAND.handLine), layer: 'under', lineOp: .3 }, stick: { ...stickMix(STICK.front, KG(), .5), layer: 'behindRobe' } }),
+    profileL: () => ({ th: -90, robe: PROFILE_BL, feet: [mxr(FEET.profile[1]), mxr(FEET.profile[0])],
+      right: sl(mx(tr(PT.FAR_STAND, -12)), 'back'), left: sl(mx(tr(STAND.near, 10.5)), 'front'),
+      cuff: null, fist: null, leftHand: { pts: mxr(tr(STAND.hand, 10.5)), line: mx(tr(STAND.handLine, 10.5)), layer: 'under', lineOp: .3 },
+      stick: { x: 3, y: -28.4, rot: 150, stretch: 1, layer: 'behindRobe' } }),
+    back34L: () => ({ th: -135, robe: lerpP(PROFILE_BL, ROBE_B, .5), feet: feetMix([mxr(FEET.profile[1]), mxr(FEET.profile[0])], FEET.back, .5),
+      right: slBlend(sl(mx(tr(PT.FAR_STAND, -12)), 'back'), ARM.rightBack, .5, 'back'), left: Object.assign(slBlend(sl(mx(tr(STAND.near, 10.5)), 'front'), ARM.leftBackB, .5, 'front'), { inner: [4, 19] }),   // (the line only along the side toward the body, not round the bottom)
+      cuff: null, fist: null, leftHand: null, stick: { ...stickMix({ x: 3, y: -28.4, rot: 150, stretch: 1 }, STICK.back, .5), layer: 'behindRobe' } }),
+  };
   function body(view, cand) {
     const B = cand === 'B';
+    if (leftBodies[view]) return leftBodies[view]();
     if (view === 'front') return { th: 0, robe: B ? ROBE_B : ROBE_SYM, feet: FEET.front,
       right: ARM.rightFront, left: B ? ARM.leftFrontB : ARM.leftFrontA,
       cuff: { cx: -13, cy: -24.4, rx: 4.3, ry: 3.8, r: 0 }, fist: { pts: tr(IDLE.hand, -4, .2), line: tr(IDLE.handLine, -4, .2), layer: 'front' },
@@ -201,12 +231,31 @@
     return `<g class="m4" id="${id}"><defs><clipPath id="${id}-robe"><path d="${P(robe)}"/></clipPath><clipPath id="${id}-head"><path d="${P(head)}"/></clipPath>${defs}<g id="${id}-art">${out.join('')}</g></defs>`
       + `<ellipse cx="1" cy="1.4" rx="27" ry="4.2" class="m4shadow"/><g${facingLeft ? ' transform="scale(-1 1)"' : ''}><use href="#${id}-art" class="m4-sil"/><use href="#${id}-art"/></g></g>`;
   }
+  // o.mod (Round 4.2B, walking): { feet: [[dx, dy], [dx, dy]], right: deg, left: deg (arms about the shoulder, the hand,
+  // cuff and keisaku go with them), stick: deg (about the fist), hem: dx, tilt: deg }
+  function applyMod(b, m) {
+    if (!m) return b;
+    const out = { ...b };
+    if (m.feet) out.feet = b.feet.map((f, i) => movP(f, m.feet[i]));
+    if (m.hem) out.robe = hemP(b.robe, m.hem);
+    const rp = b.right.pts[0], lp = b.left.pts[0];
+    if (m.right) { out.right = { ...b.right, pts: rotP(b.right.pts, rp, m.right) }; out.cuff = rotCuff(b.cuff, rp, m.right);
+      if (b.fist) out.fist = { ...b.fist, pts: rotP(b.fist.pts, rp, m.right), line: rotP(b.fist.line, rp, m.right) }; out.stick = rotStick(b.stick, rp, m.right); }
+    if (m.left) { out.left = { ...b.left, pts: rotP(b.left.pts, lp, m.left) }; if (b.leftHand) out.leftHand = { ...b.leftHand, pts: rotP(b.leftHand.pts, lp, m.left), line: rotP(b.leftHand.line, lp, m.left) }; }
+    if (m.stick && out.fist) { const c = out.fist.pts.reduce((a, q) => [a[0] + q[0] / out.fist.pts.length, a[1] + q[1] / out.fist.pts.length], [0, 0]); out.stick = rotStick(out.stick, c, m.stick); }
+    else if (m.stick) out.stick = rotStick(out.stick, [out.stick.x, out.stick.y], m.stick);
+    return out;
+  }
   function viewTT(view, cand, o = {}) {
-    const id = o.id || 'tt', b = body(view, cand), th = b.th, h = headParts(th, o.face || 'kind'), col = collarD(th, id), out = [];
+    const id = o.id || 'tt', b = applyMod(body(view, cand), o.mod), th = b.th, h = headParts(th, o.face || 'kind'), col = collarD(th, id), out = [];
+    if (o.mod && o.mod.tilt) h.tiltAdd = o.mod.tilt;
     const hand = (hd) => fill(P(hd.pts), ART.skin, 1) + (hd.lineOp ? det(L(P(hd.line, false), .7, hd.lineOp)) : '');
     // behind the robe
     if (b.left.layer === 'back') out.push(sleeveD(b.left));
     if (b.right.layer === 'back') out.push(sleeveD(b.right));
+    // his right hand and the keisaku when they are behind his body (turning toward facing left)
+    if (b.stick.layer === 'behindRobe') out.push(stickD(b.stick));
+    if (b.fist && b.fist.layer === 'behindRobe') out.push(fistD(b.fist.pts) + det(fingers(b.fist.line)));
     out.push(fill(P(b.feet[0]), ART.foot) + fill(P(b.feet[1]), ART.foot));
     out.push(fill(P(b.robe), ART.robe));
     out.push(det(robeLine(b.robe, th, -14, -36, -37, -3, 1, .45) + robeLine(b.robe, th, 180, -56, 180, -3, 1, .3)));
@@ -218,7 +267,7 @@
     if (b.right.layer === 'front') out.push(sleeveD(b.right));
     if (b.cuff) out.push(det(`<ellipse cx="${f2(b.cuff.cx)}" cy="${f2(b.cuff.cy)}" rx="${f2(b.cuff.rx)}" ry="${f2(b.cuff.ry)}" transform="rotate(${b.cuff.r} ${f2(b.cuff.cx)} ${f2(b.cuff.cy)})" style="fill:#26345a;stroke:${ink};stroke-width:.85"/>`));
     if (b.stick.layer === 'front') out.push(stickD(b.stick));
-    if (b.fist) out.push(fistD(b.fist.pts) + det(fingers(b.fist.line)));
+    if (b.fist && b.fist.layer !== 'behindRobe') out.push(fistD(b.fist.pts) + det(fingers(b.fist.line)));
     out.push(drawHead(h, id));
     return wrap(id, out, b.robe, h.outline, col.defs);
   }
@@ -228,16 +277,18 @@
            'keep' = drawn as the mirror image for facing left, but the keisaku stays in his RIGHT hand, which is
                     now the far one: the near arm hangs empty, the far hand holds the board at his side */
   function acc34(o = {}) {
-    const id = o.id || 'ac', left = !!o.left, out = [], face = 'kind';
+    const id = o.id || 'ac', left = !!o.left, out = [], face = o.face === 'stern' ? 'stern' : 'kind', m = o.mod || {};
+    const NS_ = [-12.6, -55.6], FS_ = [12.4, -55.4], nr = m.near || 0, fr = m.far || 0, ff = (m.feet || [])[1], nf = (m.feet || [])[0];
     const near = [[-13.6, -59.6], [-9, -56.8], [-3.6, -53.8], [2.4, -48.8], [6.2, -45]], far = [[12.8, -58.4], [10.6, -54.2], [7.8, -48.6], [5.8, -44]];
     const nearB = `<path d="${ribbon(near, 7.6, 3.2)}" style="fill:${ART.band}"/>`, farB = `<path d="${ribbon(far, 3, 2.8)}" style="fill:${ART.band}"/>`;
     const edge = (pts, sideSign, w) => pts.map((q, i) => { const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy); return [q[0] + sideSign * dy / l * w, q[1] - sideSign * dx / l * w]; });
     const keep = o.arms === 'keep', K = o.keep || {};
     // far arm, behind the robe
-    out.push(fill(P(PT.FAR_STAND), ART.robe) + (keep ? '' : fill(P(PT.FAR_HAND), ART.skin, 1)));
-    if (keep) out.push(stickD(K.stick) + fistD(K.fist) + det(fingers(K.fistLine)));
-    out.push(fill(P(PT.FEET.far), ART.foot) + fill(P(PT.FEET.near), ART.foot) + det(L('M1.6 -0.8 C1.6 1 -1 1.6 -4 1.7', .9, .5)));
-    out.push(fill(P(PT.ROBE), ART.robe));
+    out.push(fill(P(rotP(PT.FAR_STAND, FS_, fr)), ART.robe) + (keep ? '' : fill(P(rotP(PT.FAR_HAND, FS_, fr)), ART.skin, 1)));
+    if (keep) { const fist = rotP(K.fist, FS_, fr), st0 = rotStick(K.stick, FS_, fr), fc = fist.reduce((a, q) => [a[0] + q[0] / fist.length, a[1] + q[1] / fist.length], [0, 0]);
+      out.push(stickD(rotStick(st0, fc, m.stick || 0)) + fistD(fist) + det(fingers(rotP(K.fistLine, FS_, fr)))); }
+    out.push(fill(P(movP(PT.FEET.far, ff)), ART.foot) + fill(P(movP(PT.FEET.near, nf)), ART.foot) + (nf ? det(`<g transform="translate(${f2(nf[0])} ${f2(nf[1])})">${L('M1.6 -0.8 C1.6 1 -1 1.6 -4 1.7', .9, .5)}</g>`) : det(L('M1.6 -0.8 C1.6 1 -1 1.6 -4 1.7', .9, .5))));
+    out.push(fill(P(hemP(PT.ROBE, m.hem)), ART.robe));
     out.push(det(L(P(left ? [[11.2, -36], [12.4, -22], [12.8, -3.4]] : [[0.6, -36], [-0.4, -22], [-0.8, -3]], false), 1, .45)));
     out.push(det(`<g clip-path="url(#${id}-robe)">
       <path d="${P([[-4, -56], [1.4, -51], [5.8, -46.4], [9.8, -52.6], [12, -57], [4, -58.6]])}" style="fill:${ART.neck}"/>
@@ -248,15 +299,16 @@
              : L(P(edge(near.slice(2), 1, 1.6), false), .8, .6) + L(P(edge(far.slice(1), -1, 1.4), false), .9, .75)}
     </g>`));
     out.push(det(`<path d="${P(RAKU)}" style="fill:${ART.kesa};stroke:${ink};stroke-width:1.1"/><path d="${P(RAKU_IN)}" style="fill:none;stroke:${ART.bandC};stroke-width:.7;opacity:.55"/>`));
-    if (!keep) { const c = IDLE.cuffO;
-      out.push(fill(P(curve(IDLE.near, MK.DENSE.near, true)), ART.robe) + det(L(P(curve(IDLE.nearLine, MK.DENSE.line, false), false), 1.15)
+    if (!keep) { const c = rotCuff(IDLE.cuffO, NS_, nr), hand = rotP(IDLE.hand, NS_, nr), hc = hand.reduce((a, q) => [a[0] + q[0] / hand.length, a[1] + q[1] / hand.length], [0, 0]);
+      out.push(fill(P(rotP(curve(IDLE.near, MK.DENSE.near, true), NS_, nr)), ART.robe) + det(L(P(rotP(curve(IDLE.nearLine, MK.DENSE.line, false), NS_, nr), false), 1.15)
         + `<ellipse cx="${c.cx}" cy="${c.cy}" rx="${c.rx}" ry="${c.ry}" transform="rotate(${c.r} ${c.cx} ${c.cy})" style="fill:#26345a;stroke:${ink};stroke-width:.85"/>`)
-        + stickD(IDLE.stick) + fistD(IDLE.hand) + det(fingers(IDLE.handLine)));
-    } else out.push(fill(P(STAND.hand), ART.skin, 1) + det(L(P(STAND.handLine, false), .8, .55)) + fill(P(STAND.near), ART.robe) + det(L(P(STAND.nearLine, false), 1.15)));
-    out.push(`<g transform="rotate(2 3 -56)">` + fill(PT.HEAD, ART.skin) + det(`<g clip-path="url(#${id}-head)"><path d="M-6 -95 C-15 -88 -17 -74 -13 -64 C-10 -58.6 -6 -56 -1 -54.6 L-30 -50 L-30 -100 Z" style="fill:var(--skin-lo);opacity:.5"/></g>` + L(PT.HEAD_LOWER, 1.25))
+        + stickD(rotStick(rotStick(IDLE.stick, NS_, nr), hc, m.stick || 0)) + fistD(hand) + det(fingers(rotP(IDLE.handLine, NS_, nr))));
+    } else out.push(fill(P(rotP(STAND.hand, NS_, nr)), ART.skin, 1) + det(L(P(rotP(STAND.handLine, NS_, nr), false), .8, .55)) + fill(P(rotP(STAND.near, NS_, nr)), ART.robe) + det(L(P(rotP(STAND.nearLine, NS_, nr), false), 1.15)));
+    out.push(`<g transform="rotate(${m.tilt ? f2(2 + m.tilt) : 2} 3 -56)">` + fill(PT.HEAD, ART.skin) + det(`<g clip-path="url(#${id}-head)"><path d="M-6 -95 C-15 -88 -17 -74 -13 -64 C-10 -58.6 -6 -56 -1 -54.6 L-30 -50 L-30 -100 Z" style="fill:var(--skin-lo);opacity:.5"/></g>` + L(PT.HEAD_LOWER, 1.25))
       + fill(PT.EAR, ART.skin, 1) + det(L('M-15 -74 q-2 1.8 -.4 4.4', .9, .55) + '<path d="M-7.4 -88.6 q5 -4.2 11 -4.6" style="fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;opacity:.5"/>'
       + `<ellipse cx="5.6" cy="-66.4" rx="3.6" ry="2" style="fill:var(--blush);opacity:${PT.BLUSH[face]}"/><ellipse cx="19.6" cy="-66.2" rx="1.8" ry="1.6" style="fill:var(--blush);opacity:${PT.BLUSH[face]}"/>`
-      + `<ellipse cx="8.4" cy="-72.6" rx="1.9" ry="2.3" style="fill:${ink}"/><ellipse cx="16.6" cy="-72.6" rx="1.6" ry="2.2" style="fill:${ink}"/>` + L('M11.4 -64 q2.6 2 5 -.2', 1.4)
+      + (face === 'stern' ? `<ellipse cx="8.6" cy="-72.2" rx="1.9" ry="1.8" style="fill:${ink}"/><ellipse cx="16.8" cy="-72.2" rx="1.6" ry="1.7" style="fill:${ink}"/>` + L('M11.6 -63.6 h4.8', 1.5)
+        : `<ellipse cx="8.4" cy="-72.6" rx="1.9" ry="2.3" style="fill:${ink}"/><ellipse cx="16.6" cy="-72.6" rx="1.6" ry="2.2" style="fill:${ink}"/>` + L('M11.4 -64 q2.6 2 5 -.2', 1.4))
       + PT.BROW[face].map(d => `<path d="${d}" style="fill:#f6f1e6;stroke:${ink};stroke-width:1;stroke-linejoin:round"/>`).join('')) + '</g>');
     return `<g class="m4" id="${id}">
       <defs><clipPath id="${id}-robe"><path d="${P(PT.ROBE)}"/></clipPath><clipPath id="${id}-head"><path d="${PT.HEAD}"/></clipPath><g id="${id}-art">${out.join('')}</g></defs>
@@ -276,11 +328,13 @@
 
   /* ---------- public ---------- */
   const VIEWS = { front: 'P1 正面', back: 'P2 背面', p3mid: 'P3 中間（側面 → 正面）', profile: 'P4 側面', back34: 'P4 背面 3/4', q34L: '面向左・香板仍在右手' };
+  const VIEWS_L = { p3midL: '中間（正面 → 面向左）', profileL: '側面（面向左）', back34L: '背面 3/4（面向左）' };
   function view(name, cand, o = {}) {
     if (name === 'accepted') return MK.art({ id: o.id || 'acc', pose: 'idle', facing: o.facing });
-    if (name === 'q34L') return acc34({ id: o.id, left: true, arms: 'keep', keep: keepGrip(cand) });
+    if (name === 'q34L') return acc34({ id: o.id, left: true, arms: 'keep', keep: keepGrip(cand), face: o.face, mod: o.mod });
+    if (name === 'q34R') return acc34({ id: o.id, left: false, arms: 'idle', face: o.face, mod: o.mod });   // the accepted 3/4 itself, rebuilt (identical when unmoved)
     if (name === 'q34Lmirror') return MK.art({ id: o.id || 'acm', pose: 'idle', facing: 'left' });   // the accepted mirror (the keisaku changes hands)
     return viewTT(name, cand, o);
   }
-  window.MONK_VIEWS2 = { VIEWS, view, headParts, body, acc34, keepGrip, lapel };
+  window.MONK_VIEWS2 = { VIEWS, VIEWS_L, view, headParts, body, acc34, keepGrip, lapel };
 })();

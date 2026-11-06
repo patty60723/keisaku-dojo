@@ -62,9 +62,14 @@
   function arcTable(pts) { const d = [0]; for (let i = 1; i < pts.length; i++) d.push(d[i - 1] + dist(pts[i - 1], pts[i])); return d; }
   const smooth = u => { u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); };
   // one leg from a stop to the next: positions on the curve, and a time table with eased start and stop
+  // (Round 4.2B: a waypoint may also be a point {x, y} — where he is when a reminder interrupts him — and a leg may
+  // have its own speed: opts.speed, units / s)
   function makeLeg(names, opts = {}) {
-    const way = names.map(n => N[n]), pts = way.length > 1 ? catmull(way) : [way[0]], D = arcTable(pts), L = D[D.length - 1];
-    const A = Math.min(12, L / 3), B = Math.min(18, L / 2.5), v = d => SPEED * Math.max(.12, Math.min(1, smooth(d / A), smooth((L - d) / B)));
+    const way = names.map(n => typeof n === 'string' ? N[n] : n), V = opts.speed || SPEED;
+    // opts.straight: along the waypoints in straight stretches (a purposeful walk, turning at each waypoint)
+    const pts = way.length < 2 ? [way[0]] : opts.straight ? way.slice(1).reduce((acc, b, i) => { const a = way[i], n = Math.max(1, Math.ceil(dist(a, b) / .5)); for (let k = 1; k <= n; k++) acc.push({ x: a.x + (b.x - a.x) * k / n, y: a.y + (b.y - a.y) * k / n }); return acc; }, [{ x: way[0].x, y: way[0].y }]) : catmull(way);
+    const D = arcTable(pts), L = D[D.length - 1];
+    const A = Math.min(opts.speed ? 18 : 12, L / 3), B = Math.min(18, L / 2.5), v = d => V * Math.max(.12, Math.min(1, smooth(d / A), smooth((L - d) / B)));
     const T = [0]; for (let i = 1; i < pts.length; i++) T.push(T[i - 1] + (D[i] - D[i - 1]) / v((D[i] + D[i - 1]) / 2) * 1000);
     const total = T[T.length - 1];
     function at(t) {     // → { x, y, tx, ty } (tangent) at leg time t (ms)

@@ -32,6 +32,16 @@ a { color: var(--ai); }
 <p class="note">分支 <code>feature/round4-monk-integration</code>（從 main <code>68a414f</code> 建立）。原型：<a href="./">design/round4/</a>。正式版（<code>src/</code>、<code>index.html</code>）、Round 1 原型與 Round 3 審查頁都沒有被覆蓋。</p>
 
 <div class="card"><b>Round 4.2A-1</b>：新視角美術修正候選 A／B 見 <a href="pose-refinement-review.html">pose-refinement-review.html</a>（P3 中間、背面 3/4、正面、背面、側面、面向左但香板仍在右手；原始／A／B 並排、頭與耳放大、禪堂預覽）。頭部五官、耳朵、衣領、胸前衣片改由同一個轉向角度決定（<code>monk-views2.js</code>）。尚未選定。</div>
+<div class="card"><b>Round 4.2B～4.3 自然巡堂（採用候選 B，非最終美術）</b>：預覽與步態／轉身序列見 <a href="natural-patrol.html">natural-patrol.html</a>（固定種子重播、速度 1／¼／4、路徑疊圖、減少動態、路線紀錄）；整合原型 <a href="index.html">index.html</a> 可用 <code>?seed=N</code> 固定巡堂。
+<ul>
+<li><b>巡堂</b>（<code>natural-patrol.js</code>）：沿 Round 4.1 安全路點走；後方巡行、左右前方出巡、停下看麻糬；路線加權選擇，上一條 ×0.15、前一條 ×0.6、折回原處 ×0.35，不連續重複；換邊只經後方；停留 1.2–3 秒，偶有 4–7 秒靜止，前方停 2.4–4 秒。巡堂用自己的時鐘（rAF dt），頁面隱藏時停止。</li>
+<li><b>畫法</b>：每個姿勢（步態 8 相 × 正／背／左／右 × 神情、轉身影格）只在 <code>&lt;defs&gt;</code> 建一次，舞台上一個 <code>&lt;use&gt;</code> 只換 href 和 transform，不逐格重建 SVG。Round 3.5 的 <code>MONK4.art</code> 與提醒動畫不變（另一個 renderer，交接時 actor 接手）。</li>
+<li><b>提醒</b>：分心時 ① 減速停步（0.26 秒）② 轉向麻糬、神情轉嚴肅（注意）③ 以安全路徑快步走到立點（從所在點、目前路段兩端、最近路點中取最短且腳印不進安全邊界者）④ 在立點恢復 3.5 的比例、朝向與位置 ⑤ 播放完整 3.5 提醒（舉起 → 打 → 收回）⑥ 回巡堂。計數方式與規則不變。</li>
+<li><b>已知差異</b>：注意的一拍改在巡堂中（嚴肅神情＋轉向），因新視角沒有舉著香板走的姿勢，舉起在立點才開始。</li>
+<li><b>測試</b>：<code>tests/round4_2b.test.mjs</code> 17 項全過；全套 108 項中 107 過，唯一失敗為已知的 <code>collect.test.mjs</code> 日期問題（季節規則未改，另行記錄）。3.5 回歸檢查（return-check）0 差異像素。</li>
+<li><b>效能（無頭 Chromium，非實機）</b>：60 秒巡堂 p50/p95 16.7 ms，無超過 33 ms 的幀；CPU 降速 4× 時 p99 33.4 ms、3493 幀中 20 幀超過 33 ms；巡堂每幀繪製約 0.004–0.011 ms；heap 60 秒增加約 0.17 MB；姿勢共建 44 個後 DOM 不再增加。</li>
+<li><b>手機</b>：360／390／412、375×600、844×390 無水平捲動、無錯誤；舞台上只有場景內的熱點（堂規、窗、收藏冊…），控制按鈕不覆蓋舞台。橫向 844×390 時舞台下半需捲動（沿用版面 B，未因巡堂改變）。</li>
+</ul></div>
 <div class="card"><b>Round 4.2A</b>：
 <ul style="margin:4px 0 0;padding-left:20px">
 <li><b>合掌請打移到舞台外</b>：放在舞台下方與「暫離／出堂」同一列（版面 B，預設）；另一個候選是舞台正下方單獨一列（版面 A，<code>?ask=a</code>）。<code>?ask=stage</code> 可以看回原本在舞台上的位置做對照。顯示規則不變（只在坐禪中出現；暫離、落座、出堂、結算時隱藏；提醒進行中按了不處理）。底部加了安全區留白；測試列可以收起。截圖：<code>shots/layout/</code>（before＝原本、candA、candB；360×780、390×844、412×915、360×640、740×360）。</li>

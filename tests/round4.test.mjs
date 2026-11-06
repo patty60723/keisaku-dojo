@@ -31,11 +31,16 @@ test('focus: the timer runs, the monk patrols, nothing strikes on its own', asyn
 });
 
 test('first distraction: one full reminder, counted once at the hit, back to the hanging pose', async () => {
+  // (Round 4.2B) he first stops his patrol, notices and walks by the safe paths to the stance; the reminder then plays
+  // from the stance (raise → … → return), counted at the hit
   const { p, ctx, errors } = await open();
   await p.evaluate(() => __R4.awayFor(3000, true));
-  const seen = new Set();
-  for (let i = 0; i < 400 && !(await S(p)).monk.seg.match(/still|walk/); i++) { const s = await S(p); seen.add(s.monk.seg); if (s.monk.seg === 'windup' || s.monk.seg === 'pre') assert.equal(s.hits, 0, 'not counted before the hit'); await p.waitForTimeout(15); }
-  for (const id of ['notice', 'raise', 'swing', 'return']) assert.ok(seen.has(id) || id === 'swing', `played ${id} (saw ${[...seen]})`);
+  const seen = new Set(), modes = new Set();
+  for (let i = 0; i < 1500; i++) { const s = await S(p); seen.add(s.monk.seg); modes.add(s.patrol.mode + (s.patrol.face === 'stern' ? ':stern' : ''));
+    if (s.monk.seg === 'windup' || s.monk.seg === 'pre') assert.equal(s.hits, 0, 'not counted before the hit');
+    if (!s.playing && s.performed === 1) break; await p.waitForTimeout(15); }
+  for (const id of ['raise', 'return']) assert.ok(seen.has(id), `played ${id} (saw ${[...seen]})`);
+  assert.ok([...modes].some(m => m.endsWith(':stern')), `noticed (stern) before walking over (${[...modes]})`);
   await settled(p);
   const s = await S(p);
   assert.equal(s.hits, 1); assert.equal(s.impacts, 1); assert.equal(s.performed, 1);

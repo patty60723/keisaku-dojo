@@ -101,6 +101,7 @@
 
     /* ---- one frame: dt = ms since the last drawn frame (the host clamps it), now = rAF time ---- */
     render(dt, now) {
+      if (this.external) return 0;   // Round 4.2B: the natural patrol is drawing him (it hands him back at the stance)
       const s = this.s, rm = this.rm(), t0 = performance.now();
       this.t += dt;
       // walking and turning (between performances)
