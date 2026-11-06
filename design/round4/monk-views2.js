@@ -148,6 +148,36 @@
     const inNeck = s => clip ? `<g clip-path="url(#${id}-neck)">${s}</g>` : '';
     return { defs: clip, body: `<g clip-path="url(#${id}-robe)">${neck}${inNeck(n.runs.map(white).join('') + f.runs.map(white).join(''))}${n.runs.map(band).join('')}${f.runs.map(band).join('')}${inNeck(n.runs.map(edgeLine).join('') + f.runs.map(edgeLine).join(''))}</g>` };
   }
+  // Round 4.3 — the collar from the front and on the way to the 3/4, in the accepted drawing's own terms: two soft
+  // bands with no outline of their own, wide where they leave the shoulder (the head hides their ends), narrowing as
+  // they come down to a crossing just above the chest panel, a little off centre; his LEFT lapel lies over his right;
+  // the neck shows as a narrow, deep V between them (the accepted white under-collar is all but hidden, so it is left
+  // out here); one ink line on the inner edge of each band. At θ = ±35° it reaches the accepted 3/4's own bands
+  // (facing left: their mirror image, with the overlap swapped as acc34 does), so a turn changes it smoothly.
+  const FC = {   // [points], [width at the shoulder, width at the crossing]; under = his right lapel, over = his left
+    front: { under: [[-14.4, -59.4], [-10.2, -56.8], [-5.4, -53.2], [-1.4, -49.2], [2.8, -45.2]], uw: [6.2, 2.8],
+             over: [[14.8, -59.6], [10.8, -56.6], [6.2, -52.6], [2.6, -48.6], [-0.4, -44.8]], ow: [6.8, 3.2] },
+    acc: { under: [[-13.6, -59.6], [-9, -56.8], [-3.6, -53.8], [2.4, -48.8], [6.2, -45]], uw: [7.6, 3.2],
+           over: [[12.8, -58.4], [11.7, -56.3], [10.6, -54.2], [7.8, -48.6], [5.8, -44]], ow: [3, 2.8] },
+  };
+  const FC_MAX = 35;
+  function frontCollar(th, id) {
+    const u = clamp(Math.abs(th) / FC_MAX, 0, 1), left = th < 0, F = FC.front, A = FC.acc;
+    const mir = pts => pts.map(([x, y]) => [-x, y]), lp = (a, b) => a.map((q, i) => [q[0] + (b[i][0] - q[0]) * u, q[1] + (b[i][1] - q[1]) * u]), lw = (a, b) => [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u];
+    // facing left, the accepted mirror image's near band is his LEFT lapel (the one on top)
+    const under = left ? lp(F.under, mir(A.over)) : lp(F.under, A.under), uw = left ? lw(F.uw, A.ow) : lw(F.uw, A.uw);
+    const over = left ? lp(F.over, mir(A.under)) : lp(F.over, A.over), ow = left ? lw(F.ow, A.uw) : lw(F.ow, A.ow);
+    // the inner edge (toward the neck) of a band: offset by half its width, tapering like the band
+    const inner = (pts, w, side) => pts.map((q, i) => { const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1,
+      h = (w[0] + (w[1] - w[0]) * i / (pts.length - 1)) / 2 * .92; return [q[0] + side * dy / l * h, q[1] - side * dx / l * h]; });
+    const uIn = inner(under, uw, 1), oIn = inner(over, ow, -1);
+    // the neck: between the two inner edges, closed above under the chin (the head covers the top)
+    const cross = [(uIn[4][0] + oIn[3][0]) / 2, (uIn[3][1] + oIn[3][1]) / 2 + 1.6];
+    const neck = [...uIn.slice(0, 4), cross, ...oIn.slice(0, 4).reverse(), [oIn[0][0], -61], [uIn[0][0], -61]];
+    return `<g data-collar="front" clip-path="url(#${id}-robe)"><path d="${P(neck)}" style="fill:${ART.neck}"/>`
+      + `<path d="${ribbon(under, uw[0], uw[1])}" style="fill:${ART.band}"/>` + L(P(uIn.slice(1, 4), false), .8, .6)   /* stops where the lapel on top covers it */
+      + `<path d="${ribbon(over, ow[0], ow[1])}" style="fill:${ART.band}"/>` + L(P(oIn.slice(1), false), .9, .75) + '</g>';
+  }
   const RAKU = [[-0.6, -44.6], [6.6, -45.4], [14, -44.4], [14.4, -39.4], [13.6, -35.4], [6.4, -34.8], [-0.4, -35.6], [-1.2, -40]], RAKU_IN = [[1.4, -42.8], [6.6, -43.4], [12, -42.6], [12.2, -39.6], [11.6, -37.2], [6.4, -36.8], [1.6, -37.4], [1, -40]];
   function rakusuD(th, id) {
     if (cs(th) < -.05) return '';
@@ -259,7 +289,7 @@
     out.push(fill(P(b.feet[0]), ART.foot) + fill(P(b.feet[1]), ART.foot));
     out.push(fill(P(b.robe), ART.robe));
     out.push(det(robeLine(b.robe, th, -14, -36, -37, -3, 1, .45) + robeLine(b.robe, th, 180, -56, 180, -3, 1, .3)));
-    out.push(det(col.body)); out.push(det(rakusuD(th, id)));
+    out.push(det(Math.abs(th) <= FC_MAX ? frontCollar(th, id) : col.body)); out.push(det(rakusuD(th, id)));
     // the keisaku behind his sleeve (from behind), then the sleeves in front of the robe
     if (b.stick.layer === 'under') out.push(stickD(b.stick));
     if (b.leftHand && b.leftHand.layer === 'under') out.push(hand(b.leftHand));
