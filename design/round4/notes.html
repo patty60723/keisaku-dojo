@@ -31,6 +31,7 @@ a { color: var(--ai); }
 <h1>香板禪堂 Round 4：住持動畫整合原型</h1>
 <p class="note">分支 <code>feature/round4-monk-integration</code>（從 main <code>68a414f</code> 建立）。原型：<a href="./">design/round4/</a>。正式版（<code>src/</code>、<code>index.html</code>）、Round 1 原型與 Round 3 審查頁都沒有被覆蓋。</p>
 
+<div class="card"><b>Round 4 已結案</b>：整體設計通過驗收。結案紀錄（各輪成果、已驗收的造型與動畫、巡堂與提醒規則、測試結果、尚未驗證與尚未定案的事）見 <a href="../../docs/round4-closeout.md">docs/round4-closeout.md</a>。以下各輪的說明與審查頁保留原樣。</div>
 <div class="card"><b>Round 4.2A-1</b>：新視角美術修正候選 A／B 見 <a href="pose-refinement-review.html">pose-refinement-review.html</a>（P3 中間、背面 3/4、正面、背面、側面、面向左但香板仍在右手；原始／A／B 並排、頭與耳放大、禪堂預覽）。頭部五官、耳朵、衣領、胸前衣片改由同一個轉向角度決定（<code>monk-views2.js</code>）。尚未選定。</div>
 <div class="card"><b>Round 4.3 正面領口修正</b>：前後對照見 <a href="collar-review.html">collar-review.html</a>（修正前為 commit 403877e 的影格，存於 <code>collar-before.json</code>）。正面與轉向正面的中間影格改用原版 3/4 的領口語言：左襟壓右襟、交叉點在胸前衣片上方略偏一側、衣領從肩膀寬往交叉點漸細、本身不描外框也不加白邊、只描內緣一條線、脖子露出窄而深的 V；轉身時從原版 3/4 平順過渡到正面再到面向左。只有正面走路 16 張與中間 4 張改變，其他 57 張姿勢與 3.5 原圖不變；背面衣領未受影響，未改。</div>
 <div class="card"><b>Round 4.2B～4.3 自然巡堂（採用候選 B，非最終美術）</b>：預覽與步態／轉身序列見 <a href="natural-patrol.html">natural-patrol.html</a>（固定種子重播、速度 1／¼／4、路徑疊圖、減少動態、路線紀錄）；整合原型 <a href="index.html">index.html</a> 可用 <code>?seed=N</code> 固定巡堂。

@@ -118,6 +118,10 @@ manifest 的 `id` 要寫完整路徑 `/keisaku-dojo/`:寫 `./` 會被解析成�
 - [`docs/onboarding-spec.md`](docs/onboarding-spec.md):開場對話與設定流程
 - [`docs/journal-spec.md`](docs/journal-spec.md):坐禪帳、印章與連續天數
 
+設計紀錄:
+
+- [`docs/round4-closeout.md`](docs/round4-closeout.md):Round 4 住持動畫整合與自然巡堂的結案紀錄(已驗收的造型與動畫、巡堂與提醒規則、測試結果、尚未驗證與尚未決定的事)。原型在 `design/round4/`,尚未移植到正式版
+
 ## 待辦
 
 **測試**
