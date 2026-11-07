@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>自然巡堂預覽</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Huninn&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="../round2/r1-tokens.css">
+<style>
+body { margin: 0; background: var(--washi); color: var(--ink); font: 15px/1.65 var(--f-ui); }
+main { max-width: 900px; margin: 0 auto; padding: 16px max(16px, env(safe-area-inset-right)) calc(56px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+h1 { font: 700 23px/1.3 var(--f-story); margin: 0 0 4px; }
+h2 { font: 700 18px/1.35 var(--f-story); margin: 28px 0 8px; }
+.note { color: var(--ink-2); font-size: 14px; }
+.card { background: var(--paper); border-radius: 16px; box-shadow: var(--lift); padding: 12px 16px; margin: 10px 0; }
+.ctl { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.ctl label { display: inline-flex; align-items: center; gap: 4px; min-height: 34px; font-size: 14px; }
+.btn { min-height: 40px; padding: 0 14px; border-radius: 20px; border: 1.5px solid var(--paper-edge); background: var(--paper); color: var(--ink); font: 14px var(--f-ui); cursor: pointer; }
+.btn.main { background: var(--ai); color: var(--on-ai); border-color: var(--ai); }
+input[type=number] { width: 6em; min-height: 34px; font: 14px var(--f-num); border-radius: 8px; border: 1.5px solid var(--paper-edge); padding: 0 6px; background: var(--paper); color: var(--ink); }
+.stage { position: relative; border-radius: var(--r-lg); overflow: hidden; aspect-ratio: 4 / 3; box-shadow: var(--lift); background: var(--wall); isolation: isolate; max-width: 560px; }
+.stage svg { display: block; width: 100%; height: 100%; }
+#read { font: 13px/1.5 var(--f-num), var(--f-ui); color: var(--ink-2); margin-top: 6px; min-height: 40px; }
+#log { list-style: none; margin: 0; padding: 0; max-height: 180px; overflow-y: auto; font: 12px/1.6 ui-monospace, Menlo, monospace; }
+.strip { display: grid; gap: 6px; grid-template-columns: repeat(8, minmax(0, 1fr)); }
+.strip.s4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } .strip.s5 { grid-template-columns: repeat(5, minmax(0, 1fr)); } .strip.s3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 600px) { .strip { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.tile { background: var(--wall); border-radius: 10px; padding: 3px; margin: 0; box-shadow: var(--lift); }
+.tile svg { display: block; width: 100%; height: auto; }
+.tile figcaption { font-size: 11px; text-align: center; color: var(--ink-2); }
+.ln { stroke: var(--line); stroke-linecap: round; stroke-linejoin: round; }
+.cshadow { fill: #1f1610; opacity: var(--shadow-o); }
+[data-time="day"] .dusk-only, [data-time="day"] .night-only, [data-time="dusk"] .day-only, [data-time="dusk"] .night-only, [data-time="night"] .day-only, [data-time="night"] .dusk-only { opacity: 0; }
+.m4p { fill: var(--sil, var(--c)); stroke: var(--sil, none); stroke-width: var(--sw, 0); stroke-linejoin: round; }
+.m4p[data-s] { stroke: var(--sil, var(--line)); stroke-width: var(--sw, 1.1); }
+.m4-sil { --sil: var(--line); --sw: 4.4; --det: none; }
+.m4det { display: var(--det, inline); }
+.m4shadow { fill: #1f1610; opacity: .2; }
+</style>
+</head>
+<body data-time="day">
+<main>
+<h1>自然巡堂預覽（Round 4.2B）</h1>
+<p class="note">候選 B 的新視角，走 Round 4.1 的安全路徑。路線依權重隨機選（同一個種子每次都一樣），不連續重複同一條；停留 1.2–3 秒，有時安靜 4–7 秒；走到左前、右前會轉身看麻糬；左右換邊一定繞回後方。按「提醒」：收步 → 察覺 → 沿安全路徑到提醒站位 → Round 3.5 驗收的香板提醒 → 回到巡堂。</p>
+<div class="stage" id="stage"><svg id="scene" viewBox="0 0 400 300" role="img" aria-label="禪堂：住持巡堂"></svg></div>
+<div id="read"></div>
+<div class="card ctl">
+  <button class="btn main" id="remind">提醒（分心）</button>
+  <span>種子 <input type="number" id="seed" value="7"> <button class="btn" id="restart">從頭重播</button></span>
+  <span><label><input type="radio" name="spd" value="1" checked> 1 倍</label> <label><input type="radio" name="spd" value=".25"> 0.25 倍</label> <label><input type="radio" name="spd" value="4"> 4 倍</label></span>
+  <label><input type="checkbox" id="paths"> 路徑線</label>
+  <label><input type="checkbox" id="rmOn"> 減少動態</label>
+</div>
+<div class="card"><b>巡堂紀錄</b><ol id="log"></ol></div>
+
+<h2>走路循環（每 1/8 步）</h2>
+<p class="note">正面、背面、3/4 面向右（已驗收造型）、3/4 面向左（香板仍在右手）。腳輪流抬起、空著的手擺得比握香板的手多、下擺微微跟著擺。身體的上下起伏在舞台上由整體位置表現（這裡不含）。</p>
+<div id="cycles"></div>
+
+<h2>轉身（連續影格）</h2>
+<div id="turns"></div>
+
+<h2>新視角修正前後</h2>
+<div class="strip s5" id="ba"></div>
+</main>
+
+<script src="../round2/r1-scene.js"></script>
+<script src="../round3/monk4.js"></script>
+<script src="../round3/anim.js"></script>
+<script src="monk-actor.js"></script>
+<script src="patrol-paths.js"></script>
+<script src="monk-views.js"></script>
+<script src="monk-views2.js"></script>
+<script src="natural-patrol.js"></script>
+<script>
+'use strict';
+const $ = s => document.querySelector(s), NS = 'http://www.w3.org/2000/svg', A = KEISAKU_ANIM, P = PATROL, V2 = MONK_VIEWS2, NPD = NATURAL_PATROL;
+document.documentElement.dataset.time = 'day';
+document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style="position:absolute" aria-hidden="true">${sceneDefs()}</svg>`);
+const scene = $('#scene');
+scene.innerHTML = sceneMarkup() + '<defs id="npDefs"></defs><g id="overlay" style="pointer-events:none"></g>';
+$('#rack', scene).setAttribute('opacity', 0); $('#seatLip', scene).setAttribute('opacity', 1);
+// the mochi (Round 1 drawing), squashing with the reminder
+const mochiG = document.createElementNS(NS, 'g'); $('#mochiSlot', scene).appendChild(mochiG);
+function drawMochi(face = 'calm', sx = 1, sy = 1) {
+  mochiG.setAttribute('transform', `translate(206 257) scale(${sx.toFixed(3)} ${sy.toFixed(3)})`);
+  if (mochiG.dataset.face === face) return; mochiG.dataset.face = face;
+  const f = FACE[face], eyes = f.eyes === 'dot' ? '<circle cx="-11" cy="-30" r="2.7" fill="var(--line)"/><circle cx="11" cy="-30" r="2.7" fill="var(--line)"/>' : f.eyes;
+  mochiG.innerHTML = mochiMarkup('mo');
+  mochiG.querySelector('#mo-face').innerHTML = `<ellipse cx="-20" cy="-22" rx="5.4" ry="3.2" fill="var(--blush)" opacity=".6"/><ellipse cx="20" cy="-22" rx="5.4" ry="3.2" fill="var(--blush)" opacity=".6"/>${eyes}${f.mouth}`;
+  HANDS.lap.forEach(([cx, cy, rx, ry, r], i) => { const e = mochiG.querySelector(`#mo-${i ? 'hr' : 'hl'}`); Object.entries({ cx, cy, rx, ry, transform: `rotate(${r} ${cx} ${cy})` }).forEach(([k, v]) => e.setAttribute(k, v)); });
+  mochiG.querySelector('#mo-feet').setAttribute('opacity', 0);
+}
+drawMochi();
+const back = document.createElementNS(NS, 'g'), front = document.createElementNS(NS, 'g');
+$('#monkSlot', scene).appendChild(back); $('#fxSlot', scene).appendChild(front);
+let rm = false;
+const K = new MonkActor(back, front, { depth: P.depth, rm: () => rm });
+K.s.x = P.N.BL.x; K.s.y = P.N.BL.y;
+const logEl = $('#log'), log = t => { const li = document.createElement('li'); li.textContent = `${(np.t / 1000).toFixed(1).padStart(6)} s  ${t}`; logEl.prepend(li); };
+let np = null, busy = false;
+function makeNP(seed) {
+  $('#npDefs', scene).innerHTML = ''; if (np) np.off();
+  np = new NaturalPatrol({ actor: K, defs: $('#npDefs', scene), lip: $('#seatLip', scene), slot: $('#monkSlot', scene), seed, rm: () => rm, log });
+  K.s.x = P.N.BL.x; K.s.y = P.N.BL.y; K.s.dir = 1; logEl.innerHTML = '';
+  np.start(300, 'BL');
+}
+makeNP(+$('#seed').value);
+$('#restart').onclick = () => { if (busy) return; makeNP(+$('#seed').value || 1); };
+$('#rmOn').onchange = e => { rm = e.target.checked; };
+let speed = 1; document.querySelectorAll('input[name=spd]').forEach(r => r.onchange = () => speed = +r.value);
+async function remind() {
+  if (busy) return; busy = true; log('分心 → 提醒');
+  const r = await np.toStance(); if (r.aborted) { busy = false; return; }
+  log('到提醒站位（3.5 驗收的比例、朝向、位置）');
+  await K.perform({ quick: true, onImpact: () => log('命中') });
+  drawMochi('calm');
+  log('提醒結束 → 回到巡堂'); busy = false;
+  np.start(600, 'ST');
+}
+$('#remind').onclick = remind;
+// paths overlay
+const pts = a => a.map(p => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' L');
+$('#paths').onchange = e => { $('#overlay').innerHTML = e.target.checked ? P.EDGES.map(([a, b]) => `<path d="M${pts(P.makeLeg([a, b]).pts)}" style="fill:none;stroke:#34466e;stroke-width:1;stroke-dasharray:3 2;opacity:.6"/>`).join('') + `<path d="M${pts(P.GROUND.zafu)} Z M${pts(P.GROUND.mat)} Z" style="fill:#c8432d;opacity:.12"/>` : ''; };
+// the loop
+let prevT = performance.now(), perf = { n: 0, slow: 0, work: [] };
+function frame(t) {
+  requestAnimationFrame(frame);
+  const gap = t - prevT, dt = Math.min(50, Math.max(0, gap)) * speed; prevT = t; const w0 = performance.now();
+  const m = K.mochi(); if (m) drawMochi(m.face, m.sx, m.sy);
+  np.update(dt, t); K.render(dt, t);
+  const st = np.state(), ks = K.state();
+  $('#read').textContent = `${st.active ? (st.mode === 'walk' ? '走路' : st.mode === 'turn' ? '轉身' : '停留') : ks.performing ? '提醒：' + ks.seg : '站位'}・${st.active ? { R: '3/4 面向右', L: '3/4 面向左', F: '正面', K: '背面' }[st.fam] : '3/4 面向右'}・(${K.s.x.toFixed(1)}, ${K.s.y.toFixed(1)})・比例 ${P.depth(K.s.y).toFixed(3)}・種子 ${np.seed}・姿勢 ${st.built} 張`;
+  perf.n++; if (gap > 25) perf.slow++; perf.work.push(performance.now() - w0); if (perf.work.length > 600) perf.work.shift();
+}
+requestAnimationFrame(frame);
+
+/* ---------- strips ---------- */
+let sid = 0;
+const tile = (markup, cap, vb = '-34 -104 68 110') => `<figure class="tile"><svg viewBox="${vb}"><rect x="-60" y="-120" width="120" height="140" fill="var(--wall)"/><rect x="-60" y="0" width="120" height="20" fill="var(--tatami)" opacity=".55"/>${markup}</svg><figcaption>${cap}</figcaption></figure>`;
+const pose = key => NPD.buildPose(key, 'st' + (++sid));
+$('#cycles').innerHTML = [['F', '正面'], ['K', '背面'], ['R', '3/4 面向右'], ['L', '3/4 面向左']].map(([f, n]) => `<p class="note" style="margin:10px 0 4px"><b>${n}</b></p><div class="strip">${[...Array(8)].map((_, i) => tile(pose(`W:${f}:${i}:kind:0`), `${i + 1}/8`)).join('')}</div>`).join('');
+const SEQ = [['3/4 右 → 正面（左前停下看麻糬的反向）', ['W:R:0:kind:0', 'T:p3mid:kind', 'W:F:0:kind:0']], ['正面 → 3/4 左（右前停下看麻糬）', ['W:F:0:kind:0', 'T:p3midL:kind', 'W:L:0:kind:0']],
+  ['3/4 右 → 背面（從左前回後方）', ['W:R:0:kind:0', 'T:profile:kind', 'T:back34:kind', 'W:K:0:kind:0']], ['3/4 左 → 背面（從右前回後方）', ['W:L:0:kind:0', 'T:profileL:kind', 'T:back34L:kind', 'W:K:0:kind:0']],
+  ['3/4 右 → 3/4 左（後方折返，經過正面）', ['W:R:0:kind:0', 'T:p3mid:kind', 'W:F:0:kind:0', 'T:p3midL:kind', 'W:L:0:kind:0']]];
+$('#turns').innerHTML = SEQ.map(([n, keys]) => `<p class="note" style="margin:10px 0 4px"><b>${n}</b></p><div class="strip s5">${keys.map((k, i) => tile(pose(k), `${i + 1}`)).join('')}</div>`).join('');
+// before / after: Round 4.2A original vs candidate B (adopted for development)
+$('#ba').innerHTML = [['p3_1', 'p3mid', 'P3 中間'], ['p4_2', 'back34', '背面 3/4'], ['front', 'front', '正面'], ['back', 'back', '背面'], ['accL', 'q34L', '面向左']].map(([o, b, n]) =>
+  tile(o === 'accL' ? MONK4.art({ id: 'ba' + (++sid), pose: 'idle', facing: 'left' }) : MONK_VIEWS.view(o, { id: 'ba' + (++sid) }), `4.2A・${n}`) + '').join('')
+  + [['p3mid', 'P3 中間'], ['back34', '背面 3/4'], ['front', '正面'], ['back', '背面'], ['q34L', '面向左（右手握板）']].map(([b, n]) => tile(V2.view(b, 'B', { id: 'bb' + (++sid) }), `B・${n}`)).join('');
+window.__np = { get np() { return np; }, K, remind, makeNP, setSpeed: v => speed = v, perf, get busy() { return busy; } };
+</script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>正面領口修正</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Huninn&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="../round2/r1-tokens.css">
+<style>
+body { margin: 0; background: var(--washi); color: var(--ink); font: 15px/1.65 var(--f-ui); }
+main { max-width: 900px; margin: 0 auto; padding: 16px max(16px, env(safe-area-inset-right)) calc(56px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+h1 { font: 700 23px/1.3 var(--f-story); margin: 0 0 4px; }
+h2 { font: 700 18px/1.35 var(--f-story); margin: 28px 0 8px; }
+.note { color: var(--ink-2); font-size: 14px; }
+.card { background: var(--paper); border-radius: 16px; box-shadow: var(--lift); padding: 12px 16px; margin: 10px 0; }
+.ctl { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.ctl label { display: inline-flex; align-items: center; gap: 4px; min-height: 34px; font-size: 14px; }
+.btn { min-height: 40px; padding: 0 14px; border-radius: 20px; border: 1.5px solid var(--paper-edge); background: var(--paper); color: var(--ink); font: 14px var(--f-ui); cursor: pointer; }
+.btn.main { background: var(--ai); color: var(--on-ai); border-color: var(--ai); }
+input[type=number] { width: 6em; min-height: 34px; font: 14px var(--f-num); border-radius: 8px; border: 1.5px solid var(--paper-edge); padding: 0 6px; background: var(--paper); color: var(--ink); }
+.stage { position: relative; border-radius: var(--r-lg); overflow: hidden; aspect-ratio: 4 / 3; box-shadow: var(--lift); background: var(--wall); isolation: isolate; max-width: 560px; }
+.stage svg { display: block; width: 100%; height: 100%; }
+#read { font: 13px/1.5 var(--f-num), var(--f-ui); color: var(--ink-2); margin-top: 6px; min-height: 40px; }
+#log { list-style: none; margin: 0; padding: 0; max-height: 180px; overflow-y: auto; font: 12px/1.6 ui-monospace, Menlo, monospace; }
+.strip { display: grid; gap: 6px; grid-template-columns: repeat(8, minmax(0, 1fr)); }
+.strip.s4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } .strip.s5 { grid-template-columns: repeat(5, minmax(0, 1fr)); } .strip.s3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 600px) { .strip { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.tile { background: var(--wall); border-radius: 10px; padding: 3px; margin: 0; box-shadow: var(--lift); }
+.tile svg { display: block; width: 100%; height: auto; }
+.tile figcaption { font-size: 11px; text-align: center; color: var(--ink-2); }
+.ln { stroke: var(--line); stroke-linecap: round; stroke-linejoin: round; }
+.cshadow { fill: #1f1610; opacity: var(--shadow-o); }
+[data-time="day"] .dusk-only, [data-time="day"] .night-only, [data-time="dusk"] .day-only, [data-time="dusk"] .night-only, [data-time="night"] .day-only, [data-time="night"] .dusk-only { opacity: 0; }
+.m4p { fill: var(--sil, var(--c)); stroke: var(--sil, none); stroke-width: var(--sw, 0); stroke-linejoin: round; }
+.m4p[data-s] { stroke: var(--sil, var(--line)); stroke-width: var(--sw, 1.1); }
+.m4-sil { --sil: var(--line); --sw: 4.4; --det: none; }
+.m4det { display: var(--det, inline); }
+.m4shadow { fill: #1f1610; opacity: .2; }
+.strip.s2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .strip.s6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .strip { align-items: start; }
+.lab { font-size: 13px; font-weight: 700; margin: 6px 0 2px; }
+</style>
+</head>
+<body data-time="day">
+<main>
+<h1>正面領口修正（Round 4.3）</h1>
+<p class="note">局部美術修正：只改正面（與轉向正面的中間影格）的領口。頭身比例、臉、耳朵、肩膀、袖子、香板、動畫節奏與巡堂路徑都不變。「修正前」是 commit 403877e 的影格（存成靜態檔），「修正後」是現在的程式即時畫的。</p>
+
+<h2>1. 原版 3/4 領口 vs 修正前的正面領口</h2>
+<p class="note">原版（Round 3.5 已驗收）：左襟壓右襟，交叉點偏向他的左側、落在胸前衣片上緣；近側衣領寬、往交叉點漸細，遠側衣領窄；白色內領只露出細細一條；脖子從兩襟之間露出一小塊；線條只描衣領的內緣。</p>
+<div class="pair" id="cmp"></div>
+
+<h2>2. 修正前／修正後：正面全身與領口特寫</h2>
+<div id="ba"></div>
+
+<h2>3. 正面走路循環（領口特寫，每 1/8 步）</h2>
+<div id="walk"></div>
+
+<h2>4. 轉身：3/4 右 → 正面 → 3/4 左（含中間影格）</h2>
+<div id="turn"></div>
+</main>
+<script src="../round2/r1-scene.js"></script>
+<script src="../round3/monk4.js"></script>
+<script src="../round3/anim.js"></script>
+<script src="monk-actor.js"></script>
+<script src="patrol-paths.js"></script>
+<script src="monk-views.js"></script>
+<script src="monk-views2.js"></script>
+<script src="natural-patrol.js"></script>
+<script>
+const $ = s => document.querySelector(s), N = NATURAL_PATROL;
+const FULL = '-34 -104 68 110', ZOOM = '-22 -70 44 34';
+let sid = 0;
+const tile = (markup, cap, vb = FULL) => `<figure class="tile"><svg viewBox="${vb}"><rect x="-60" y="-120" width="120" height="140" fill="var(--wall)"/><rect x="-60" y="0" width="120" height="20" fill="var(--tatami)" opacity=".55"/>${markup}</svg><figcaption>${cap}</figcaption></figure>`;
+const now = key => N.buildPose(key, 'cr' + (++sid));
+const acc = () => MONK4.art({ id: 'cr' + (++sid), pose: 'idle' });
+const strip = (cls, items) => `<div class="strip ${cls}">${items.join('')}</div>`;
+fetch('collar-before.json').then(r => r.json()).then(B => {
+  const bf = key => B[key].replaceAll('id="bf', 'id="b' + (++sid) + 'f').replace(/url\(#bf/g, 'url(#b' + sid + 'f').replace(/href="#bf/g, 'href="#b' + sid + 'f');
+  $('#cmp').innerHTML = tile(acc(), '原版 3/4（已驗收）', ZOOM) + tile(bf('W:F:0:kind:0'), '修正前：正面', ZOOM) + tile(acc(), '原版 3/4 全身') + tile(bf('W:F:0:kind:0'), '修正前：正面全身');
+  $('#ba').innerHTML = ['kind', 'stern'].map(f => `<p class="lab">${f === 'kind' ? '平常' : '嚴肅（提醒時）'}</p>` + strip('s4', [tile(bf(`W:F:0:${f}:0`), '修正前'), tile(now(`W:F:0:${f}:0`), '修正後'), tile(bf(`W:F:0:${f}:0`), '修正前（特寫）', ZOOM), tile(now(`W:F:0:${f}:0`), '修正後（特寫）', ZOOM)])).join('');
+  const ph = [...Array(8).keys()];
+  $('#walk').innerHTML = '<p class="lab">修正前</p>' + strip('', ph.map(i => tile(bf(`W:F:${i}:kind:0`), `${i + 1}/8`, ZOOM)))
+    + '<p class="lab">修正後</p>' + strip('', ph.map(i => tile(now(`W:F:${i}:kind:0`), `${i + 1}/8`, ZOOM)))
+    + '<p class="lab">修正後（全身）</p>' + strip('', ph.map(i => tile(now(`W:F:${i}:kind:0`), `${i + 1}/8`)));
+  const seq = ['W:R:0:kind:0', 'T:p3mid:kind', 'W:F:0:kind:0', 'T:p3midL:kind', 'W:L:0:kind:0'], cap = ['3/4 右（原版）', '中間', '正面', '中間', '3/4 左'];
+  $('#turn').innerHTML = '<p class="lab">修正前</p>' + strip('s5', seq.map((k, i) => tile(bf(k), cap[i], ZOOM)))
+    + '<p class="lab">修正後</p>' + strip('s5', seq.map((k, i) => tile(now(k), cap[i], ZOOM)))
+    + '<p class="lab">修正後（全身）</p>' + strip('s5', seq.map((k, i) => tile(now(k), cap[i])));
+  document.body.dataset.ready = '1';
+});
+</script>
+</body>
+</html>

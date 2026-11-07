@@ -10,15 +10,20 @@ after(async () => { await browser.close(); server.stop(); });
 const SEASON_SCROLL = { spring: '花開', summer: '清風', autumn: '明月', winter: '雪' };
 const seasonNow = () => ['spring', 'summer', 'autumn', 'winter'][Math.floor(((new Date().getMonth() + 11) % 12) / 3)];
 const tenDays = () => [...Array(10)].map((_, i) => entry(i));          // ten full rounds on ten days in a row, none struck
+// the same ten rounds on fixed winter days (10–19 December 2025, 2 pm): a log counted back from today straddles two
+// seasons in the first days of Feb / May / Aug / Nov, so the season's scroll would be one round short
+const winterDays = () => [...Array(10)].map((_, i) => { const t = new Date(2025, 11, 10 + i, 14).getTime();
+  return entry(0, { t, d: `2025-12-${String(10 + i).padStart(2, '0')}` }); });
 const openBook = async p => { await p.locator('#collectBtn').click(); await p.waitForFunction(() => document.getElementById('collect').open); };
 const card = (p, id) => p.locator(`.c-item[data-id="${id}"]`);
 const scrollText = p => p.evaluate(() => document.getElementById('scrollText').textContent);
 
 test('the hanging scroll opens the 收藏冊, which works out from the log what has been earned', async () => {
-  const { p, ctx, errors } = await openApp(browser, server.url, { storage: { 'keisaku-log-v2': tenDays() } });
+  const { p, ctx, errors } = await openApp(browser, server.url, { storage: { 'keisaku-log-v2': winterDays() } });
   await openBook(p);
   const locked = id => card(p, id).evaluate(b => b.classList.contains('locked'));
-  for (const id of ['靜', '忍', '心', '莫妄想', '日日是好日', SEASON_SCROLL[seasonNow()]]) assert.equal(await locked(id), false, id);
+  for (const id of ['靜', '忍', '心', '莫妄想', '日日是好日', SEASON_SCROLL.winter]) assert.equal(await locked(id), false, id);
+  for (const id of [SEASON_SCROLL.spring, SEASON_SCROLL.summer, SEASON_SCROLL.autumn]) assert.equal(await locked(id), true, `${id}: no rounds in that season`);
   for (const id of ['無', '一期一會', '放下著']) assert.equal(await locked(id), true, id);
   assert.match(await card(p, '無').textContent(), /還差 40 炷/);
   assert.match(await p.locator('#collectSum').textContent(), /已經收到 \d+ \/ 47 樣/);

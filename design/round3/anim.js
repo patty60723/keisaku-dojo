@@ -85,6 +85,8 @@
   // the hold: the arm keeps drawing back a touch, the body settles a little further back (alive, not frozen)
   const KK = {}; for (const k in KEYS) KK[k] = KEYS[k];
   KK.windupPlus = Object.assign({}, KK.windup, { a1: KK.windup.a1 + 4, sr: KK.windup.sr - 4, lean: KK.windup.lean - 1, name: 'windupPlus' });
+  // Round 4: noticing — the hanging pose with the head turned toward the mochi (tilt 6°, 察覺 face)
+  KK.idleNotice = Object.assign({}, KK.idle, { name: 'idleNotice', face: 'notice', tilt: 6 });
 
   /* ---------- timeline ---------- */
   const ease = {
@@ -100,14 +102,23 @@
       ['swing', '揮下', 'windupPlus', 'strike', 'in'], ['stop', '命中停格', 'strike', 'strike', 'lin'], ['follow', '收勢', 'strike', 'follow', 'out'], ['settle', '收勢（停）', 'follow', 'follow', 'lin'],
       ['return', '收板歸位', 'follow', 'idle', 'inOut'], ['rest', '待機', 'idle', 'idle', 'lin']];
     let t0 = 0; SEG = plan.map(([id, zh, a, b, e]) => { const s = { id, zh, a, b, e, t0, t1: t0 + T[id] }; t0 = s.t1; return s; });
+    DEF.SEG = SEG;
   }
+  /* Round 4: a timeline can also be made from rows [id, 中文, from key, to key, ease, ms] (the game composes the
+     reminder: notice → raise → approach → … the accepted segments). Every function below takes an optional plan;
+     without one it uses the timeline above, exactly as before. */
+  const DEF = { SEG: [] };
+  function makePlan(rows) { let t0 = 0; return { SEG: rows.map(([id, zh, a, b, e, ms]) => { const s = { id, zh, a, b, e, t0, t1: t0 + ms }; t0 = s.t1; return s; }) }; }
   build();
-  const total = () => SEG[SEG.length - 1].t1;
-  const segAt = t => SEG.find(s => t < s.t1) || SEG[SEG.length - 1];
+  const total = (pl = DEF) => pl.SEG[pl.SEG.length - 1].t1;
+  const segAt = (t, pl = DEF) => pl.SEG.find(s => t < s.t1) || pl.SEG[pl.SEG.length - 1];
+  const segOf = (pl, id) => pl.SEG.find(s => s.id === id);
 
-  function joints(t) {
-    t = Math.max(0, Math.min(total(), t));
-    const s = segAt(t), A = KK[s.a], B = KK[s.b], u = Math.min(1, (t - s.t0) / ((s.t1 - s.t0) || 1)), e = ease[s.e](u);
+  function joints(t, pl = DEF) {
+    t = Math.max(0, Math.min(total(pl), t));
+    const s = segAt(t, pl), A = KK[s.a], B0 = KK[s.b], u = Math.min(1, (t - s.t0) / ((s.t1 - s.t0) || 1)), e = ease[s.e](u);
+    // angles are unwrapped per segment (for the 3.3–3.5 chain this changes nothing: it was unwrapped in that order)
+    const B = B0 === A ? A : Object.assign(Object.create(B0), { a1: unwrap(A.a1, B0.a1), a2: unwrap(A.a2, B0.a2), sr: unwrap(A.sr, B0.sr) });
     const a1 = lerp(A.a1, B.a1, e), a2 = lerp(A.a2, B.a2, e), L1 = lerp(A.L1, B.L1, e), L2 = lerp(A.L2, B.L2, e);
     const el = [SH[0] + L1 * dir(a1)[0], SH[1] + L1 * dir(a1)[1]], wr = [el[0] + L2 * dir(a2)[0], el[1] + L2 * dir(a2)[1]];
     const fd = lerp(A.fd, B.fd, e), fa = lerp(A.fa, B.fa, e), fist = [wr[0] + fd * dir(a2 + fa)[0], wr[1] + fd * dir(a2 + fa)[1]];
@@ -119,6 +130,8 @@
       face = u < .25 ? 'calm' : u < .8 ? 'relief' : 'kind';
       tilt += 4 * Math.sin(Math.PI * u) ** 2;
     }
+    if (s.id === 'notice') face = 'notice';
+    if (s.id === 'raise') face = u < .6 ? 'notice' : 'stern';   // the Round 3 plan: serious at 60% of the raise
     return { t, s, A, B, e, u, el, wr, fist, a2, rot, d, stretch, origin: [fist[0] + off[0] * cr - off[1] * sn, fist[1] + off[0] * sn + off[1] * cr],
       tipLen: M.STICK.grip + M.STICK.blade * stretch, lean: lerp(A.lean, B.lean, e), sx: lerp(A.sx, B.sx, e), sy: lerp(A.sy, B.sy, e),
       face, tilt, a1, L1, L2, sr };
@@ -136,8 +149,8 @@
     });
   }
   const LAG = 50;
-  function poseAt(t, opts = {}) {
-    const j = joints(t), lag = joints(t - LAG), A = j.A, B = j.B, e = j.e;
+  function poseAt(t, opts = {}, pl = DEF) {
+    const j = joints(t, pl), lag = joints(t - LAG, pl), A = j.A, B = j.B, e = j.e;
     const carried = b => { const q = skin(b, j, lag); return b.ctrl ? onSpline(q, b.closed, SUB) : q; };
     const blend = (key) => lerpP(carried(A[key]), carried(B[key]), e);
     const cf = lerp(A.cf, B.cf, e), cv = lerp(A.cv, B.cv, e), n = dir(j.a2 + 90);
@@ -155,8 +168,9 @@
     };
     // motion trail: the tip's last 70 ms, only while it is fast
     let trail = '';
-    if (j.s.id === 'swing' || j.s.id === 'stop') {
-      const pts = []; for (let k = 0; k <= 10; k++) pts.push(tipLocal(joints(Math.max(SEG[3].t0, j.t - 70 + 7 * k))));
+    const sw = segOf(pl, 'swing');
+    if (sw && (j.s.id === 'swing' || j.s.id === 'stop')) {
+      const pts = []; for (let k = 0; k <= 10; k++) pts.push(tipLocal(joints(Math.max(sw.t0, j.t - 70 + 7 * k), pl)));
       const mid = pts.map(q => q.map(v => v.toFixed(1)).join(' ')).join(' L');
       trail = `<path d="M${mid}" style="fill:none;stroke:#fffaf0;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;opacity:${opts.trailOp ?? .3}"/>`;
     }
@@ -170,8 +184,9 @@
   }
 
   /* ---------- the mochi's reaction: squash at the hit, held during the hit-stop, then a damped bounce ---------- */
-  function mochiAt(t) {
-    const hit = SEG[4].t0, after = SEG[4].t1;
+  function mochiAt(t, pl = DEF) {
+    const st = segOf(pl, 'stop'); if (!st) return { sx: 1, sy: 1, face: 'calm' };
+    const hit = st.t0, after = st.t1;
     if (t < hit) return { sx: 1, sy: 1, face: 'calm' };
     if (t < after) return { sx: 1.07, sy: .88, face: 'ouch' };
     const tau = t - after, dy = -.12 * Math.exp(-tau / 150) * Math.cos(2 * Math.PI * tau / 300);
@@ -258,5 +273,5 @@
     return j;
   }
 
-  window.KEISAKU_ANIM = { stickFrontAt: t => stickFrontAt(joints(t)), T, build, total, SEG: () => SEG, joints, poseAt, mochiAt, analyse, makeView, draw, toWorld, tipLocal, MONK_AT, MOCHI_AT, KK, SH, LAG, curve, NEAR_N, LINE_N, endCheck };
+  window.KEISAKU_ANIM = { stickFrontAt: (t, pl) => stickFrontAt(joints(t, pl)), T, build, total, SEG: () => SEG, makePlan, segOf, joints, poseAt, mochiAt, analyse, makeView, draw, toWorld, tipLocal, MONK_AT, MOCHI_AT, KK, SH, LAG, curve, NEAR_N, LINE_N, endCheck };
 })();

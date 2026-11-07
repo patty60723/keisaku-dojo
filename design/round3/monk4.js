@@ -365,5 +365,7 @@
     idle: { shN: [-15, -48], elN: [-19.4, -31], wrN: [-11.6, -24.8], hdN: [-9.0667, -25], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
     ready3: { shN: [-15, -48], elN: [-21.4, -29.6], wrN: [-10.6, -36], hdN: [-8.4, -37.5], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
   };
-  window.MONK4 = { silhouette, art, SCHEME, POSE, spline, stick, STICK, SKELETON, FIST, FIST_LINE, resample, onSpline, curve, DENSE };
+  // Round 4.2A: the accepted shapes, read-only, so new views of the same monk are built from them (nothing here changes)
+  const parts = Object.freeze({ HEAD, HEAD_LOWER, EAR, FEET, ROBE, NEAR_OUT, FAR_OUT, FAR_STAND, FAR_HAND, BROW, BLUSH, ART, ribbon });
+  window.MONK4 = { parts, silhouette, art, SCHEME, POSE, spline, stick, STICK, SKELETON, FIST, FIST_LINE, resample, onSpline, curve, DENSE };
 })();

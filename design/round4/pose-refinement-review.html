@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>新視角美術修正</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Huninn&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="../round2/r1-tokens.css">
+<style>
+body { margin: 0; background: var(--washi); color: var(--ink); font: 15px/1.65 var(--f-ui); }
+main { max-width: 980px; margin: 0 auto; padding: 18px 16px 60px; }
+h1 { font: 700 24px/1.3 var(--f-story); margin: 0 0 4px; }
+h2 { font: 700 18px/1.35 var(--f-story); margin: 32px 0 8px; }
+h3 { font-size: 15px; margin: 16px 0 6px; }
+.note { color: var(--ink-2); font-size: 14px; }
+.card { background: var(--paper); border-radius: 16px; box-shadow: var(--lift); padding: 12px 16px; margin: 10px 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip { min-height: 38px; padding: 0 12px; border-radius: 19px; border: 1.5px solid var(--paper-edge); background: var(--paper); color: var(--ink); font: 14px var(--f-ui); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ai); color: var(--on-ai); border-color: var(--ai); }
+.tile { background: var(--wall); border-radius: 14px; box-shadow: var(--lift); padding: 6px; margin: 0; }
+.tile svg { display: block; width: 100%; height: auto; }
+.tile figcaption { font-size: 12.5px; color: var(--ink-2); text-align: center; margin-top: 2px; line-height: 1.4; }
+.tile figcaption b { color: var(--ink); }
+.grid { display: grid; gap: 10px; }
+.g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } .g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } .g6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+@media (max-width: 680px) { .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .g6 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.scene { border-radius: 16px; overflow: hidden; box-shadow: var(--lift); }
+.scene svg { display: block; width: 100%; height: auto; }
+.tw { overflow-x: auto; margin: 8px 0; }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 13.5px; background: var(--paper); border-radius: 12px; overflow: hidden; }
+th, td { text-align: left; vertical-align: top; padding: 6px 9px; border-bottom: 1px solid var(--washi-2); }
+th { background: var(--washi-2); }
+.ln { stroke: var(--line); stroke-linecap: round; stroke-linejoin: round; }
+.cshadow { fill: #1f1610; opacity: var(--shadow-o); }
+[data-time="day"] .dusk-only, [data-time="day"] .night-only, [data-time="dusk"] .day-only, [data-time="dusk"] .night-only, [data-time="night"] .day-only, [data-time="night"] .dusk-only { opacity: 0; }
+.m4p { fill: var(--sil, var(--c)); stroke: var(--sil, none); stroke-width: var(--sw, 0); stroke-linejoin: round; }
+.m4p[data-s] { stroke: var(--sil, var(--line)); stroke-width: var(--sw, 1.1); }
+.m4-sil { --sil: var(--line); --sw: 4.4; --det: none; }
+.m4det { display: var(--det, inline); }
+.m4shadow { fill: #1f1610; opacity: .2; }
+.guide { stroke: var(--shu); stroke-width: .45; stroke-dasharray: 1.6 1.2; opacity: .75; }
+.guide-t { font: 3.2px var(--f-ui); fill: var(--shu); }
+</style>
+</head>
+<body data-time="day">
+<main>
+<h1>住持新視角：美術修正候選（Round 4.2A-1）</h1>
+<p class="note">候選，尚未選定。<b>原始</b>＝Round 4.2A；<b>A</b>＝保守修正（修頭、耳、五官、衣領的轉向，保留 4.2A 的身體輪廓）；<b>B</b>＝表現力優化（同樣的頭部修正，加上：空著的左手改用已驗收的「站姿」自然垂下的袖子、袍身下擺微微展開、肚子圓一點、肩線柔和）。左上角固定是 Round 3.5 驗收的 3/4，所有圖同一比例、同一組參考線。</p>
+<div class="card chips"><label><input type="checkbox" id="gOn" checked> 參考線</label>　<label><input type="checkbox" id="silOn"> 只看剪影</label></div>
+
+<h2>1. 修正了什麼（原因）</h2>
+<div class="card"><ol style="margin:0;padding-left:20px">
+<li><b>耳朵像貼上去</b>：4.2A 所有新視角都把耳朵畫在頭的後面（已驗收的 3/4 是畫在頭的邊緣上面），中間影格只露出半個耳朵、卻有完整外框。現在耳朵和已驗收一樣畫在頭的邊緣上；只有轉到頭後方時才藏到頭後面。</li>
+<li><b>耳朵、五官、頭各是不同角度</b>：4.2A 是把兩張圖的各個零件分別混合。現在五官、耳朵、衣領、胸前衣片、袍子的接縫都由<b>同一個轉向角度</b>決定（每個部件在頭或脖子周圍有固定的位置，轉到背面就看不到）。以已驗收的 3/4 校準：角度 35° 時，模型算出的眼睛和已驗收的位置差不到 1 單位，耳朵在臉的 103° 外。</li>
+<li><b>背面 3/4 頭和身體方向相反</b>：4.2A 的背面把他的右耳放在畫面左邊（從背後看，右耳應該在右邊），所以轉到背面 3/4 時，耳朵往左跑、身體往右轉。現在右耳一路從臉側 → 頭中間 → 畫面右邊，五官在 135° 時已完全轉到看不見。</li>
+<li><b>太對稱</b>（候選 B）：不是把頭或肩膀畫歪，而是讓左右手做不同的事——右手握香板（前臂往前），左手空著自然垂下（用已驗收「站姿」的袖子與手）。</li>
+</ol></div>
+
+<h2>2. P3 中間（側面 → 正面）：原始／A／B</h2>
+<div class="grid g4" id="p3"></div>
+<h3>頭與耳朵放大</h3>
+<div class="grid g3" id="p3z"></div>
+
+<h2>3. P4 背面 3/4：原始／A／B</h2>
+<div class="grid g4" id="b34"></div>
+<h3>頭與耳朵放大</h3>
+<div class="grid g3" id="b34z"></div>
+
+<h2>4. 正面與背面：A／B</h2>
+<div class="grid g4" id="fb"></div>
+<h3>肩膀、袖口、香板放大（正面）</h3>
+<div class="grid g6" id="fz"></div>
+<h3>肩膀、袖子、香板放大（背面）</h3>
+<div class="grid g6" id="bz"></div>
+
+<h2>5. 側面：原始／A／B</h2>
+<div class="grid g4" id="pr"></div>
+
+<h2>6. 面向左，香板仍在右手</h2>
+<p class="note">已驗收的面向左是整張鏡像，所以香板換到左手（第二張）。新候選：頭、袍子、衣領、胸前衣片全部是已驗收的原件（由同樣的形狀重組，第 9 節有逐像素驗證），只改兩隻手：靠近我們的左手空著自然垂下（已驗收「站姿」的袖子與手），右手在遠側握著香板。手臂沒有穿過身體，香板一直在右手。</p>
+<div class="grid g4" id="kg"></div>
+<div class="grid g3" id="kgz"></div>
+
+<h2>7. 握持一致性</h2>
+<div class="tw"><table><thead><tr><th>視角</th><th>香板在</th><th>拳頭</th></tr></thead><tbody id="grip"></tbody></table></div>
+
+<h2>8. 放在禪堂裡</h2>
+<div class="card chips" id="spot"></div>
+<div class="card chips" id="spotCand"></div>
+<div class="scene" id="sceneBox"></div>
+<p class="note" id="sceneNote"></p>
+
+<h2>9. 驗證</h2>
+<div class="card" id="verify">計算中…</div>
+
+<h2>10. A 與 B</h2>
+<div class="tw"><table><thead><tr><th></th><th>A 保守修正</th><th>B 表現力優化</th></tr></thead><tbody>
+<tr><td>修正內容</td><td>頭、耳、五官、衣領、胸前衣片依同一角度；身體輪廓沿用 4.2A</td><td>同 A 的頭部修正；空著的手改成自然垂下的袖子與手；下擺微展、肚子圓一點、肩線柔和；側面前胸較圓、背較平</td></tr>
+<tr><td>優點</td><td>與 4.2A 差異最小，已經檢查過的比例都不變；風險最低</td><td>左右手做不同的事，正面、背面不再像對稱人偶；輪廓更接近 3/4 的圓潤鐘形；空手直接用已驗收的站姿零件</td></tr>
+<tr><td>缺點</td><td>正面、背面仍然很對稱（兩隻袖子是同一個形狀的鏡像），呆板感只減輕一部分</td><td>下擺比 3/4 略寬（約 7%），和 3/4 並排時要確認是否可以接受；改動面較大，需要再看一輪</td></tr>
+</tbody></table></div>
+<p class="note">我的推薦：<b>B</b>。理由是使用者指出的「呆板」主要來自左右完全對稱，A 只修了透視，對稱還在；B 的不對稱來自動作本身（一手握板、一手放鬆），不需要把頭或肩畫歪。決定權在你。</p>
+</main>
+
+<script src="../round2/r1-scene.js"></script>
+<script src="../round3/monk4.js"></script>
+<script src="monk-views.js"></script>
+<script src="monk-views2.js"></script>
+<script src="patrol-paths.js"></script>
+<script>
+'use strict';
+const $ = s => document.querySelector(s), V1 = MONK_VIEWS, V2 = MONK_VIEWS2, P = PATROL;
+document.documentElement.dataset.time = 'day';
+document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style="position:absolute" aria-hidden="true">${sceneDefs()}</svg>`);
+let nid = 0;
+// what to draw: 'acc' (accepted 3/4), ['orig', key] (Round 4.2A), ['A'|'B', view]
+function draw(w) {
+  const id = 'r' + (++nid);
+  if (w === 'acc') return MONK4.art({ id, pose: 'idle' });
+  if (w === 'accL') return MONK4.art({ id, pose: 'idle', facing: 'left' });
+  const [c, k] = w; return c === 'orig' ? V1.view(k, { id }) : V2.view(k, c, { id });
+}
+const guides = () => $('#gOn').checked ? `<g>${[[-94, '頭頂'], [-54.2, '下巴'], [-25, '袖口'], [0, '下擺']].map(([y, t]) => `<path class="guide" d="M-44 ${y} H44"/><text class="guide-t" x="-44" y="${y - .8}">${t}</text>`).join('')}</g>` : '';
+const sil = () => $('#silOn').checked ? ' style="--c:#2a2420;--sil:#2a2420;--det:none"' : '';
+const svg = (vb, inner) => `<svg viewBox="${vb}"><rect x="-200" y="-200" width="400" height="400" fill="var(--wall)"/><rect x="-200" y="0" width="400" height="200" fill="var(--tatami)" opacity=".55"/><g${sil()}>${inner}</g>${guides()}</svg>`;
+const tile = (w, cap, vb = '-42 -104 84 110') => `<figure class="tile">${svg(vb, draw(w))}<figcaption>${cap}</figcaption></figure>`;
+const BASE = tile('acc', '<b>基準</b>：Round 3.5 驗收 3/4');
+const ORIG = { p3mid: 'p3_1', back34: 'p4_2', front: 'front', back: 'back', profile: 'profile' };
+function render() {
+  nid = 0;
+  const three = (v, name) => BASE + tile(['orig', ORIG[v]], `<b>原始</b>（4.2A）${name}`) + tile(['A', v], `<b>A</b> ${name}`) + tile(['B', v], `<b>B</b> ${name}`);
+  $('#p3').innerHTML = three('p3mid', 'P3 中間');
+  $('#b34').innerHTML = three('back34', '背面 3/4');
+  $('#pr').innerHTML = three('profile', '側面');
+  const zoom = (v, vb) => tile(['orig', ORIG[v]], '原始', vb) + tile(['A', v], 'A', vb) + tile(['B', v], 'B', vb);
+  $('#p3z').innerHTML = zoom('p3mid', '-30 -98 60 46');
+  $('#b34z').innerHTML = zoom('back34', '-30 -98 60 46');
+  $('#fb').innerHTML = tile(['A', 'front'], '<b>A</b> 正面') + tile(['B', 'front'], '<b>B</b> 正面') + tile(['A', 'back'], '<b>A</b> 背面') + tile(['B', 'back'], '<b>B</b> 背面');
+  const parts = (v, list) => list.map(([vb, n]) => tile(['A', v], `A・${n}`, vb) + tile(['B', v], `B・${n}`, vb)).join('');
+  $('#fz').innerHTML = parts('front', [['-32 -66 30 30', '肩袖（左）'], ['-26 -36 30 26', '袖口拳頭'], ['2 -66 30 30', '肩袖（右）']]);
+  $('#bz').innerHTML = parts('back', [['-32 -66 30 30', '肩袖（左）'], ['-4 -36 30 40', '香板'], ['2 -66 30 30', '肩袖（右）']]);
+  $('#kg').innerHTML = BASE + tile('accL', '既有鏡像：<b>香板換到左手</b>') + tile(['A', 'q34L'], '<b>A</b> 面向左・右手握板') + tile(['B', 'q34L'], '<b>B</b> 面向左・右手握板');
+  $('#kgz').innerHTML = ['accL', ['A', 'q34L'], ['B', 'q34L']].map((w, i) => tile(w, ['既有鏡像', 'A', 'B'][i] + '・手與香板', '-36 -40 46 44')).join('');
+  $('#grip').innerHTML = [['3/4 面向右（驗收）', '右手、在身前（畫面左）', '看得到'], ['P3 中間', '右手、在身前（畫面左）', '看得到'], ['正面', '右手（畫面左）', '看得到，擋在袖口前'], ['側面', '右手、在身前', '看得到'],
+    ['背面 3/4', '右手（轉到身體前方）', '被袖子擋住，只看到板身'], ['背面', '右手（畫面右）', '被袖子擋住，只看到板身'], ['面向左（新）', '右手、在遠側', 'A：拳頭在袍邊露出一點；B：再往前一些'],
+    ['面向左（既有鏡像）', '<b>左手</b>（換手）', '—']].map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('');
+  renderScene(); verify();
+}
+/* ---- in the zendo ---- */
+const SPOTS = [['LF', 'front', '左前・正面'], ['RF', 'q34L', '右前・面向左（右手握板）'], ['BC', 'back', '後方中・背面'], ['RS', 'back34', '右側往後・背面 3/4'], ['LS', 'p3mid', '左前轉身・P3 中間'], ['ST', 'acc', '提醒站位・既有 3/4']];
+let spot = 0, cand = 'B';
+function renderScene() {
+  $('#spot').innerHTML = SPOTS.map(([n, k, t], i) => `<button class="chip" data-i="${i}" aria-pressed="${i === spot}">${t}</button>`).join('');
+  $('#spotCand').innerHTML = ['orig', 'A', 'B'].map(c => `<button class="chip" data-c="${c}" aria-pressed="${c === cand}">${c === 'orig' ? '原始 4.2A' : '候選 ' + c}</button>`).join('');
+  $('#spot').querySelectorAll('button').forEach(b => b.onclick = () => { spot = +b.dataset.i; renderScene(); });
+  $('#spotCand').querySelectorAll('button').forEach(b => b.onclick = () => { cand = b.dataset.c; renderScene(); });
+  const [n, k] = SPOTS[spot], q = P.N[n], s = P.depth(q.y), host = document.createElement('div');
+  host.innerHTML = `<svg viewBox="0 0 400 300">${sceneMarkup()}</svg>`; const sv = host.firstChild;
+  sv.querySelector('#rack').setAttribute('opacity', 0); sv.querySelector('#seatLip').setAttribute('opacity', 1);
+  sv.querySelector('#mochiSlot').innerHTML = `<g transform="translate(206 257)">${mochiStatic()}</g>`;
+  const w = k === 'acc' ? 'acc' : cand === 'orig' ? (k === 'q34L' ? 'accL' : ['orig', ORIG[k]]) : [cand, k];
+  const monk = `<g transform="translate(${q.x} ${q.y}) scale(${s} ${s})">${draw(w)}</g>`;
+  if (P.inFront(q.y)) sv.querySelector('#seatLip').insertAdjacentHTML('afterend', monk); else sv.querySelector('#monkSlot').innerHTML = monk;
+  $('#sceneBox').replaceChildren(sv);
+  $('#sceneNote').textContent = `${P.N[n].zh} (${q.x}, ${q.y})・比例 ${s.toFixed(3)}・${P.inFront(q.y) ? '在麻糬前面一層' : '在麻糬後面'}`;
+}
+function mochiStatic() {
+  const host = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); host.innerHTML = mochiMarkup('mo');
+  const f = FACE.calm, eyes = f.eyes === 'dot' ? '<circle cx="-11" cy="-30" r="2.7" fill="var(--line)"/><circle cx="11" cy="-30" r="2.7" fill="var(--line)"/>' : f.eyes;
+  host.querySelector('#mo-face').innerHTML = `<ellipse cx="-20" cy="-22" rx="5.4" ry="3.2" fill="var(--blush)" opacity=".6"/><ellipse cx="20" cy="-22" rx="5.4" ry="3.2" fill="var(--blush)" opacity=".6"/>${eyes}${f.mouth}`;
+  HANDS.lap.forEach(([cx, cy, rx, ry, r], i) => { const e = host.querySelector(`#mo-${i ? 'hr' : 'hl'}`); Object.entries({ cx, cy, rx, ry, transform: `rotate(${r} ${cx} ${cy})` }).forEach(([a, v]) => e.setAttribute(a, v)); });
+  host.querySelector('#mo-feet').setAttribute('opacity', 0); return host.innerHTML;
+}
+/* ---- checks shown on the page (the same ones the tests run) ---- */
+function checks() {
+  const R = [], views = ['front', 'p3mid', 'profile', 'back34', 'back'];
+  for (const c of ['A', 'B']) for (const v of views) {
+    const b = V2.body(v, c), h = V2.headParts(b.th), outline = h.outline;
+    // an ear on the head must touch it (not float); one behind it must be at least partly hidden by it
+    const dist = (p, poly) => Math.min(...poly.map(q => Math.hypot(p[0] - q[0], p[1] - q[1])));
+    const inPoly = (p, poly) => { let r = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const a = poly[i], bq = poly[j]; if ((a[1] > p[1]) !== (bq[1] > p[1]) && p[0] < (bq[0] - a[0]) * (p[1] - a[1]) / (bq[1] - a[1]) + a[0]) r = !r; } return r; };
+    const ears = h.ears.map(e => ({ onTop: e.onTop, attached: e.pts.some(p => inPoly(p, outline)) || Math.min(...e.pts.map(p => dist(p, outline))) < .8 }));
+    const eyesShown = h.eyes.filter(e => e.show).length, faceAway = Math.cos(b.th * Math.PI / 180) < -.2;
+    R.push({ c, v, th: b.th, ears, eyesShown, ok: ears.every(e => e.attached) && !(faceAway && eyesShown), grip: b.stick.x < 0 === (Math.cos(b.th * Math.PI / 180) > 0) || b.th === 90 });
+  }
+  return R;
+}
+function verify() {
+  const R = checks(); window.__REFINE = { checks: R };
+  $('#verify').innerHTML = `<b>耳朵與五官（每個候選 × 每個視角）</b><ul style="margin:4px 0;padding-left:20px;font-size:14px">${R.map(r => `<li>${r.c}・${V2.VIEWS[r.v]}（${r.th}°）：耳朵 ${r.ears.map(e => (e.onTop ? '在頭上' : '在頭後') + (e.attached ? '・接著頭' : '・<b style="color:var(--shu)">浮起</b>')).join('／')}；看得到的眼睛 ${r.eyesShown} 隻 ${r.ok ? '✓' : '<b style="color:var(--shu)">✗</b>'}</li>`).join('')}</ul>`
+    + `<p class="note" id="pix">逐像素驗證（重組的 3/4 與已驗收的 3/4）由 <code>tests/round4_2a1.test.mjs</code> 執行，結果寫在交付說明。</p>`;
+}
+$('#gOn').onchange = render; $('#silOn').onchange = render;
+render();
+window.__refine = { draw, setSpot: (i, c) => { spot = i; if (c) cand = c; renderScene(); } };
+</script>
+</body>
+</html>
