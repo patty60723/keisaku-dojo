@@ -990,7 +990,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
 .c-season h3 small { font-size: .8rem; color: var(--muted); font-family: var(--f-body); }
 .c-season p { margin: 2px 0 4px; font-size: .88rem; }
 .c-season ul { margin: 0; padding-left: 1.1em; font-size: .8rem; color: var(--muted); }
-.result-new { color: var(--kesa); font-weight: 700; }
+.result-new { grid-column: 1 / -1; color: var(--kesa); font-weight: 700; }   /* a whole row: in the seal's column it squeezed the text (Round 5) */
 
 /* the season outside: petals, leaves and snow drift down; fireflies blink at night */
 .drift { animation: drift var(--dur) linear var(--delay) infinite; }
@@ -4445,7 +4445,8 @@ const I18N = {
   // the production app's own places for him, as stops on the safe paths (Round 4 units)
   P.addStop('HO', { x: 72, y: 238, zh: '對話時（麻糬左邊）' }, ['BL']);       // was HOST_X = 72 (production units)
   P.addStop('TE', { x: 196, y: 228, zh: '休息時（香案旁喝茶）' }, ['BC', 'BL']);   // was TEA_X = 190
-  const PARK = { host: ['HO', 'R'], rest: ['TE', 'L'], leave: ['BL', 'R'] };
+  // while they have stepped away (暫離) the mochi stands where she does at check-in, so he waits where he does then
+  const PARK = { host: ['HO', 'R'], rest: ['TE', 'L'], leave: ['HO', 'R'] };
 
   class MonkDirector {
     constructor({ slot, lip, fx, defs, rm = () => false, seed = 1 + Math.floor(Math.random() * 99999) }) {
