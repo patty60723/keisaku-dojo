@@ -324,6 +324,16 @@ button:focus-visible, input:focus-visible { outline: 2.5px solid var(--accent); 
 .sense[data-ok="yes"] b { color: var(--accent); }
 .btn:disabled { opacity: .55; cursor: wait; }
 
+/* ---------- Round 5: the accepted Round 3.5 / Round 4 monk ---------- */
+/* The drawing uses the Round 1 token names; here they are set for him alone (the app's own --line is a UI border).
+   His ink stays dark in every theme, as the earlier monk's did; skin, robe and kesa follow the app's palette. */
+.monk4 { --line: #2a2622; --skin-lo: color-mix(in srgb, var(--skin) 80%, #9a6a42); --robe-lo: color-mix(in srgb, var(--robe) 72%, #000); --kin: #c99a3e; }
+.m4p { fill: var(--sil, var(--c)); stroke: var(--sil, none); stroke-width: var(--sw, 0); stroke-linejoin: round; }
+.m4p[data-s] { stroke: var(--sil, var(--line)); stroke-width: var(--sw, 1.1); }
+.m4-sil { --sil: var(--line); --sw: 4.4; --det: none; }
+.m4det { display: var(--det, inline); }
+.m4shadow { fill: #1f1610; opacity: .2; }
+
 /* ---------- RPG dialogue box ---------- */
 .dialog {
   background: var(--surface); border: 1.5px solid var(--ink); border-radius: 16px;
@@ -619,11 +629,13 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 .quiet-btn:hover { color: var(--ink); }
 .quiet-btn.warn { color: var(--shu); font-weight: 700; text-decoration-color: currentColor; }
 
-/* 6: 合掌請打 lives in the corner of the zendo */
+/* 6: 合掌請打 (Round 5, layout B): its own row under the zendo, so it never covers the monk or the mochi */
+.ask-row { display: flex; justify-content: flex-end; margin-block: -4px; }
+.ask-row:has(> .ask-btn[hidden]) { display: none; }
 .ask-btn {
-  position: absolute; right: 10px; bottom: 10px; z-index: 3;
+  position: relative; z-index: 3;
   font: inherit; font-size: .85rem; font-weight: 700; letter-spacing: .04em; cursor: pointer;
-  min-height: 40px; padding: 0 14px 0 10px; border-radius: 999px; display: flex; align-items: center; gap: 4px;
+  min-height: 44px; padding: 0 16px 0 12px; border-radius: 999px; display: flex; align-items: center; gap: 4px;
   border: 1.5px solid var(--line); background: color-mix(in srgb, var(--surface) 88%, transparent); color: var(--ink);
   backdrop-filter: blur(3px);
 }
@@ -1038,7 +1050,7 @@ html:lang(en) * { letter-spacing: normal !important; }
   .top { grid-column: 1 / -1; }
   /* the zendo keeps its own proportions; the monk and the timer sit beside it, centred on its height */
   .stage-wrap { grid-column: 1; grid-row: 2 / 6; align-self: start; --u: calc((var(--stage-w) - 3px) / 400); }
-  .dialog { grid-column: 2; grid-row: 3; }
+  .dialog, .ask-row { grid-column: 2; grid-row: 3; }
   .panel { grid-column: 2; grid-row: 4; margin-top: 0; }
   .tour-card { left: auto; right: 24px; margin: 0; width: min(420px, calc(100vw - 48px)); }
 }
@@ -1295,7 +1307,7 @@ html:lang(en) * { letter-spacing: normal !important; }
       <h3>隱私</h3>
       <p>紀錄和設定只存在這台手機的瀏覽器裡,不會上傳到任何地方,也沒有追蹤或廣告。平衡儀(動作感測器)只用來判斷手機有沒有被拿起來,讀到的數值不會被保存。</p>
       <div class="about-row">
-        <span class="version">香板禪堂 <b id="appVersion">v20</b></span>
+        <span class="version">香板禪堂 <b id="appVersion">v21</b></span>
         <a class="small-btn" id="feedbackLink" href="https://github.com/patty60723/keisaku-dojo/issues/new" target="_blank" rel="noopener">回報問題</a>
       </div>
       <p class="about-note">回報問題會開啟 GitHub(需要登入),版本和裝置資訊會自動填好,只要寫下發生了什麼事。</p>
@@ -1468,56 +1480,11 @@ html:lang(en) * { letter-spacing: normal !important; }
         <rect class="f-wood" x="27" y="178" width="24" height="3" rx="1"/>
       </g>
 
-      <!-- the keisaku's place: leaning against the right-hand post until the monk picks it up -->
-      <g id="rackStick" transform="translate(375 176) rotate(4)">
-        <rect class="f-stick" x="-1.4" y="-58" width="2.8" height="58" rx="1.2" stroke="#2a2622" stroke-width=".8"/>
-        <rect class="f-stick" x="-2.8" y="-76" width="5.6" height="22" rx="1.8" stroke="#2a2622" stroke-width=".8"/>
-      </g>
 
-      <!-- monk (drawn behind the sitter; feet at 0,0, facing right) -->
-      <g id="monk" data-mood="calm" transform="translate(90 215)">
-        <!-- drawn in a consistent three-quarter view facing right (flipped with scale(-1,1) to face left) -->
-        <ellipse class="f-sink m-foot" cx="-6" cy="1" rx="6" ry="2.5"/>   <!-- the feet take turns stepping while he walks -->
-        <ellipse class="f-sink m-foot" cx="9" cy="1" rx="6" ry="2.5"/>
-        <!-- far sleeve: the wide kimono sleeve of the arm on the other side, hanging behind the body -->
-        <path class="f-robe" d="M-12.5 -53.5 C-17.4 -51.6 -19.6 -46.4 -20 -38.6 L-20.6 -25.6 Q-16.8 -22.8 -12.4 -24.6 Z" stroke="#2a2622" stroke-width="1.3" stroke-linejoin="round"/>
-        <path class="f-skin" d="M-3.6 -61 h7.6 v5.5 h-7.6 z"/>   <!-- neck -->
-        <!-- the robe: rounded shoulders, a little flare, the hem dipping slightly in the middle -->
-        <path class="f-robe" d="M-16.6 0 C-17.4 -17 -16.6 -37 -14.6 -49.6 Q-13.2 -57.6 -5.2 -58.6 L6.2 -58.6 Q14.6 -57.6 16.2 -49.6 C17.8 -36 19.6 -18 20.6 0 Q2 2 -16.6 0 Z" stroke="#2a2622" stroke-width="1.5" stroke-linejoin="round"/>
-        <path d="M-6 -30 Q-5 -15 -7.2 -2.4 M7.8 -22 Q9.2 -11 8.6 -1.6" class="s-ink" stroke-width=".9" stroke-linecap="round" opacity=".28"/>   <!-- folds -->
-        <!-- kimono collar, crossed toward the side he faces: the white under-collar, then the robe's own collar band -->
-        <path d="M-5 -58.4 L6 -41 L9.6 -57.8" fill="#f3efe4" stroke="#2a2622" stroke-width="1.1" stroke-linejoin="round"/>
-        <path d="M-6.6 -58.2 L5.2 -40.4 M11.2 -57.4 L7.4 -42.6" stroke="#22314f" stroke-width="2.6" stroke-linecap="round"/>
-        <!-- rakusu hung from the neck -->
-        <g class="rakusu">
-          <path d="M-4.5 -57 L-6.5 -43 M10.5 -56.5 L13 -43" stroke="var(--kesa)" stroke-width="2.2" stroke-linecap="round"/>
-          <circle cx="-5.6" cy="-49" r="1.7" fill="none" stroke="#e9dcc0" stroke-width="1"/>
-          <rect class="f-kesa" x="-8" y="-44" width="22" height="15" rx="1.2" stroke="#2a2622" stroke-width="1"/>
-          <rect x="-5.6" y="-41.6" width="17.2" height="10.2" rx=".6" fill="none" stroke="#2a2622" stroke-width=".7" opacity=".35"/>
-        </g>
-        <!-- near sleeve: the forearm reaches forward to hold the stick and the wide sleeve drapes below it -->
-        <path class="f-robe" d="M6.4 -57.2 Q12.4 -59.6 16.2 -55 Q19.8 -50 20.6 -42 L21.8 -28.6 Q17.6 -25.4 11.6 -27.4 Q9.6 -30.6 9.2 -34.4 Q6 -45 6.4 -57.2 Z" stroke="#2a2622" stroke-width="1.3" stroke-linejoin="round"/>
-        <path d="M12.6 -30.4 Q16.6 -29.6 20.2 -31.6" class="s-ink" stroke-width=".8" opacity=".3" stroke-linecap="round"/>
-        <circle class="f-skin" cx="12" cy="-38" r="4.2" stroke="#2a2622" stroke-width="1.1"/>
-        <circle class="f-skin" cx="-13" cy="-72" r="3.4" stroke="#2a2622" stroke-width="1.1"/>
-        <circle class="f-skin" cx="0" cy="-72" r="15" stroke="#2a2622" stroke-width="1.5"/>
-        <path d="M-6 -84 q4 -2 8 0" class="s-ink" stroke-width=".8" opacity=".35"/>
-        <ellipse cx="3" cy="-73" rx="1.6" ry="2" fill="#2a2622"/>
-        <ellipse cx="10" cy="-73" rx="1.6" ry="2" fill="#2a2622"/>
-        <ellipse class="f-blush" cx="-2" cy="-66.5" rx="3.2" ry="1.9" opacity=".7"/>
-        <ellipse class="f-blush" cx="12.2" cy="-66.5" rx="1.6" ry="1.4" opacity=".7"/>
-        <path class="m-mouth s-ink" d="M4 -66 q2.5 1.8 5 0" stroke-width="1.2" stroke-linecap="round"/>
-        <path class="m-stern-mouth s-ink" d="M4 -65.5 h5" stroke-width="1.3" stroke-linecap="round"/>
-        <path class="brow s-ink" d="M0 -79 l5 2.2 M13 -79 l-4.5 2.2" stroke-width="1.5" stroke-linecap="round"/>
-      </g>
-
-      <!-- the keisaku: its own layer that follows the monk; lifted above the mochi while he strikes -->
-      <g id="stickLayer" transform="translate(90 215)" visibility="hidden">
-          <g id="stick" transform="rotate(10 12 -38)">
-          <rect class="f-stick" x="10.6" y="-90" width="2.8" height="58" rx="1.2" stroke="#2a2622" stroke-width=".8"/>
-          <rect class="f-stick" x="9.2" y="-108" width="5.6" height="22" rx="1.8" stroke="#2a2622" stroke-width=".8"/>
-        </g>
-      </g>
+      <!-- the monk (Round 5: the accepted Round 3.5 / Round 4 monk, drawn by src/monk/). His three layers are in the
+           Round 4 scene's units: translate(-6 -17) puts that scene's mochi (206, 257) on this one's (200, 240).
+           Behind the mochi while his feet are behind hers; in front of her (monkNear) when they are in front. -->
+      <g id="monkSlot" class="monk4" transform="translate(-6 -17)"><defs id="monkDefs"></defs></g>
 
       <!-- sitter: a mochi on a zafu -->
       <g id="sitter" class="standing" data-face="peek" transform="translate(200 240)">
@@ -1621,6 +1588,8 @@ html:lang(en) * { letter-spacing: normal !important; }
         </g>
         </g>
       </g>
+      <g id="monkNear" class="monk4" transform="translate(-6 -17)"><g id="monkLip"></g></g>
+      <g id="monkFxSlot" class="monk4" transform="translate(-6 -17)"></g>   <!-- the keisaku and its fist above the mochi while he strikes -->
       <!-- dusk: evening light over everything, warmer on the window side -->
       <rect class="dusk" x="0" y="0" width="400" height="280" fill="url(#duskWash)" style="mix-blend-mode: multiply" pointer-events="none"/>
     </svg>
@@ -1633,7 +1602,6 @@ html:lang(en) * { letter-spacing: normal !important; }
     <button type="button" class="hotspot" id="roundWinBtn" aria-label="圓窗(悟之窗)" title="悟之窗" style="--x:64;--y:64;--w:56;--h:68"></button>
     <button type="button" class="hotspot" id="windowBtn" aria-label="方窗(迷之窗)" title="迷之窗" style="--x:278;--y:60;--w:58;--h:76"></button>
     <button type="button" class="hotspot" id="journalBtn" aria-haspopup="dialog" aria-label="坐禪帳" title="坐禪帳" style="--x:336;--y:36;--w:52;--h:90"><span class="streak-badge" id="streakBadge" hidden></span></button>
-    <button type="button" class="ask-btn" id="askBtn" hidden><svg class="ico ico-stick" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 21.4 11.6 13.4" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M3.6 21.4 11.6 13.4" stroke="var(--stick)" stroke-width="1.6" stroke-linecap="round"/><path d="M13.3 14.3 9.7 10.7 17.7 2.7Q19.5 2.2 21.3 4.1 21.8 5.6 21.3 6.3Z" fill="var(--stick)" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M1.8 12.6Q2.6 8.4 6 5.6M1.6 8.4Q2.2 6 3.8 4.4" fill="none" stroke="var(--shu)" stroke-width="1.5" stroke-linecap="round"/></svg>合掌請打</button>
     <p class="toast" id="toast" aria-live="polite" hidden></p>
       <div class="result" id="result" hidden>
       <div class="result-card">
@@ -1651,6 +1619,11 @@ html:lang(en) * { letter-spacing: normal !important; }
       </div>
     </div>
   </section>
+
+  <!-- Round 5 (layout B, Round 4.2A): 合掌請打 under the zendo, not on it -->
+  <div class="ask-row">
+    <button type="button" class="ask-btn" id="askBtn" hidden><svg class="ico ico-stick" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 21.4 11.6 13.4" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M3.6 21.4 11.6 13.4" stroke="var(--stick)" stroke-width="1.6" stroke-linecap="round"/><path d="M13.3 14.3 9.7 10.7 17.7 2.7Q19.5 2.2 21.3 4.1 21.8 5.6 21.3 6.3Z" fill="var(--stick)" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M1.8 12.6Q2.6 8.4 6 5.6M1.6 8.4Q2.2 6 3.8 4.4" fill="none" stroke="var(--shu)" stroke-width="1.5" stroke-linecap="round"/></svg>合掌請打</button>
+  </div>
 
   <section class="dialog" id="dialog" aria-live="polite" hidden>
     <div class="dlg-head">
@@ -1939,6 +1912,7 @@ const I18N = {
     "被抓到了": "見つかった",
     "啪!離開畫面 {0}。": "パシッ!画面を離れて{0}。",
     "啪!離開太久,再補一下。": "パシッ!離れすぎです、もうひとつ。",
+    "又分心了 {0} 次。": "ほかにも {0} 回、気が散りましたね。",
     "確定要出堂?": "退堂しますか?",
     "啪!精神一振,謝謝師父。": "パシッ!目が覚めました。ありがとうございます。",
     "下次打開時換成新的語言。": "次に開いたときに新しい言語に切り替わります。",
@@ -2494,6 +2468,7 @@ const I18N = {
     "被抓到了": "Caught",
     "啪!離開畫面 {0}。": "Whack! Away from the screen for {0}. ",
     "啪!離開太久,再補一下。": "Whack! Away too long. One more. ",
+    "又分心了 {0} 次。": "Your mind wandered {0} more {0|time|times}.",
     "確定要出堂?": "Leave the hall now? ",
     "啪!精神一振,謝謝師父。": "Whack! That woke me up. Thank you. ",
     "下次打開時換成新的語言。": "The new language applies next time you open the app. ",
@@ -2821,6 +2796,1719 @@ const I18N = {
     "、": ", "
   }
 };
+;
+/* =====================================================================
+   住持 Round 3 — "Cozy Storybook Monk".
+
+   Shape language: like the mochi — every body shape is a smooth spline through a few points.
+   The sleeves ARE the sides of the silhouette: they fall from soft shoulders and make the drop shape,
+   so the outline is the same in every pose. A pose only changes what happens inside it: where the hands
+   are, how the near sleeve folds, where the keisaku is.
+   The outer contour is a single silhouette copy drawn behind. Inside, only a few thin lines, each with a
+   job: which sleeve is in front, where a hand comes out, where the collar crosses.
+   Feet at y = 0, facing right (three-quarter). Facing left mirrors everything except the collar, which is
+   re-laid so the wearer's left panel stays on top.
+   ===================================================================== */
+(function () {
+  const f = n => (+n).toFixed(2);
+  function spline(pts, closed = true) {
+    const n = pts.length, P = i => closed ? pts[(i + n) % n] : pts[Math.max(0, Math.min(n - 1, i))];
+    let d = `M${f(pts[0][0])} ${f(pts[0][1])}`;
+    for (let i = 0; i < (closed ? n : n - 1); i++) {
+      const p0 = P(i - 1), p1 = P(i), p2 = P(i + 1), p3 = P(i + 2);
+      d += ` C${f(p1[0] + (p2[0] - p0[0]) / 6)} ${f(p1[1] + (p2[1] - p0[1]) / 6)} ${f(p2[0] - (p3[0] - p1[0]) / 6)} ${f(p2[1] - (p3[1] - p1[1]) / 6)} ${f(p2[0])} ${f(p2[1])}`;
+    }
+    return d + (closed ? ' Z' : '');
+  }
+  function ribbon(pts, w0, w1) {   // a hand-drawn band that tapers from w0 to w1
+    const n = pts.length, A = [], B = [];
+    for (let i = 0; i < n; i++) {
+      const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy) || 1;
+      const w = (w0 + (w1 - w0) * i / (n - 1)) / 2;
+      A.push([pts[i][0] - dy / len * w, pts[i][1] + dx / len * w]); B.push([pts[i][0] + dy / len * w, pts[i][1] - dx / len * w]);
+    }
+    return spline(A, false) + ' L' + spline(B.reverse(), false).slice(1) + ' Z';
+  }
+
+  /* Round 3.5 — points on a drawn curve. resample: evenly by length along a polyline. onSpline: SUB points per span
+     of the spline() above (same tangents). curve: n points on spline(pts), evenly by arc length.
+     The hanging pose (idle) draws its sleeve through curve(…, DENSE) so the animation, which carries exactly these
+     points, ends on the very same path. */
+  const lerp = (a, b, t) => a + (b - a) * t, dist = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]);
+  function resample(pts, n, closed) {
+    const Q = closed ? [...pts, pts[0]] : pts, L = [0];
+    for (let i = 1; i < Q.length; i++) L.push(L[i - 1] + dist(Q[i - 1], Q[i]));
+    const T = L[L.length - 1], out = [];
+    for (let k = 0; k < n; k++) {
+      const d = closed ? T * k / n : T * k / (n - 1); let i = 1; while (i < L.length - 1 && L[i] < d) i++;
+      const u = (d - L[i - 1]) / ((L[i] - L[i - 1]) || 1); out.push([lerp(Q[i - 1][0], Q[i][0], u), lerp(Q[i - 1][1], Q[i][1], u)]);
+    }
+    return out;
+  }
+  /* Catmull-Rom points ON the curve that MONK4.spline draws (same tangents), resampled evenly by arc length.
+     Round 3.5: every key's sleeve outline is carried this way, so a frame that lands on a key pose draws that
+     pose's own curve (to within 0.05 units), not a re-fitted approximation of it. */
+  function onSpline(pts, closed, SUB) {   // SUB points per spline segment, evenly in the curve parameter
+    const m = pts.length, Pq = i => closed ? pts[(i + m) % m] : pts[Math.max(0, Math.min(m - 1, i))], dense = [];
+    const segs = closed ? m : m - 1;
+    for (let i = 0; i < segs; i++) {
+      const p0 = Pq(i - 1), p1 = Pq(i), p2 = Pq(i + 1), p3 = Pq(i + 2);
+      const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6], c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+      for (let k = 0; k < SUB; k++) { const t = k / SUB, a = (1 - t) ** 3, b = 3 * t * (1 - t) ** 2, c = 3 * t * t * (1 - t), d = t ** 3;
+        dense.push([a * p1[0] + b * c1[0] + c * c2[0] + d * p2[0], a * p1[1] + b * c1[1] + c * c2[1] + d * p2[1]]); }
+    }
+    if (!closed) dense.push(pts[m - 1].slice());
+    return dense;
+  }
+  function curve(pts, n, closed) {          // n points on the curve, evenly by arc length
+    const out = resample(onSpline(pts, closed, 24), n, closed);
+    if (!closed) out[n - 1] = pts[pts.length - 1].slice();
+    out[0] = pts[0].slice();
+    return out;
+  }
+  const DENSE = { near: 288, line: 91 };
+
+  /* ---------- shared proportions (scheme B): every pose uses these ---------- */
+  const HEAD = 'M2 -94 C-9 -94 -17.5 -86 -17.5 -75 C-17.5 -66 -13 -59 -6 -56.2 C-1 -54.4 6 -54.2 11 -55.4 C17 -57 21.5 -62 22.2 -68.5 C23 -76 21.5 -84 16 -89.5 C12 -92.8 7 -94 2 -94 Z';
+  const HEAD_LOWER = 'M-17.5 -75 C-17.5 -66 -13 -59 -6 -56.2 C-1 -54.4 6 -54.2 11 -55.4 C17 -57 21.5 -62 22.2 -68.5';
+  const EAR = 'M-14.4 -76.6 C-17.6 -76.6 -18.8 -73.4 -18.4 -70.8 C-18 -68 -16 -66.4 -13.8 -66.8 C-12.6 -68.6 -12.4 -73.6 -14.4 -76.6 Z';
+  const FEET = { far: [[6, -1.6], [10.6, -4.2], [16.2, -3.6], [18.4, -1], [15.8, 1.2], [9.6, 1.4]], near: [[-12.4, -1], [-8.4, -4.2], [-2.2, -3.8], [1.6, -0.8], [-1.2, 1.6], [-8.2, 1.8]] };
+  // robe: soft shoulders under the chin, the torso the sleeves wrap, a skirt that settles on the feet.
+  // The sleeves end a little above the knees and stand out past the skirt: that small step is what makes
+  // the arms read even in pure silhouette.
+  const ROBE = [[3, -61], [-9, -60.2], [-13, -55.8], [-16, -48], [-17.6, -36], [-18.4, -24], [-19, -14], [-20.6, -6], [-21.4, -2.6], [-13, -0.4], [2, 1], [15, 0], [21, -3], [20.6, -8], [19.8, -16], [19.2, -26], [18.4, -38], [16.4, -48], [13, -55], [8.6, -60.4]];
+  // the sleeves' outer edges are the same in every pose; only the inner side changes
+  const NEAR_OUT = [[-12.6, -55.6], [-17.6, -50], [-22.6, -40], [-25.6, -28], [-26.4, -19.4], [-24.6, -15.2]];
+  const FAR_OUT = [[12.4, -55.4], [17.6, -50.4], [22.8, -40], [26, -28], [26.6, -19.4], [24.8, -15.4]];
+  const FAR_STAND = FAR_OUT.concat([[20, -14.6], [15.6, -15.4], [14.4, -20], [14.4, -32], [13.6, -46]]);
+  const FAR_HAND = [[18.4, -17.2], [22.6, -17.2], [24.4, -13.6], [22.6, -10.4], [18.8, -10.6], [17.4, -13.8]];
+
+  const POSE = {
+    stand: {   // arms relaxed: each hand peeks out of the front of its sleeve
+      near: NEAR_OUT.concat([[-19, -14.2], [-13.2, -14.8], [-10, -18], [-9, -27], [-10.8, -38], [-12, -48]]),
+      nearLine: [[-12, -44], [-10.2, -35], [-9, -26], [-9.8, -19], [-12.8, -15], [-19.6, -14.2], [-24.6, -15.2]],
+      hand: [[-15.6, -17.4], [-11.2, -17.8], [-9, -14.4], [-10.6, -11], [-14.8, -11], [-16.6, -14]],
+      handLine: [[-12.6, -16.4], [-11.6, -14], [-12.6, -11.8]],
+      far: FAR_STAND, farBehind: true, farHand: FAR_HAND,
+    },
+    tuck: {    // hands folded into the sleeves in front of the belly; the sleeves overlap softly and hang the same way
+      near: NEAR_OUT.concat([[-19, -14.2], [-9, -14.6], [0, -15.6], [6.6, -17.4], [10.6, -21], [10.4, -26.2], [6.4, -29.6], [-2.4, -30], [-9.6, -31.6], [-11.6, -39], [-12, -48]]),
+      nearLine: [[-12, -43], [-10.6, -34], [-6.4, -30.4], [1.6, -29.8], [7.4, -28.6], [10.6, -24.6], [9.6, -19.6], [5.2, -16.8], [-2, -15.4], [-12, -14.4], [-19.6, -14.2], [-24.6, -15.2]],
+      far: FAR_STAND, farBehind: true,
+      // the far forearm comes forward in front of the belly and goes into the near sleeve
+      farFront: [[6.4, -29.6], [13.4, -31.4], [20.6, -32], [25, -29], [26.4, -22.4], [24.8, -16.4], [18.4, -15.4], [10.6, -16.4], [6, -19]],
+      farLine: [[10.8, -30.8], [16.6, -31.8], [21.6, -31.2], [24.8, -28.8]],
+      farLine2: [[24.6, -16.6], [19.4, -15.4], [12.4, -16]],
+    },
+    idle: {    // the keisaku hangs from the near hand at the waist, blade down and a little back
+      near: NEAR_OUT.concat([[-19, -14.2], [-13.4, -14.8], [-11.4, -18.6], [-10.8, -24.6], [-10.6, -30], [-11.6, -40], [-12, -48]]),
+      nearLine: [[-12, -43], [-10.8, -34], [-10.6, -27.4], [-11.2, -21], [-12.6, -16.4], [-15.4, -14.4], [-19.6, -14.2], [-24.6, -15.2]],
+      cuffO: { cx: -11.6, cy: -24.8, rx: 1.9, ry: 3.9, r: -8 },
+      hand: [[-11.6, -28.2], [-7.4, -28.6], [-5.2, -25.2], [-6.8, -21.8], [-10.8, -21.6], [-12.6, -24.6]],
+      handLine: [[-8.8, -27.2], [-7.8, -24.8], [-8.8, -22.6]],
+      far: FAR_STAND, farBehind: true, farHand: FAR_HAND,
+      stick: { x: -7.6, y: -28.4, rot: 204 },
+    },
+    ready: {   // raised a little, beside the near shoulder: the moment before he means it
+      near: NEAR_OUT.concat([[-19, -14.2], [-13.4, -14.8], [-11.6, -18], [-11.2, -27], [-11.6, -36], [-12.2, -42], [-12.6, -48]]),
+      nearLine: [[-12.2, -41.6], [-11.4, -33], [-11.4, -24], [-12.4, -17.2], [-15, -14.8], [-19.6, -14.2], [-24.6, -15.2]],
+      tube: [[-18.8, -41.2], [-21.4, -35], [-23.4, -28.4]],
+      cuffO: { cx: -15.8, cy: -40.4, rx: 3.8, ry: 1.6, r: -4 },
+      hand: [[-18.6, -48], [-14.4, -48.6], [-12.2, -45.2], [-13.8, -41.8], [-17.8, -41.6], [-19.6, -44.6]],
+      handLine: [[-15.8, -47.2], [-14.8, -44.8], [-15.8, -42.6]],
+      far: FAR_STAND, farBehind: true, farHand: FAR_HAND,
+      stick: { x: -15.2, y: -41.4, rot: -14 },
+    },
+
+    /* ---- posture fix (Round 3.1): the arm is placed first, the sleeve follows it ----
+       shoulder joints stay where the torso has them; elbows, forearms and wrists move with the pose,
+       and the sleeves' outline is allowed to change with them. */
+    tuck2: {   // both forearms folded across the belly, each hand inside the other sleeve; shoulders down, elbows relaxed
+      v2: true,
+      farBack: [[12.4, -55.4], [17.8, -50.6], [22.4, -42], [25.4, -34.4], [24.6, -29.6], [19.6, -30.4], [15, -34], [13.6, -46]],
+      // the far forearm: from its elbow at the front of the belly toward the middle; its sleeve hangs below it, lowest under the elbow
+      farFront: [[7.6, -29.4], [13, -31], [18.4, -33.2], [22.6, -35], [25.8, -31.8], [26.9, -25.4], [26.2, -19], [23.2, -14.6], [17.6, -13.2], [11.4, -14], [6.8, -16.2]],
+      farLines: [[[8.6, -29.6], [13, -31], [18.4, -33.2], [22.4, -34.8]], [[26, -18.6], [22.8, -14.4], [17.4, -13.2], [11.4, -14]]],
+      // the near arm: upper arm hangs by the side, the elbow bends forward, the forearm crosses in front and its cuff rests over the far forearm
+      near: [[-12.6, -55.6], [-17.6, -50.2], [-22.4, -41], [-24.8, -33.4], [-25.6, -27], [-25, -20], [-22.6, -14.6], [-17.6, -12.4], [-9, -13.2], [-0.6, -15], [5.6, -17.6], [9.4, -21.4], [9.4, -26.2], [6.4, -29.6], [0, -30.2], [-7, -31], [-11.4, -32.8], [-12.6, -38], [-12.4, -48]],
+      nearLines: [
+        [[-12.2, -43], [-12, -36.4], [-10.8, -32.2], [-6.4, -30.8], [0, -30.2], [6.4, -29.6], [9.4, -26.2], [9.4, -21.4], [5.6, -17.6], [-0.6, -15], [-9, -13.2], [-17.6, -12.4], [-22.6, -14.6]],
+      ],
+      folds: [[[-12.4, -31.2], [-15.2, -26.6], [-15.8, -21.4]]],   // the one fold: where the sleeve turns at the elbow
+      cuffO: { cx: 8.2, cy: -24.4, rx: 1.2, ry: 4.4, r: -8 },
+    },
+    ready2: {  // shoulder → elbow out and down → forearm up and a little forward → wrist cocked along the grip → keisaku
+      v2: true,
+      far: FAR_STAND, farBehind: true, farHand: FAR_HAND,
+      // the sleeve follows the arm: the elbow pushes it out, the bag hangs straight down from the raised forearm and is shorter
+      near: [[-12.6, -55.6], [-17.6, -50.6], [-23.6, -45], [-28.4, -38.6], [-30.6, -33], [-29.8, -26.6], [-27.4, -20.8], [-22.8, -18.6], [-18.6, -20.4], [-16.6, -25], [-17.4, -30.4], [-20.1, -35.9], [-25.9, -39.5], [-21.4, -43.6], [-16, -46.6], [-12.8, -50.4]],
+      nearLines: [
+        [[-20.1, -35.9], [-17.4, -30.4], [-16.6, -25], [-18.6, -20.4], [-22.8, -18.6], [-27.4, -20.8]],   // forearm underside → the bag hanging from it
+      ],
+      folds: [[[-25, -31.4], [-24.4, -26.6], [-23.2, -22.4]]],   // the bag hangs from the elbow
+      cuffO: { cx: -23, cy: -37.7, rx: 3.6, ry: 1.5, r: 32 },
+      skin: [[-21.2, -36.6], [-24.8, -38.8], [-22.4, -42.7], [-18.8, -40.5]],   // the wrist shows where the sleeve has slid back
+      hand: [[-21.8, -46.8], [-17.6, -47.6], [-15.6, -44.6], [-16.6, -41], [-20.6, -40.6], [-22.6, -43.6]],
+      handLine: [[-18.4, -46.8], [-17.4, -44.4], [-18.6, -41.8]],
+      stick: { x: -17.1, y: -41.1, rot: -34 },
+    },
+    ready3: {  // final fix: the elbow stays low by the side, the forearm comes forward and up in front of the chest,
+               // the wrist shows out of the cuff, the fist is in front of the body (not at the shoulder), and the wrist
+               // tips the keisaku back over the shoulder so the board clears the face
+      v2: true,
+      far: FAR_STAND, farBehind: true, farHand: FAR_HAND,
+      near: [[-12.6, -55.6], [-17.6, -50.4], [-23, -42.6], [-26.2, -35.6], [-27.2, -29.6], [-26.6, -23.4], [-24, -18.4], [-19, -16.8], [-14.6, -18], [-12.4, -22.6], [-11.8, -28.4], [-12.4, -30.8], [-16, -36.2], [-17.2, -38.8], [-14.6, -44], [-12.8, -50.4]],
+      nearLines: [
+        [[-12.4, -30.8], [-11.8, -28.4], [-12.4, -22.6], [-14.6, -18], [-19, -16.8], [-24, -18.4]],   // forearm underside → the bag hanging from it
+        [[-16.2, -38.8], [-18.4, -35.8], [-20.6, -33.2]],                                         // inside of the elbow: the bend (kept clear of the keisaku)
+      ],
+      cuffO: { cx: -14.2, cy: -33.5, rx: 3.4, ry: 1.4, r: 56 },
+      skin: [[-13.1, -31.8], [-15.3, -35.2], [-11.7, -37.7], [-9.5, -34.3]],
+      hand: [[-11.2, -40.2], [-7.2, -41.2], [-4.8, -38.4], [-5.6, -34.8], [-9.4, -34.2], [-11.6, -37]],
+      handLine: [[-9.4, -40.4], [-7.6, -37.8], [-6.8, -35.4]],
+      stick: { x: -5.7, y: -35.2, rot: -50 },
+    },
+    /* ---- Phase 5 key poses: wind-up, strike, follow-through. The keisaku lands on the mochi's shoulder,
+       as a real keisaku does, so the hand never has to come up across his own face. ---- */
+    windup: {  // the arm draws back: elbow up and out at shoulder height, forearm up, fist beside the head, board pointing back
+      v2: true, lean: -4, sy: 1.025,
+      far: FAR_STAND, farBehind: true, farHand: FAR_HAND,
+      // the sleeve hangs from the raised upper arm; the bag drops below the elbow
+      near: [[-12.6, -55.6], [-19, -55.2], [-25.4, -54.4], [-29.6, -52.4], [-32.4, -48.4], [-32.8, -41], [-30.6, -33.6], [-25.6, -30.2], [-20.4, -31.6], [-16.4, -36.4], [-13.8, -42], [-12.6, -47.4]],
+      nearLines: [[[-12.8, -46.4], [-14.2, -41.4], [-17, -35.6], [-21.4, -31.2], [-26.4, -30.2], [-30.4, -33.4]]],
+      folds: [[[-27.4, -48], [-26.8, -42], [-25.4, -36.4]]],
+      cuffO: { cx: -25.5, cy: -52.8, rx: 3.4, ry: 1.4, r: 34 },
+      skin: [[-23.8, -51.7], [-27.2, -53.9], [-24.1, -58.5], [-20.7, -56.3]],
+      fist: [-21, -59.6],
+      stick: { rot: -80 },
+    },
+    strike: { // shoulder leads, the forearm and wrist whip forward and down; the board stretches a little; the bag streams behind
+      v2: true, lean: 5, sx: 1.03, sy: .965,
+      far: FAR_STAND, farBehind: true, farHand: FAR_HAND,
+      near: [[-12.6, -55.6], [-8, -54.2], [-3, -53], [0.9, -51.4], [-0.8, -45.3], [-6, -44.4], [-11.6, -41.2], [-18.6, -37.4], [-24.4, -34.4], [-27.6, -35.6], [-26.4, -40.6], [-22.4, -45.6], [-17.6, -50.4]],
+      nearLines: [[[-0.8, -45.3], [-6, -44.4], [-11.6, -41.2], [-18.6, -37.4], [-24.4, -34.4], [-27.4, -35.8]]],
+      cuffO: { cx: 0.05, cy: -48.35, rx: 1.4, ry: 3.2, r: 15 },
+      skin: [[0.58, -50.3], [-0.48, -46.4], [4.5, -45.1], [5.5, -48.9]],
+      fist: [8, -46],
+      stick: { rot: 118, stretch: 1.15 },
+      swoosh: true, impact: true,
+    },
+    follow: { // after the hit: the weight settles back, the arm relaxes forward and down, the bag swings back under the arm
+      v2: true, lean: 1.5,
+      far: FAR_STAND, farBehind: true, farHand: FAR_HAND,
+      near: [[-12.6, -55.6], [-17.6, -50.4], [-21.6, -44], [-21.6, -36.4], [-20.6, -29.4], [-17, -24.6], [-10.6, -23.4], [-5.4, -26.6], [-4.4, -31.4], [-5.7, -34.8], [-3.3, -40.8], [-9, -43.4], [-12.6, -50]],
+      nearLines: [[[-5.7, -34.8], [-4.4, -31.4], [-5.4, -26.6], [-10.6, -23.4], [-17, -24.6], [-20.8, -29.8]], [[-12.6, -50.2], [-9, -43.4], [-3.3, -40.8]]],
+      cuffO: { cx: -4.5, cy: -37.8, rx: 1.4, ry: 3.2, r: 22 },
+      skin: [[-5.2, -35.8], [-3.7, -39.8], [0.7, -38], [-0.8, -34]],
+      fist: [2.6, -35.4],
+      stick: { rot: 128 },
+    },
+  };
+
+  const FIST = [[-2.8, -2.6], [1.2, -3.6], [3.6, -0.8], [2.8, 2.8], [-1, 3.4], [-3.4, 0.6]], FIST_LINE = [[-0.8, -2.8], [0.4, -0.2], [-0.6, 2.4]];
+  for (const k of ['windup', 'strike', 'follow']) {
+    const q = POSE[k], [cx, cy] = q.fist, r = q.stick.rot * Math.PI / 180, d = [Math.sin(r), -Math.cos(r)];
+    q.hand = FIST.map(([x, y]) => [cx + x, cy + y]); q.handLine = FIST_LINE.map(([x, y]) => [cx + x, cy + y]);
+    Object.assign(q.stick, { x: cx - 3.5 * d[0], y: cy - 3.5 * d[1] });
+  }
+
+  /* the keisaku: a short round grip with a binding, then a long flat board that widens a little toward a
+     squared, softly rounded end. We see its broad face; a thin darker strip along one edge gives it thickness. */
+  const STICK = { grip: 7, blade: 23, w0: 4.6, w1: 7.6 };
+  function stick(s, c, line, sil) {
+    const g = STICK.grip, b = STICK.blade * (s.stretch || 1), e = g + b, h0 = STICK.w0 / 2, h1 = STICK.w1 / 2;
+    const board = `M${-h0} ${-g} L${h0} ${-g} L${h1} ${-e + 1.8} Q${h1} ${-e} ${h1 - 1.8} ${-e} L${-h1 + 1.8} ${-e} Q${-h1} ${-e} ${-h1} ${-e + 1.8} Z`;
+    return `<g transform="translate(${s.x} ${s.y}) rotate(${s.rot})">
+      <rect x="-1.25" y="${-g - .4}" width="2.5" height="${g + 2.4}" rx="1.25" style="fill:${c.grip};stroke:${line};stroke-width:1"/>
+      <path d="${board}" style="fill:${c.blade};stroke:${line};stroke-width:1.1;stroke-linejoin:round"/>
+      ${sil ? '' : `<path d="M${h0 - 1} ${-g} L${h1 - 1.1} ${-e + 1.6}" style="stroke:${c.edge};stroke-width:1.6;stroke-linecap:round;opacity:.7"/>`}
+      <rect x="-2.6" y="${-g - .6}" width="5.2" height="2" rx=".8" style="fill:${c.band};stroke:${line};stroke-width:.7"/>
+    </g>`;
+  }
+
+  /* ---------- the three silhouette directions (same head, same feet) ---------- */
+  const SCHEME = {
+    A: { name: '圓潤鐘形', robe: [[3, -61], [-9, -60.2], [-12.6, -56], [-15, -48], [-16.4, -36], [-18.6, -22], [-23.6, -9], [-27.4, -2.6], [-16, 0.6], [2, 1.6], [18, 0.6], [28, -2.8], [24.4, -9], [20.4, -22], [18, -36], [15.6, -48], [12.8, -55], [8.6, -60.4]],
+         sleeve: ([x, y]) => [x * 0.84, y], headDy: 0 },
+    B: { name: '柔和水滴形', robe: null, sleeve: p => p, body: p => p, headDy: 0 },
+    C: { name: '短胖梯形', robe: null, sleeve: ([x, y]) => [x * 1.1, y * 0.84], body: ([x, y]) => [x * 1.14, y * 0.84], headDy: 9.4 },
+  };
+
+  const ink = 'var(--line)';
+  const L = (d, w = 1.1, op = 1) => `<path d="${d}" style="fill:none;stroke:${ink};stroke-width:${w};stroke-linecap:round;stroke-linejoin:round;opacity:${op}"/>`;
+
+  function silhouette(o) {
+    const S = SCHEME[o.scheme], p = POSE[o.pose], TS = pts => pts.map(S.sleeve), TB = pts => pts.map(S.body || S.sleeve);
+    const robe = S.robe || TB(ROBE);
+    let s = `<path d="${spline(robe)}"/><path d="${spline(TB(FEET.far))}"/><path d="${spline(TB(FEET.near))}"/>`;
+    s += `<path d="${spline(TS(p.near))}"/>` + (p.far ? `<path d="${spline(TS(p.far))}"/>` : '') + (p.farBack ? `<path d="${spline(TS(p.farBack))}"/>` : '') + (p.skin ? `<path d="${spline(TS(p.skin))}"/>` : '');
+    if (p.farFront) s += `<path d="${spline(TS(p.farFront))}"/>`;
+    if (p.hand) s += `<path d="${spline(TS(p.hand))}"/>`;
+    if (p.farHand) s += `<path d="${spline(TS(p.farHand))}"/>`;
+    if (p.stick) { const [x, y] = S.sleeve([p.stick.x, p.stick.y]); s += stick({ ...p.stick, x, y }, { grip: '#2a2420', blade: '#2a2420', band: '#2a2420' }, '#2a2420', 1); }
+    s += `<g transform="translate(0 ${S.headDy})"><path d="${HEAD}"/><path d="${EAR}"/></g>`;
+    return `<g style="fill:#2a2420">${s}</g>`;
+  }
+
+  /* ---------- faces: v2's face kept; four moods for the "gentle → suddenly serious → gentle" beat ---------- */
+  const eyeDot = (x, y, rx, ry) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" style="fill:${ink}"/>`;
+  const BROW = {
+    calm:   ['M4.4 -77.8 C5.8 -80.4 9.6 -80.8 11.4 -78.4 C10 -77.6 6.6 -77.2 4.4 -77.8 Z', 'M14.2 -78 C15.6 -80.2 18.6 -80.6 20 -78.6 C18.6 -77.6 16 -77.2 14.2 -78 Z'],
+    kind:   ['M4.4 -77.4 C5.6 -80.4 9.6 -81 11.4 -78.6 C10 -77.6 6.6 -77 4.4 -77.4 Z', 'M14.4 -78.4 C15.6 -80.8 18.8 -80.8 20 -78.4 C18.8 -77.6 16 -77.4 14.4 -78.4 Z'],
+    notice: ['M4.2 -79.6 C5.6 -82.8 9.8 -83.2 11.6 -80.8 C10 -79.8 6.6 -79.2 4.2 -79.6 Z', 'M14.4 -78.4 C15.6 -80.8 18.8 -80.8 20 -78.4 C18.8 -77.6 16 -77.4 14.4 -78.4 Z'],
+    stern:  ['M4.8 -79.8 C7 -80.8 10.4 -79.6 12 -76.6 C9.6 -76.4 6.6 -77.4 4.8 -79.8 Z', 'M13.4 -76.8 C14.8 -79.4 18 -80.4 19.8 -79.6 C18.4 -77.4 15.8 -76.6 13.4 -76.8 Z'],
+    relief: ['M4.6 -78 C5.8 -81 9.8 -81.4 11.4 -79 C10 -78 6.8 -77.6 4.6 -78 Z', 'M14.4 -79 C15.6 -81.4 18.8 -81.2 20 -78.8 C18.8 -78 16 -77.8 14.4 -79 Z'],
+  };
+  const FACE = {
+    kind:   () => eyeDot(8.4, -72.6, 1.9, 2.3) + eyeDot(16.6, -72.6, 1.6, 2.2) + L('M11.4 -64 q2.6 2 5 -.2', 1.4),
+    notice: () => eyeDot(9.4, -72.8, 2, 2.6) + eyeDot(17.4, -72.8, 1.7, 2.4) + `<circle cx="10" cy="-73.6" r=".6" style="fill:#fff"/><circle cx="17.9" cy="-73.6" r=".5" style="fill:#fff"/>` + L('M12.4 -63.8 q1.6 .6 3.2 0', 1.3),
+    stern:  () => eyeDot(8.6, -72.2, 1.9, 1.8) + eyeDot(16.8, -72.2, 1.6, 1.7) + L('M11.6 -63.6 h4.8', 1.5),
+    relief: () => L('M6.2 -72.2 q2.2 -2.8 4.4 0 M14.6 -72.2 q2 -2.6 4 0', 1.5) + L('M10.8 -64.6 q3.2 2.8 6.4 -.4', 1.4),
+    calm:   () => eyeDot(8.4, -72.4, 1.9, 2.1) + eyeDot(16.6, -72.4, 1.6, 2) + L('M11.8 -63.8 q2.2 .9 4.4 0', 1.4),
+  };
+  const BLUSH = { kind: .6, notice: .4, stern: .25, relief: .9, calm: .45 };
+  const brow = d => `<path d="${d}" style="fill:#f6f1e6;stroke:${ink};stroke-width:1;stroke-linejoin:round"/>`;
+
+  const ART = { robe: 'var(--robe)', robeLo: 'var(--robe-lo)', band: '#2b395e', white: '#f6f2e8', neck: 'var(--skin-lo)', skin: 'var(--skin)', kesa: 'var(--kesa)', foot: '#f2ede2', grip: '#8a6240', blade: '#d8b177', edge: '#a27a48', bandC: '#5e3d22' };
+
+  /* full colour (scheme B): o = { id, pose, face, facing, lines (false = no inner lines), shadow } */
+  function art(o) {
+    const p = o.poseObj || POSE[o.pose], face = o.face || 'kind', left = o.facing === 'left', id = o.id, lines = o.lines !== false;
+    const fill = (d, c, s) => `<path class="m4p" d="${d}" style="--c:${c}" ${s ? 'data-s="1"' : ''}/>`;
+    const det = s => `<g class="m4det">${s}</g>`;
+    const Ln = (pts, w = 1.15, op = 1) => lines ? L(spline(pts, false), w, op) : '';
+    /* Round 3.5 — the hand holding the keisaku. Before, it was part of the silhouette (and, on the split front layer,
+       had a silhouette copy of its own), so it got the 4.4-wide outer ring on top of its own 1.1 stroke: a dark ring
+       right next to the cuff and the grip. Now the fist and the bare wrist are drawn with their own single stroke and
+       stay out of the silhouette; the finger line is lighter. o.fistLegacy = the drawing before 3.5 (for comparisons). */
+    const FL = !!o.fistLegacy;
+    const fistD = pts => FL ? fill(spline(pts), ART.skin, 1) : det(`<path d="${spline(pts)}" style="fill:${ART.skin};stroke:${ink};stroke-width:1.2;stroke-linejoin:round"/>`);
+    const fingers = pts => Ln(pts, FL ? .8 : .7, FL ? .55 : .42);
+    const cuffW = FL ? 1 : .85;
+    const wristD = (pts, w) => FL ? fill(spline(pts), ART.skin, 1) : det(`<path d="${spline(pts)}" style="fill:${ART.skin};stroke:${ink};stroke-width:${(.9 * Math.min(1, w ?? 1)).toFixed(3)};stroke-linejoin:round"/>`);
+    // (the animation passes the near sleeve as many points sampled ON the key poses' curves; the same spline through
+    // them reproduces those curves, so nothing special is needed to draw them)
+    const shape = (pts, closed) => spline(pts, closed);
+    const out = [], front = [], late = [];
+    if (p.farBehind) out.push(fill(spline(p.far), ART.robe) + (p.farHand ? fill(spline(p.farHand), ART.skin, 1) : ''));
+    if (p.farBack) out.push(fill(spline(p.farBack), ART.robe));
+    out.push(fill(spline(FEET.far), ART.foot) + fill(spline(FEET.near), ART.foot) + det(lines ? L('M1.6 -0.8 C1.6 1 -1 1.6 -4 1.7', .9, .5) : ''));
+    out.push(fill(spline(ROBE), ART.robe));
+    // one soft shade low on the robe, the side away from the window
+    // the upper panel's edge: one quiet line from under the rakusu to the hem
+    out.push(det(Ln(left ? [[11.2, -36], [12.4, -22], [12.8, -3.4]] : [[0.6, -36], [-0.4, -22], [-0.8, -3]], 1, .45)));
+    // collar: neck in the V, a thin white under-collar, the dark collar (the wearer's left on top), standing up at the nape
+    const near = [[-13.6, -59.6], [-9, -56.8], [-3.6, -53.8], [2.4, -48.8], [6.2, -45]], far = [[12.8, -58.4], [10.6, -54.2], [7.8, -48.6], [5.8, -44]];
+    const nearB = `<path d="${ribbon(near, 7.6, 3.2)}" style="fill:${ART.band}"/>`, farB = `<path d="${ribbon(far, 3, 2.8)}" style="fill:${ART.band}"/>`;
+    const edge = (pts, sideSign, w) => pts.map((q, i) => { const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy); return [q[0] + sideSign * dy / l * w, q[1] - sideSign * dx / l * w]; });
+    out.push(det(`<g clip-path="url(#${id}-robe)">
+      <path d="${spline([[-4, -56], [1.4, -51], [5.8, -46.4], [9.8, -52.6], [12, -57], [4, -58.6]])}" style="fill:${ART.neck}"/>
+      <path d="${ribbon([[-3, -55.6], [1.6, -51], [5.6, -46.2]], 1.8, 1.2)}" style="fill:${ART.white}"/>
+      <path d="${ribbon([[11.4, -56.6], [9.4, -52], [6.6, -46.4]], 1.6, 1.1)}" style="fill:${ART.white}"/>
+      ${left ? farB + nearB : nearB + farB}
+      ${lines ? (left ? L(spline(edge(far.slice(1), -1, 1.4), false), .8, .6) + L(spline(edge(near.slice(2), 1, 1.6), false), .9, .75)
+                      : L(spline(edge(near.slice(2), 1, 1.6), false), .8, .6) + L(spline(edge(far.slice(1), -1, 1.4), false), .9, .75)) : ''}
+    </g>`));
+    // rakusu: a small panel hanging from the crossing (its cords go up under the collar)
+    out.push(det(`<path d="${spline([[-0.6, -44.6], [6.6, -45.4], [14, -44.4], [14.4, -39.4], [13.6, -35.4], [6.4, -34.8], [-0.4, -35.6], [-1.2, -40]])}" style="fill:${ART.kesa};stroke:${ink};stroke-width:1.1"/>
+      ${lines ? `<path d="${spline([[1.4, -42.8], [6.6, -43.4], [12, -42.6], [12.2, -39.6], [11.6, -37.2], [6.4, -36.8], [1.6, -37.4], [1, -40]])}" style="fill:none;stroke:${ART.bandC};stroke-width:.7;opacity:.55"/>` : ''}`));
+    if (p.farFront && !p.v2) out.push(fill(spline(p.farFront), ART.robe) + det(Ln(p.farLine) + Ln(p.farLine2)));
+    if (p.v2) {
+      if (p.farFront) out.push(fill(spline(p.farFront), ART.robe) + det(p.farLines.map(l => Ln(l)).join('')));
+      if (p.swoosh) out.push(det(`<path d="M16 -97 C36 -90 46 -66 40 -38" style="fill:none;stroke:#fffaf0;stroke-width:7;stroke-linecap:round;opacity:.5"/>
+        <path d="M24 -96 C42 -86 50 -66 46 -46" style="fill:none;stroke:#fffaf0;stroke-width:1.3;stroke-linecap:round;opacity:.8"/>
+        <path d="M30 -92 C46 -80 52 -66 50 -54" style="fill:none;stroke:#fffaf0;stroke-width:1;stroke-linecap:round;opacity:.6"/>`));
+      // while the near arm swings over the head it is drawn in front of the head (it is the arm nearer to us);
+      // it then needs its own outline where it crosses the face
+      const arm = o.armOverHead ? late : out;
+      arm.push(fill(shape(p.near, true), ART.robe) + det(p.nearLines.map(l => Ln(l)).join('') + (p.folds || []).map(l => Ln(l, .85, .45)).join('') + (p.extraLines || []).map(l => l.op > .02 ? Ln(l.pts, l.w || 1.1, l.op) : '').join('') + (o.armOverHead ? L(shape(p.near, true), 1.2) : '')));
+      if (p.cuffO) arm.push(det(`<ellipse cx="${p.cuffO.cx}" cy="${p.cuffO.cy}" rx="${p.cuffO.rx}" ry="${p.cuffO.ry}" transform="rotate(${p.cuffO.r} ${p.cuffO.cx} ${p.cuffO.cy})" style="fill:#26345a;stroke:${ink};stroke-width:${cuffW}"/>`));
+      if (p.skin && (p.skinW ?? 1) > .02) arm.push(wristD(p.skin, p.skinW));
+      // split: the keisaku and the fist holding it go on their own layer (above the mochi), the rest stays behind
+      const top = o.split && !o.stickBack ? front : (o.armOverHead ? late : out);
+      if (o.frontUnder) top.push(det(o.frontUnder));
+      if (p.stick) top.push(det(stick(p.stick, { ...ART, band: ART.bandC }, ink)));
+      if (p.hand) top.push(fistD(p.hand) + det(fingers(p.handLine)));
+      if (p.impact) top.push(det(`<g style="fill:none;stroke:var(--kin);stroke-width:1.3;stroke-linecap:round"><path d="M38 -38 l2.4 -4.6 M41.6 -32.6 l5 -1.4 M40 -26.6 l4.4 2.6"/></g>`));
+    }
+    if (p.v2) {}
+    else if (o.pose === 'idle' || o.pose === 'ready') out.push(fill(spline(o.pose === 'idle' ? curve(p.near, DENSE.near, true) : p.near), ART.robe) + det(Ln(o.pose === 'idle' ? curve(p.nearLine, DENSE.line, false) : p.nearLine) + (p.tube ? Ln(p.tube, 1.1) : '') + (p.cuffO ? `<ellipse cx="${p.cuffO.cx}" cy="${p.cuffO.cy}" rx="${p.cuffO.rx}" ry="${p.cuffO.ry}" transform="rotate(${p.cuffO.r} ${p.cuffO.cx} ${p.cuffO.cy})" style="fill:#26345a;stroke:${ink};stroke-width:${cuffW}"/>` : '')) + det(stick(p.stick, { ...ART, band: ART.bandC }, ink)) + fistD(p.hand) + det(fingers(p.handLine)));
+    else out.push((p.hand ? fill(spline(p.hand), ART.skin, 1) + det(Ln(p.handLine, .8, .55)) : '') + fill(spline(p.near), ART.robe) + det(Ln(p.nearLine)));
+    // head (v2)
+    out.push(`<g transform="rotate(${o.tilt ?? 2} 3 -56)">` + fill(HEAD, ART.skin) + det(`<g clip-path="url(#${id}-head)"><path d="M-6 -95 C-15 -88 -17 -74 -13 -64 C-10 -58.6 -6 -56 -1 -54.6 L-30 -50 L-30 -100 Z" style="fill:var(--skin-lo);opacity:.5"/></g>` + L(HEAD_LOWER, 1.25))
+      + fill(EAR, ART.skin, 1) + det(L('M-15 -74 q-2 1.8 -.4 4.4', .9, .55) + '<path d="M-7.4 -88.6 q5 -4.2 11 -4.6" style="fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;opacity:.5"/>'
+      + `<ellipse cx="5.6" cy="-66.4" rx="3.6" ry="2" style="fill:var(--blush);opacity:${BLUSH[face]}"/><ellipse cx="19.6" cy="-66.2" rx="1.8" ry="1.6" style="fill:var(--blush);opacity:${BLUSH[face]}"/>`
+      + FACE[face]() + BROW[face].map(brow).join('')) + '</g>');
+    out.push(...late);
+    const flip = left ? ' transform="scale(-1 1)"' : '';
+    const body = `rotate(${p.lean || 0}) scale(${p.sx || 1} ${p.sy || 1})`;
+    if (o.split) return {
+      back: `<g class="m4" id="${id}"><defs><clipPath id="${id}-robe"><path d="${spline(ROBE)}"/></clipPath><clipPath id="${id}-head"><path d="${HEAD}"/></clipPath><g id="${id}-art">${out.join('')}</g></defs>
+        ${o.shadow !== false ? '<ellipse cx="1" cy="1.4" rx="27" ry="4.2" class="m4shadow"/>' : ''}<g${flip}><g transform="${body}"><use href="#${id}-art" class="m4-sil"/><use href="#${id}-art"/></g></g></g>`,
+      front: `<g class="m4"><defs><g id="${id}-fr">${front.join('')}</g></defs><g${flip}><g transform="${body}">${FL ? `<use href="#${id}-fr" class="m4-sil"/>` : ''}<use href="#${id}-fr"/>${o.frontTop || ''}</g></g></g>`,
+    };
+    return `<g class="m4" id="${id}">
+      <defs><clipPath id="${id}-robe"><path d="${spline(ROBE)}"/></clipPath><clipPath id="${id}-head"><path d="${HEAD}"/></clipPath><g id="${id}-art">${out.join('')}</g></defs>
+      ${o.shadow !== false ? '<ellipse cx="1" cy="1.4" rx="27" ry="4.2" class="m4shadow"/>' : ''}
+      <g${flip}><g transform="rotate(${p.lean || 0}) scale(${p.sx || 1} ${p.sy || 1})"><use href="#${id}-art" class="m4-sil"/><use href="#${id}-art"/></g></g>
+    </g>`;
+  }
+
+  const SKELETON = {
+    tuck2: { shN: [-15, -48], elN: [-19.6, -29.6], wrN: [4.4, -24.4], hdN: [8.4, -23.6], shF: [13.5, -49], elF: [22, -31.6], wrF: [1.6, -25.6], hdF: [-2.4, -25] },
+    ready2: { shN: [-15, -48], elN: [-26, -33], wrN: [-20.6, -41.6], hdN: [-19.1, -44], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
+    windup: { shN: [-15, -48], elN: [-28, -49], wrN: [-22.4, -57.4], hdN: [-21, -59.6], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
+    strike: { shN: [-15, -48], elN: [-6, -50], wrN: [5, -47], hdN: [8, -46], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
+    follow: { shN: [-15, -48], elN: [-10, -40], wrN: [0, -36], hdN: [2.6, -35.4], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
+    // the hanging pose (Round 3.5: the end of the return); the wrist is where its cuff is, the fist is the hand's centre
+    idle: { shN: [-15, -48], elN: [-19.4, -31], wrN: [-11.6, -24.8], hdN: [-9.0667, -25], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
+    ready3: { shN: [-15, -48], elN: [-21.4, -29.6], wrN: [-10.6, -36], hdN: [-8.4, -37.5], shF: [13.5, -49], elF: [18, -31], wrF: [20.6, -16.8], hdF: [21, -13.8] },
+  };
+  // Round 4.2A: the accepted shapes, read-only, so new views of the same monk are built from them (nothing here changes)
+  const parts = Object.freeze({ HEAD, HEAD_LOWER, EAR, FEET, ROBE, NEAR_OUT, FAR_OUT, FAR_STAND, FAR_HAND, BROW, BLUSH, ART, ribbon });
+  window.MONK4 = { parts, silhouette, art, SCHEME, POSE, spline, stick, STICK, SKELETON, FIST, FIST_LINE, resample, onSpline, curve, DENSE };
+})();
+;
+/* =====================================================================
+   Round 3.3 — playable preview of the reminder beat: raised → wind-up → hold → strike → hit-stop → follow-through.
+
+   How a frame is made
+   • Joints: the shoulder stays put; the upper arm and the forearm are interpolated as angles and lengths
+     between key poses (so the elbow and wrist travel on arcs, never straight through the body).
+   • The fist sits on the forearm (distance + angle from the wrist); the keisaku is ALWAYS placed from the fist
+     and its angle = forearm angle + wrist angle. Nothing about it is interpolated on its own.
+   • Sleeves: each key pose's sleeve outline is resampled and "skinned" to its own skeleton (every point is tied
+     to the torso, the upper arm and the forearm by distance). For a frame, both neighbouring keys' outlines are
+     carried by the current skeleton and blended — so the cuff stays on the forearm even mid-swing. Points of the
+     sleeve bag (far from the bones) are carried by the skeleton of 50 ms earlier: that is the lag.
+   • Body lean / squash interpolate with the same curve. The scene is not rotated as a whole.
+   • Layers: the robe, sleeves and head stay behind the mochi; only the keisaku and the fist holding it are on
+     their own layer above it.
+   • Round 3.5: after the follow-through the arm returns to the hanging pose (POSE.idle, as drawn) and the last frame
+     is that pose exactly; endCheck() measures it.
+   ===================================================================== */
+(function () {
+  'use strict';
+  const M = MONK4, P = M.POSE, SK = M.SKELETON, { resample, onSpline, curve } = M;
+  const SH = [-15, -48], TORSO = [[-13.2, -57.4], [-12.4, -46]];
+  const MONK_AT = [132, 254], MOCHI_AT = [206, 257];
+  const R = Math.PI / 180;
+  const ang = (a, b) => Math.atan2(b[1] - a[1], b[0] - a[0]) / R;
+  const dist = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const dir = a => [Math.cos(a * R), Math.sin(a * R)];
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const lerpP = (A, B, t) => A.map((q, i) => [lerp(q[0], B[i][0], t), lerp(q[1], B[i][1], t)]);
+  const unwrap = (prev, a) => { while (a - prev > 180) a -= 360; while (a - prev < -180) a += 360; return a; };
+  function segDist(p, a, b) {
+    const dx = b[0] - a[0], dy = b[1] - a[1], l2 = dx * dx + dy * dy || 1;
+    const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / l2));
+    return Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy);
+  }
+  const frame = (p0, p1) => { const L = dist(p0, p1) || 1, e = [(p1[0] - p0[0]) / L, (p1[1] - p0[1]) / L]; return { p0, L, e, n: [-e[1], e[0]] }; };
+  const toLocal = (P, f) => { const d = [P[0] - f.p0[0], P[1] - f.p0[1]]; return [(d[0] * f.e[0] + d[1] * f.e[1]) / f.L, d[0] * f.n[0] + d[1] * f.n[1]]; };
+  const fromLocal = ([u, v], f) => [f.p0[0] + f.e[0] * u * f.L + f.n[0] * v, f.p0[1] + f.e[1] * u * f.L + f.n[1] * v];
+
+  // The 3.3 keys drew a spline through their outline resampled to 48 (line: 16) points; those keys now carry points on
+  // exactly that drawn curve (6 per span), so their frames do not move. idle carries points on its own drawn curve.
+  const SUB = 6, NEAR_N = M.DENSE.near, LINE_N = M.DENSE.line;   // 288 = 48 × 6, 91 = 15 × 6 + 1
+
+  /* ---------- key poses, as data ----------
+     Round 3.5 adds 'idle' (the existing 香板垂放 pose, read as it is) and, per key, a few values that used to be
+     constants: the cuff's size and its angle relative to the forearm, the bare wrist's width and where the keisaku's
+     origin sits relative to the fist. The four keys from 3.3 get exactly the old constants, so their frames are
+     unchanged; idle gets its own drawing's values. */
+  const KEYS = { ready3: { face: 'stern', tilt: 4 }, windup: { face: 'stern', tilt: 2 }, strike: { face: 'stern', tilt: 6 }, follow: { face: 'calm', tilt: 3 }, idle: { face: 'kind', tilt: 2, own: true } };
+  let prev = null;
+  for (const k of ['ready3', 'windup', 'strike', 'follow', 'idle']) {
+    const q = SK[k], pz = P[k], el = q.elN, wr = q.wrN, own = KEYS[k].own;
+    const hc = pz.hand.reduce((a, v) => [a[0] + v[0] / pz.hand.length, a[1] + v[1] / pz.hand.length], [0, 0]);
+    const fist = pz.fist || hc;
+    let a1 = ang(SH, el), a2 = ang(el, wr), sr = (pz.stick.rot - 90) - a2;
+    if (prev) { a1 = unwrap(prev.a1, a1); a2 = unwrap(prev.a2, a2); sr = unwrap(prev.sr, sr); }
+    const u = dir(a2), c = pz.cuffO, nv = dir(a2 + 90);
+    // the keisaku's origin in its own (rotated) frame, measured from the fist; 3.3 keys: 3.5 back along the board
+    let stickOff = [0, 3.5];
+    if (own) { const rr = pz.stick.rot * R, dx = pz.stick.x - fist[0], dy = pz.stick.y - fist[1]; stickOff = [dx * Math.cos(rr) + dy * Math.sin(rr), -dx * Math.sin(rr) + dy * Math.cos(rr)]; }
+    let cuffRel = own ? c.r - a2 : 0; if (own) { while (cuffRel > 90) cuffRel -= 180; while (cuffRel < -90) cuffRel += 180; }
+    const key = Object.assign(KEYS[k], {
+      name: k, a1, a2, sr, L1: dist(SH, el), L2: dist(el, wr), fd: dist(wr, fist), fa: ang(wr, fist) - a2,
+      cf: ((c.cx - el[0]) * u[0] + (c.cy - el[1]) * u[1]) / dist(el, wr),
+      cv: own ? (c.cx - el[0]) * nv[0] + (c.cy - el[1]) * nv[1] : 0,
+      cuffRx: own ? c.rx : 1.4, cuffRy: own ? c.ry : 3.3, cuffRel, skinW: own ? 0 : 2, stickOff,
+      stretch: pz.stick.stretch || 1, lean: pz.lean || 0, sx: pz.sx || 1, sy: pz.sy || 1,
+      hand: pz.hand.map(v => [v[0] - fist[0], v[1] - fist[1]]), handLine: pz.handLine.map(v => [v[0] - fist[0], v[1] - fist[1]]),
+    });
+    const lines0 = pz.nearLines || [pz.nearLine];
+    // bind the sleeve outline and its lines to this key's own skeleton
+    const fu = frame(SH, el), ff = frame(el, wr);
+    const bind = pts => pts.map(Pt => {
+      const dT = segDist(Pt, TORSO[0], TORSO[1]), dU = segDist(Pt, SH, el), dF = segDist(Pt, el, wr);
+      const w = [1 / (dT * dT + 1), 1 / (dU * dU + 1), 1 / (dF * dF + 1)], s = w[0] + w[1] + w[2];
+      return { P: Pt, w: w.map(x => x / s), lu: toLocal(Pt, fu), lf: toLocal(Pt, ff), bag: Math.min(dU, dF) > 6.5 };
+    });
+    // 3.3 keys: the 48 / 16 control points are skinned (as in 3.3) and the drawn spline is sampled afterwards;
+    // idle: points on its own drawn curve are skinned directly. Both end up as NEAR_N / LINE_N points.
+    key.near = bind(own ? curve(pz.near, NEAR_N, true) : resample(pz.near, 48, true)); key.near.ctrl = !own; key.near.closed = true;
+    key.line0 = bind(own ? curve(lines0[0], LINE_N, false) : resample(lines0[0], 16, false)); key.line0.ctrl = !own; key.line0.closed = false;
+    key.extras = lines0.slice(1).concat(pz.folds || []).map(l => bind(l));
+    prev = key;
+  }
+  // the hold: the arm keeps drawing back a touch, the body settles a little further back (alive, not frozen)
+  const KK = {}; for (const k in KEYS) KK[k] = KEYS[k];
+  KK.windupPlus = Object.assign({}, KK.windup, { a1: KK.windup.a1 + 4, sr: KK.windup.sr - 4, lean: KK.windup.lean - 1, name: 'windupPlus' });
+  // Round 4: noticing — the hanging pose with the head turned toward the mochi (tilt 6°, 察覺 face)
+  KK.idleNotice = Object.assign({}, KK.idle, { name: 'idleNotice', face: 'notice', tilt: 6 });
+
+  /* ---------- timeline ---------- */
+  const ease = {
+    lin: t => t, inOut: t => t < .5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2,
+    in: t => t * t * t, out: t => 1 - (1 - t) ** 3, sine: t => .5 - Math.cos(Math.PI * t) / 2,
+  };
+  // Round 3.5: the old 460 ms 'post' hold is replaced by settle (follow-through held) → return (back to the hanging
+  // pose) → rest (held, so the lagging sleeve bag lands too). Everything up to the follow-through is unchanged.
+  const T = { pre: 200, windup: 340, hold: 160, swing: 90, stop: 135, follow: 260, settle: 120, return: 520, rest: 120 };
+  let SEG = [];
+  function build() {
+    const plan = [['pre', '舉起', 'ready3', 'ready3', 'lin'], ['windup', '預備', 'ready3', 'windup', 'inOut'], ['hold', '停頓', 'windup', 'windupPlus', 'sine'],
+      ['swing', '揮下', 'windupPlus', 'strike', 'in'], ['stop', '命中停格', 'strike', 'strike', 'lin'], ['follow', '收勢', 'strike', 'follow', 'out'], ['settle', '收勢（停）', 'follow', 'follow', 'lin'],
+      ['return', '收板歸位', 'follow', 'idle', 'inOut'], ['rest', '待機', 'idle', 'idle', 'lin']];
+    let t0 = 0; SEG = plan.map(([id, zh, a, b, e]) => { const s = { id, zh, a, b, e, t0, t1: t0 + T[id] }; t0 = s.t1; return s; });
+    DEF.SEG = SEG;
+  }
+  /* Round 4: a timeline can also be made from rows [id, 中文, from key, to key, ease, ms] (the game composes the
+     reminder: notice → raise → approach → … the accepted segments). Every function below takes an optional plan;
+     without one it uses the timeline above, exactly as before. */
+  const DEF = { SEG: [] };
+  function makePlan(rows) { let t0 = 0; return { SEG: rows.map(([id, zh, a, b, e, ms]) => { const s = { id, zh, a, b, e, t0, t1: t0 + ms }; t0 = s.t1; return s; }) }; }
+  build();
+  const total = (pl = DEF) => pl.SEG[pl.SEG.length - 1].t1;
+  const segAt = (t, pl = DEF) => pl.SEG.find(s => t < s.t1) || pl.SEG[pl.SEG.length - 1];
+  const segOf = (pl, id) => pl.SEG.find(s => s.id === id);
+
+  function joints(t, pl = DEF) {
+    t = Math.max(0, Math.min(total(pl), t));
+    const s = segAt(t, pl), A = KK[s.a], B0 = KK[s.b], u = Math.min(1, (t - s.t0) / ((s.t1 - s.t0) || 1)), e = ease[s.e](u);
+    // angles are unwrapped per segment (for the 3.3–3.5 chain this changes nothing: it was unwrapped in that order)
+    const B = B0 === A ? A : Object.assign(Object.create(B0), { a1: unwrap(A.a1, B0.a1), a2: unwrap(A.a2, B0.a2), sr: unwrap(A.sr, B0.sr) });
+    const a1 = lerp(A.a1, B.a1, e), a2 = lerp(A.a2, B.a2, e), L1 = lerp(A.L1, B.L1, e), L2 = lerp(A.L2, B.L2, e);
+    const el = [SH[0] + L1 * dir(a1)[0], SH[1] + L1 * dir(a1)[1]], wr = [el[0] + L2 * dir(a2)[0], el[1] + L2 * dir(a2)[1]];
+    const fd = lerp(A.fd, B.fd, e), fa = lerp(A.fa, B.fa, e), fist = [wr[0] + fd * dir(a2 + fa)[0], wr[1] + fd * dir(a2 + fa)[1]];
+    const sr = lerp(A.sr, B.sr, e), rot = a2 + sr + 90, d = [Math.sin(rot * R), -Math.cos(rot * R)];
+    const stretch = lerp(A.stretch, B.stretch, e);
+    const off = [lerp(A.stickOff[0], B.stickOff[0], e), lerp(A.stickOff[1], B.stickOff[1], e)], cr = Math.cos(rot * R), sn = Math.sin(rot * R);
+    let face = e < .5 ? A.face : B.face, tilt = lerp(A.tilt, B.tilt, e);
+    if (s.id === 'return') {   // calm → the eyes close into the kind smile → kind; one slow nod on the way down
+      face = u < .25 ? 'calm' : u < .8 ? 'relief' : 'kind';
+      tilt += 4 * Math.sin(Math.PI * u) ** 2;
+    }
+    if (s.id === 'notice') face = 'notice';
+    if (s.id === 'raise') face = u < .6 ? 'notice' : 'stern';   // the Round 3 plan: serious at 60% of the raise
+    return { t, s, A, B, e, u, el, wr, fist, a2, rot, d, stretch, origin: [fist[0] + off[0] * cr - off[1] * sn, fist[1] + off[0] * sn + off[1] * cr],
+      tipLen: M.STICK.grip + M.STICK.blade * stretch, lean: lerp(A.lean, B.lean, e), sx: lerp(A.sx, B.sx, e), sy: lerp(A.sy, B.sy, e),
+      face, tilt, a1, L1, L2, sr };
+  }
+  const tipLocal = j => [j.origin[0] + j.tipLen * j.d[0], j.origin[1] + j.tipLen * j.d[1]];
+  function toWorld(p, j) {   // monk art coords → scene coords (lean + squash about the feet, then placement)
+    const c = Math.cos(j.lean * R), s = Math.sin(j.lean * R), x = p[0] * j.sx, y = p[1] * j.sy;
+    return [MONK_AT[0] + x * c - y * s, MONK_AT[1] + x * s + y * c];
+  }
+  function skin(bound, j, lag) {
+    const fu = frame(SH, j.el), ff = frame(j.el, j.wr), gu = frame(SH, lag.el), gf = frame(lag.el, lag.wr);
+    return bound.map(b => {
+      const U = fromLocal(b.lu, b.bag ? gu : fu), F = fromLocal(b.lf, b.bag ? gf : ff);
+      return [b.w[0] * b.P[0] + b.w[1] * U[0] + b.w[2] * F[0], b.w[0] * b.P[1] + b.w[1] * U[1] + b.w[2] * F[1]];
+    });
+  }
+  const LAG = 50;
+  function poseAt(t, opts = {}, pl = DEF) {
+    const j = joints(t, pl), lag = joints(t - LAG, pl), A = j.A, B = j.B, e = j.e;
+    const carried = b => { const q = skin(b, j, lag); return b.ctrl ? onSpline(q, b.closed, SUB) : q; };
+    const blend = (key) => lerpP(carried(A[key]), carried(B[key]), e);
+    const cf = lerp(A.cf, B.cf, e), cv = lerp(A.cv, B.cv, e), n = dir(j.a2 + 90);
+    const c = [lerp(j.el[0], j.wr[0], cf) + cv * n[0], lerp(j.el[1], j.wr[1], cf) + cv * n[1]], hw = lerp(A.skinW, B.skinW, e);
+    const hand = lerpP(A.hand, B.hand, e).map(v => [v[0] + j.fist[0], v[1] + j.fist[1]]);
+    const handLine = lerpP(A.handLine, B.handLine, e).map(v => [v[0] + j.fist[0], v[1] + j.fist[1]]);
+    const extraLines = A.extras.map(l => ({ pts: skin(l, j, lag), op: 1 - e })).concat(B.extras.map(l => ({ pts: skin(l, j, lag), op: e })));
+    const p = {
+      v2: true, far: P.stand.far, farBehind: true, farHand: P.stand.farHand,
+      near: blend('near'), nearLines: [blend('line0')], extraLines,
+      cuffO: { cx: c[0], cy: c[1], rx: lerp(A.cuffRx, B.cuffRx, e), ry: lerp(A.cuffRy, B.cuffRy, e), r: j.a2 + lerp(A.cuffRel, B.cuffRel, e) },
+      skin: [[c[0] + hw * n[0], c[1] + hw * n[1]], [c[0] - hw * n[0], c[1] - hw * n[1]], [j.wr[0] - hw * n[0], j.wr[1] - hw * n[1]], [j.wr[0] + hw * n[0], j.wr[1] + hw * n[1]]], skinW: hw / 2,
+      hand, handLine, stick: { x: j.origin[0], y: j.origin[1], rot: j.rot, stretch: j.stretch },
+      lean: j.lean, sx: j.sx, sy: j.sy, impact: j.s.id === 'stop',
+    };
+    // motion trail: the tip's last 70 ms, only while it is fast
+    let trail = '';
+    const sw = segOf(pl, 'swing');
+    if (sw && (j.s.id === 'swing' || j.s.id === 'stop')) {
+      const pts = []; for (let k = 0; k <= 10; k++) pts.push(tipLocal(joints(Math.max(sw.t0, j.t - 70 + 7 * k), pl)));
+      const mid = pts.map(q => q.map(v => v.toFixed(1)).join(' ')).join(' L');
+      trail = `<path d="M${mid}" style="fill:none;stroke:#fffaf0;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;opacity:${opts.trailOp ?? .3}"/>`;
+    }
+    let top = '';
+    if (opts.skeleton) {
+      const pt = v => v.map(x => x.toFixed(1)).join(' ');
+      top = `<g style="fill:none;stroke:var(--shu);stroke-width:.9;stroke-linecap:round;stroke-linejoin:round"><path d="M${pt(SH)} L${pt(j.el)} L${pt(j.wr)} L${pt(j.fist)}"/>`
+        + [SH, j.el, j.wr, j.fist].map(v => `<circle cx="${v[0].toFixed(1)}" cy="${v[1].toFixed(1)}" r="1.2" style="fill:#fff;stroke:var(--shu);stroke-width:.7"/>`).join('') + '</g>';
+    }
+    return { p, j, trail, top };
+  }
+
+  /* ---------- the mochi's reaction: squash at the hit, held during the hit-stop, then a damped bounce ---------- */
+  function mochiAt(t, pl = DEF) {
+    const st = segOf(pl, 'stop'); if (!st) return { sx: 1, sy: 1, face: 'calm' };
+    const hit = st.t0, after = st.t1;
+    if (t < hit) return { sx: 1, sy: 1, face: 'calm' };
+    if (t < after) return { sx: 1.07, sy: .88, face: 'ouch' };
+    const tau = t - after, dy = -.12 * Math.exp(-tau / 150) * Math.cos(2 * Math.PI * tau / 300);
+    return { sx: 1 - dy * .6, sy: 1 + dy, face: tau < 600 ? 'ouch' : 'teary' };
+  }
+
+  /* ---------- the hit check: is the board ever inside the mochi? where does it land? ---------- */
+  let probe;
+  function insideMochi(pw, m) {
+    if (!probe) { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('width', 0); s.setAttribute('height', 0); s.style.position = 'absolute';
+      s.innerHTML = `<path d="${MOCHI_BODY}"/>`; document.body.appendChild(s); probe = s.firstChild; }
+    const lx = (pw[0] - MOCHI_AT[0]) / m.sx, ly = (pw[1] - MOCHI_AT[1]) / m.sy;
+    const pt = probe.ownerSVGElement.createSVGPoint(); pt.x = lx; pt.y = ly; return probe.isPointInFill(pt);
+  }
+  function analyse() {
+    const step = 1000 / 60, inside = [], path = [];
+    for (let t = 0; t <= total() + .01; t += step) {
+      const j = joints(t), m = mochiAt(t);
+      const tip = toWorld(tipLocal(j), j); path.push(tip);
+      // test the outer 40% of the board
+      let hitIn = false;
+      for (let f = .6; f <= 1.001; f += .1) { const q = [j.origin[0] + j.tipLen * f * j.d[0], j.origin[1] + j.tipLen * f * j.d[1]]; if (insideMochi(toWorld(q, j), m)) hitIn = true; }
+      if (hitIn) inside.push({ t: Math.round(t), seg: j.s.zh });
+    }
+    const jh = joints(SEG[4].t0), tipH = toWorld(tipLocal(jh), jh), lx = tipH[0] - MOCHI_AT[0], ly = tipH[1] - MOCHI_AT[1];
+    return { inside, path, hit: tipH, hitLocal: [lx, ly] };
+  }
+
+  /* ---------- Round 3.5: does the return land exactly on the hanging pose? (repeatable; numbers only) ---------- */
+  function endCheck() {
+    const segD = (p, a, b) => segDist(p, a, b);
+    const polyDist = (p, Q, closed) => { let m = 1e9; for (let i = 0; i < Q.length - (closed ? 0 : 1); i++) m = Math.min(m, segD(p, Q[i], Q[(i + 1) % Q.length])); return m; };
+    const haus = (A, B, closed) => Math.max(...A.map(p => polyDist(p, B, closed)), ...B.map(p => polyDist(p, A, closed)));
+    const maxPt = (A, B) => Math.max(...A.map((q, i) => dist(q, B[i])));
+    const tEnd = total(), FR = 1000 / 60, I = P.idle, Q = SK.idle, end = poseAt(tEnd), j = end.j, p = end.p;
+    const fistIdle = I.hand.reduce((a, v) => [a[0] + v[0] / I.hand.length, a[1] + v[1] / I.hand.length], [0, 0]);
+    const ref = { near: curve(I.near, 3000, true), line: curve(I.nearLine, 1500, false) };
+    const lag = joints(tEnd - LAG);
+    const joint = { elbow: dist(j.el, Q.elN), wrist: dist(j.wr, Q.wrN), fist: dist(j.fist, fistIdle), shoulder: 0 };
+    const stickR = { origin: dist([p.stick.x, p.stick.y], [I.stick.x, I.stick.y]), rot: Math.abs(p.stick.rot - I.stick.rot), length: Math.abs(j.tipLen - (M.STICK.grip + M.STICK.blade)), stretch: Math.abs(j.stretch - 1) };
+    const c = p.cuffO, ci = I.cuffO;
+    const outline = { near: haus(p.near, ref.near, true), line: haus(p.nearLines[0], ref.line, false), hand: maxPt(p.hand, I.hand), handLine: maxPt(p.handLine, I.handLine),
+      cuff: Math.max(Math.abs(c.cx - ci.cx), Math.abs(c.cy - ci.cy), Math.abs(c.rx - ci.rx), Math.abs(c.ry - ci.ry), Math.abs(c.r - ci.r)), wrist: p.skinW };
+    const state = { lean: Math.abs(j.lean), sx: Math.abs(j.sx - 1), sy: Math.abs(j.sy - 1), tilt: Math.abs(j.tilt - 2), face: j.face, trail: end.trail === '' , impact: !!p.impact,
+      extras: Math.max(0, ...p.extraLines.map(l => l.op)), armOverHead: j.s.id === 'swing', stickFront: stickFrontAt(j), lag: Math.max(dist(lag.el, j.el), dist(lag.wr, j.wr)), seg: j.s.id };
+    // speeds across the boundary: units (and degrees) per 60 fps frame, for the last frames of the animation and the
+    // first frame of the static idle that follows (which does not move: 0)
+    const tip = t => { const q = joints(t); return tipLocal(q); };
+    const speed = t => { const a = poseAt(t - FR), b = poseAt(t); return { t: Math.round(t), joints: Math.max(dist(a.j.el, b.j.el), dist(a.j.wr, b.j.wr), dist(a.j.fist, b.j.fist)),
+      tip: dist(tip(t - FR), tip(t)), rot: Math.abs(b.j.rot - a.j.rot), sleeve: maxPt(a.p.near, b.p.near) }; };
+    const S = SEG.find(x => x.id === 'return'), R2 = SEG.find(x => x.id === 'rest');
+    const speeds = [S.t1 - 2 * FR, S.t1, R2.t0 + 3 * FR, tEnd].map(speed);
+    const peak = (() => { let m = { joints: 0, tip: 0, rot: 0, sleeve: 0 }; for (let t = S.t0 + FR; t <= tEnd; t += FR) { const v = speed(t); for (const k in m) m[k] = Math.max(m[k], v[k]); } return m; })();
+    return { tEnd, joint, stick: stickR, outline, state, speeds, peak };
+  }
+
+  /* ---------- views ---------- */
+  // the keisaku's layer: over the mochi from the swing on; halfway through the return (when it is down by his side,
+  // far from the mochi and the head) it goes back to the body layer, where the static hanging pose has it
+  function stickFrontAt(j, legacy) {
+    const u = (j.t - j.s.t0) / ((j.s.t1 - j.s.t0) || 1);
+    if (legacy) return ['stop', 'follow', 'settle'].includes(j.s.id) || (j.s.id === 'swing' && u > .8) || (j.s.id === 'return' && u < .5);
+    return ['swing', 'stop', 'follow', 'settle'].includes(j.s.id) || (j.s.id === 'return' && u < .5);
+  }
+  let views = 0;
+  function makeView(el, vb) {
+    el.innerHTML = `<svg viewBox="${vb}" style="display:block;width:100%;height:auto">${sceneMarkup()}<g class="ov"></g></svg>`;
+    const s = el.querySelector('svg'); s.querySelector('#seatLip').setAttribute('opacity', 1); s.querySelector('#rack').setAttribute('opacity', 0);
+    return { id: 'pv' + (++views), s, monk: s.querySelector('#monkSlot'), mochi: s.querySelector('#mochiSlot'), front: s.querySelector('#fxSlot'), ov: s.querySelector('.ov') };
+  }
+  function draw(view, t, opts) {
+    const { p, j, trail, top } = poseAt(t, opts), m = mochiAt(t), id = view.id;
+    // layering: the keisaku only comes up over the mochi for the end of the swing and after; while it passes over his
+    // head it stays on the body layer, under the head, so it never covers his face
+    const u = (j.t - j.s.t0) / ((j.s.t1 - j.s.t0) || 1);
+    // opts.legacy = the 3.3 layering (board behind the head until the last 20% of the swing), kept for the comparison
+    const swinging = !opts.legacy && j.s.id === 'swing';
+    const stickFront = stickFrontAt(j, opts.legacy);
+    const r = M.art({ id, poseObj: p, face: j.face, tilt: j.tilt, split: true, stickBack: !stickFront, armOverHead: swinging, frontUnder: trail, frontTop: top, fistLegacy: opts.fistLegacy });
+    view.monk.innerHTML = `<g transform="translate(${MONK_AT[0]} ${MONK_AT[1]})">${r.back}</g>`;
+    view.front.innerHTML = `<g transform="translate(${MONK_AT[0]} ${MONK_AT[1]})">${r.front}</g>`;
+    view.mochi.innerHTML = `<g transform="translate(${MOCHI_AT[0]} ${MOCHI_AT[1]}) scale(${m.sx.toFixed(3)} ${m.sy.toFixed(3)})">${mochiStatic(m.face, true)}</g>`;
+    view.ov.innerHTML = opts.trace ? opts.traceSvg : '';
+    return j;
+  }
+
+  window.KEISAKU_ANIM = { stickFrontAt: (t, pl) => stickFrontAt(joints(t, pl)), T, build, total, SEG: () => SEG, makePlan, segOf, joints, poseAt, mochiAt, analyse, makeView, draw, toWorld, tipLocal, MONK_AT, MOCHI_AT, KK, SH, LAG, curve, NEAR_N, LINE_N, endCheck };
+})();
+;
+/* =====================================================================
+   Round 4 — the Round 3.5 monk as an actor for the game prototype.
+
+   The game decides WHAT happens (a distraction was caught, walk there, stop); this module decides how it LOOKS,
+   using the accepted Round 3.5 drawing (MONK4) and timeline (KEISAKU_ANIM) as they are:
+   • the reminder is one timeline: notice → raise → approach (→ turn) → call → the accepted pre … rest segments
+     (their poses and times are not changed; the hit lands where Round 3.5 put it, with the monk at x = 132);
+   • every frame of it is computed by KEISAKU_ANIM.poseAt (joints, keisaku from the fist, skinned sleeves, lag) and
+     drawn by MONK4.art in two layers: the body behind the mochi, the keisaku and its fist in front while striking;
+   • the actor has its own clock. It only advances while frames are drawn, so a hidden page simply pauses the
+     performance and it carries on from the same frame when the page comes back (no jump, no replay);
+   • between performances the monk stands in the static poses (香板垂放 with the keisaku, 站姿 without), and only
+     redraws when something visible changes.
+   ===================================================================== */
+(function () {
+  'use strict';
+  const A = KEISAKU_ANIM, MK = MONK4;
+  const HIT_X = A.MONK_AT[0], WALK = 170;            // the Round 1 approach speed (units / s)
+  const inOut = t => t < .5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+  const lerp = (a, b, t) => a + (b - a) * t;
+  // the accepted Round 3.5 segments, as rows for KEISAKU_ANIM.makePlan
+  const ACCEPTED = () => A.SEG().map(s => [s.id, s.zh, s.a, s.b, s.e, s.t1 - s.t0]);
+  // eyes / mouth names used by the Round 1 prototype → the Round 3 monk's faces
+  const EYES = { open: 'kind', smile: 'relief', shut: 'relief', stern: 'stern' };
+
+  class MonkActor {
+    constructor(back, front, { rm = () => false, depth = () => 1 } = {}) {
+      this.back = back; this.front = front; this.rm = rm; this.depthOf = depth;
+      // depth: Round 4.1 — a limited scale for nearer / farther on the floor (1 at y = 254, where he strikes)
+      this.s = { x: 72, y: 254, dir: 1, head: 0, bobY: 0, arm: 0, lean: 0, squash: 1, moving: false, depth: 1 };
+      this.stickOn = true; this.faceK = 'kind'; this.walk = 0; this.sway = 1; this.t = 0;
+      this.mv = null; this.turnTo = null; this.perf = null; this.key = ''; this.stats = { redraws: 0, ms: 0 };
+    }
+    /* ---- the Round 1 prototype's monk API (so its patrol, idle beats and ceremony keep working) ---- */
+    eyes(k) { this.faceK = EYES[k] || 'kind'; }
+    mouth() {}
+    holdStick(on) { this.stickOn = on; }
+    setFace(f) { this.faceK = f; }
+    walkTo(x, speed = 150) {
+      const from = this.s.x, d = Math.abs(x - from);
+      if (this.mv) this.mv.done();
+      if (d < 1 || this.rm()) { this.s.x = x; return Promise.resolve(); }
+      this.s.dir = x > from ? 1 : -1;
+      return new Promise(done => { this.mv = { from, to: x, t: 0, ms: d / speed * 1000, done: () => { this.mv = null; this.s.moving = false; done(); } }; });
+    }
+    /* Round 4.1: walk along a leg from patrol-paths.js (positions and timing come from the leg; he faces the way he
+       is going across the screen, and keeps his facing on legs that mostly go toward or away from us) */
+    walkLeg(leg) {
+      if (this.mv) this.mv.done();
+      if (this.rm()) { const q = leg.at(leg.total); this.s.x = q.x; this.s.y = q.y; return Promise.resolve(); }
+      return new Promise(done => { this.mv = { leg, t: 0, done: () => { this.mv = null; this.s.moving = false; done(); } }; });
+    }
+    face(dir) {
+      if (this.s.dir === dir) return Promise.resolve();
+      if (this.rm()) { this.s.dir = dir; return Promise.resolve(); }
+      return new Promise(done => { this.turnTo = { from: this.s.dir, to: dir, t: 0, ms: 180, done: () => { this.turnTo = null; done(); } }; });
+    }
+    get busy() { return !!this.perf; }
+
+    /* ---- the reminder ----
+       opts: { quick: skip notice + approach (Round 1 rule: he is still standing there), onSeg(id), onImpact() }
+       resolves { aborted } when the monk is back in the hanging pose (or was stopped) */
+    perform(opts = {}) {
+      if (this.perf) this.abort();
+      if (this.mv) this.mv.done();
+      if (this.turnTo) { this.s.dir = this.turnTo.to; this.turnTo.done(); }
+      this.stickOn = true; this.s.head = 0;
+      const x0 = this.s.x, rows = [], rm = this.rm();
+      let walkDir = Math.sign(HIT_X - x0) || 1;
+      if (rm) {   // reduced motion: no walking, no swing — the key poses held, cut from one to the next
+        this.s.x = HIT_X; this.s.dir = 1;
+        rows.push(['notice', '察覺', 'idleNotice', 'idleNotice', 'lin', 350], ['stop', '命中', 'strike', 'strike', 'lin', 600], ['rest', '待機', 'idle', 'idle', 'lin', 350]);
+      } else {
+        if (!opts.quick) rows.push(['notice', '察覺', 'idle', 'idleNotice', 'sine', 450], ['raise', '舉板', 'idleNotice', 'ready3', 'inOut', 420]);
+        else rows.push(['raise', '舉板', 'idle', 'ready3', 'inOut', 420]);
+        const d = Math.abs(HIT_X - x0);
+        if (d >= 1) rows.push(['approach', '走近', 'ready3', 'ready3', 'lin', d / WALK * 1000]);
+        if (walkDir < 0 || (d < 1 && this.s.dir < 0)) rows.push(['turn', '轉身', 'ready3', 'ready3', 'lin', 180]);
+        rows.push(['call', '喝', 'ready3', 'ready3', 'lin', 300], ...ACCEPTED());
+      }
+      // he turns to face the mochi in the first 180 ms of noticing (she may be on his other side)
+      const faceDir = rm ? 1 : (Math.abs(HIT_X - x0) < 1 ? this.s.dir : walkDir);
+      const plan = A.makePlan(rows);
+      return new Promise(resolve => {
+        this.perf = { plan, t: 0, x0, rm, seg: '', impacted: false, opts, resolve, dirStart: this.s.dir, faceDir };
+        this.key = '';
+      });
+    }
+    abort() {    // e.g. a reset: straight back to the hanging pose, no count
+      const p = this.perf; if (!p) return;
+      this.perf = null; this.s.x = HIT_X; this.s.dir = 1; this.s.moving = false; this.key = '';
+      p.resolve({ aborted: true });
+    }
+    // what the mochi should look like right now, if the monk's performance decides it (null otherwise)
+    mochi() {
+      const p = this.perf; if (!p || !p.impacted) return null;
+      if (p.rm) { const st = A.segOf(p.plan, 'stop'); return p.t < st.t1 ? { sx: 1.07, sy: .88, face: 'ouch' } : { sx: 1, sy: 1, face: 'teary' }; }
+      return A.mochiAt(p.t, p.plan);
+    }
+    state() { const p = this.perf; return { performing: !!p, seg: p ? p.seg : (this.mv ? 'walk' : 'still'), t: p ? Math.round(p.t) : 0, total: p ? Math.round(A.total(p.plan)) : 0, x: +this.s.x.toFixed(1), dir: this.s.dir, pose: p ? 'anim' : (this.stickOn ? 'idle' : 'stand'), face: this.faceK }; }
+
+    /* ---- one frame: dt = ms since the last drawn frame (the host clamps it), now = rAF time ---- */
+    render(dt, now) {
+      if (this.external) return 0;   // Round 4.2B: the natural patrol is drawing him (it hands him back at the stance)
+      const s = this.s, rm = this.rm(), t0 = performance.now();
+      this.t += dt;
+      // walking and turning (between performances)
+      if (this.mv && this.mv.leg) {
+        const m = this.mv; m.t += dt; const q = m.leg.at(m.t); s.x = q.x; s.y = q.y; s.moving = true;
+        if (Math.abs(q.tx) > .35 && !this.turnTo && Math.sign(q.tx) !== Math.sign(s.dir)) this.face(Math.sign(q.tx));
+        if (m.t >= m.leg.total) m.done();
+      } else if (this.mv) { const m = this.mv; m.t += dt; const u = Math.min(1, m.t / m.ms); s.x = lerp(m.from, m.to, inOut(u)); s.moving = true; if (u >= 1) { s.x = m.to; m.done(); } }
+      s.depth = this.depthOf(s.y);
+      if (this.turnTo) { const m = this.turnTo; m.t += dt; const u = Math.min(1, m.t / m.ms); s.dir = lerp(m.from, m.to, inOut(u)); if (u >= 1) { s.dir = m.to; m.done(); } }
+      const p = this.perf;
+      let html, front = '', key, walking = s.moving;
+      // the standing sway fades out for a performance and back in after it, so neither end jumps
+      this.sway += ((p ? 0 : 1) - this.sway) * Math.min(1, dt / 250);
+      if (p) {
+        p.t += dt;
+        const T = A.total(p.plan), tt = Math.min(p.t, T), r = A.poseAt(tt, {}, p.plan), j = r.j, id = j.s.id;
+        if (id !== p.seg) { p.seg = id; p.opts.onSeg && p.opts.onSeg(id); }
+        if (tt < 180 && p.dirStart !== p.faceDir) s.dir = lerp(p.dirStart, p.faceDir, inOut(tt / 180));
+        else if (id === 'notice' || id === 'raise') s.dir = p.faceDir;
+        if (id === 'approach') { const u = (tt - j.s.t0) / (j.s.t1 - j.s.t0); s.x = lerp(p.x0, HIT_X, inOut(u)); s.dir = Math.sign(HIT_X - p.x0) || s.dir; walking = true; }
+        else if (A.segOf(p.plan, 'approach') && tt >= A.segOf(p.plan, 'approach').t1) s.x = HIT_X;
+        if (id === 'turn') { const u = (tt - j.s.t0) / (j.s.t1 - j.s.t0); s.dir = lerp(-1, 1, inOut(u)); }
+        else if (A.segOf(p.plan, 'turn') && tt >= A.segOf(p.plan, 'turn').t1) s.dir = 1;
+        const st = A.segOf(p.plan, 'stop');
+        if (!p.impacted && tt >= st.t0) { p.impacted = true; p.opts.onImpact && p.opts.onImpact(); }
+        const facing = s.dir < 0 ? 'left' : 'right';
+        const art = MK.art({ id: 'k4', poseObj: r.p, face: j.face, tilt: j.tilt, split: true, stickBack: !A.stickFrontAt(tt, p.plan), armOverHead: id === 'swing', frontUnder: rm ? '' : r.trail, facing });
+        html = art.back; front = art.front; key = 'anim';
+        this.faceK = 'kind';
+        if (p.t >= T) {   // back in the hanging pose: the static pose takes over (the same drawing, verified in Round 3.5)
+          this.perf = null; s.moving = false; this.key = ''; p.resolve({ aborted: false });
+        }
+      } else {
+        const pose = this.stickOn ? 'idle' : 'stand', tilt = 2 + s.head * .6, facing = s.dir < 0 ? 'left' : 'right';
+        key = `${pose}|${this.faceK}|${tilt.toFixed(1)}|${facing}`;
+        if (key !== this.key) html = MK.art({ id: 'k4', pose, face: this.faceK, tilt, facing });
+      }
+      if (walking && !rm) this.walk += dt / 1000 * 9.5;
+      const step = walking && !rm ? Math.sin(this.walk) : 0;
+      const bob = -Math.abs(step) * 2.2 + s.bobY + (rm ? 0 : Math.sin(now / 1000 * 1.6) * .35 * this.sway);
+      const sc = Math.max(.05, Math.abs(s.dir));
+      const dp = s.depth || 1, place = `translate(${s.x.toFixed(2)} ${(s.y + bob).toFixed(2)}) scale(${(sc * dp).toFixed(3)} ${dp.toFixed(3)})`;
+      this.back.setAttribute('transform', place); this.front.setAttribute('transform', place);
+      // held poses (walking over, the call, the hit-stop, settling) give the same markup frame after frame: only the
+      // placement changes then, so the SVG is not re-parsed
+      if (html !== undefined && (html !== this.lastHtml || front !== this.lastFront)) { this.back.innerHTML = html; this.front.innerHTML = front; this.lastHtml = html; this.lastFront = front; this.stats.redraws++; }
+      if (html !== undefined) this.key = key;
+      const ms = performance.now() - t0; this.stats.ms += ms;
+      return ms;
+    }
+  }
+  window.MonkActor = MonkActor;
+  window.MONK_HIT_X = HIT_X;
+})();
+;
+/* =====================================================================
+   Round 4.2A-1 — refined candidate views of the monk (A: conservative, B: more character).
+
+   What went wrong in 4.2A (monk-views.js), and what this file does instead:
+   • 4.2A drew every view's ears BEHIND the head (the accepted 3/4 draws its ear ON the head's edge), so in the
+     halfway frames only half an ear stuck out, with its whole outline: it looked pasted on.
+   • Ears, eyes, brows, mouth and the head outline were each blended separately between two drawings, so they
+     stood for different turn angles; and the back view had his right ear on OUR left (from behind it is on our
+     right), so the back-3/4 turned the head one way and the body the other.
+   Here the face, the ears, the collar, the chest panel and the robe's seams all come from ONE turn angle θ
+   (0 = facing us, 90 = facing right, 180 = back to us, negative = facing left): each is a point at a fixed place
+   around the head or the neck, projected and shown only while it faces us. It is calibrated on the accepted 3/4:
+   at θ = 35° the eyes land within a unit of the accepted ones and the ears sit 103° round from the face.
+   The bodies (robe, sleeves, hands, keisaku) are drawn per view, by design, in two candidates.
+   He always holds the keisaku in his RIGHT hand. The accepted drawing is untouched; the left-facing pose that
+   keeps the keisaku in his right hand reuses the accepted head, robe and collar exactly (acc34 below).
+   ===================================================================== */
+(function () {
+  'use strict';
+  const MK = MONK4, PT = MK.parts, { spline, curve } = MK, ART = PT.ART, ink = 'var(--line)', ribbon = PT.ribbon;
+  const RAD = Math.PI / 180, sn = a => Math.sin(a * RAD), cs = a => Math.cos(a * RAD), clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const L = (d, w = 1.1, op = 1) => `<path d="${d}" style="fill:none;stroke:${ink};stroke-width:${w};stroke-linecap:round;stroke-linejoin:round;opacity:${op}"/>`;
+  const fill = (d, c, s) => `<path class="m4p" d="${d}" style="--c:${c}" ${s ? 'data-s="1"' : ''}/>`;
+  const det = s => `<g class="m4det">${s}</g>`;
+  const P = (pts, closed = true) => spline(pts, closed);
+  const f2 = v => (+v).toFixed(2);
+  const fistD = pts => det(`<path d="${P(pts)}" style="fill:${ART.skin};stroke:${ink};stroke-width:1.2;stroke-linejoin:round"/>`);
+  const fingers = pts => L(P(pts, false), .7, .42);
+  const stickD = s => det(MK.stick(s, { ...ART, band: ART.bandC }, ink));
+  const mx = pts => pts.map(([x, y]) => [-x, y]);
+  const tr = (pts, dx, dy = 0, sx = 1) => pts.map(([x, y]) => [x * sx + dx, y + dy]);
+  const rs = (pts, n, closed = true) => curve(pts, n, closed);
+  function mxr(pts) { const m = mx(pts).reverse(); let k = 0; m.forEach((q, i) => { if (q[0] + q[1] < m[k][0] + m[k][1]) k = i; }); return m.slice(k).concat(m.slice(0, k)); }
+  const lerpP = (A, B, t) => A.map((q, i) => [q[0] + (B[i][0] - q[0]) * t, q[1] + (B[i][1] - q[1]) * t]);
+  // Round 4.2B: walking moves parts rigidly about a joint; a zero move returns the very same array
+  const rotP = (pts, [px, py], deg) => { if (!deg) return pts; const c = Math.cos(deg * RAD), s2 = Math.sin(deg * RAD); return pts.map(([x, y]) => [px + (x - px) * c - (y - py) * s2, py + (x - px) * s2 + (y - py) * c]); };
+  const rotStick = (st, piv, deg) => { if (!deg) return st; const [o] = rotP([[st.x, st.y]], piv, deg); return { ...st, x: o[0], y: o[1], rot: st.rot + deg }; };
+  const rotCuff = (cf, piv, deg) => { if (!deg || !cf) return cf; const [o] = rotP([[cf.cx, cf.cy]], piv, deg); return { ...cf, cx: o[0], cy: o[1], r: cf.r + deg }; };
+  const movP = (pts, d) => (!d || (!d[0] && !d[1])) ? pts : pts.map(([x, y]) => [x + d[0], y + d[1]]);
+  const hemP = (pts, dx) => !dx ? pts : pts.map(([x, y]) => { const u = clamp((y + 14) / 14, 0, 1); return [x + dx * u * u * (3 - 2 * u), y]; });
+  // mirror a closed outline keeping its point order's meaning (point i ↔ the mirror of point n − i): robes and the like
+  const mxIdx = pts => pts.map((_, i) => { const q = pts[(pts.length - i) % pts.length]; return [-q[0], q[1]]; });
+  function cubicPts(d) {
+    const n = d.match(/-?\d*\.?\d+/g).map(Number), out = []; let x = n[0], y = n[1];
+    for (let i = 2; i + 5 < n.length; i += 6) { const [a, b, c, e, f, g] = n.slice(i, i + 6);
+      for (let k = 1; k <= 20; k++) { const t = k / 20, m = 1 - t; out.push([m * m * m * x + 3 * m * m * t * a + 3 * m * t * t * c + t * t * t * f, m * m * m * y + 3 * m * m * t * b + 3 * m * t * t * e + t * t * t * g]); } x = f; y = g; }
+    return out;
+  }
+  const IDLE = MK.POSE.idle, STAND = MK.POSE.stand, NS = 40;
+  const ROBE_SYM = PT.ROBE.map((p, i) => { const q = PT.ROBE[(20 - i) % 20]; return [(p[0] - q[0]) / 2, (p[1] + q[1]) / 2]; });
+  const sl = (pts, layer, reversed = false) => { let q = rs(pts, NS); if (reversed) q = [q[0], ...q.slice(1).reverse()]; return { pts: q, layer, inner: reversed ? [NS - 37, NS - 15] : [15, 37] }; };
+  const slBlend = (a, b, t, layer) => ({ pts: lerpP(a.pts, b.pts, t), layer, inner: t < .5 ? a.inner : b.inner });
+
+  /* ---------- the head's outline at an angle (outlines only; nothing on the head is blended) ---------- */
+  const H = {
+    front: rs([[0, -94], [-10.5, -91.8], [-17.2, -85], [-19.4, -75], [-18, -65.8], [-13.4, -59], [-6.4, -55], [0, -54.2], [6.4, -55], [13.4, -59], [18, -65.8], [19.4, -75], [17.2, -85], [10.5, -91.8]], 48),
+    acc: rs(cubicPts(PT.HEAD), 48),
+    back: rs([[0, -94], [-10.5, -91.8], [-17.2, -85], [-19.4, -75], [-18.4, -66.4], [-14.6, -60.6], [-8, -57.8], [0, -57.2], [8, -57.8], [14.6, -60.6], [18.4, -66.4], [19.4, -75], [17.2, -85], [10.5, -91.8]], 48),
+  };
+  function headAt(th) {
+    const a = Math.abs(th), k = a <= 35 ? lerpP(H.front, H.acc, a / 35) : a <= 90 ? H.acc : lerpP(H.acc, H.back, (a - 90) / 90);
+    return th < 0 ? k.map(([x, y]) => [-x, y]).reverse() : k;
+  }
+  const FRONT_HALF = y => { let best = 0; for (const [x, yy] of H.front) if (x > 0 && Math.abs(yy - y) < 2.2) best = Math.max(best, x); return best || 19.4; };
+  // where a closed outline crosses the horizontal line at y: [leftmost, rightmost] (exact edge intersections)
+  const span = (pts, y) => { const xs = []; for (let i = 0; i < pts.length; i++) { const a = pts[i], b = pts[(i + 1) % pts.length];
+    if ((a[1] - y) * (b[1] - y) <= 0 && a[1] !== b[1]) xs.push(a[0] + (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1])); } return xs.length ? [Math.min(...xs), Math.max(...xs)] : [-19, 19]; };
+
+  /* ---------- the face and the ears at an angle ---------- */
+  const EAR = cubicPts(PT.EAR), EARC = EAR.reduce((a, q) => [a[0] + q[0] / EAR.length, a[1] + q[1] / EAR.length], [0, 0]);
+  const EAR_AZ = 103.4, EYE_AZ = 15.5, EAR_FULL = 9.36;
+  function headParts(th, face = 'kind') {
+    const out = { th, outline: headAt(th) }, sp = span(out.outline, -75), c = (sp[0] + sp[1]) / 2;
+    const X = (az, y, k = 1) => c + FRONT_HALF(y) * k * sn(az + th), Z = az => cs(az + th);
+    const inside = (x, y, m) => { const s = span(out.outline, y); return clamp(x, s[0] + m, s[1] - m); };
+    // eyes (his right eye at −EYE_AZ), narrower as they turn away, hidden when they face away
+    // (a chibi face keeps its eyes inside the head even near profile: they narrow less than a sphere would, and stay a little in from the edge)
+    out.eyes = [-EYE_AZ, EYE_AZ].map(az => { const z = Z(az), rx = 1.99 * (.55 + .45 * z); return { az, z, show: z > .12, x: inside(X(az, -72.6), -72.6, rx + 2.4 + 2.2 * (1 - z)), y: -72.6, rx, ry: 2 + .32 * z }; });
+    out.brows = out.eyes.map((e, i) => ({ show: e.show, x: e.x + (i === 0 ? -.45 : .45), sx: (.55 + .45 * e.z) / (.55 + .45 * .93), mirror: i === 1 }));
+    const zm = cs(th); out.mouth = { show: zm > -.15, x: inside(c + FRONT_HALF(-64) * 1.2 * sn(th), -64, 3.4 + 1.6 * (1 - Math.max(0, zm))), sx: (.45 + .55 * Math.max(0, zm)) / (.45 + .55 * cs(35)) };
+    const aR = -34 + (th >= 0 ? 10 : 9) * th / 35, aL = 34 + (th >= 0 ? 9 : 10) * th / 35;
+    out.blush = [aR, aL].map(az => { const z = Z(az); return { show: z > .05, x: X(az, -66.3), y: -66.3, rx: 3.64 * (.4 + .6 * z), ry: 2 * (.75 + .25 * z) }; });
+    // ears: 103° round from the face; on the head (like the accepted 3/4) unless clearly behind it
+    // its size follows the way the ear's surface faces (a little forward of straight out), calibrated to the
+    // accepted ear at 35°: narrow from the front and from behind, fullest from the side
+    out.ears = [-EAR_AZ, EAR_AZ].map(az => { const z = Z(az), nz = cs(az + Math.sign(-az) * 40 + th), x = X(az, EARC[1]), w = 6.8 * (.5 + .5 * Math.abs(nz)), right = x > c;
+      const pts = EAR.map(([px, py]) => [(px - EARC[0]) * (w / 6.4) * (right ? -1 : 1) + x, py]);
+      return { az, z, x, w, right, onTop: z > -.45, line: z > -.45 && cs(th) > -.3, pts }; });
+    out.shade = Math.abs(th) > 10 && Math.abs(th) < 120 ? (th > 0 ? 'side' : 'sideR') : Math.abs(th) >= 110 ? 'nape' : '';
+    out.tilt = clamp(2 * sn(th) / sn(35), -2, 2) * (Math.abs(th) > 120 ? .5 : 1);
+    out.face = face; out.c = c;
+    if (face === 'stern') out.eyes.forEach(e => { e.ry *= .78; e.y = -72.2; });
+    return out;
+  }
+  function drawHead(h, id) {
+    const B = PT.BROW[h.face], blushO = PT.BLUSH[h.face] ?? .6, lower = h.outline.slice(12, 37);
+    const earD = e => fill(P(e.pts), ART.skin, 1);
+    const earLine = e => { if (!e.line) return ''; const s = e.right ? -1 : 1, k = e.w / 6.4, x0 = e.x + .6 * k * s; return L(`M${f2(x0)} -74 q${f2(-2 * k * s)} 1.8 ${f2(-.4 * k * s)} 4.4`, .9, .55); };
+    const shade = h.shade === 'side' ? `<path d="M-6 -95 C-15 -88 -17 -74 -13 -64 C-10 -58.6 -6 -56 -1 -54.6 L-30 -50 L-30 -100 Z" style="fill:var(--skin-lo);opacity:.5"/>`
+      : h.shade === 'sideR' ? `<path transform="scale(-1 1)" d="M-6 -95 C-15 -88 -17 -74 -13 -64 C-10 -58.6 -6 -56 -1 -54.6 L-30 -50 L-30 -100 Z" style="fill:var(--skin-lo);opacity:.5"/>`
+      : h.shade === 'nape' ? `<path d="M-21 -70 C-15 -61.5 15 -61.5 21 -70 L21 -50 L-21 -50 Z" style="fill:var(--skin-lo);opacity:.32"/>` : '';
+    const eye = e => e.show ? `<ellipse cx="${f2(e.x)}" cy="${f2(e.y)}" rx="${f2(e.rx)}" ry="${f2(e.ry)}" style="fill:${ink}"/>` : '';
+    const brow = (b, i) => b.show ? `<path d="${B[0]}" transform="translate(${f2(b.x)} 0) scale(${f2((b.mirror ? -1 : 1) * b.sx)} 1) translate(-7.9 0)" style="fill:#f6f1e6;stroke:${ink};stroke-width:1;stroke-linejoin:round"/>` : '';
+    const blush = b => b.show ? `<ellipse cx="${f2(b.x)}" cy="${f2(b.y)}" rx="${f2(b.rx)}" ry="${f2(b.ry)}" style="fill:var(--blush);opacity:${blushO}"/>` : '';
+    const MD = h.face === 'stern' ? ['M11.6 -63.6 h4.8', 14, 1.5] : ['M11.4 -64 q2.6 2 5 -.2', 13.9, 1.4];
+    const m = h.mouth, mouth = m.show ? `<g transform="translate(${f2(m.x)} 0) scale(${f2(m.sx)} 1) translate(${-MD[1]} 0)">${L(MD[0], MD[2])}</g>` : '';
+    // the light comes from the window on our left; a view facing left is the accepted mirror image, so its highlight is mirrored too
+    const hl = `<path${h.th < 0 ? ' transform="scale(-1 1)"' : ''} d="M-7.4 -88.6 q5 -4.2 11 -4.6" style="fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;opacity:.5"/>`;
+    return `<g transform="rotate(${f2(h.tilt + (h.tiltAdd || 0))} 3 -56)">` + h.ears.filter(e => !e.onTop).map(earD).join('') + fill(P(h.outline), ART.skin)
+      + det(`<g clip-path="url(#${id}-head)">${shade}</g>` + L(P(lower, false), 1.25))
+      + h.ears.filter(e => e.onTop).map(earD).join('')
+      + det(h.ears.map(earLine).join('') + hl
+        + `<g clip-path="url(#${id}-head)">` + h.blush.map(blush).join('') + h.eyes.map(eye).join('') + mouth + h.brows.map(brow).join('') + '</g>') + '</g>';
+  }
+
+  /* ---------- the collar, the chest panel and the robe's lines at an angle ---------- */
+  // each side of the collar runs from the crossing (the V, a little to his right of centre) over the shoulder to the
+  // middle of the nape; the side from his left shoulder is the one on top (as in the accepted drawing)
+  const LAPEL = {
+    near: [[0, -10.6, -45, 15, 3.4], [.55, -100, -59.6, 15, 8.5], [1, -180, -57.8, 9.5, 4.6]],
+    far: [[0, -12.2, -44, 15, 3.4], [.55, 100, -58.4, 15, 8.5], [1, 180, -57.8, 9.5, 4.6]],
+  };
+  function lapel(side, th) {
+    const K = LAPEL[side], pts = [];
+    for (let i = 0; i <= 44; i++) { const s = i / 44; let j = 1; while (j < K.length - 1 && K[j][0] < s) j++;
+      const a = K[j - 1], b = K[j], u = (s - a[0]) / (b[0] - a[0]), az = a[1] + (b[1] - a[1]) * u, y = a[2] + (b[2] - a[2]) * u, R = a[3] + (b[3] - a[3]) * u, w = a[4] + (b[4] - a[4]) * u;
+      const z = cs(az + th); pts.push({ x: R * sn(az + th), y, z, w: w * (.6 + .4 * Math.max(0, z)), s }); }
+    const runs = []; let cur = null; for (const q of pts) { if (q.z > -.02) { if (!cur) runs.push(cur = []); cur.push(q); } else cur = null; }
+    return { pts, runs };
+  }
+  function ribbonW(run) {   // a band along points with their own widths
+    const A = [], B = []; for (let i = 0; i < run.length; i++) { const a = run[Math.max(0, i - 1)], b = run[Math.min(run.length - 1, i + 1)], dx = b.x - a.x, dy = b.y - a.y, l = Math.hypot(dx, dy) || 1, h = run[i].w / 2;
+      A.push([run[i].x - dy / l * h, run[i].y + dx / l * h]); B.push([run[i].x + dy / l * h, run[i].y - dx / l * h]); }
+    return P(A, false) + ' L' + P(B.reverse(), false).slice(1) + ' Z';
+  }
+  function collarD(th, id) {
+    const n = lapel('near', th), f = lapel('far', th), front = cs(th) > -.25;
+    // the neck shows between the two sides (front only); the white under-collar and the inner edge lines are clipped to it
+    let neck = '', clip = '';
+    if (front) { const a = n.pts.filter(q => q.s <= .5 && q.z > 0), b = f.pts.filter(q => q.s <= .5 && q.z > 0);
+      if (a.length > 2 && b.length > 2) { const poly = [...a.map(q => [q.x, q.y]), [Math.max(a[a.length - 1].x, b[b.length - 1].x) * .5 + Math.min(a[a.length - 1].x, b[b.length - 1].x) * .5, -62], ...b.reverse().map(q => [q.x, q.y])];
+        neck = `<path d="M${poly.map(q => f2(q[0]) + ' ' + f2(q[1])).join(' L')} Z" style="fill:${ART.neck}"/>`;
+        clip = `<clipPath id="${id}-neck"><path d="M${poly.map(q => f2(q[0]) + ' ' + f2(q[1])).join(' L')} Z"/></clipPath>`; } }
+    const band = run => `<path d="${ribbonW(run)}" style="fill:${ART.band}"/>`;
+    const white = run => `<path d="${ribbonW(run.map(q => ({ ...q, w: q.w + 1.5 })))}" style="fill:${ART.white}"/>`;
+    const edgeLine = run => { if (run.length < 3) return ''; const off = sgn => run.map((q, i) => { const a = run[Math.max(0, i - 1)], b = run[Math.min(run.length - 1, i + 1)], dx = b.x - a.x, dy = b.y - a.y, l = Math.hypot(dx, dy) || 1; return [q.x + sgn * dy / l * q.w / 2, q.y - sgn * dx / l * q.w / 2]; });
+      return L(P(off(1), false), .85, .7) + L(P(off(-1), false), .85, .7); };
+    const inNeck = s => clip ? `<g clip-path="url(#${id}-neck)">${s}</g>` : '';
+    return { defs: clip, body: `<g clip-path="url(#${id}-robe)">${neck}${inNeck(n.runs.map(white).join('') + f.runs.map(white).join(''))}${n.runs.map(band).join('')}${f.runs.map(band).join('')}${inNeck(n.runs.map(edgeLine).join('') + f.runs.map(edgeLine).join(''))}</g>` };
+  }
+  // Round 4.3 — the collar from the front and on the way to the 3/4, in the accepted drawing's own terms: two soft
+  // bands with no outline of their own, wide where they leave the shoulder (the head hides their ends), narrowing as
+  // they come down to a crossing just above the chest panel, a little off centre; his LEFT lapel lies over his right;
+  // the neck shows as a narrow, deep V between them (the accepted white under-collar is all but hidden, so it is left
+  // out here); one ink line on the inner edge of each band. At θ = ±35° it reaches the accepted 3/4's own bands
+  // (facing left: their mirror image, with the overlap swapped as acc34 does), so a turn changes it smoothly.
+  const FC = {   // [points], [width at the shoulder, width at the crossing]; under = his right lapel, over = his left
+    front: { under: [[-14.4, -59.4], [-10.2, -56.8], [-5.4, -53.2], [-1.4, -49.2], [2.8, -45.2]], uw: [6.2, 2.8],
+             over: [[14.8, -59.6], [10.8, -56.6], [6.2, -52.6], [2.6, -48.6], [-0.4, -44.8]], ow: [6.8, 3.2] },
+    acc: { under: [[-13.6, -59.6], [-9, -56.8], [-3.6, -53.8], [2.4, -48.8], [6.2, -45]], uw: [7.6, 3.2],
+           over: [[12.8, -58.4], [11.7, -56.3], [10.6, -54.2], [7.8, -48.6], [5.8, -44]], ow: [3, 2.8] },
+  };
+  const FC_MAX = 35;
+  function frontCollar(th, id) {
+    const u = clamp(Math.abs(th) / FC_MAX, 0, 1), left = th < 0, F = FC.front, A = FC.acc;
+    const mir = pts => pts.map(([x, y]) => [-x, y]), lp = (a, b) => a.map((q, i) => [q[0] + (b[i][0] - q[0]) * u, q[1] + (b[i][1] - q[1]) * u]), lw = (a, b) => [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u];
+    // facing left, the accepted mirror image's near band is his LEFT lapel (the one on top)
+    const under = left ? lp(F.under, mir(A.over)) : lp(F.under, A.under), uw = left ? lw(F.uw, A.ow) : lw(F.uw, A.uw);
+    const over = left ? lp(F.over, mir(A.under)) : lp(F.over, A.over), ow = left ? lw(F.ow, A.uw) : lw(F.ow, A.ow);
+    // the inner edge (toward the neck) of a band: offset by half its width, tapering like the band
+    const inner = (pts, w, side) => pts.map((q, i) => { const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1,
+      h = (w[0] + (w[1] - w[0]) * i / (pts.length - 1)) / 2 * .92; return [q[0] + side * dy / l * h, q[1] - side * dx / l * h]; });
+    const uIn = inner(under, uw, 1), oIn = inner(over, ow, -1);
+    // the neck: between the two inner edges, closed above under the chin (the head covers the top)
+    const cross = [(uIn[4][0] + oIn[3][0]) / 2, (uIn[3][1] + oIn[3][1]) / 2 + 1.6];
+    const neck = [...uIn.slice(0, 4), cross, ...oIn.slice(0, 4).reverse(), [oIn[0][0], -61], [uIn[0][0], -61]];
+    return `<g data-collar="front" clip-path="url(#${id}-robe)"><path d="${P(neck)}" style="fill:${ART.neck}"/>`
+      + `<path d="${ribbon(under, uw[0], uw[1])}" style="fill:${ART.band}"/>` + L(P(uIn.slice(1, 4), false), .8, .6)   /* stops where the lapel on top covers it */
+      + `<path d="${ribbon(over, ow[0], ow[1])}" style="fill:${ART.band}"/>` + L(P(oIn.slice(1), false), .9, .75) + '</g>';
+  }
+  const RAKU = [[-0.6, -44.6], [6.6, -45.4], [14, -44.4], [14.4, -39.4], [13.6, -35.4], [6.4, -34.8], [-0.4, -35.6], [-1.2, -40]], RAKU_IN = [[1.4, -42.8], [6.6, -43.4], [12, -42.6], [12.2, -39.6], [11.6, -37.2], [6.4, -36.8], [1.6, -37.4], [1, -40]];
+  function rakusuD(th, id) {
+    if (cs(th) < -.05) return '';
+    const cx = 11.5 * sn(th), k = (.45 + .55 * cs(th)) / (.45 + .55 * cs(35)), T = pts => pts.map(([x, y]) => [(x - 6.6) * k + cx, y]);
+    return `<g clip-path="url(#${id}-robe)"><path d="${P(T(RAKU))}" style="fill:${ART.kesa};stroke:${ink};stroke-width:1.1"/><path d="${P(T(RAKU_IN))}" style="fill:none;stroke:${ART.bandC};stroke-width:.7;opacity:.55"/></g>`;
+  }
+  // a line drawn on the robe's surface between two azimuths (the front overlap, the back seam)
+  function robeLine(robe, th, az0, y0, az1, y1, w, op) {
+    const pts = []; for (let i = 0; i <= 24; i++) { const u = i / 24, az = az0 + (az1 - az0) * u, y = y0 + (y1 - y0) * u, sp = span(robe, y), R = (sp[1] - sp[0]) / 2 * .96, c = (sp[0] + sp[1]) / 2;
+      if (cs(az + th) > .05) pts.push([c + R * sn(az + th), y]); }
+    return pts.length > 3 ? L(P(pts, false), w, op) : '';
+  }
+
+  /* ---------- the bodies: per view, per candidate ---------- */
+  const shapeB = pts => pts.map(([x, y]) => { const hem = clamp((y + 14) / 14, 0, 1), belly = y > -40 && y < -12 ? Math.sin(Math.PI * (y + 40) / 28) : 0;
+    const k = 1 + .07 * hem * hem * (3 - 2 * hem) + .035 * belly; return [x * k, y < -52 ? y + .5 * Math.min(1, Math.abs(x) / 12) : y]; });
+  const ROBE_B = shapeB(ROBE_SYM);
+  const PROFILE_A = tr(ROBE_SYM, 0, 0, .92);
+  // side view: a straighter back, a rounder front (the belly the 3/4 has), the hem settling a little wider at the front
+  const PROFILE_B = ROBE_B.map(([x, y]) => [x < 0 ? x * .9 : x * .98 + (y > -42 && y < -12 ? 2.8 * Math.sin(Math.PI * (y + 42) / 30) : 0) + (y > -8 ? 1.2 : 0), y]);
+  const FEET = {
+    front: [[[-12.6, -1.2], [-10, -4], [-4.6, -3.8], [-1.6, -1], [-3.6, 1.4], [-9.8, 1.6]], [[1.6, -1], [4.6, -3.8], [10, -4], [12.6, -1.2], [9.8, 1.6], [3.6, 1.4]]],
+    back: [[[2.6, -1.4], [4.6, -3.4], [8.4, -3.4], [10.6, -1.6], [9, 0.8], [4.2, 0.8]], [[-10.6, -1.6], [-8.4, -3.4], [-4.6, -3.4], [-2.6, -1.4], [-4.2, 0.8], [-9, 0.8]]],
+    profile: [[[-8, -1], [-4, -4], [3, -3.8], [8.2, -1.4], [5, 1.6], [-4, 1.6]], [[2, -1.6], [6, -3.8], [10.6, -3.4], [12.4, -1], [9.6, 1], [4, 1.2]]],
+    acc: [PT.FEET.near, PT.FEET.far],
+  };
+  const feetMix = (a, b, t) => [0, 1].map(i => lerpP(rs(a[i], 16), rs(b[i], 16), t));
+  const STICK = { front: { x: -12.63, y: -28.3, rot: 186, stretch: .88 }, acc: { x: -7.6, y: -28.4, rot: 204, stretch: 1 }, back: { x: 12.63, y: -28.3, rot: 174, stretch: .88 } };
+  const stickMix = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, rot: a.rot + (b.rot - a.rot) * t, stretch: a.stretch + (b.stretch - a.stretch) * t });
+  // his right arm (holds the keisaku) and his left arm, as sleeves in each view
+  const ARM = {
+    right34: sl(IDLE.near, 'front'), left34: sl(PT.FAR_STAND, 'back'),
+    rightFront: sl(IDLE.near, 'front'), leftFrontA: sl(mx(IDLE.near), 'front'), leftFrontB: sl(mx(STAND.near), 'front'),
+    rightProfileA: sl(tr(IDLE.near, 11), 'front'), rightProfileB: sl(tr(IDLE.near, 10.5), 'front'), leftProfile: sl(tr(PT.FAR_STAND, -12), 'back'),
+    rightBack: sl(mx(IDLE.near), 'front', true), leftBackA: sl(IDLE.near, 'front', true), leftBackB: sl(STAND.near, 'front', true),
+  };
+  // the left-facing family, for turning between the front / back and the left-facing 3/4 (q34L): his right arm,
+  // with the keisaku, is now the far one; his left arm hangs empty in front. Built from the same parts, mirrored.
+  const ROBE_LM = mxIdx(PT.ROBE), PROFILE_BL = mxIdx(PROFILE_B);
+  const KG = () => { const k = keepGrip('B'); return { x: -k.stick.x, y: k.stick.y, rot: 360 - k.stick.rot, stretch: k.stick.stretch }; };
+  const leftBodies = {
+    p3midL: () => ({ th: -17.5, robe: lerpP(ROBE_LM, ROBE_B, .5), feet: feetMix([mxr(PT.FEET.far), mxr(PT.FEET.near)], FEET.front, .5),
+      right: slBlend(ARM.rightFront, sl(mx(PT.FAR_STAND), 'back'), .5, 'back'), left: ARM.leftFrontB,
+      cuff: null, fist: { pts: mx(MK.FIST).map(([x, y]) => [x - 19.4, y - 25.4]), line: mx(MK.FIST_LINE).map(([x, y]) => [x - 19.4, y - 25.4]), layer: 'behindRobe' },
+      leftHand: { pts: mxr(STAND.hand), line: mx(STAND.handLine), layer: 'under', lineOp: .3 }, stick: { ...stickMix(STICK.front, KG(), .5), layer: 'behindRobe' } }),
+    profileL: () => ({ th: -90, robe: PROFILE_BL, feet: [mxr(FEET.profile[1]), mxr(FEET.profile[0])],
+      right: sl(mx(tr(PT.FAR_STAND, -12)), 'back'), left: sl(mx(tr(STAND.near, 10.5)), 'front'),
+      cuff: null, fist: null, leftHand: { pts: mxr(tr(STAND.hand, 10.5)), line: mx(tr(STAND.handLine, 10.5)), layer: 'under', lineOp: .3 },
+      stick: { x: 3, y: -28.4, rot: 150, stretch: 1, layer: 'behindRobe' } }),
+    back34L: () => ({ th: -135, robe: lerpP(PROFILE_BL, ROBE_B, .5), feet: feetMix([mxr(FEET.profile[1]), mxr(FEET.profile[0])], FEET.back, .5),
+      right: slBlend(sl(mx(tr(PT.FAR_STAND, -12)), 'back'), ARM.rightBack, .5, 'back'), left: Object.assign(slBlend(sl(mx(tr(STAND.near, 10.5)), 'front'), ARM.leftBackB, .5, 'front'), { inner: [4, 19] }),   // (the line only along the side toward the body, not round the bottom)
+      cuff: null, fist: null, leftHand: null, stick: { ...stickMix({ x: 3, y: -28.4, rot: 150, stretch: 1 }, STICK.back, .5), layer: 'behindRobe' } }),
+  };
+  function body(view, cand) {
+    const B = cand === 'B';
+    if (leftBodies[view]) return leftBodies[view]();
+    if (view === 'front') return { th: 0, robe: B ? ROBE_B : ROBE_SYM, feet: FEET.front,
+      right: ARM.rightFront, left: B ? ARM.leftFrontB : ARM.leftFrontA,
+      cuff: { cx: -13, cy: -24.4, rx: 4.3, ry: 3.8, r: 0 }, fist: { pts: tr(IDLE.hand, -4, .2), line: tr(IDLE.handLine, -4, .2), layer: 'front' },
+      leftHand: { pts: mxr(STAND.hand), line: mx(STAND.handLine), layer: 'under', lineOp: .42 }, stick: { ...STICK.front, layer: 'front' } };
+    if (view === 'p3mid') { const lf = B ? ARM.leftFrontB : ARM.leftFrontA;
+      return { th: 17.5, robe: lerpP(PT.ROBE, B ? ROBE_B : ROBE_SYM, .5), feet: feetMix(FEET.acc, FEET.front, .5),
+        right: ARM.rightFront, left: slBlend(ARM.left34, lf, .5, 'front'),
+        cuff: { cx: -12.3, cy: -24.6, rx: 3.1, ry: 3.85, r: -4 }, fist: { pts: tr(IDLE.hand, -2, .1), line: tr(IDLE.handLine, -2, .1), layer: 'front' },
+        leftHand: { pts: lerpP(PT.FAR_HAND, mxr(STAND.hand), .5), line: lerpP([[20.4, -16.4], [21.4, -14], [20.4, -11.8]], mx(STAND.handLine), .5), layer: 'under', lineOp: B ? .3 : 0 },
+        stick: { ...stickMix(STICK.acc, STICK.front, .5), layer: 'front' } }; }
+    if (view === 'profile') { const dx = B ? 10.5 : 11;
+      return { th: 90, robe: B ? PROFILE_B : PROFILE_A, feet: FEET.profile, right: B ? ARM.rightProfileB : ARM.rightProfileA, left: ARM.leftProfile,
+        cuff: { cx: -11.6 + dx, cy: -24.8, rx: 1.9, ry: 3.9, r: -8 }, fist: { pts: tr(IDLE.hand, dx), line: tr(IDLE.handLine, dx), layer: 'front' },
+        leftHand: null, stick: { x: -7.6 + dx, y: -28.4, rot: 204, stretch: 1, layer: 'front' } }; }
+    if (view === 'back34') { const rp = B ? ARM.rightProfileB : ARM.rightProfileA, lb = B ? ARM.leftBackB : ARM.leftBackA;
+      return { th: 135, robe: lerpP(B ? PROFILE_B : PROFILE_A, B ? ROBE_B : ROBE_SYM, .5), feet: feetMix(FEET.profile, FEET.back, .5),
+        right: slBlend(rp, ARM.rightBack, .5, 'front'), left: slBlend(ARM.leftProfile, lb, .5, 'back'),
+        cuff: null, fist: null, leftHand: null, stick: { ...stickMix({ x: -7.6 + (B ? 10.5 : 11), y: -28.4, rot: 204, stretch: 1 }, STICK.back, .5), layer: 'under' } }; }
+    if (view === 'back') return { th: 180, robe: B ? ROBE_B : ROBE_SYM, feet: FEET.back, right: ARM.rightBack, left: B ? ARM.leftBackB : ARM.leftBackA,
+      cuff: null, fist: null, leftHand: null, stick: { ...STICK.back, layer: 'under' } };
+    throw new Error('no view ' + view);
+  }
+  function sleeveD(s) { return fill(P(s.pts), ART.robe) + (s.layer === 'front' ? det(L(P(s.pts.slice(s.inner[0], s.inner[1]), false), 1.15)) : ''); }
+  function wrap(id, out, robe, head, defs = '', facingLeft = false) {
+    return `<g class="m4" id="${id}"><defs><clipPath id="${id}-robe"><path d="${P(robe)}"/></clipPath><clipPath id="${id}-head"><path d="${P(head)}"/></clipPath>${defs}<g id="${id}-art">${out.join('')}</g></defs>`
+      + `<ellipse cx="1" cy="1.4" rx="27" ry="4.2" class="m4shadow"/><g${facingLeft ? ' transform="scale(-1 1)"' : ''}><use href="#${id}-art" class="m4-sil"/><use href="#${id}-art"/></g></g>`;
+  }
+  // o.mod (Round 4.2B, walking): { feet: [[dx, dy], [dx, dy]], right: deg, left: deg (arms about the shoulder, the hand,
+  // cuff and keisaku go with them), stick: deg (about the fist), hem: dx, tilt: deg }
+  function applyMod(b, m) {
+    if (!m) return b;
+    const out = { ...b };
+    if (m.feet) out.feet = b.feet.map((f, i) => movP(f, m.feet[i]));
+    if (m.hem) out.robe = hemP(b.robe, m.hem);
+    const rp = b.right.pts[0], lp = b.left.pts[0];
+    if (m.right) { out.right = { ...b.right, pts: rotP(b.right.pts, rp, m.right) }; out.cuff = rotCuff(b.cuff, rp, m.right);
+      if (b.fist) out.fist = { ...b.fist, pts: rotP(b.fist.pts, rp, m.right), line: rotP(b.fist.line, rp, m.right) }; out.stick = rotStick(b.stick, rp, m.right); }
+    if (m.left) { out.left = { ...b.left, pts: rotP(b.left.pts, lp, m.left) }; if (b.leftHand) out.leftHand = { ...b.leftHand, pts: rotP(b.leftHand.pts, lp, m.left), line: rotP(b.leftHand.line, lp, m.left) }; }
+    if (m.stick && out.fist) { const c = out.fist.pts.reduce((a, q) => [a[0] + q[0] / out.fist.pts.length, a[1] + q[1] / out.fist.pts.length], [0, 0]); out.stick = rotStick(out.stick, c, m.stick); }
+    else if (m.stick) out.stick = rotStick(out.stick, [out.stick.x, out.stick.y], m.stick);
+    return out;
+  }
+  function viewTT(view, cand, o = {}) {
+    const id = o.id || 'tt', b = applyMod(body(view, cand), o.mod), th = b.th, h = headParts(th, o.face || 'kind'), col = collarD(th, id), out = [];
+    if (o.mod && o.mod.tilt) h.tiltAdd = o.mod.tilt;
+    const hand = (hd) => fill(P(hd.pts), ART.skin, 1) + (hd.lineOp ? det(L(P(hd.line, false), .7, hd.lineOp)) : '');
+    // behind the robe
+    if (b.left.layer === 'back') out.push(sleeveD(b.left));
+    if (b.right.layer === 'back') out.push(sleeveD(b.right));
+    // his right hand and the keisaku when they are behind his body (turning toward facing left)
+    if (b.stick.layer === 'behindRobe') out.push(stickD(b.stick));
+    if (b.fist && b.fist.layer === 'behindRobe') out.push(fistD(b.fist.pts) + det(fingers(b.fist.line)));
+    out.push(fill(P(b.feet[0]), ART.foot) + fill(P(b.feet[1]), ART.foot));
+    out.push(fill(P(b.robe), ART.robe));
+    out.push(det(robeLine(b.robe, th, -14, -36, -37, -3, 1, .45) + robeLine(b.robe, th, 180, -56, 180, -3, 1, .3)));
+    out.push(det(Math.abs(th) <= FC_MAX ? frontCollar(th, id) : col.body)); out.push(det(rakusuD(th, id)));
+    // the keisaku behind his sleeve (from behind), then the sleeves in front of the robe
+    if (b.stick.layer === 'under') out.push(stickD(b.stick));
+    if (b.leftHand && b.leftHand.layer === 'under') out.push(hand(b.leftHand));
+    if (b.left.layer === 'front') out.push(sleeveD(b.left));
+    if (b.right.layer === 'front') out.push(sleeveD(b.right));
+    if (b.cuff) out.push(det(`<ellipse cx="${f2(b.cuff.cx)}" cy="${f2(b.cuff.cy)}" rx="${f2(b.cuff.rx)}" ry="${f2(b.cuff.ry)}" transform="rotate(${b.cuff.r} ${f2(b.cuff.cx)} ${f2(b.cuff.cy)})" style="fill:#26345a;stroke:${ink};stroke-width:.85"/>`));
+    if (b.stick.layer === 'front') out.push(stickD(b.stick));
+    if (b.fist && b.fist.layer !== 'behindRobe') out.push(fistD(b.fist.pts) + det(fingers(b.fist.line)));
+    out.push(drawHead(h, id));
+    return wrap(id, out, b.robe, h.outline, col.defs);
+  }
+
+  /* ---------- the accepted 3/4, rebuilt from its own parts (so a new arm arrangement keeps its head, robe, collar) ----------
+     arms: 'idle' = his right hand holds the keisaku in front (the accepted pose);
+           'keep' = drawn as the mirror image for facing left, but the keisaku stays in his RIGHT hand, which is
+                    now the far one: the near arm hangs empty, the far hand holds the board at his side */
+  function acc34(o = {}) {
+    const id = o.id || 'ac', left = !!o.left, out = [], face = o.face === 'stern' ? 'stern' : 'kind', m = o.mod || {};
+    const NS_ = [-12.6, -55.6], FS_ = [12.4, -55.4], nr = m.near || 0, fr = m.far || 0, ff = (m.feet || [])[1], nf = (m.feet || [])[0];
+    const near = [[-13.6, -59.6], [-9, -56.8], [-3.6, -53.8], [2.4, -48.8], [6.2, -45]], far = [[12.8, -58.4], [10.6, -54.2], [7.8, -48.6], [5.8, -44]];
+    const nearB = `<path d="${ribbon(near, 7.6, 3.2)}" style="fill:${ART.band}"/>`, farB = `<path d="${ribbon(far, 3, 2.8)}" style="fill:${ART.band}"/>`;
+    const edge = (pts, sideSign, w) => pts.map((q, i) => { const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy); return [q[0] + sideSign * dy / l * w, q[1] - sideSign * dx / l * w]; });
+    const keep = o.arms === 'keep', K = o.keep || {};
+    // far arm, behind the robe
+    out.push(fill(P(rotP(PT.FAR_STAND, FS_, fr)), ART.robe) + (keep ? '' : fill(P(rotP(PT.FAR_HAND, FS_, fr)), ART.skin, 1)));
+    if (keep) { const fist = rotP(K.fist, FS_, fr), st0 = rotStick(K.stick, FS_, fr), fc = fist.reduce((a, q) => [a[0] + q[0] / fist.length, a[1] + q[1] / fist.length], [0, 0]);
+      out.push(stickD(rotStick(st0, fc, m.stick || 0)) + fistD(fist) + det(fingers(rotP(K.fistLine, FS_, fr)))); }
+    out.push(fill(P(movP(PT.FEET.far, ff)), ART.foot) + fill(P(movP(PT.FEET.near, nf)), ART.foot) + (nf ? det(`<g transform="translate(${f2(nf[0])} ${f2(nf[1])})">${L('M1.6 -0.8 C1.6 1 -1 1.6 -4 1.7', .9, .5)}</g>`) : det(L('M1.6 -0.8 C1.6 1 -1 1.6 -4 1.7', .9, .5))));
+    out.push(fill(P(hemP(PT.ROBE, m.hem)), ART.robe));
+    out.push(det(L(P(left ? [[11.2, -36], [12.4, -22], [12.8, -3.4]] : [[0.6, -36], [-0.4, -22], [-0.8, -3]], false), 1, .45)));
+    out.push(det(`<g clip-path="url(#${id}-robe)">
+      <path d="${P([[-4, -56], [1.4, -51], [5.8, -46.4], [9.8, -52.6], [12, -57], [4, -58.6]])}" style="fill:${ART.neck}"/>
+      <path d="${ribbon([[-3, -55.6], [1.6, -51], [5.6, -46.2]], 1.8, 1.2)}" style="fill:${ART.white}"/>
+      <path d="${ribbon([[11.4, -56.6], [9.4, -52], [6.6, -46.4]], 1.6, 1.1)}" style="fill:${ART.white}"/>
+      ${left ? farB + nearB : nearB + farB}
+      ${left ? L(P(edge(far.slice(1), -1, 1.4), false), .8, .6) + L(P(edge(near.slice(2), 1, 1.6), false), .9, .75)
+             : L(P(edge(near.slice(2), 1, 1.6), false), .8, .6) + L(P(edge(far.slice(1), -1, 1.4), false), .9, .75)}
+    </g>`));
+    out.push(det(`<path d="${P(RAKU)}" style="fill:${ART.kesa};stroke:${ink};stroke-width:1.1"/><path d="${P(RAKU_IN)}" style="fill:none;stroke:${ART.bandC};stroke-width:.7;opacity:.55"/>`));
+    if (!keep) { const c = rotCuff(IDLE.cuffO, NS_, nr), hand = rotP(IDLE.hand, NS_, nr), hc = hand.reduce((a, q) => [a[0] + q[0] / hand.length, a[1] + q[1] / hand.length], [0, 0]);
+      out.push(fill(P(rotP(curve(IDLE.near, MK.DENSE.near, true), NS_, nr)), ART.robe) + det(L(P(rotP(curve(IDLE.nearLine, MK.DENSE.line, false), NS_, nr), false), 1.15)
+        + `<ellipse cx="${c.cx}" cy="${c.cy}" rx="${c.rx}" ry="${c.ry}" transform="rotate(${c.r} ${c.cx} ${c.cy})" style="fill:#26345a;stroke:${ink};stroke-width:.85"/>`)
+        + stickD(rotStick(rotStick(IDLE.stick, NS_, nr), hc, m.stick || 0)) + fistD(hand) + det(fingers(rotP(IDLE.handLine, NS_, nr))));
+    } else out.push(fill(P(rotP(STAND.hand, NS_, nr)), ART.skin, 1) + det(L(P(rotP(STAND.handLine, NS_, nr), false), .8, .55)) + fill(P(rotP(STAND.near, NS_, nr)), ART.robe) + det(L(P(rotP(STAND.nearLine, NS_, nr), false), 1.15)));
+    out.push(`<g transform="rotate(${m.tilt ? f2(2 + m.tilt) : 2} 3 -56)">` + fill(PT.HEAD, ART.skin) + det(`<g clip-path="url(#${id}-head)"><path d="M-6 -95 C-15 -88 -17 -74 -13 -64 C-10 -58.6 -6 -56 -1 -54.6 L-30 -50 L-30 -100 Z" style="fill:var(--skin-lo);opacity:.5"/></g>` + L(PT.HEAD_LOWER, 1.25))
+      + fill(PT.EAR, ART.skin, 1) + det(L('M-15 -74 q-2 1.8 -.4 4.4', .9, .55) + '<path d="M-7.4 -88.6 q5 -4.2 11 -4.6" style="fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;opacity:.5"/>'
+      + `<ellipse cx="5.6" cy="-66.4" rx="3.6" ry="2" style="fill:var(--blush);opacity:${PT.BLUSH[face]}"/><ellipse cx="19.6" cy="-66.2" rx="1.8" ry="1.6" style="fill:var(--blush);opacity:${PT.BLUSH[face]}"/>`
+      + (face === 'stern' ? `<ellipse cx="8.6" cy="-72.2" rx="1.9" ry="1.8" style="fill:${ink}"/><ellipse cx="16.8" cy="-72.2" rx="1.6" ry="1.7" style="fill:${ink}"/>` + L('M11.6 -63.6 h4.8', 1.5)
+        : `<ellipse cx="8.4" cy="-72.6" rx="1.9" ry="2.3" style="fill:${ink}"/><ellipse cx="16.6" cy="-72.6" rx="1.6" ry="2.2" style="fill:${ink}"/>` + L('M11.4 -64 q2.6 2 5 -.2', 1.4))
+      + PT.BROW[face].map(d => `<path d="${d}" style="fill:#f6f1e6;stroke:${ink};stroke-width:1;stroke-linejoin:round"/>`).join('')) + '</g>');
+    return `<g class="m4" id="${id}">
+      <defs><clipPath id="${id}-robe"><path d="${P(PT.ROBE)}"/></clipPath><clipPath id="${id}-head"><path d="${PT.HEAD}"/></clipPath><g id="${id}-art">${out.join('')}</g></defs>
+      <ellipse cx="1" cy="1.4" rx="27" ry="4.2" class="m4shadow"/>
+      <g${left ? ' transform="scale(-1 1)"' : ''}><g transform="rotate(0) scale(1 1)"><use href="#${id}-art" class="m4-sil"/><use href="#${id}-art"/></g></g>
+    </g>`;
+  }
+  // facing left with the keisaku still in his right hand (drawn facing right with it in the far hand, then mirrored).
+  // A: the far fist just shows past the robe's edge, the board hangs along his side.
+  // B: the far hand is held a little further forward and the board angled forward, so it reads clearly in his hand.
+  function keepGrip(cand) {
+    const fc = cand === 'B' ? [21.4, -26] : [19.8, -25.2], rot = cand === 'B' ? 160 : 168, stretch = cand === 'B' ? 1 : .95;
+    const FIST = MK.FIST, FL = MK.FIST_LINE, fist = FIST.map(([x, y]) => [x + fc[0], y + fc[1]]), line = FL.map(([x, y]) => [x + fc[0], y + fc[1]]);
+    const r = rot * RAD, origin = [fc[0] - 3.5 * Math.sin(r), fc[1] + 3.5 * Math.cos(r)];
+    return { stick: { x: origin[0], y: origin[1], rot, stretch }, fist, fistLine: line };
+  }
+
+  /* ---------- public ---------- */
+  const VIEWS = { front: 'P1 正面', back: 'P2 背面', p3mid: 'P3 中間（側面 → 正面）', profile: 'P4 側面', back34: 'P4 背面 3/4', q34L: '面向左・香板仍在右手' };
+  const VIEWS_L = { p3midL: '中間（正面 → 面向左）', profileL: '側面（面向左）', back34L: '背面 3/4（面向左）' };
+  function view(name, cand, o = {}) {
+    if (name === 'accepted') return MK.art({ id: o.id || 'acc', pose: 'idle', facing: o.facing });
+    if (name === 'q34L') return acc34({ id: o.id, left: true, arms: 'keep', keep: keepGrip(cand), face: o.face, mod: o.mod });
+    if (name === 'q34R') return acc34({ id: o.id, left: false, arms: 'idle', face: o.face, mod: o.mod });   // the accepted 3/4 itself, rebuilt (identical when unmoved)
+    if (name === 'q34Lmirror') return MK.art({ id: o.id || 'acm', pose: 'idle', facing: 'left' });   // the accepted mirror (the keisaku changes hands)
+    return viewTT(name, cand, o);
+  }
+  window.MONK_VIEWS2 = { VIEWS, VIEWS_L, view, headParts, body, acc34, keepGrip, lapel };
+})();
+;
+/* =====================================================================
+   Round 4.1 — where the monk may walk in the zendo, and a check that he never walks through the mochi.
+
+   Scene units are the 400 × 300 viewBox of the stage (the stage keeps 4:3, so nothing is cropped at any phone width).
+   A position is the point between the monk's feet on the floor: x across, y = depth on screen (bigger = nearer).
+
+   • Depth: a limited scale, s(y) = 1 + 0.003 (y − 254), clamped to 0.9 … 1.1. At y = 254 (where Round 3.5 was
+     accepted, and where he strikes) s = 1, so the accepted reminder is drawn exactly as before.
+   • Layers: by depth only — behind the mochi while his feet are behind hers (y ≤ 257), in front of her and her
+     cushion when they are in front. Never "on top because he is in front": in front he must also be clear of her.
+   • Safe zone, on the floor: the cushion (ellipse 38 × 9 at (206, 256)) and the mat (trapezoid y 262–274) grown by
+     4 units. The monk's footprint is an ellipse of his full outline width (± 31 · s), 8 · s deep — not his centre.
+   • On screen, while he is in front: his whole outline box (± 32.4 · s wide, 103 · s tall, measured from the drawing
+     with the keisaku hanging, both facings, plus the outline stroke) must not touch the mochi (body + cushion, + 3).
+   Paths are fixed waypoints joined by smooth (centripetal Catmull-Rom) legs between stops; the speed eases in and
+   out at stops. Routes are played in a fixed order, so every review is the same.
+   ===================================================================== */
+(function (root) {
+  'use strict';
+  const MOCHI = { x: 206, y: 257 }, STANCE = { x: 132, y: 254 };
+  const MONK_BOX = { x0: -32.4, x1: 32.4, y0: -103.3, y1: 7.8 };      // getBBox of the idle / stand art ± 2.2 stroke
+  const FOOT = { rx: 31, ry: 8 };
+  const FLOOR = { x0: 0, x1: 400, back: 196, front: 291 };            // the wall meets the floor at 189; front wood at 291
+  const SPEED = 30;                                                   // units / s while patrolling (Round 1: 34)
+  const depth = y => Math.max(.9, Math.min(1.1, 1 + .003 * (y - 254)));
+  const inFront = y => y > MOCHI.y;
+
+  /* ---------- waypoints (measured against the scene, see patrol-review.html) ---------- */
+  const N = {
+    BL: { x: 118, y: 224, zh: '後方左' }, BC: { x: 206, y: 220, zh: '後方中' }, BR: { x: 294, y: 224, zh: '後方右' },
+    LS: { x: 116, y: 250, zh: '左側（繞行入口）' }, LF: { x: 104, y: 282, zh: '左前' },
+    RS: { x: 306, y: 252, zh: '右側（繞行入口）' }, RF: { x: 314, y: 282, zh: '右前' },
+    ST: { x: STANCE.x, y: STANCE.y, zh: '提醒站位（3.5）' },
+  };
+  const EDGES = [['BL', 'BC'], ['BC', 'BR'], ['BL', 'LS'], ['LS', 'LF'], ['LS', 'ST'], ['BL', 'ST'], ['BR', 'RS'], ['RS', 'RF']];
+  // fixed review routes: legs between stops; a stop can face the mochi ('mochi') and dwell
+  const R = (zh, stops) => ({ zh, stops });
+  const ROUTES = {
+    back: R('後方巡堂', [['BL'], ['BC', { dwell: 900 }], ['BR', { dwell: 900 }], ['BC', { dwell: 600 }], ['BL', { dwell: 600 }]]),
+    left: R('左側繞行', [['BL'], ['LS', 'LF', { dwell: 1400, face: 'mochi' }], ['LS', 'BL', { dwell: 600 }]]),
+    right: R('右側繞行', [['BR'], ['RS', 'RF', { dwell: 1400, face: 'mochi' }], ['RS', 'BR', { dwell: 600 }]]),
+    around: R('左前 → 右前（繞回後方）', [['LF', { face: 'mochi' }], ['LS', 'BL', 'BC', 'BR', 'RS', 'RF', { dwell: 1200, face: 'mochi' }]]),
+  };
+
+  /* ---------- geometry ---------- */
+  const dist = (a, b) => Math.hypot(b.x - a.x, b.y - a.y);
+  function catmull(pts, perSeg = 40) {     // centripetal Catmull-Rom through pts, ends extended by reflection
+    const P = [{ x: 2 * pts[0].x - pts[1].x, y: 2 * pts[0].y - pts[1].y }, ...pts, { x: 2 * pts[pts.length - 1].x - pts[pts.length - 2].x, y: 2 * pts[pts.length - 1].y - pts[pts.length - 2].y }];
+    const out = [{ x: pts[0].x, y: pts[0].y }];
+    for (let i = 1; i < P.length - 2; i++) {
+      const p0 = P[i - 1], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2];
+      const t0 = 0, t1 = t0 + Math.sqrt(dist(p0, p1)) || 1e-6, t2 = t1 + Math.sqrt(dist(p1, p2)) || 1e-6, t3 = t2 + Math.sqrt(dist(p2, p3)) || 1e-6;
+      for (let k = 1; k <= perSeg; k++) {
+        const t = t1 + (t2 - t1) * k / perSeg, L = (a, b, ta, tb) => ({ x: (tb - t) / (tb - ta) * a.x + (t - ta) / (tb - ta) * b.x, y: (tb - t) / (tb - ta) * a.y + (t - ta) / (tb - ta) * b.y });
+        const A1 = L(p0, p1, t0, t1), A2 = L(p1, p2, t1, t2), A3 = L(p2, p3, t2, t3), B1 = L(A1, A2, t0, t2), B2 = L(A2, A3, t1, t3);
+        out.push(L(B1, B2, t1, t2));
+      }
+    }
+    out[out.length - 1] = { x: pts[pts.length - 1].x, y: pts[pts.length - 1].y };
+    return out;
+  }
+  function arcTable(pts) { const d = [0]; for (let i = 1; i < pts.length; i++) d.push(d[i - 1] + dist(pts[i - 1], pts[i])); return d; }
+  const smooth = u => { u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); };
+  // one leg from a stop to the next: positions on the curve, and a time table with eased start and stop
+  // (Round 4.2B: a waypoint may also be a point {x, y} — where he is when a reminder interrupts him — and a leg may
+  // have its own speed: opts.speed, units / s)
+  function makeLeg(names, opts = {}) {
+    const way = names.map(n => typeof n === 'string' ? N[n] : n), V = opts.speed || SPEED;
+    // opts.straight: along the waypoints in straight stretches (a purposeful walk, turning at each waypoint)
+    const pts = way.length < 2 ? [way[0]] : opts.straight ? way.slice(1).reduce((acc, b, i) => { const a = way[i], n = Math.max(1, Math.ceil(dist(a, b) / .5)); for (let k = 1; k <= n; k++) acc.push({ x: a.x + (b.x - a.x) * k / n, y: a.y + (b.y - a.y) * k / n }); return acc; }, [{ x: way[0].x, y: way[0].y }]) : catmull(way);
+    const D = arcTable(pts), L = D[D.length - 1];
+    const A = Math.min(opts.speed ? 18 : 12, L / 3), B = Math.min(18, L / 2.5), v = d => V * Math.max(.12, Math.min(1, smooth(d / A), smooth((L - d) / B)));
+    const T = [0]; for (let i = 1; i < pts.length; i++) T.push(T[i - 1] + (D[i] - D[i - 1]) / v((D[i] + D[i - 1]) / 2) * 1000);
+    const total = T[T.length - 1];
+    function at(t) {     // → { x, y, tx, ty } (tangent) at leg time t (ms)
+      t = Math.max(0, Math.min(total, t)); let i = 1; while (i < T.length - 1 && T[i] < t) i++;
+      const u = (t - T[i - 1]) / ((T[i] - T[i - 1]) || 1), a = pts[i - 1], b = pts[i] || a;
+      const l = dist(a, b) || 1; return { x: a.x + (b.x - a.x) * u, y: a.y + (b.y - a.y) * u, tx: (b.x - a.x) / l, ty: (b.y - a.y) / l };
+    }
+    return { names, pts, D, L, T, total, at, dwell: opts.dwell || 0, face: opts.face || null };
+  }
+  // a route = legs between its stops (each stop entry: [...waypoints passed, stopName, {opts}])
+  function makeRoute(key) {
+    const r = ROUTES[key], legs = []; let from = r.stops[0][0];
+    for (const s of r.stops.slice(1)) { const names = s.filter(x => typeof x === 'string'), o = s.find(x => typeof x === 'object') || {}; legs.push(makeLeg([from, ...names], o)); from = names[names.length - 1]; }
+    return { key, zh: r.zh, start: r.stops[0][0], startFace: (r.stops[0].find(x => typeof x === 'object') || {}).face, legs };
+  }
+  // shortest way over the waypoint graph (to the reminder stance, or anywhere)
+  function pathTo(from, to) {
+    const dd = {}, prev = {}, todo = new Set(Object.keys(N)); for (const k of todo) dd[k] = Infinity; dd[from] = 0;
+    while (todo.size) { let u = null; for (const k of todo) if (u === null || dd[k] < dd[u]) u = k; todo.delete(u); if (u === to) break;
+      for (const [a, b] of EDGES) { const v = a === u ? b : b === u ? a : null; if (v && todo.has(v)) { const nd = dd[u] + dist(N[u], N[v]); if (nd < dd[v]) { dd[v] = nd; prev[v] = u; } } } }
+    const out = [to]; while (out[0] !== from) { if (!prev[out[0]]) return null; out.unshift(prev[out[0]]); } return out;
+  }
+  const legToStance = from => { const p = pathTo(from, 'ST'); return p && p.length > 1 ? makeLeg(p, { face: 'right' }) : null; };
+
+  /* ---------- the mochi as shapes ---------- */
+  function cubicPts(d, ox, oy) {     // sample an M … C … Z path made only of cubic curves
+    const n = d.match(/-?\d*\.?\d+/g).map(Number), out = []; let x = n[0], y = n[1];
+    for (let i = 2; i + 5 < n.length; i += 6) { const [a, b, c, e, f, g] = n.slice(i, i + 6);
+      for (let k = 1; k <= 24; k++) { const t = k / 24, m = 1 - t; out.push({ x: ox + m * m * m * x + 3 * m * m * t * a + 3 * m * t * t * c + t * t * t * f, y: oy + m * m * m * y + 3 * m * m * t * b + 3 * m * t * t * e + t * t * t * g }); } x = f; y = g; }
+    return out;
+  }
+  const BODY_D = 'M-34 0 C-38 -10 -36 -30 -26 -48 C-18 -62 -8 -68 0 -68 C8 -68 18 -62 26 -48 C36 -30 38 -10 34 0 C22 4.5 -22 4.5 -34 0 Z';
+  const ell = (cx, cy, rx, ry, n = 72, a0 = 0, a1 = 2 * Math.PI) => Array.from({ length: n }, (_, i) => { const a = a0 + (a1 - a0) * i / (n - 1); return { x: cx + rx * Math.cos(a), y: cy + ry * Math.sin(a) }; });
+  const grow = (poly, m) => { const c = poly.reduce((a, p) => ({ x: a.x + p.x / poly.length, y: a.y + p.y / poly.length }), { x: 0, y: 0 }); return poly.map(p => { const dx = p.x - c.x, dy = p.y - c.y, l = Math.hypot(dx, dy) || 1; return { x: p.x + dx / l * m, y: p.y + dy / l * m }; }); };
+  // on screen: her body (stroke 2.4) and the cushion seen from the front (top ellipse + its side), + 3
+  const SCREEN = { body: grow(cubicPts(BODY_D, MOCHI.x, MOCHI.y), 1.2 + 3), zafu: grow([...ell(206, 256, 38, 9, 40, Math.PI, 2 * Math.PI), ...ell(206, 262, 38, 9, 40, 0, Math.PI)], 3) };
+  // on the floor: the cushion and the mat, + 4
+  const GROUND = { zafu: ell(206, 256, 38 + 4, 9 + 4), mat: [{ x: 152 - 4.4, y: 258 }, { x: 260 + 4.4, y: 258 }, { x: 268 + 4.6, y: 278 }, { x: 144 - 4.6, y: 278 }] };
+  // the same without the 4-unit margin: the cushion and the mat themselves
+  const GROUND_RAW = { zafu: ell(206, 256, 38, 9), mat: [{ x: 152, y: 262 }, { x: 260, y: 262 }, { x: 268, y: 274 }, { x: 144, y: 274 }] };
+  function inPoly(p, poly) { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const a = poly[i], b = poly[j]; if ((a.y > p.y) !== (b.y > p.y) && p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x) c = !c; } return c; }
+  const monkRect = (x, y) => { const s = depth(y); return { x0: x + MONK_BOX.x0 * s, x1: x + MONK_BOX.x1 * s, y0: y + MONK_BOX.y0 * s, y1: y + MONK_BOX.y1 * s }; };
+  const inRect = (p, r) => p.x >= r.x0 && p.x <= r.x1 && p.y >= r.y0 && p.y <= r.y1;
+  const rectPoly = r => [{ x: r.x0, y: r.y0 }, { x: r.x1, y: r.y0 }, { x: r.x1, y: r.y1 }, { x: r.x0, y: r.y1 }];
+  const rectsHit = (r, poly) => poly.some(p => inRect(p, r)) || rectPoly(r).some(p => inPoly(p, poly));
+  function footHits(x, y, G = GROUND) {
+    const s = depth(y), F = ell(x, y, FOOT.rx * s, FOOT.ry * s, 64), inF = p => ((p.x - x) / (FOOT.rx * s)) ** 2 + ((p.y - y) / (FOOT.ry * s)) ** 2 <= 1;
+    return ['zafu', 'mat'].filter(k => F.some(p => inPoly(p, G[k])) || G[k].some(inF));
+  }
+  const screenHits = (x, y) => { const r = monkRect(x, y); return ['body', 'zafu'].filter(k => rectsHit(r, SCREEN[k])); };
+  // the front of the mochi: the band in front of her where crossing from one side to the other is not allowed
+  const FRONT = { x0: 168, x1: 244, y: MOCHI.y };
+
+  /* ---------- the check: every sample of every leg (60 fps), not only the waypoints ---------- */
+  function check(leg, { ask = null, label = '' } = {}) {
+    const out = { label, frames: 0, ground: [], stanceMargin: [], screen: [], crossFront: [], bounds: [], jumps: [], corners: [], ask: [], needsPose: [], layerSwitch: [], minClear: Infinity, maxStep: 0 };
+    let prev = null, prevT = null, wasFront = null;
+    for (let t = 0; t <= leg.total + 1e-6; t += 1000 / 60) {
+      const q = leg.at(t), r = monkRect(q.x, q.y), front = inFront(q.y), tag = { t: Math.round(t), x: +q.x.toFixed(1), y: +q.y.toFixed(1) };
+      out.frames++;
+      // the accepted reminder stance itself is 4 units from the mat corner, inside the margin: the last steps into it are
+      // recorded on their own (they must still be clear of the cushion and the mat themselves); anywhere else it fails
+      const g = footHits(q.x, q.y);
+      if (g.length) { const raw = footHits(q.x, q.y, GROUND_RAW); if (!raw.length && dist(q, STANCE) < 12) out.stanceMargin.push({ ...tag, what: g }); else out.ground.push({ ...tag, what: g, raw }); }
+      if (front) { const sh = screenHits(q.x, q.y); if (sh.length) out.screen.push({ ...tag, what: sh }); }
+      if (front && r.x1 > FRONT.x0 && r.x0 < FRONT.x1) out.crossFront.push(tag);
+      if (r.x0 < FLOOR.x0 || r.x1 > FLOOR.x1 || r.y0 < 0 || q.y + 5.6 * depth(q.y) > FLOOR.front || q.y < FLOOR.back) out.bounds.push(tag);
+      if (ask && r.x1 > ask.x0 && r.x0 < ask.x1 && r.y1 > ask.y0 && r.y0 < ask.y1) out.ask.push(tag);
+      if (wasFront !== null && front !== wasFront && screenHits(q.x, q.y).length) out.layerSwitch.push(tag);
+      wasFront = front;
+      // clearance to her on screen (for the record): distance from the outline box to her body outline
+      const cl = Math.min(...SCREEN.body.map(p => Math.max(r.x0 - p.x, p.x - r.x1, 0) + Math.max(r.y0 - p.y, p.y - r.y1, 0)));
+      if (front) out.minClear = Math.min(out.minClear, cl);
+      if (prev) { const st = dist(prev, q); out.maxStep = Math.max(out.maxStep, st); if (st > 1.2) out.jumps.push({ ...tag, step: +st.toFixed(2) }); }
+      if (Math.abs(q.tx) < .35 && dist(leg.pts[0], q) > 1 && dist(leg.pts[leg.pts.length - 1], q) > 1) out.needsPose.push(tag);
+      prev = q; prevT = t;
+    }
+    // corners: direction change between neighbouring curve samples
+    for (let i = 2; i < leg.pts.length; i++) { const a = leg.pts[i - 2], b = leg.pts[i - 1], c = leg.pts[i];
+      const a1 = Math.atan2(b.y - a.y, b.x - a.x), a2 = Math.atan2(c.y - b.y, c.x - b.x); let d = Math.abs(a2 - a1) * 180 / Math.PI; if (d > 180) d = 360 - d;
+      if (dist(a, b) > .05 && dist(b, c) > .05 && d > 25) out.corners.push({ x: +b.x.toFixed(1), y: +b.y.toFixed(1), deg: +d.toFixed(0) }); }
+    out.ok = !out.ground.length && !out.screen.length && !out.crossFront.length && !out.bounds.length && !out.jumps.length && !out.corners.length && !out.layerSwitch.length;
+    return out;
+  }
+  function checkAll(ask) {
+    const res = [];
+    for (const k of Object.keys(ROUTES)) makeRoute(k).legs.forEach((l, i) => res.push(check(l, { ask, label: `${ROUTES[k].zh}・第 ${i + 1} 段（${l.names.map(n => N[n].zh).join(' → ')}）` })));
+    for (const n of Object.keys(N)) if (n !== 'ST') { const l = legToStance(n); res.push(l ? check(l, { ask, label: `回到提醒站位：${N[n].zh} → ${l.names.slice(1).map(m => N[m].zh).join(' → ')}` }) : { label: `回到提醒站位：${N[n].zh}`, ok: false, unreachable: true }); }
+    { const l = makeLeg(['ST', 'BL']); res.push(check(l, { ask, label: '提醒後恢復巡堂：提醒站位（3.5） → 後方左' })); }
+    // joins between consecutive legs of a route: no jump at the stops
+    const joins = []; for (const k of Object.keys(ROUTES)) { const legs = makeRoute(k).legs; for (let i = 1; i < legs.length; i++) { const a = legs[i - 1].at(legs[i - 1].total), b = legs[i].at(0); joins.push({ route: k, at: legs[i].names[0], gap: dist(a, b) }); } }
+    // the stops themselves, standing still for a while
+    const stops = Object.entries(N).map(([k, p]) => ({ k, zh: p.zh, x: p.x, y: p.y, s: +depth(p.y).toFixed(3), front: inFront(p.y), ground: footHits(p.x, p.y), groundRaw: footHits(p.x, p.y, GROUND_RAW), screen: inFront(p.y) ? screenHits(p.x, p.y) : [], ask: ask ? (() => { const r = monkRect(p.x, p.y); return r.x1 > ask.x0 && r.x0 < ask.x1 && r.y1 > ask.y0 && r.y0 < ask.y1; })() : null }));
+    return { legs: res, joins, stops };
+  }
+
+  // Round 5: a host page can add its own stops (the production app's 'next to the mochi while talking' and 'at the tea
+  // table'), joined to existing waypoints; the Round 4 stops, edges and routes are not touched
+  function addStop(name, pt, links) {
+    if (N[name]) throw new Error('PATROL.addStop: ' + name + ' exists');
+    N[name] = { x: pt.x, y: pt.y, zh: pt.zh || name };
+    for (const l of links) EDGES.push([name, l]);
+    return N[name];
+  }
+  root.PATROL = { addStop, N, EDGES, ROUTES, STANCE, MOCHI, MONK_BOX, FOOT, FLOOR, SPEED, depth, inFront, makeRoute, makeLeg, pathTo, legToStance, monkRect, footHits, screenHits, SCREEN, GROUND, GROUND_RAW, FRONT, check, checkAll };
+})(typeof window !== 'undefined' ? window : globalThis);
+;
+/* =====================================================================
+   Round 4.2B — the monk's natural patrol (candidate B views) on the Round 4.1 safe paths.
+
+   Drawing: every pose the patrol needs (walk-cycle phases, turn frames, standing variants) is built ONCE, on first
+   use, into a hidden <defs>; the monk on stage is a single <use> whose href changes only when the pose changes.
+   Moving him is a transform. So walking does not rebuild any SVG; the accepted reminder (MonkActor + Round 3.5)
+   is untouched and takes over only at the reminder stance, in exactly the pose he arrives in.
+
+   Views ("families"): R = the accepted 3/4 facing right (rebuilt from its own parts, identical when still),
+   L = facing left with the keisaku still in his right hand, F = front, K = back (all candidate B).
+   Turns go through the in-between frames: R↔F (P3), L↔F, R↔K (side, back-3/4), L↔K; R↔L through F.
+
+   Behaviour: from each stop a next route is drawn by weight from a seeded random generator (same seed, same
+   patrol), never the same route twice in a row; stops last 1.2–3 s, sometimes a quiet 4–7 s; at the front stops he
+   turns to watch the mochi. Left and right front are only reached from the back, so changing sides goes round
+   behind her. A reminder: he slows to a stop, notices (stern), walks briskly by safe paths to the accepted stance,
+   faces the mochi and hands over to the accepted reminder; afterwards he walks back to the patrol.
+   ===================================================================== */
+(function () {
+  'use strict';
+  const V = MONK_VIEWS2, P = PATROL;
+  const TAU = Math.PI * 2, clamp = (v, a, b) => Math.max(a, Math.min(b, v)), dist = (a, b) => Math.hypot(b.x - a.x, b.y - a.y);
+  function rng(seed) { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+  /* ---------- poses ---------- */
+  const PHASES = 8, STRIDE = 24;               // units walked per full step cycle (two steps)
+  const TURN = { 'R>F': ['p3mid'], 'F>R': ['p3mid'], 'L>F': ['p3midL'], 'F>L': ['p3midL'], 'R>K': ['profile', 'back34'], 'K>R': ['back34', 'profile'],
+    'L>K': ['profileL', 'back34L'], 'K>L': ['back34L', 'profileL'], 'R>L': ['p3mid', '@F', 'p3midL'], 'L>R': ['p3midL', '@F', 'p3mid'],
+    'F>K': ['p3mid', '@R', 'profile', 'back34'], 'K>F': ['back34', 'profile', '@R', 'p3mid'] };
+  const TURN_MS = 85;
+  const VIEW_OF = { R: 'q34R', L: 'q34L', F: 'front', K: 'back' };
+  // a walking step, as small moves of the parts (see MONK_VIEWS2 o.mod): unhurried, a little sway, the free arm swings
+  // more than the one holding the keisaku
+  function walkMod(fam, ph) {
+    if (ph === 0 && fam !== 'X') return null;
+    const s = Math.sin(TAU * ph / PHASES);
+    if (fam === 'R') return { feet: [[2.6 * s, -1.9 * Math.max(0, s)], [-2.6 * s, -1.9 * Math.max(0, -s)]], near: 1.3 * s, far: -2.4 * s, stick: -1.6 * s, hem: -.7 * s };
+    if (fam === 'L') return { feet: [[2.6 * s, -1.9 * Math.max(0, s)], [-2.6 * s, -1.9 * Math.max(0, -s)]], near: 2.6 * s, far: -1.1 * s, stick: 1.3 * s, hem: -.7 * s };
+    return { feet: [[0, -2 * Math.max(0, s)], [0, -2 * Math.max(0, -s)]], right: 1 * s, left: -2 * s, stick: -1.2 * s, hem: .6 * s };
+  }
+  function buildPose(key, id) {   // key: 'W:fam:phase:face:tilt' or 'T:view:face'
+    const [kind, a, b, c, d] = key.split(':');
+    if (kind === 'T') return V.view(a, 'B', { id, face: b });
+    const fam = a, ph = +b, face = c, tilt = +d || 0, mod = walkMod(fam, ph);
+    const m = mod || tilt ? Object.assign({}, mod || {}, tilt ? { tilt } : {}) : undefined;
+    return V.view(VIEW_OF[fam], 'B', { id, face, mod: m });
+  }
+  class Poses {
+    constructor(defs) { this.defs = defs; this.ids = new Map(); this.n = 0; this.built = 0; }
+    id(key) {
+      let id = this.ids.get(key);
+      if (!id) { id = 'np' + (++this.n); this.defs.insertAdjacentHTML('beforeend', buildPose(key, id)); this.ids.set(key, id); this.built++; }
+      return id;
+    }
+    warm(keys, perFrame = 1) { this.queue = (this.queue || []).concat(keys.filter(k => !this.ids.has(k))); this.perFrame = perFrame; }
+    tick() { for (let i = 0; i < (this.perFrame || 1) && this.queue && this.queue.length; i++) this.id(this.queue.shift()); }
+  }
+  const allKeys = (faces = ['kind']) => { const k = []; for (const f of faces) { for (const fam of 'RLFK') for (let p = 0; p < PHASES; p++) k.push(`W:${fam}:${p}:${f}:0`);
+    for (const v of ['p3mid', 'p3midL', 'profile', 'back34', 'profileL', 'back34L']) k.push(`T:${v}:${f}`); } return k; };
+
+  /* ---------- routes: from each stop, where he may go next, and how much he likes to ---------- */
+  const ROUTES = {
+    BL: [['BL-BC', ['BC'], 3], ['BL-LF', ['LS', 'LF'], 2.2], ['BL-BR', ['BC', 'BR'], 1.2]],
+    BC: [['BC-BL', ['BL'], 3], ['BC-BR', ['BR'], 3]],
+    BR: [['BR-BC', ['BC'], 3], ['BR-RF', ['RS', 'RF'], 2.2], ['BR-BL', ['BC', 'BL'], 1.2]],
+    LF: [['LF-BL', ['LS', 'BL'], 1]],
+    RF: [['RF-BR', ['RS', 'BR'], 1]],
+    ST: [['ST-BL', ['BL'], 1]],
+  };
+  // which way he faces while standing at a stop: toward the mochi (at the back stops he looks over the hall)
+  const STOP_FACE = { BL: 'R', BC: 'F', BR: 'L', LF: 'R', RF: 'L', ST: 'R', LS: 'R', RS: 'L' };
+
+  class NaturalPatrol {
+    constructor({ actor, defs, lip, slot, seed = 1, rm = () => false, log = () => {} }) {
+      Object.assign(this, { actor, lip, slot, rm, log });
+      this.poses = new Poses(defs); this.seed = seed; this.rand = rng(seed);
+      this.s = { x: P.N.BL.x, y: P.N.BL.y, fam: 'R', face: 'kind', phase: 0, tilt: 0 };
+      this.active = false; this.t = 0; this.tok = 0; this.waits = []; this.mode = 'off'; this.history = []; this.routes = []; this.at = 'BL';
+      this.key = ''; this.useEl = null; this.stats = { swaps: 0 };
+      this.poses.warm(allKeys(['kind']), 2);
+    }
+    /* --- the clock: everything waits on it, so a hidden page (no frames) simply pauses the patrol --- */
+    sleep(ms) { const tok = this.tok; return new Promise(r => this.waits.push({ at: this.t + ms, r, tok })); }
+    frame() { return new Promise(r => this.waits.push({ at: this.t, r, tok: this.tok, frame: true })); }
+    alive(tok) { return tok === this.tok && this.active; }
+    /* --- taking the monk over from the actor, and giving him back --- */
+    claim() {
+      if (this.active) return; const a = this.actor;
+      this.s.x = a.s.x; this.s.y = a.s.y; this.s.fam = a.s.dir < 0 ? 'L' : 'R';
+      this.active = true; a.external = true;
+      a.back.innerHTML = '<use/>'; a.front.innerHTML = ''; this.useEl = a.back.firstChild; this.key = '';
+    }
+    release() {   // the actor draws him again (at the stance this is the very same drawing)
+      if (!this.active) return; this.active = false; this.tok++; this.mode = 'off';
+      const a = this.actor; Object.assign(a.s, { x: this.s.x, y: this.s.y, dir: this.s.fam === 'L' ? -1 : 1, moving: false });
+      a.external = false; a.key = ''; a.lastHtml = null; a.lastFront = null;
+      if (this.slot && a.back.parentNode !== this.slot) this.slot.appendChild(a.back);
+    }
+    /* --- turning and walking --- */
+    async turnTo(fam) {
+      const tok = this.tok, from = this.s.fam; if (fam === from) return;
+      if (!this.rm()) for (const step of TURN[from + '>' + fam] || []) { if (step[0] === '@') { this.s.fam = step.slice(1); this.s.turnKey = null; } else this.s.turnKey = step; this.mode = 'turn'; await this.sleep(TURN_MS); if (!this.alive(tok)) return; }
+      this.s.turnKey = null; this.s.fam = fam; if (this.mode === 'turn') this.mode = 'stand';
+    }
+    famFor(q) { return Math.abs(q.tx) >= .5 ? (q.tx > 0 ? 'R' : 'L') : (q.ty > 0 ? 'F' : 'K'); }
+    async walk(leg, { brisk = false } = {}) {
+      const tok = this.tok;
+      if (this.rm()) { const q = leg.at(leg.total); this.s.x = q.x; this.s.y = q.y; await this.sleep(400); return; }
+      await this.turnTo(this.famFor(leg.at(Math.min(leg.total, 250)))); if (!this.alive(tok)) return;
+      this.mode = 'walk'; this.leg = leg; this.legT = 0; this.brisk = brisk; let want = this.s.fam, since = 0;
+      while (this.alive(tok) && this.legT < leg.total) {
+        const before = this.t; await this.frame(); if (!this.alive(tok)) return;
+        const dt = this.t - before, q0 = leg.at(this.legT); this.legT = Math.min(leg.total, this.legT + dt * (this.slow ?? 1));
+        const q = leg.at(this.legT); this.s.phase += dist(q0, q) / STRIDE; this.s.x = q.x; this.s.y = q.y;
+        // the way he faces follows the way he goes (after a moment, so a curve does not make him flicker)
+        const f = this.famFor(q); if (f !== this.s.fam) { since = f === want ? since + dt : 0; want = f; if (since > 140) { await this.turnTo(f); if (!this.alive(tok)) return; this.mode = 'walk'; since = 0; } }
+        if (this.stopRequest) { this.stopRequest(); this.stopRequest = null; break; }
+      }
+      await this.settleFeet(); this.mode = 'stand';
+    }
+    async settleFeet() {   // at a stop his feet come together (the step finishes rather than snapping)
+      const tok = this.tok, target = Math.ceil(this.s.phase * 2 - 1e-6) / 2;
+      while (this.alive(tok) && this.s.phase < target) { const b = this.t; await this.frame(); this.s.phase = Math.min(target, this.s.phase + (this.t - b) / 1000 * 1.6); }
+      this.s.phase = Math.round(this.s.phase * 2) / 2;
+    }
+    async dwell(ms, stop) {
+      const tok = this.tok; this.mode = 'stand';
+      await this.turnTo(STOP_FACE[stop] || this.s.fam); if (!this.alive(tok)) return;
+      // once in a longer stop: a small tilt of the head toward the mochi and back
+      if (ms > 1800 && !this.rm()) { await this.sleep(ms * .35); for (const t of [.5, 1, 1.5, 1.5, 1, .5, 0]) { this.s.tilt = t; await this.sleep(t === 1.5 ? 700 : 90); if (!this.alive(tok)) return; } await this.sleep(ms * .35); }
+      else await this.sleep(ms);
+    }
+    pick(stop) {
+      const opts = ROUTES[stop] || ROUTES.BL, last = this.history[this.history.length - 1], prev = this.history[this.history.length - 2];
+      // not the same route again, and rather not straight back to the stop he has just come from
+      const cameFrom = this.cameFrom, w = opts.map(([id, names, wt]) => wt * (id === last ? .15 : 1) * (id === prev ? .6 : 1) * (names[names.length - 1] === cameFrom ? .35 : 1)), sum = w.reduce((a, b) => a + b, 0);
+      let r = this.rand() * sum, i = 0; while (r > w[i] && i < w.length - 1) { r -= w[i]; i++; }
+      return opts[i];
+    }
+    async loop(tok) {
+      while (this.alive(tok)) {
+        const [id, names] = this.pick(this.at), to = names[names.length - 1];
+        this.history.push(id); this.routes.push({ t: Math.round(this.t), id }); if (this.routes.length > 200) this.routes.shift();
+        this.log(`巡堂：${P.N[this.at].zh} → ${P.N[to].zh}`);
+        await this.walk(P.makeLeg([this.at, ...names])); if (!this.alive(tok)) return;
+        this.cameFrom = this.at; this.at = to;
+        const quiet = this.rand() < .22, front = to === 'LF' || to === 'RF';
+        await this.dwell(front ? 2400 + this.rand() * 1600 : quiet ? 4000 + this.rand() * 3000 : 1200 + this.rand() * 1800, to);
+      }
+    }
+    /* --- public --- */
+    start(delay = 0, from) {
+      this.claim(); const tok = ++this.tok;
+      if (from) this.at = from; else this.at = this.nearestStop();
+      this.mode = 'stand';
+      (async () => { await this.sleep(delay); if (!this.alive(tok)) return;
+        if (dist(this.s, P.N[this.at]) > 1) { await this.walk(P.makeLeg([{ x: this.s.x, y: this.s.y }, this.at])); if (!this.alive(tok)) return; }
+        this.loop(tok); })();
+    }
+    nearestStop(here = this.s) { let best = 'BL', d = 1e9; for (const k of ['BL', 'BC', 'BR', 'LF', 'RF', 'ST']) { const e = dist(here, P.N[k]); if (e < d) { d = e; best = k; } } return best; }
+    halt() {   // stop where he is (drawn, standing); a walk to the stance that was under way ends as aborted
+      this.tok++; this.mode = this.active ? 'stand' : 'off'; this.slow = 1; this.s.face = 'kind'; this.s.turnKey = null;
+      if (this.pendingStance) { const r = this.pendingStance; this.pendingStance = null; r({ aborted: true }); }
+    }
+    off() { this.halt(); this.release(); }
+    // Round 5: stop patrolling, walk by the safe paths to a stop and stand there facing fam (unhurried; at once with
+    // reduced motion). Resolves { aborted } like toStance.
+    park(stop, fam, { speed = 40 } = {}) {
+      this.claim(); this.halt();
+      const tok = ++this.tok, alive = () => tok === this.tok && this.active;
+      this.parked = stop;
+      return (async () => {
+        if (this.mode === 'walk' || this.leg) { await this.settleFeet(); if (!alive()) return { aborted: true }; }
+        const leg = this.wayLeg(stop, undefined, null, this.nearestStop(), speed);
+        if (leg) { this.leg = null; await this.walk(leg); if (!alive()) return { aborted: true }; }
+        this.s.x = P.N[stop].x; this.s.y = P.N[stop].y; this.at = stop;
+        await this.turnTo(fam); if (!alive()) return { aborted: true };
+        this.mode = 'stand'; this.render(this.t);
+        return { aborted: false };
+      })();
+    }
+    placeAt(n, fam) { this.claim(); this.halt(); Object.assign(this.s, { x: P.N[n].x, y: P.N[n].y, phase: 0, turnKey: null }); if (fam) this.s.fam = fam; this.at = n; this.render(this.t); }
+    // to the reminder stance. Resolves { aborted } once he stands there facing the mochi (or was stopped).
+    toStance(o) {
+      if (!this.active) return Promise.resolve({ aborted: false });
+      return new Promise(res => { this.pendingStance = res; this._toStance(o).then(v => { if (this.pendingStance === res) { this.pendingStance = null; res(v); } }); });
+    }
+    async _toStance({ quick = false } = {}) {
+      const tok = ++this.tok, alive = () => tok === this.tok && this.active;
+      const wasWalking = this.mode === 'walk' && !!this.leg, legThen = wasWalking ? this.leg : null;
+      // 1. finish the step and stop (if he was walking): slow to a halt over a quarter of a second along his path
+      if (this.mode === 'walk' && this.leg && !this.rm()) {
+        const leg = this.leg; let u = 0;
+        while (alive() && u < 1 && this.legT < leg.total) { const b = this.t; await this.frame(); const dt = this.t - b; u += dt / 260; const q0 = leg.at(this.legT); this.legT = Math.min(leg.total, this.legT + dt * (1 - u)); const q = leg.at(this.legT); this.s.phase += dist(q0, q) / STRIDE; this.s.x = q.x; this.s.y = q.y; }
+      }
+      if (!alive()) return { aborted: true };
+      await this.settleFeet(); if (!alive()) return { aborted: true };
+      // 2. notice: serious, a look toward the mochi
+      this.s.face = 'stern'; this.s.tilt = 0; this.mode = 'stand';
+      if (!quick) { await this.turnTo(this.s.x < P.MOCHI.x ? 'R' : 'L'); if (!alive()) return { aborted: true }; await this.sleep(this.rm() ? 200 : 380); if (!alive()) return { aborted: true }; }
+      // 3. by the safe paths to the stance: through whichever nearby stop is shorter
+      const leg = this.stanceLeg(undefined, legThen);
+      if (leg) { this.leg = null; await this.walk(leg, { brisk: true }); if (!alive()) return { aborted: true }; }
+      this.s.x = P.N.ST.x; this.s.y = P.N.ST.y; this.at = 'ST';
+      await this.turnTo('R'); if (!alive()) return { aborted: true };
+      this.s.face = 'kind'; this.render(this.t);
+      this.release();
+      return { aborted: false };
+    }
+    // the way to the stance from where he is now (null if he is there): his current leg's ends and the nearest stop are
+    // tried, the shortest wins; the first stretch runs back along (or on along) the leg he was on
+    stanceLeg(here = { x: this.s.x, y: this.s.y }, leg = this.leg, at = this.at) { return this.wayLeg('ST', here, leg, at); }
+    // Round 5: the same, to any stop (the production app parks him by the mochi while talking, at the tea table on a break)
+    wayLeg(target, here = { x: this.s.x, y: this.s.y }, leg = this.leg, at = this.at, speed = 62) {
+      const T = P.N[target];
+      if (dist(here, T) <= .5) return null;
+      const via = leg ? [leg.names[0], leg.names[leg.names.length - 1]] : [at], cands = [];
+      const near = Object.keys(P.N).sort((a, b) => dist(here, P.N[a]) - dist(here, P.N[b])).slice(0, 2);
+      for (const n of new Set([...via.filter(v => typeof v === 'string'), this.nearestStop(here), ...near])) { const path = P.pathTo(n, target); if (!path) continue;
+        let L = dist(here, P.N[n]); for (let i = 1; i < path.length; i++) L += dist(P.N[path[i - 1]], P.N[path[i]]);
+        const way = (dist(here, P.N[n]) > 1 ? [here] : []).concat(path);
+        cands.push({ n, way: way.length > 1 ? way : [here, target], L }); }
+      // shortest first, but only a way whose footprint keeps the safe-zone margin (it may touch it only at the stance)
+      const pt = w => typeof w === 'string' ? P.N[w] : w, clear = way => { for (let i = 1; i < way.length; i++) { const a = pt(way[i - 1]), b = pt(way[i]), n = Math.ceil(dist(a, b) / 1.5);
+        for (let k = 0; k <= n; k++) { const x = a.x + (b.x - a.x) * k / n, y = a.y + (b.y - a.y) * k / n; if (dist({ x, y }, T) > 12 && P.footHits(x, y).length) return false; } } return true; };
+      cands.sort((a, b) => a.L - b.L);
+      const c = cands.find(c => clear(c.way)) || cands[0];
+      return P.makeLeg(c.way, { speed, straight: true });
+    }
+    /* --- one frame (dt ms, already clamped by the host) --- */
+    update(dt, now) {
+      this.poses.tick();
+      if (!this.active) return 0;
+      const t0 = performance.now();
+      this.t += dt;
+      for (const w of this.waits.slice()) if (w.tok !== this.tok) { this.waits.splice(this.waits.indexOf(w), 1); }
+      const due = this.waits.filter(w => w.frame || w.at <= this.t); this.waits = this.waits.filter(w => !due.includes(w)); due.forEach(w => w.r());
+      this.render(now);
+      return performance.now() - t0;
+    }
+    poseKey() {
+      const s = this.s, rm = this.rm();
+      if (s.turnKey && !rm) return `T:${s.turnKey}:${s.face}`;
+      const ph = rm ? 0 : (((Math.floor((s.phase % 1) * PHASES + .5)) % PHASES) + PHASES) % PHASES;
+      return `W:${s.fam}:${ph}:${s.face}:${rm ? 0 : s.tilt}`;
+    }
+    render(now = 0) {
+      if (!this.active || !this.useEl) return;
+      const key = this.poseKey();
+      if (key !== this.key) { this.useEl.setAttribute('href', '#' + this.poses.id(key)); this.key = key; this.stats.swaps++; }
+      const s = this.s, d = P.depth(s.y), walking = this.mode === 'walk' && !this.rm();
+      const bob = walking ? -Math.abs(Math.sin(TAU * s.phase)) * 1.2 : 0, breath = this.rm() || walking ? 0 : Math.sin(now / 1000 * 1.5) * .3;
+      this.actor.back.setAttribute('transform', `translate(${s.x.toFixed(2)} ${(s.y + bob + breath).toFixed(2)}) scale(${d.toFixed(4)})`);
+      Object.assign(this.actor.s, { x: s.x, y: s.y, depth: d, dir: s.fam === 'L' ? -1 : 1 });
+      // layer by depth: behind the mochi while his feet are behind hers
+      const front = P.inFront(s.y), back = this.actor.back;
+      if (front && back.previousElementSibling !== this.lip) this.lip.after(back);
+      if (!front && back.parentNode !== this.slot) this.slot.appendChild(back);
+    }
+    state() { return { active: this.active, mode: this.mode, x: +this.s.x.toFixed(2), y: +this.s.y.toFixed(2), fam: this.s.fam, face: this.s.face, key: this.key, at: this.at, seed: this.seed, routes: this.routes.slice(), built: this.poses.built }; }
+  }
+  window.NaturalPatrol = NaturalPatrol;
+  window.NATURAL_PATROL = { ROUTES, TURN, STOP_FACE, PHASES, walkMod, buildPose, allKeys };
+})();
+;
+/* =====================================================================
+   Round 5 — the monk in the production app.
+
+   One controller owns the monk: nothing else moves him or changes what he is drawing. It puts together the
+   accepted Round 4 pieces as they are:
+   • NaturalPatrol (Round 4.2B): the candidate-B walks and turns on the Round 4.1 safe paths, drawn from a bank of
+     poses built once (<defs> + one <use>), and the walk to the reminder stance;
+   • MonkActor (Round 4): the accepted Round 3.5 reminder (MONK4.art + KEISAKU_ANIM), from the stance.
+
+   The app says what is going on (its own phases, its own timer) through mode(); it sends distractions through
+   remind(). A reminder that is already under way (walking to the stance or striking) takes any new one in: it is
+   not queued or replayed (the app has already counted it), and the reminder says how many more there were.
+
+   Coordinates: the monk lives in the Round 4 scene's units. The production scene (viewBox 400 × 280) has its mochi
+   at (200, 240); the Round 4 scene had her at (206, 257). The monk's three layers sit in groups translated by
+   OFF = (−6, −17), so the two mochi coincide and every Round 4 path, stance and safe zone keeps its numbers.
+   ===================================================================== */
+(function () {
+  'use strict';
+  const P = PATROL, OFF = { x: -6, y: -17 };
+  // the production app's own places for him, as stops on the safe paths (Round 4 units)
+  P.addStop('HO', { x: 72, y: 238, zh: '對話時（麻糬左邊）' }, ['BL']);       // was HOST_X = 72 (production units)
+  P.addStop('TE', { x: 196, y: 228, zh: '休息時（香案旁喝茶）' }, ['BC', 'BL']);   // was TEA_X = 190
+  const PARK = { host: ['HO', 'R'], rest: ['TE', 'L'], leave: ['BL', 'R'] };
+
+  class MonkDirector {
+    constructor({ slot, lip, fx, defs, rm = () => false, seed = 1 + Math.floor(Math.random() * 99999) }) {
+      const back = document.createElementNS('http://www.w3.org/2000/svg', 'g'), front = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      back.id = 'monk'; front.id = 'monkFx';
+      slot.appendChild(back); fx.appendChild(front);
+      this.K = new MonkActor(back, front, { rm, depth: P.depth });
+      this.K.s.x = P.N.HO.x; this.K.s.y = P.N.HO.y;
+      this.NP = new NaturalPatrol({ actor: this.K, defs, lip, slot, seed, rm });
+      this.rm = rm; this.want = 'host'; this.applied = null; this.busy = false; this.tok = 0; this.merged = 0;
+      this.stats = { reminders: 0, merged: 0, aborted: 0 };
+      this.NP.placeAt('HO', 'R');
+      this.apply();
+    }
+    // where he is, in the host scene's units (for the speech bubble)
+    pos() { const s = this.K.s; return { x: s.x + OFF.x, y: s.y + OFF.y, depth: P.depth(s.y) }; }
+    // what he should be doing when he is not reminding: 'patrol' | 'host' | 'rest' | 'leave'
+    mode(want) { this.want = want; if (!this.busy) this.apply(); }
+    apply() {
+      if (this.busy || this.applied === this.want) return;
+      const want = this.applied = this.want;
+      if (want === 'patrol') { this.NP.start(this.rm() ? 0 : 400); return; }
+      const [stop, fam] = PARK[want]; this.NP.park(stop, fam);
+    }
+    // a distraction. Resolves when the reminder it started is over (or at once, if it was merged into one under way).
+    //   o.ask: asked for (合掌請打) — ignored while one is under way, as in the app
+    //   o.onCall(): the 喝 / 請 beat; o.onImpact(): the keisaku lands; returns 'merged' | 'ignored' | a Promise
+    remind(o = {}) {
+      if (this.busy) { if (o.ask) return 'ignored'; this.merged++; this.stats.merged++; return 'merged'; }
+      this.busy = true; this.merged = 0; this.stats.reminders++;
+      const tok = ++this.tok, K = this.K, NP = this.NP;
+      return (async () => {
+        try {
+          if (!NP.active) NP.claim();
+          const r0 = await NP.toStance({});
+          if (r0.aborted || tok !== this.tok) return { aborted: true, merged: this.merged };
+          const res = await K.perform({ quick: true,
+            onSeg: id => { if (id === 'call' && tok === this.tok) o.onCall && o.onCall(); },
+            onImpact: () => { if (tok === this.tok) o.onImpact && o.onImpact(); } });
+          return { aborted: !!res.aborted || tok !== this.tok, merged: this.merged };
+        } finally {
+          if (tok === this.tok) { this.busy = false; this.applied = null; this.apply(); }
+        }
+      })();
+    }
+    // 出堂 or a reset: the reminder stops now, he is put straight back in the hanging pose and goes to his place
+    abort() {
+      if (!this.busy) return;
+      this.tok++; this.busy = false; this.stats.aborted++;
+      if (this.K.busy) this.K.abort();
+      if (this.NP.pendingStance) this.NP.halt();
+      this.applied = null; this.apply();
+    }
+    frame(dt, now) { this.NP.update(dt, now); this.K.render(dt, now); }
+    state() {
+      const k = this.K.state(), n = this.NP.state();
+      return { busy: this.busy, want: this.want, merged: this.merged, x: +this.K.s.x.toFixed(2), y: +this.K.s.y.toFixed(2), monk: k, patrol: n, stats: { ...this.stats } };
+    }
+  }
+  window.MonkDirector = MonkDirector;
+  window.MONK_OFF = OFF;
+})();
+;
 (() => {
   const $ = s => document.querySelector(s);
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2878,12 +4566,11 @@ const I18N = {
     translateDom(document.body);
     document.documentElement.style.setProperty('--why', JSON.stringify(tr('為什麼?')));   // the 「為什麼?」 after the detection warning is CSS text
   }
-  const monkEl = $('#monk'), stickEl = $('#stick'), stickLayer = $('#stickLayer'), sitterEl = $('#sitter');
+  const sitterEl = $('#sitter');
   const bubbleEl = $('#bubble'), bubbleText = $('#bubbleText');
   const toastEl = $('#toast'), clockEl = $('#clock'), statusEl = $('#status');
   const mainBtn = $('#mainBtn'), askBtn = $('#askBtn'), leaveBtn = $('#leaveBtn'), backBtn = $('#backBtn');
-  const PIVOT = '12 -38';
-  const SITTER_X = 200, TEA_X = 190, HOST_X = 72, RACK_X = 375;
+  const SITTER_X = 200;
   const STAND = { x: -66, y: 14 };            // where the mochi stands (relative to the cushion) while checking in
   const DEFAULT_CFG = { task: tr('專注'), focusMin: 25, rounds: 4, breakMin: 5 };
   const MAX_PRESETS = 3;
@@ -3350,40 +5037,16 @@ const I18N = {
   function startBackground(rise) { startAmbient(ambientChoice(), rise); if (musicOn()) startMusic(rise); else stopMusic(1); }
   function stopBackground(fade = 1.5) { stopAmbient(fade); stopMusic(fade); }
 
-  /* ---------- monk motion ---------- */
-  const M = { holding: false, x: 60, y: 215, ty: 215, tx: 60, speed: 28, face: 1, stick: 10, wait: 1.5, walkT: 0, mode: 'patrol', arrive: null };
-  function pickPatrol() {
-    let tx;
-    if (Math.random() < .22) tx = SITTER_X + (Math.random() * 10 - 5);   // stop behind the sitter and watch
-    else do { tx = 50 + Math.random() * 300; } while (Math.abs(tx - M.x) < 70);
-    M.tx = tx; M.speed = 22 + Math.random() * 12; M.wait = 1.2 + Math.random() * 3.2;
-  }
-  function walkTo(x, speed) { M.tx = x; M.speed = speed; return new Promise(r => { M.arrive = r; }); }
+  /* ---------- the monk (Round 5: the accepted Round 3.5 / Round 4 monk, src/monk/) ---------- */
+  // One controller owns him: the natural patrol on the safe paths, his places while talking and on a break, and the
+  // accepted reminder. The app only tells it what is going on (Monk.mode) and sends it distractions (Monk.remind).
+  const Monk = new MonkDirector({ slot: $('#monkSlot'), lip: $('#monkLip'), fx: $('#monkFxSlot'), defs: $('#monkDefs'), rm: () => reduceMotion,
+    seed: DEBUG && +new URLSearchParams(location.search).get('seed') || undefined });
 
-  let last = performance.now(), stickInFront = false;
-  const monkFeet = [...document.querySelectorAll('#monk .m-foot')];
+  let last = performance.now(), monkSpeed = 1;                      // monkSpeed: only the tests change it (his clock, not the timer)
   function frame(now) {
-    const dt = Math.min(.05, (now - last) / 1000); last = now;
-    const dx = M.tx - M.x, moving = Math.abs(dx) > .4;
-    if (moving) {
-      M.x += Math.sign(dx) * Math.min(Math.abs(dx), M.speed * dt);
-      M.face = Math.sign(dx); M.walkT += dt;
-    } else {
-      M.x = M.tx;
-      if (M.arrive) { const r = M.arrive; M.arrive = null; r(); }
-      else if (M.mode === 'patrol') { M.wait -= dt; if (M.wait <= 0) pickPatrol(); }
-    }
-    M.y += (M.ty - M.y) * Math.min(1, dt * 6);
-    const bob = moving && !reduceMotion ? -Math.abs(Math.sin(M.walkT * 7)) * 2.4 : 0;
-    const place = `translate(${M.x.toFixed(2)} ${(M.y + bob).toFixed(2)}) scale(${M.face} 1)`;
-    monkEl.setAttribute('transform', place);
-    const step = moving && !reduceMotion ? Math.sin(M.walkT * 7) : 0;     // one foot lifts and swings forward, then the other
-    monkFeet.forEach((f, i) => { const k = i ? -step : step; f.setAttribute('transform', k > 0 ? `translate(${(k * 2.5).toFixed(2)} ${(-k * 2.2 - bob).toFixed(2)})` : `translate(0 ${(-bob).toFixed(2)})`); });
-    stickLayer.setAttribute('transform', place);
-    // the stick is always above the monk; while he strikes it also goes above the mochi
-    const front = M.mode === 'task';
-    if (front !== stickInFront) { stickInFront = front; (front ? sitterEl : monkEl).after(stickLayer); }
-    stickEl.setAttribute('transform', `rotate(${M.stick.toFixed(1)} ${PIVOT})`);
+    const dt = Math.min(50, Math.max(0, now - last)); last = now;   // a page that was hidden carries on where it was
+    Monk.frame(dt * monkSpeed, now);
     if (!bubbleEl.hidden) placeBubble();
     flyFireflies(now);
     animateFace(now);
@@ -3450,9 +5113,10 @@ const I18N = {
 
   function placeBubble() {
     const edge = bubbleEl.classList.contains('long') ? 33 : 20;   // keep a wrapped bubble wholly inside the scene
-    bubbleEl.style.left = Math.min(100 - edge, Math.max(edge, M.x / 400 * 100)) + '%';
+    const m = Monk.pos();
+    bubbleEl.style.left = Math.min(100 - edge, Math.max(edge, (m.x + 4 * m.depth) / 400 * 100)) + '%';
     const u = $('#stage').getBoundingClientRect().width / 400;   // scene units: the floor below can grow without moving it
-    bubbleEl.style.top = Math.max((M.y - 92) * u, bubbleEl.offsetHeight + 4) + 'px';   // a tall bubble stays inside the scene
+    bubbleEl.style.top = Math.max((m.y - 106 * m.depth) * u, bubbleEl.offsetHeight + 4) + 'px';   // a tall bubble stays inside the scene
   }
   function bubble(text) {
     if (text == null) { bubbleEl.hidden = true; return; }
@@ -3500,77 +5164,57 @@ const I18N = {
   }
   const sitDown = () => hop(true), standUp = () => hop(false);
 
-  /* ---------- the monk does one thing at a time ---------- */
+  // for the tests (and a curious console): what the monk and the round are doing; nothing here changes anything
+  window.__keisaku = { monk: () => Monk.state(), round: () => ({ phase: P.phase, round: P.round, hits: P.hits, roundHits: P.roundHits, asks: P.asks, todayHits: P.todayHits, end: P.end, left: P.left }), queue: () => queue.length, sensing: () => motionOn, speed: v => { monkSpeed = v; } };
+
+  /* ---------- things that happen one after another (a reminder, then the tip about 暫離, then the result) ---------- */
   const queue = []; let busy = false;
   function enqueue(fn) { queue.push(fn); pump(); }
   async function pump() {
     if (busy) return; busy = true;
     while (queue.length) await queue.shift()();
-    busy = false; M.ty = 215; monkEl.dataset.mood = 'calm';
+    busy = false;
     settleMonk();
   }
-  // What the monk does when nothing is queued: host the dialogue, drink tea, or patrol.
+  // What the monk does when he is not reminding: patrol while people sit, stand by the mochi while talking,
+  // drink tea on a break, wait at the back while they have stepped away.
   let hostAway = false, teaTalk = 0;
   function settleMonk() {
-    if (busy) return;
-    const talking = !$('#dialog').hidden && (P.phase === 'idle' || P.phase === 'ready');
-    const want = P.phase === 'break' || hostAway ? 'rest' : talking ? 'host' : 'patrol';
+    const want = P.phase === 'break' || hostAway ? 'rest' : P.phase === 'settle' || P.phase === 'focus' ? 'patrol' : P.phase === 'leave' ? 'leave' : 'host';
     $('#tea').setAttribute('visibility', want === 'rest' ? 'visible' : 'hidden');
-    if (want === M.mode) return;
-    M.mode = want; M.stick = 10;
-    if (want === 'rest') {
-      M.ty = 215;
-      walkTo(TEA_X, 40).then(() => {
-        if (M.mode !== 'rest') return;
-        M.face = -1; bubble(tr('喫茶去~'));                  // the tea is on the table to his left
-        clearTimeout(teaTalk); teaTalk = setTimeout(() => bubble(null), 2600);
-      });
-    } else if (want === 'host') {
-      M.ty = 220;
-      walkTo(HOST_X, 70).then(() => { if (M.mode === 'host') M.face = 1; });
-    } else {
-      M.ty = 215; M.wait = .6; M.arrive = null; M.tx = M.x;
+    if (want === Monk.want) return;
+    Monk.mode(want);
+    if (want === 'rest') {                                             // the tea is on the table to his left
+      clearTimeout(teaTalk); teaTalk = setTimeout(() => { if (Monk.want === 'rest') { bubble(tr('喫茶去~')); teaTalk = setTimeout(() => bubble(null), 2600); } }, reduceMotion ? 300 : 2600);
     }
   }
 
-  // the monk only carries the keisaku while people are sitting; otherwise it leans against the post
-  function showStick() {
-    stickLayer.setAttribute('visibility', M.holding ? 'visible' : 'hidden');
-    $('#rackStick').setAttribute('visibility', M.holding ? 'hidden' : 'visible');
-  }
-  async function goToRack() {
-    M.mode = 'fetch'; M.ty = 215;
-    await walkTo(RACK_X - 14, 90);
-    M.face = 1; await sleep(250);
-  }
-  async function takeStick() {
-    if (M.holding) return;
-    await goToRack(); M.holding = true; M.stick = 10; showStick(); await sleep(300);
-  }
-  async function returnStick() {
-    if (!M.holding) return;
-    await goToRack(); M.holding = false; showStick(); await sleep(250);
-  }
-
-  async function strike({ reason, counted }) {
-    await takeStick();
-    M.mode = 'task'; M.ty = 222;
-    await walkTo(mochiX() + 72, 150);
-    M.face = -1;
-    monkEl.dataset.mood = counted ? 'stern' : 'calm';
-    bubble(counted ? tr('喝!') : tr('請。')); await sleep(420);
-    await tween(M.stick, -48, 380, v => M.stick = v, easeOut);
-    await sleep(160);
-    await tween(-48, 95, 85, v => M.stick = v);
-    impact();
-    if (counted) { P.hits++; P.roundHits++; P.todayHits++; } else { P.asks++; }
-    renderStats();
-    toast(reason, counted, 2600);
-    await sleep(480); bubble(null);
-    await tween(95, 10, 480, v => M.stick = v, easeInOut);
-    monkEl.dataset.mood = 'calm';
-    await sleep(350);
-    if (P.phase !== 'focus' && P.phase !== 'settle') await returnStick();
+  /* ---------- a distraction: counted when it is confirmed; the monk reminds once, however many more come ---------- */
+  // counted: a real distraction (picked up, still holding it, away from the screen). The count is made here, when the
+  // event is confirmed, not when the keisaku lands; one reminder may stand for several. ask: 合掌請打 (not counted).
+  function distraction({ reason, counted }) {
+    if (P.phase !== 'focus') return false;                            // only while sitting: not settling, away, resting or after
+    if (!counted && Monk.busy) return false;                           // asking while he is already reminding: as before, nothing
+    if (counted) { P.hits++; P.roundHits++; P.todayHits++; renderStats(); }
+    if (Monk.busy) { toast(reason, true, 2600); Monk.remind({}); return true; }   // taken into the reminder under way
+    const r = Monk.remind({
+      ask: !counted,
+      onCall: () => bubble(counted ? tr('喝!') : tr('請。')),
+      onImpact: () => {
+        impact();
+        if (!counted) { P.asks++; renderStats(); }
+        toast(reason, counted, 2600);
+        setTimeout(() => bubble(null), 480);
+      }
+    });
+    enqueue(async () => {
+      const res = await r;
+      bubble(null);
+      if (res && !res.aborted && res.merged > 0 && P.phase === 'focus') {   // the ones taken in: said once, at the end
+        bubble(tr('又分心了 {0} 次。', res.merged)); setTimeout(() => bubble(null), 1800);
+      }
+    });
+    return true;
   }
 
   // after the strike's jolt the lamp goes back to its gentle flicker
@@ -3680,11 +5324,11 @@ const I18N = {
   }
   function typeText(text) {
     return new Promise(res => {
-      const chars = [...text]; let i = 0;
+      const chars = [...text]; let i = 0, timer = 0;                    // (declared first: with reduced motion done() runs at once)
       dlgText.textContent = '';
       const done = () => { clearInterval(timer); dlgText.textContent = text; finishTyping = null; res(); };
       if (reduceMotion) { done(); return; }
-      const timer = setInterval(() => { dlgText.textContent += chars[i++]; if (i >= chars.length) done(); }, 34);
+      timer = setInterval(() => { dlgText.textContent += chars[i++]; if (i >= chars.length) done(); }, 34);
       finishTyping = done;
     });
   }
@@ -3774,12 +5418,8 @@ const I18N = {
       // first visit: say what this place is before pointing at anything
       if (!hasSat) {
         try {
-          for (const [line, reply, withStick] of INTRO) {
-            if (withStick) await new Promise(r => enqueue(async () => { await takeStick(); r(); }));
-            await ask(line, [{ label: reply, value: 1, primary: true }], { skippable: true });
-            if (withStick) enqueue(returnStick);
-          }
-        } catch (e) { if (e !== SKIP) throw e; enqueue(returnStick); }
+          for (const [line, reply] of INTRO) await ask(line, [{ label: reply, value: 1, primary: true }], { skippable: true });   // he holds the keisaku all along
+        } catch (e) { if (e !== SKIP) throw e; }
         store.set('keisaku-rules-asked-v1', true);      // the essentials were just said; the board holds the rest
         introduced = true;
       }
@@ -4000,7 +5640,15 @@ const I18N = {
       DME.requestPermission().then(r => { Mo.permission = r; }, () => { Mo.permission = 'denied'; });
     }
   }
-  window.addEventListener('devicemotion', e => {
+  // Round 5: listened to only while seated (落座, 坐禪, 回座): not on a break, while away (暫離), after 出堂 or at check-in.
+  // Same readings and thresholds as before; adding it twice is harmless (the browser keeps one listener per function).
+  let motionOn = false;
+  function sensing(on) {
+    if (on === motionOn) return; motionOn = on;
+    if (on) { Mo.t = 0; Mo.still = 0; window.addEventListener('devicemotion', onMotion); }
+    else { window.removeEventListener('devicemotion', onMotion); Mo.score = 0; }
+  }
+  function onMotion(e) {
     const g = e.accelerationIncludingGravity;
     if (!g || g.x == null) return;
     const v = [g.x, g.y, g.z];
@@ -4021,13 +5669,13 @@ const I18N = {
       Mo.base = Mo.lp.slice(); Mo.picked = false; onPutDown();
     } else if (Date.now() - Mo.lastNag > 20000) {
       Mo.lastNag = Date.now();
-      enqueue(() => strike({ reason: tr('啪!還在滑?把手機放回去。'), counted: true }));
+      distraction({ reason: tr('啪!還在滑?把手機放回去。'), counted: true });
     }
-  });
+  }
   function onPickUp() {
     setStatus(tr('拿起手機了'), 'hit');
     setFace('peek');
-    enqueue(() => strike({ reason: tr('啪!手機拿起來了。放回原位才能繼續。'), counted: true }));
+    distraction({ reason: tr('啪!手機拿起來了。放回原位才能繼續。'), counted: true });
     enqueue(leaveTip);
   }
   // caught for the first time: if it was something that couldn't wait, this is the button for next time
@@ -4142,7 +5790,7 @@ const I18N = {
   function beginSettle() {
     if (P.round === 1) { P.hits = 0; P.asks = 0; P.focusTotal = 0; }
     P.phase = 'settle'; P.roundHits = 0; P.leaveUsed = false; P.leaveMs = 0; P.resuming = false;
-    enqueue(takeStick);
+    sensing(true);
     $('#result').hidden = true;
     renderRounds(); renderStats(); keepAwake(); settleMonk();
     setFace(sitFace());
@@ -4178,9 +5826,9 @@ const I18N = {
     if (P.phase !== 'focus' || P.leaveUsed) return;
     P.left = Math.max(0, P.end - Date.now());
     P.phase = 'leave'; P.leaveUsed = true; P.leaveAt = Date.now();
-    Mo.base = null; Mo.picked = false;
+    Mo.base = null; Mo.picked = false; sensing(false);
     stopBackground(1.2); letSleep(); renderSense(null);
-    standUp(); setFace(restFace());
+    standUp(); setFace(restFace()); settleMonk();                       // he stops patrolling and waits at the back
     setStatus(tr('暫離中'), '');
     setMain(tr('出堂・結束'));
     bubble(tr('去吧,快去快回。')); P.leaveBubble = setTimeout(() => bubble(null), 2400);
@@ -4192,8 +5840,8 @@ const I18N = {
     P.leaveMs += Date.now() - P.leaveAt;
     clearTimeout(P.leaveBubble); bubble(null);
     P.phase = 'settle'; P.resuming = true;
-    audio(); askMotionPermission();
-    setFace(sitFace());
+    audio(); askMotionPermission(); sensing(true);
+    setFace(sitFace()); settleMonk();
     setStatus(tr('回座中'), 'on');
     setMain(tr('出堂・結束'));
     keepAwake();
@@ -4246,13 +5894,12 @@ const I18N = {
     if (P.round >= cfg.rounds) { P.showGoal = goalMet; finishCycle(false); return; }
     P.phase = 'break';
     P.end = Date.now() + cfg.breakMin * 60000;
-    Mo.base = null; Mo.picked = false;
+    Mo.base = null; Mo.picked = false; sensing(false);
     letSleep(); renderSense(null);
     standUp(); flashFace(P.endFace || 'happy', 6000);
     setStatus(tr('休息'), '');
     setMain(tr('跳過休息'));
     toast(goalMet ? tr('今日目標 {0} 炷達成!休息 {1} 分鐘。', goalNow(), cfg.breakMin) : tr('開靜。這炷被打 {0} 下,休息 {1} 分鐘,手機可以用了。', P.roundHits, cfg.breakMin));
-    enqueue(returnStick);
     renderRounds(); settleMonk();
   }
 
@@ -4302,10 +5949,10 @@ const I18N = {
     clearTimeout(P.settleTimer);
     const hadFocus = P.focusTotal > 0 || P.hits > 0;
     P.phase = 'idle'; P.round = 1; P.resuming = false; P.awaitReturn = false; P.lateMin = 0;
-    letSleep(); Mo.base = null; Mo.picked = false; standUp();
+    letSleep(); Mo.base = null; Mo.picked = false; sensing(false); standUp();
     setMain(null); setStatus(tr('報到中'), '');
     renderSense(null);
-    enqueue(returnStick);
+    if (early) Monk.abort();                                          // 出堂: a reminder under way stops at once (when the time is up it plays out)
     renderRounds(); settleMonk();
     if (hadFocus) enqueue(async () => showResult(early));
     else onboarding(true);
@@ -4383,8 +6030,8 @@ const I18N = {
     const label = secs >= 60 ? tr('{0} 分 {1} 秒', Math.floor(secs / 60), secs % 60) : tr('{0} 秒', secs);
     setFace('peek');
     setStatus(tr('被抓到了'), 'hit');
-    enqueue(() => strike({ reason: tr('啪!離開畫面 {0}。', label), counted: true }));
-    if (secs >= 90) enqueue(() => strike({ reason: tr('啪!離開太久,再補一下。'), counted: true }));
+    distraction({ reason: tr('啪!離開畫面 {0}。', label), counted: true });
+    if (secs >= 90) distraction({ reason: tr('啪!離開太久,再補一下。'), counted: true });   // counted; taken into the same reminder
     enqueue(async () => { if (P.phase === 'focus') setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on'); });
     enqueue(leaveTip);
     tick();
@@ -4405,9 +6052,9 @@ const I18N = {
   });
   askBtn.addEventListener('click', () => {
     audio();
-    if (busy) return;
+    if (Monk.busy || P.phase !== 'focus') return;                       // as before: not while he is already reminding
     setFace('surprised');                                                // "wait, now?" until the stick lands
-    enqueue(() => strike({ reason: tr('啪!精神一振,謝謝師父。'), counted: false }));
+    distraction({ reason: tr('啪!精神一振,謝謝師父。'), counted: false });
   });
   // Install to home screen: Chrome/Android fire beforeinstallprompt; iOS Safari needs the share menu.
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;

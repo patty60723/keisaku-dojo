@@ -262,22 +262,27 @@ test('a hidden page: no frames, no progress; back again, the reminder carries on
 
 test('a reload during a round starts over, as before, and keeps the log and the collection', async () => {
   const old = [entry(3, { min: 25, hits: 2 }), entry(2, { min: 25 }), entry(1, { min: 50, hits: 1, leave: 1, late: 3, goal: 4 })];
-  const collect = { scroll: '心', wear: { head: null, body: null, extra: null }, seen: [], faces: ['calm'], face: 'peek' };
+  const collect = { scroll: '忍', wear: { head: null, body: null, extra: null }, seen: [], faces: ['calm'], face: 'peek' };
   const { p, ctx, errors } = await openApp(browser, server.url, { storage: { 'keisaku-log-v2': old, 'keisaku-collect-v1': collect } });
   await sit(p); await away(p, 3000);
   await p.reload(); await waitForLine(p, '今天想做什麼');
   assert.equal((await R(p)).phase, 'idle');
   assert.deepEqual(await log(p), old, 'the log as it was (the round in progress was not finished, as before)');
-  assert.equal(await p.evaluate(() => JSON.parse(localStorage.getItem('keisaku-collect-v1')).scroll), '心');
-  // a finished round adds one entry in the same format
-  await sit(p); await away(p, 3000); await idleMonk(p); await forward(p, 26 * 60000);
-  await p.waitForFunction(() => !document.getElementById('result').hidden, null, { timeout: 15000 });
-  const L = await log(p), e = L[L.length - 1];
+  assert.equal(await p.evaluate(() => JSON.parse(localStorage.getItem('keisaku-collect-v1')).scroll), '忍');
+  await ctx.close();
+  // a finished round adds one entry in the same format (a fresh visit with the same old log)
+  const { p: p2, ctx: ctx2, errors: e2 } = await openApp(browser, server.url, { storage: { 'keisaku-log-v2': old, 'keisaku-collect-v1': collect } });
+  await finishedRound(p2);
+  const L = await log(p2), e = L[L.length - 1];
   assert.equal(L.length, 4);
   assert.deepEqual(Object.keys(e).filter(k => !['t', 'd', 'task', 'min', 'hits', 'full', 'leave', 'late', 'goal'].includes(k)), [], 'no new fields');
   assert.deepEqual([e.min, e.hits, e.full], [25, 1, true]);
-  assert.deepEqual(errors, []); await ctx.close();
+  assert.deepEqual([...errors, ...e2], []); await ctx2.close();
 });
+async function finishedRound(p) {
+  await sit(p); await away(p, 3000); await idleMonk(p); await forward(p, 26 * 60000);
+  await p.waitForFunction(() => !document.getElementById('result').hidden, null, { timeout: 15000 });
+}
 
 for (const [w, h] of [[320, 640], [360, 740], [390, 844], [412, 915], [375, 600], [844, 390]]) {
   test(`phone ${w}×${h}: no sideways scroll, 合掌請打 under the zendo, the monk and the mochi inside it`, async () => {
@@ -318,11 +323,13 @@ test('the service worker: the new version is cached, old caches go, and the app 
   await p.evaluate(async () => { const c = await caches.open('keisaku-shell-v20'); await c.put('./index.html', new Response('old')); localStorage.setItem('keisaku-log-v2', JSON.stringify([{ t: 1, d: '2026-01-01', task: '讀書', min: 25, hits: 1, full: true }])); });
   await p.goto(server.url + 'index.html');
   await p.evaluate(() => navigator.serviceWorker.ready);
-  await p.waitForFunction(async () => (await caches.keys()).includes('keisaku-shell-v21') && !(await caches.keys()).includes('keisaku-shell-v20'), null, { timeout: 10000, polling: 300 });
+  let keys = [];
+  for (let i = 0; i < 30; i++) { keys = await p.evaluate(() => caches.keys()); if (keys.includes('keisaku-shell-v21') && !keys.includes('keisaku-shell-v20')) break; await p.waitForTimeout(300); }
+  assert.deepEqual(keys.filter(k => k.startsWith('keisaku-shell-')), ['keisaku-shell-v21'], 'the new shell cache, the old one gone');
   await p.reload(); await p.waitForFunction(() => !!navigator.serviceWorker.controller);
   await ctx.setOffline(true);
   await p.reload();
-  await p.waitForFunction(() => window.__keisaku && document.getElementById('monk') && !document.getElementById('dialog').hidden, null, { timeout: 10000 });
+  await p.waitForFunction(() => window.__keisaku && document.getElementById('monk') && __keisaku.monk().patrol.active, null, { timeout: 10000 });   // the app, with its monk, offline
   assert.equal(await p.evaluate(() => JSON.parse(localStorage.getItem('keisaku-log-v2')).length), 1, 'the log is still there');
   await ctx.setOffline(false); await ctx.close();
 });

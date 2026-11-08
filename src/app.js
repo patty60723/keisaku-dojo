@@ -813,11 +813,11 @@
   }
   function typeText(text) {
     return new Promise(res => {
-      const chars = [...text]; let i = 0;
+      const chars = [...text]; let i = 0, timer = 0;                    // (declared first: with reduced motion done() runs at once)
       dlgText.textContent = '';
       const done = () => { clearInterval(timer); dlgText.textContent = text; finishTyping = null; res(); };
       if (reduceMotion) { done(); return; }
-      const timer = setInterval(() => { dlgText.textContent += chars[i++]; if (i >= chars.length) done(); }, 34);
+      timer = setInterval(() => { dlgText.textContent += chars[i++]; if (i >= chars.length) done(); }, 34);
       finishTyping = done;
     });
   }
@@ -1317,7 +1317,7 @@
     P.phase = 'leave'; P.leaveUsed = true; P.leaveAt = Date.now();
     Mo.base = null; Mo.picked = false; sensing(false);
     stopBackground(1.2); letSleep(); renderSense(null);
-    standUp(); setFace(restFace());
+    standUp(); setFace(restFace()); settleMonk();                       // he stops patrolling and waits at the back
     setStatus(tr('暫離中'), '');
     setMain(tr('出堂・結束'));
     bubble(tr('去吧,快去快回。')); P.leaveBubble = setTimeout(() => bubble(null), 2400);
@@ -1330,7 +1330,7 @@
     clearTimeout(P.leaveBubble); bubble(null);
     P.phase = 'settle'; P.resuming = true;
     audio(); askMotionPermission(); sensing(true);
-    setFace(sitFace());
+    setFace(sitFace()); settleMonk();
     setStatus(tr('回座中'), 'on');
     setMain(tr('出堂・結束'));
     keepAwake();
