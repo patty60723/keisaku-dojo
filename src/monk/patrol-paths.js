@@ -166,5 +166,13 @@
     return { legs: res, joins, stops };
   }
 
-  root.PATROL = { N, EDGES, ROUTES, STANCE, MOCHI, MONK_BOX, FOOT, FLOOR, SPEED, depth, inFront, makeRoute, makeLeg, pathTo, legToStance, monkRect, footHits, screenHits, SCREEN, GROUND, GROUND_RAW, FRONT, check, checkAll };
+  // Round 5: a host page can add its own stops (the production app's 'next to the mochi while talking' and 'at the tea
+  // table'), joined to existing waypoints; the Round 4 stops, edges and routes are not touched
+  function addStop(name, pt, links) {
+    if (N[name]) throw new Error('PATROL.addStop: ' + name + ' exists');
+    N[name] = { x: pt.x, y: pt.y, zh: pt.zh || name };
+    for (const l of links) EDGES.push([name, l]);
+    return N[name];
+  }
+  root.PATROL = { addStop, N, EDGES, ROUTES, STANCE, MOCHI, MONK_BOX, FOOT, FLOOR, SPEED, depth, inFront, makeRoute, makeLeg, pathTo, legToStance, monkRect, footHits, screenHits, SCREEN, GROUND, GROUND_RAW, FRONT, check, checkAll };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -163,6 +163,22 @@
       if (this.pendingStance) { const r = this.pendingStance; this.pendingStance = null; r({ aborted: true }); }
     }
     off() { this.halt(); this.release(); }
+    // Round 5: stop patrolling, walk by the safe paths to a stop and stand there facing fam (unhurried; at once with
+    // reduced motion). Resolves { aborted } like toStance.
+    park(stop, fam, { speed = 40 } = {}) {
+      this.claim(); this.halt();
+      const tok = ++this.tok, alive = () => tok === this.tok && this.active;
+      this.parked = stop;
+      return (async () => {
+        if (this.mode === 'walk' || this.leg) { await this.settleFeet(); if (!alive()) return { aborted: true }; }
+        const leg = this.wayLeg(stop, undefined, null, this.nearestStop(), speed);
+        if (leg) { this.leg = null; await this.walk(leg); if (!alive()) return { aborted: true }; }
+        this.s.x = P.N[stop].x; this.s.y = P.N[stop].y; this.at = stop;
+        await this.turnTo(fam); if (!alive()) return { aborted: true };
+        this.mode = 'stand'; this.render(this.t);
+        return { aborted: false };
+      })();
+    }
     placeAt(n, fam) { this.claim(); this.halt(); Object.assign(this.s, { x: P.N[n].x, y: P.N[n].y, phase: 0, turnKey: null }); if (fam) this.s.fam = fam; this.at = n; this.render(this.t); }
     // to the reminder stance. Resolves { aborted } once he stands there facing the mochi (or was stopped).
     toStance(o) {
@@ -193,20 +209,23 @@
     }
     // the way to the stance from where he is now (null if he is there): his current leg's ends and the nearest stop are
     // tried, the shortest wins; the first stretch runs back along (or on along) the leg he was on
-    stanceLeg(here = { x: this.s.x, y: this.s.y }, leg = this.leg, at = this.at) {
-      if (dist(here, P.N.ST) <= .5) return null;
+    stanceLeg(here = { x: this.s.x, y: this.s.y }, leg = this.leg, at = this.at) { return this.wayLeg('ST', here, leg, at); }
+    // Round 5: the same, to any stop (the production app parks him by the mochi while talking, at the tea table on a break)
+    wayLeg(target, here = { x: this.s.x, y: this.s.y }, leg = this.leg, at = this.at, speed = 62) {
+      const T = P.N[target];
+      if (dist(here, T) <= .5) return null;
       const via = leg ? [leg.names[0], leg.names[leg.names.length - 1]] : [at], cands = [];
       const near = Object.keys(P.N).sort((a, b) => dist(here, P.N[a]) - dist(here, P.N[b])).slice(0, 2);
-      for (const n of new Set([...via.filter(v => typeof v === 'string'), this.nearestStop(here), ...near])) { const path = P.pathTo(n, 'ST'); if (!path) continue;
+      for (const n of new Set([...via.filter(v => typeof v === 'string'), this.nearestStop(here), ...near])) { const path = P.pathTo(n, target); if (!path) continue;
         let L = dist(here, P.N[n]); for (let i = 1; i < path.length; i++) L += dist(P.N[path[i - 1]], P.N[path[i]]);
         const way = (dist(here, P.N[n]) > 1 ? [here] : []).concat(path);
-        cands.push({ n, way: way.length > 1 ? way : [here, 'ST'], L }); }
+        cands.push({ n, way: way.length > 1 ? way : [here, target], L }); }
       // shortest first, but only a way whose footprint keeps the safe-zone margin (it may touch it only at the stance)
       const pt = w => typeof w === 'string' ? P.N[w] : w, clear = way => { for (let i = 1; i < way.length; i++) { const a = pt(way[i - 1]), b = pt(way[i]), n = Math.ceil(dist(a, b) / 1.5);
-        for (let k = 0; k <= n; k++) { const x = a.x + (b.x - a.x) * k / n, y = a.y + (b.y - a.y) * k / n; if (dist({ x, y }, P.N.ST) > 12 && P.footHits(x, y).length) return false; } } return true; };
+        for (let k = 0; k <= n; k++) { const x = a.x + (b.x - a.x) * k / n, y = a.y + (b.y - a.y) * k / n; if (dist({ x, y }, T) > 12 && P.footHits(x, y).length) return false; } } return true; };
       cands.sort((a, b) => a.L - b.L);
       const c = cands.find(c => clear(c.way)) || cands[0];
-      return P.makeLeg(c.way, { speed: 62, straight: true });
+      return P.makeLeg(c.way, { speed, straight: true });
     }
     /* --- one frame (dt ms, already clamped by the host) --- */
     update(dt, now) {

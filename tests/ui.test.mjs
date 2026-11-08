@@ -43,7 +43,8 @@ test('dark theme: the monk keeps dark eyes and feet, and the stats smoke rises s
   const log = [entry(0, { min: 15, hits: 7 }), entry(1, { min: 20 })];
   const { p, ctx } = await openApp(browser, server.url, { dark: true, storage: { 'keisaku-log-v2': log } });
   const ink = 'rgb(42, 38, 34)';
-  const fills = await p.evaluate(() => [...document.querySelectorAll('#monk > ellipse.f-sink, .monk-face .f-sink')].map(e => getComputedStyle(e).fill));
+  // Round 5: the accepted monk's ink is set on his own layers (the app's --line is a UI border colour)
+  const fills = await p.evaluate(() => [...document.querySelectorAll('#monkDefs [data-s]')].slice(0, 6).map(e => getComputedStyle(e).stroke));
   assert.ok(fills.length >= 4 && fills.every(f => f === ink), `dark ink in dark mode, got ${fills.join(', ')}`);
   await p.locator('#journalBtn').click(); await p.waitForFunction(() => document.getElementById('journal').open);
   await p.locator('#tabStats').click();

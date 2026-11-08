@@ -55,12 +55,11 @@
     translateDom(document.body);
     document.documentElement.style.setProperty('--why', JSON.stringify(tr('為什麼?')));   // the 「為什麼?」 after the detection warning is CSS text
   }
-  const monkEl = $('#monk'), stickEl = $('#stick'), stickLayer = $('#stickLayer'), sitterEl = $('#sitter');
+  const sitterEl = $('#sitter');
   const bubbleEl = $('#bubble'), bubbleText = $('#bubbleText');
   const toastEl = $('#toast'), clockEl = $('#clock'), statusEl = $('#status');
   const mainBtn = $('#mainBtn'), askBtn = $('#askBtn'), leaveBtn = $('#leaveBtn'), backBtn = $('#backBtn');
-  const PIVOT = '12 -38';
-  const SITTER_X = 200, TEA_X = 190, HOST_X = 72, RACK_X = 375;
+  const SITTER_X = 200;
   const STAND = { x: -66, y: 14 };            // where the mochi stands (relative to the cushion) while checking in
   const DEFAULT_CFG = { task: tr('專注'), focusMin: 25, rounds: 4, breakMin: 5 };
   const MAX_PRESETS = 3;
@@ -527,40 +526,16 @@
   function startBackground(rise) { startAmbient(ambientChoice(), rise); if (musicOn()) startMusic(rise); else stopMusic(1); }
   function stopBackground(fade = 1.5) { stopAmbient(fade); stopMusic(fade); }
 
-  /* ---------- monk motion ---------- */
-  const M = { holding: false, x: 60, y: 215, ty: 215, tx: 60, speed: 28, face: 1, stick: 10, wait: 1.5, walkT: 0, mode: 'patrol', arrive: null };
-  function pickPatrol() {
-    let tx;
-    if (Math.random() < .22) tx = SITTER_X + (Math.random() * 10 - 5);   // stop behind the sitter and watch
-    else do { tx = 50 + Math.random() * 300; } while (Math.abs(tx - M.x) < 70);
-    M.tx = tx; M.speed = 22 + Math.random() * 12; M.wait = 1.2 + Math.random() * 3.2;
-  }
-  function walkTo(x, speed) { M.tx = x; M.speed = speed; return new Promise(r => { M.arrive = r; }); }
+  /* ---------- the monk (Round 5: the accepted Round 3.5 / Round 4 monk, src/monk/) ---------- */
+  // One controller owns him: the natural patrol on the safe paths, his places while talking and on a break, and the
+  // accepted reminder. The app only tells it what is going on (Monk.mode) and sends it distractions (Monk.remind).
+  const Monk = new MonkDirector({ slot: $('#monkSlot'), lip: $('#monkLip'), fx: $('#monkFxSlot'), defs: $('#monkDefs'), rm: () => reduceMotion,
+    seed: DEBUG && +new URLSearchParams(location.search).get('seed') || undefined });
 
-  let last = performance.now(), stickInFront = false;
-  const monkFeet = [...document.querySelectorAll('#monk .m-foot')];
+  let last = performance.now(), monkSpeed = 1;                      // monkSpeed: only the tests change it (his clock, not the timer)
   function frame(now) {
-    const dt = Math.min(.05, (now - last) / 1000); last = now;
-    const dx = M.tx - M.x, moving = Math.abs(dx) > .4;
-    if (moving) {
-      M.x += Math.sign(dx) * Math.min(Math.abs(dx), M.speed * dt);
-      M.face = Math.sign(dx); M.walkT += dt;
-    } else {
-      M.x = M.tx;
-      if (M.arrive) { const r = M.arrive; M.arrive = null; r(); }
-      else if (M.mode === 'patrol') { M.wait -= dt; if (M.wait <= 0) pickPatrol(); }
-    }
-    M.y += (M.ty - M.y) * Math.min(1, dt * 6);
-    const bob = moving && !reduceMotion ? -Math.abs(Math.sin(M.walkT * 7)) * 2.4 : 0;
-    const place = `translate(${M.x.toFixed(2)} ${(M.y + bob).toFixed(2)}) scale(${M.face} 1)`;
-    monkEl.setAttribute('transform', place);
-    const step = moving && !reduceMotion ? Math.sin(M.walkT * 7) : 0;     // one foot lifts and swings forward, then the other
-    monkFeet.forEach((f, i) => { const k = i ? -step : step; f.setAttribute('transform', k > 0 ? `translate(${(k * 2.5).toFixed(2)} ${(-k * 2.2 - bob).toFixed(2)})` : `translate(0 ${(-bob).toFixed(2)})`); });
-    stickLayer.setAttribute('transform', place);
-    // the stick is always above the monk; while he strikes it also goes above the mochi
-    const front = M.mode === 'task';
-    if (front !== stickInFront) { stickInFront = front; (front ? sitterEl : monkEl).after(stickLayer); }
-    stickEl.setAttribute('transform', `rotate(${M.stick.toFixed(1)} ${PIVOT})`);
+    const dt = Math.min(50, Math.max(0, now - last)); last = now;   // a page that was hidden carries on where it was
+    Monk.frame(dt * monkSpeed, now);
     if (!bubbleEl.hidden) placeBubble();
     flyFireflies(now);
     animateFace(now);
@@ -627,9 +602,10 @@
 
   function placeBubble() {
     const edge = bubbleEl.classList.contains('long') ? 33 : 20;   // keep a wrapped bubble wholly inside the scene
-    bubbleEl.style.left = Math.min(100 - edge, Math.max(edge, M.x / 400 * 100)) + '%';
+    const m = Monk.pos();
+    bubbleEl.style.left = Math.min(100 - edge, Math.max(edge, (m.x + 4 * m.depth) / 400 * 100)) + '%';
     const u = $('#stage').getBoundingClientRect().width / 400;   // scene units: the floor below can grow without moving it
-    bubbleEl.style.top = Math.max((M.y - 92) * u, bubbleEl.offsetHeight + 4) + 'px';   // a tall bubble stays inside the scene
+    bubbleEl.style.top = Math.max((m.y - 106 * m.depth) * u, bubbleEl.offsetHeight + 4) + 'px';   // a tall bubble stays inside the scene
   }
   function bubble(text) {
     if (text == null) { bubbleEl.hidden = true; return; }
@@ -677,77 +653,57 @@
   }
   const sitDown = () => hop(true), standUp = () => hop(false);
 
-  /* ---------- the monk does one thing at a time ---------- */
+  // for the tests (and a curious console): what the monk and the round are doing; nothing here changes anything
+  window.__keisaku = { monk: () => Monk.state(), round: () => ({ phase: P.phase, round: P.round, hits: P.hits, roundHits: P.roundHits, asks: P.asks, todayHits: P.todayHits, end: P.end, left: P.left }), queue: () => queue.length, sensing: () => motionOn, speed: v => { monkSpeed = v; } };
+
+  /* ---------- things that happen one after another (a reminder, then the tip about 暫離, then the result) ---------- */
   const queue = []; let busy = false;
   function enqueue(fn) { queue.push(fn); pump(); }
   async function pump() {
     if (busy) return; busy = true;
     while (queue.length) await queue.shift()();
-    busy = false; M.ty = 215; monkEl.dataset.mood = 'calm';
+    busy = false;
     settleMonk();
   }
-  // What the monk does when nothing is queued: host the dialogue, drink tea, or patrol.
+  // What the monk does when he is not reminding: patrol while people sit, stand by the mochi while talking,
+  // drink tea on a break, wait at the back while they have stepped away.
   let hostAway = false, teaTalk = 0;
   function settleMonk() {
-    if (busy) return;
-    const talking = !$('#dialog').hidden && (P.phase === 'idle' || P.phase === 'ready');
-    const want = P.phase === 'break' || hostAway ? 'rest' : talking ? 'host' : 'patrol';
+    const want = P.phase === 'break' || hostAway ? 'rest' : P.phase === 'settle' || P.phase === 'focus' ? 'patrol' : P.phase === 'leave' ? 'leave' : 'host';
     $('#tea').setAttribute('visibility', want === 'rest' ? 'visible' : 'hidden');
-    if (want === M.mode) return;
-    M.mode = want; M.stick = 10;
-    if (want === 'rest') {
-      M.ty = 215;
-      walkTo(TEA_X, 40).then(() => {
-        if (M.mode !== 'rest') return;
-        M.face = -1; bubble(tr('喫茶去~'));                  // the tea is on the table to his left
-        clearTimeout(teaTalk); teaTalk = setTimeout(() => bubble(null), 2600);
-      });
-    } else if (want === 'host') {
-      M.ty = 220;
-      walkTo(HOST_X, 70).then(() => { if (M.mode === 'host') M.face = 1; });
-    } else {
-      M.ty = 215; M.wait = .6; M.arrive = null; M.tx = M.x;
+    if (want === Monk.want) return;
+    Monk.mode(want);
+    if (want === 'rest') {                                             // the tea is on the table to his left
+      clearTimeout(teaTalk); teaTalk = setTimeout(() => { if (Monk.want === 'rest') { bubble(tr('喫茶去~')); teaTalk = setTimeout(() => bubble(null), 2600); } }, reduceMotion ? 300 : 2600);
     }
   }
 
-  // the monk only carries the keisaku while people are sitting; otherwise it leans against the post
-  function showStick() {
-    stickLayer.setAttribute('visibility', M.holding ? 'visible' : 'hidden');
-    $('#rackStick').setAttribute('visibility', M.holding ? 'hidden' : 'visible');
-  }
-  async function goToRack() {
-    M.mode = 'fetch'; M.ty = 215;
-    await walkTo(RACK_X - 14, 90);
-    M.face = 1; await sleep(250);
-  }
-  async function takeStick() {
-    if (M.holding) return;
-    await goToRack(); M.holding = true; M.stick = 10; showStick(); await sleep(300);
-  }
-  async function returnStick() {
-    if (!M.holding) return;
-    await goToRack(); M.holding = false; showStick(); await sleep(250);
-  }
-
-  async function strike({ reason, counted }) {
-    await takeStick();
-    M.mode = 'task'; M.ty = 222;
-    await walkTo(mochiX() + 72, 150);
-    M.face = -1;
-    monkEl.dataset.mood = counted ? 'stern' : 'calm';
-    bubble(counted ? tr('喝!') : tr('請。')); await sleep(420);
-    await tween(M.stick, -48, 380, v => M.stick = v, easeOut);
-    await sleep(160);
-    await tween(-48, 95, 85, v => M.stick = v);
-    impact();
-    if (counted) { P.hits++; P.roundHits++; P.todayHits++; } else { P.asks++; }
-    renderStats();
-    toast(reason, counted, 2600);
-    await sleep(480); bubble(null);
-    await tween(95, 10, 480, v => M.stick = v, easeInOut);
-    monkEl.dataset.mood = 'calm';
-    await sleep(350);
-    if (P.phase !== 'focus' && P.phase !== 'settle') await returnStick();
+  /* ---------- a distraction: counted when it is confirmed; the monk reminds once, however many more come ---------- */
+  // counted: a real distraction (picked up, still holding it, away from the screen). The count is made here, when the
+  // event is confirmed, not when the keisaku lands; one reminder may stand for several. ask: 合掌請打 (not counted).
+  function distraction({ reason, counted }) {
+    if (P.phase !== 'focus') return false;                            // only while sitting: not settling, away, resting or after
+    if (!counted && Monk.busy) return false;                           // asking while he is already reminding: as before, nothing
+    if (counted) { P.hits++; P.roundHits++; P.todayHits++; renderStats(); }
+    if (Monk.busy) { toast(reason, true, 2600); Monk.remind({}); return true; }   // taken into the reminder under way
+    const r = Monk.remind({
+      ask: !counted,
+      onCall: () => bubble(counted ? tr('喝!') : tr('請。')),
+      onImpact: () => {
+        impact();
+        if (!counted) { P.asks++; renderStats(); }
+        toast(reason, counted, 2600);
+        setTimeout(() => bubble(null), 480);
+      }
+    });
+    enqueue(async () => {
+      const res = await r;
+      bubble(null);
+      if (res && !res.aborted && res.merged > 0 && P.phase === 'focus') {   // the ones taken in: said once, at the end
+        bubble(tr('又分心了 {0} 次。', res.merged)); setTimeout(() => bubble(null), 1800);
+      }
+    });
+    return true;
   }
 
   // after the strike's jolt the lamp goes back to its gentle flicker
@@ -951,12 +907,8 @@
       // first visit: say what this place is before pointing at anything
       if (!hasSat) {
         try {
-          for (const [line, reply, withStick] of INTRO) {
-            if (withStick) await new Promise(r => enqueue(async () => { await takeStick(); r(); }));
-            await ask(line, [{ label: reply, value: 1, primary: true }], { skippable: true });
-            if (withStick) enqueue(returnStick);
-          }
-        } catch (e) { if (e !== SKIP) throw e; enqueue(returnStick); }
+          for (const [line, reply] of INTRO) await ask(line, [{ label: reply, value: 1, primary: true }], { skippable: true });   // he holds the keisaku all along
+        } catch (e) { if (e !== SKIP) throw e; }
         store.set('keisaku-rules-asked-v1', true);      // the essentials were just said; the board holds the rest
         introduced = true;
       }
@@ -1177,7 +1129,15 @@
       DME.requestPermission().then(r => { Mo.permission = r; }, () => { Mo.permission = 'denied'; });
     }
   }
-  window.addEventListener('devicemotion', e => {
+  // Round 5: listened to only while seated (落座, 坐禪, 回座): not on a break, while away (暫離), after 出堂 or at check-in.
+  // Same readings and thresholds as before; adding it twice is harmless (the browser keeps one listener per function).
+  let motionOn = false;
+  function sensing(on) {
+    if (on === motionOn) return; motionOn = on;
+    if (on) { Mo.t = 0; Mo.still = 0; window.addEventListener('devicemotion', onMotion); }
+    else { window.removeEventListener('devicemotion', onMotion); Mo.score = 0; }
+  }
+  function onMotion(e) {
     const g = e.accelerationIncludingGravity;
     if (!g || g.x == null) return;
     const v = [g.x, g.y, g.z];
@@ -1198,13 +1158,13 @@
       Mo.base = Mo.lp.slice(); Mo.picked = false; onPutDown();
     } else if (Date.now() - Mo.lastNag > 20000) {
       Mo.lastNag = Date.now();
-      enqueue(() => strike({ reason: tr('啪!還在滑?把手機放回去。'), counted: true }));
+      distraction({ reason: tr('啪!還在滑?把手機放回去。'), counted: true });
     }
-  });
+  }
   function onPickUp() {
     setStatus(tr('拿起手機了'), 'hit');
     setFace('peek');
-    enqueue(() => strike({ reason: tr('啪!手機拿起來了。放回原位才能繼續。'), counted: true }));
+    distraction({ reason: tr('啪!手機拿起來了。放回原位才能繼續。'), counted: true });
     enqueue(leaveTip);
   }
   // caught for the first time: if it was something that couldn't wait, this is the button for next time
@@ -1319,7 +1279,7 @@
   function beginSettle() {
     if (P.round === 1) { P.hits = 0; P.asks = 0; P.focusTotal = 0; }
     P.phase = 'settle'; P.roundHits = 0; P.leaveUsed = false; P.leaveMs = 0; P.resuming = false;
-    enqueue(takeStick);
+    sensing(true);
     $('#result').hidden = true;
     renderRounds(); renderStats(); keepAwake(); settleMonk();
     setFace(sitFace());
@@ -1355,7 +1315,7 @@
     if (P.phase !== 'focus' || P.leaveUsed) return;
     P.left = Math.max(0, P.end - Date.now());
     P.phase = 'leave'; P.leaveUsed = true; P.leaveAt = Date.now();
-    Mo.base = null; Mo.picked = false;
+    Mo.base = null; Mo.picked = false; sensing(false);
     stopBackground(1.2); letSleep(); renderSense(null);
     standUp(); setFace(restFace());
     setStatus(tr('暫離中'), '');
@@ -1369,7 +1329,7 @@
     P.leaveMs += Date.now() - P.leaveAt;
     clearTimeout(P.leaveBubble); bubble(null);
     P.phase = 'settle'; P.resuming = true;
-    audio(); askMotionPermission();
+    audio(); askMotionPermission(); sensing(true);
     setFace(sitFace());
     setStatus(tr('回座中'), 'on');
     setMain(tr('出堂・結束'));
@@ -1423,13 +1383,12 @@
     if (P.round >= cfg.rounds) { P.showGoal = goalMet; finishCycle(false); return; }
     P.phase = 'break';
     P.end = Date.now() + cfg.breakMin * 60000;
-    Mo.base = null; Mo.picked = false;
+    Mo.base = null; Mo.picked = false; sensing(false);
     letSleep(); renderSense(null);
     standUp(); flashFace(P.endFace || 'happy', 6000);
     setStatus(tr('休息'), '');
     setMain(tr('跳過休息'));
     toast(goalMet ? tr('今日目標 {0} 炷達成!休息 {1} 分鐘。', goalNow(), cfg.breakMin) : tr('開靜。這炷被打 {0} 下,休息 {1} 分鐘,手機可以用了。', P.roundHits, cfg.breakMin));
-    enqueue(returnStick);
     renderRounds(); settleMonk();
   }
 
@@ -1479,10 +1438,10 @@
     clearTimeout(P.settleTimer);
     const hadFocus = P.focusTotal > 0 || P.hits > 0;
     P.phase = 'idle'; P.round = 1; P.resuming = false; P.awaitReturn = false; P.lateMin = 0;
-    letSleep(); Mo.base = null; Mo.picked = false; standUp();
+    letSleep(); Mo.base = null; Mo.picked = false; sensing(false); standUp();
     setMain(null); setStatus(tr('報到中'), '');
     renderSense(null);
-    enqueue(returnStick);
+    if (early) Monk.abort();                                          // 出堂: a reminder under way stops at once (when the time is up it plays out)
     renderRounds(); settleMonk();
     if (hadFocus) enqueue(async () => showResult(early));
     else onboarding(true);
@@ -1560,8 +1519,8 @@
     const label = secs >= 60 ? tr('{0} 分 {1} 秒', Math.floor(secs / 60), secs % 60) : tr('{0} 秒', secs);
     setFace('peek');
     setStatus(tr('被抓到了'), 'hit');
-    enqueue(() => strike({ reason: tr('啪!離開畫面 {0}。', label), counted: true }));
-    if (secs >= 90) enqueue(() => strike({ reason: tr('啪!離開太久,再補一下。'), counted: true }));
+    distraction({ reason: tr('啪!離開畫面 {0}。', label), counted: true });
+    if (secs >= 90) distraction({ reason: tr('啪!離開太久,再補一下。'), counted: true });   // counted; taken into the same reminder
     enqueue(async () => { if (P.phase === 'focus') setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on'); });
     enqueue(leaveTip);
     tick();
@@ -1582,9 +1541,9 @@
   });
   askBtn.addEventListener('click', () => {
     audio();
-    if (busy) return;
+    if (Monk.busy || P.phase !== 'focus') return;                       // as before: not while he is already reminding
     setFace('surprised');                                                // "wait, now?" until the stick lands
-    enqueue(() => strike({ reason: tr('啪!精神一振,謝謝師父。'), counted: false }));
+    distraction({ reason: tr('啪!精神一振,謝謝師父。'), counted: false });
   });
   // Install to home screen: Chrome/Android fire beforeinstallprompt; iOS Safari needs the share menu.
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;

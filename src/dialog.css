@@ -294,11 +294,13 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 .quiet-btn:hover { color: var(--ink); }
 .quiet-btn.warn { color: var(--shu); font-weight: 700; text-decoration-color: currentColor; }
 
-/* 6: 合掌請打 lives in the corner of the zendo */
+/* 6: 合掌請打 (Round 5, layout B): its own row under the zendo, so it never covers the monk or the mochi */
+.ask-row { display: flex; justify-content: flex-end; margin-block: -4px; }
+.ask-row:has(> .ask-btn[hidden]) { display: none; }
 .ask-btn {
-  position: absolute; right: 10px; bottom: 10px; z-index: 3;
+  position: relative; z-index: 3;
   font: inherit; font-size: .85rem; font-weight: 700; letter-spacing: .04em; cursor: pointer;
-  min-height: 40px; padding: 0 14px 0 10px; border-radius: 999px; display: flex; align-items: center; gap: 4px;
+  min-height: 44px; padding: 0 16px 0 12px; border-radius: 999px; display: flex; align-items: center; gap: 4px;
   border: 1.5px solid var(--line); background: color-mix(in srgb, var(--surface) 88%, transparent); color: var(--ink);
   backdrop-filter: blur(3px);
 }
@@ -713,7 +715,7 @@ html:lang(en) * { letter-spacing: normal !important; }
   .top { grid-column: 1 / -1; }
   /* the zendo keeps its own proportions; the monk and the timer sit beside it, centred on its height */
   .stage-wrap { grid-column: 1; grid-row: 2 / 6; align-self: start; --u: calc((var(--stage-w) - 3px) / 400); }
-  .dialog { grid-column: 2; grid-row: 3; }
+  .dialog, .ask-row { grid-column: 2; grid-row: 3; }
   .panel { grid-column: 2; grid-row: 4; margin-top: 0; }
   .tour-card { left: auto; right: 24px; margin: 0; width: min(420px, calc(100vw - 48px)); }
 }
