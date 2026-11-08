@@ -655,7 +655,7 @@ input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-ca
 .c-season h3 small { font-size: .8rem; color: var(--muted); font-family: var(--f-body); }
 .c-season p { margin: 2px 0 4px; font-size: .88rem; }
 .c-season ul { margin: 0; padding-left: 1.1em; font-size: .8rem; color: var(--muted); }
-.result-new { color: var(--kesa); font-weight: 700; }
+.result-new { grid-column: 1 / -1; color: var(--kesa); font-weight: 700; }   /* a whole row: in the seal's column it squeezed the text (Round 5) */
 
 /* the season outside: petals, leaves and snow drift down; fireflies blink at night */
 .drift { animation: drift var(--dur) linear var(--delay) infinite; }

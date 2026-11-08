@@ -21,7 +21,8 @@
   // the production app's own places for him, as stops on the safe paths (Round 4 units)
   P.addStop('HO', { x: 72, y: 238, zh: '對話時（麻糬左邊）' }, ['BL']);       // was HOST_X = 72 (production units)
   P.addStop('TE', { x: 196, y: 228, zh: '休息時（香案旁喝茶）' }, ['BC', 'BL']);   // was TEA_X = 190
-  const PARK = { host: ['HO', 'R'], rest: ['TE', 'L'], leave: ['BL', 'R'] };
+  // while they have stepped away (暫離) the mochi stands where she does at check-in, so he waits where he does then
+  const PARK = { host: ['HO', 'R'], rest: ['TE', 'L'], leave: ['HO', 'R'] };
 
   class MonkDirector {
     constructor({ slot, lip, fx, defs, rm = () => false, seed = 1 + Math.floor(Math.random() * 99999) }) {

@@ -145,7 +145,7 @@ test('暫離, 回座, a break and the next round: no counting away from the cush
   await p.locator('#leaveBtn').click();
   await p.waitForFunction(() => __keisaku.round().phase === 'leave');
   assert.equal(await p.evaluate(() => __keisaku.sensing()), false, 'the sensor is off while away');
-  await p.waitForFunction(() => { const m = __keisaku.monk(); return m.want === 'leave' && m.patrol.at === 'BL' && m.patrol.mode === 'stand'; }, null, { timeout: 15000 });
+  await p.waitForFunction(() => { const m = __keisaku.monk(); return m.want === 'leave' && m.patrol.at === 'HO' && m.patrol.mode === 'stand'; }, null, { timeout: 15000 });
   const left = (await R(p)).left; await p.waitForTimeout(1200);
   await away(p, 5000); await p.evaluate(() => __tilt(80));
   await p.waitForTimeout(1200); await p.evaluate(() => __tilt(0));
