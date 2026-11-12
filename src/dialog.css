@@ -763,7 +763,18 @@ html:lang(en) * { letter-spacing: normal !important; }
   /* C: one height for every phase: the scene and a floor of 20% of it */
   :root[data-stage="c"] .stage-wrap { flex: none; height: calc(var(--u) * 280 * 1.2 + 3px); }
   /* the result card needs the room it needs: while it shows, the container may grow as before */
-  :root[data-stage] .stage-wrap:has(> .result:not([hidden])) { flex: 1 0 auto; height: auto; max-height: none; }
-  :root[data-stage] .ask-row { margin-top: auto; }
-  :root[data-stage] .ask-row:not(:has(> .ask-btn[hidden])) ~ .panel { margin-top: 0; }
+  :root[data-stage="b"] .stage-wrap:has(> .result:not([hidden])), :root[data-stage="c"] .stage-wrap:has(> .result:not([hidden])) { flex: 1 0 auto; height: auto; max-height: none; }
+  :root[data-stage="b"] .ask-row, :root[data-stage="c"] .ask-row { margin-top: auto; }
+  :root[data-stage="b"] .ask-row:not(:has(> .ask-btn[hidden])) ~ .panel, :root[data-stage="c"] .ask-row:not(:has(> .ask-btn[hidden])) ~ .panel { margin-top: 0; }
+  /* D: the zendo at its own height (the scene and a floor of 25% of it, in every phase), and what is under it follows
+     it at the page's own gap: nothing is stretched to fill the phone, nothing is pushed to the bottom. The page simply
+     ends where its content does, and scrolls if it is longer than the screen.
+     The result card shares one grid cell with the scene instead of floating over it, so the container is as tall as
+     the taller of the two: the card is never cut off, whatever its length or the font size. */
+  :root[data-stage="d"] .stage-wrap { flex: none; display: grid; grid-template-columns: 100%; align-items: start; }
+  @media (orientation: portrait) { :root[data-stage="d"] .stage-wrap { min-height: calc(var(--u) * 280 * 1.25 + 3px); } }   /* a phone held sideways keeps every pixel of height */
+  :root[data-stage="d"] #stage, :root[data-stage="d"] .stage-wrap > .result { grid-area: 1 / 1; }
+  :root[data-stage="d"] .stage-wrap > .result { position: relative; inset: auto; align-self: stretch; }
+  :root[data-stage="d"] .ask-row { margin-block: 0; }
+  :root[data-stage="d"] .panel { margin-top: 0; }
 }

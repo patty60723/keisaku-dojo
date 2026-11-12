@@ -32,8 +32,8 @@ window.KEISAKU_SKY = (d = new Date(Date.now())) => {
   const [rise, set] = KEISAKU_SUN(d), h = d.getHours() + d.getMinutes() / 60, near = t => Math.abs(h - t) < 2 / 3;
   return near(rise) || near(set) ? 'dusk' : h < rise || h > set ? 'dark' : 'light';
 };
-/* Round 5 stage candidates, preview only: ?stage=b or ?stage=c (kept for this tab) */
-try { const q = new URLSearchParams(location.search).get('stage'), s = q || sessionStorage.getItem('keisaku-stage'); if (s === 'b' || s === 'c') { document.documentElement.dataset.stage = s; sessionStorage.setItem('keisaku-stage', s); } else if (q) sessionStorage.removeItem('keisaku-stage'); } catch (e) {}
+/* Round 5 stage candidates, preview only: ?stage=b, ?stage=c or ?stage=d (kept for this tab) */
+try { const q = new URLSearchParams(location.search).get('stage'), s = q || sessionStorage.getItem('keisaku-stage'); if (s === 'b' || s === 'c' || s === 'd') { document.documentElement.dataset.stage = s; sessionStorage.setItem('keisaku-stage', s); } else if (q) sessionStorage.removeItem('keisaku-stage'); } catch (e) {}
 /* apply a saved light/dark choice before first paint, so the page doesn't flash the other theme */
 try { const t = (JSON.parse(localStorage.getItem('keisaku-opts-v1')) || {}).theme; if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; else if (t === 'time') document.documentElement.dataset.theme = KEISAKU_SKY(); } catch (e) {}
 </script>
