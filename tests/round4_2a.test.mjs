@@ -16,7 +16,7 @@ after(async () => { await browser.close(); server.stop(); });
 // from the files as they were before Round 4.2A (commit 2852feb); MONK4.parts was only added, nothing drawn changed
 test('the accepted monk drawing and the Round 3.5 animation are exactly as before', () => {
   const c = { Math, console }; c.window = c; vm.createContext(c);
-  const D = path.join(ROOT, 'design', 'round3');
+  const D = path.join(ROOT, 'src', 'monk');   // the accepted Round 3.5 files (moved from design/round3 in Round 5, unchanged)
   vm.runInContext(fs.readFileSync(path.join(D, 'monk4.js'), 'utf8'), c); c.MONK4 = c.window.MONK4; vm.runInContext(fs.readFileSync(path.join(D, 'anim.js'), 'utf8'), c);
   const M = c.window.MONK4, A = c.window.KEISAKU_ANIM, h = crypto.createHash('sha256');
   for (const pose of ['stand', 'tuck', 'idle', 'ready', 'tuck2', 'ready2', 'ready3', 'windup', 'strike', 'follow']) for (const facing of ['right', 'left']) h.update(M.art({ id: 'x', pose, facing }));

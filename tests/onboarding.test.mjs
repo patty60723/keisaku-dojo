@@ -15,10 +15,10 @@ test('first visit: introduction, then a tour that has to be tapped and opens eac
   assert.equal(await skipVisible(p), true, '略過開場 is offered during the introduction');
   await pick(p, '你好'); await pick(p, '然後呢?');
   await waitForLine(p, '這支香板');
-  await p.waitForFunction(() => getComputedStyle(document.getElementById('rackStick')).visibility === 'hidden');
-  assert.equal(await p.evaluate(() => getComputedStyle(document.getElementById('stickLayer')).visibility), 'visible', 'the monk holds the keisaku while talking about it');
+  // Round 5: the accepted monk holds the keisaku all along (in his right hand); there is no second one on the rack
+  assert.equal(await p.evaluate(() => document.getElementById('rackStick')), null, 'no keisaku leaning on the post');
+  assert.match(await p.evaluate(() => __keisaku.monk().patrol.key), /^W:[RLFK]:/, 'he stands by the mochi, keisaku in hand, while talking about it');
   await pick(p, '我會專心的');
-  await p.waitForFunction(() => getComputedStyle(document.getElementById('rackStick')).visibility === 'visible', null, { timeout: 8000 });
   await pick(p, '好');
 
   await p.waitForFunction(() => !document.getElementById('tourCard').hidden);

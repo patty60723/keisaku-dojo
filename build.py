@@ -16,7 +16,10 @@ if debug:
 if preview:
     body = body.replace('<main class="app">', '<main class="app">\n  <a class="preview-tag" href="./">預覽版 · 回正式版</a>', 1)
     style += '.preview-tag{align-self:flex-start;font-size:.78rem;color:#fff;background:var(--kesa);padding:2px 10px;border-radius:999px;text-decoration:none}\n'
-script=src('i18n.js')+src('app.js')
+# the accepted monk (Round 3.5 drawing and reminder, Round 4 views and natural patrol) and the controller that puts him
+# in the app, in dependency order; each file is a self-contained IIFE, joined with ';' so none can run into the next
+MONK = ['monk4.js', 'anim.js', 'monk-actor.js', 'monk-views2.js', 'patrol-paths.js', 'natural-patrol.js', 'director.js']
+script=src('i18n.js')+''.join(';\n' + src('monk/' + f) for f in MONK)+';\n'+src('app.js')
 head='''<title>香板禪堂</title>
 <script>
 /* roughly when the sun rises and sets today, in hours (about 5:15–18:45 in June, 6:45–17:15 in December; northern hemisphere).

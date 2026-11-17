@@ -35,12 +35,13 @@ export const entry = (offset, fields) => ({ t: Date.now() - offset * 864e5 + Mat
  *   storage: extra localStorage entries, values JSON-encoded unless strings
  *   path:    page to open (default index.html)
  *   locale:  the phone's language (default zh-TW, so the app speaks Chinese)
+ *   reducedMotion: 'reduce' for the system's 減少動態效果
  * In the page: window.__skew moves Date.now() forward, window.__hide(true/false) fakes leaving the app,
  * and window.__notes collects notifications instead of showing them.
  */
-export async function openApp(browser, base, { seen = SEEN, storage = {}, path: page = 'index.html', dark = false, width = 390, locale = 'zh-TW' } = {}) {
-  const ctx = await browser.newContext({ locale, viewport: { width, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true,
-    colorScheme: dark ? 'dark' : 'light', acceptDownloads: true });
+export async function openApp(browser, base, { seen = SEEN, storage = {}, path: page = 'index.html', dark = false, width = 390, height = 844, locale = 'zh-TW', reducedMotion = 'no-preference' } = {}) {
+  const ctx = await browser.newContext({ locale, viewport: { width, height }, deviceScaleFactor: 2, isMobile: true, hasTouch: true,
+    colorScheme: dark ? 'dark' : 'light', acceptDownloads: true, reducedMotion });
   const p = await ctx.newPage();
   const errors = [];
   p.on('pageerror', e => errors.push(e.message));

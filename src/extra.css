@@ -19,3 +19,13 @@
 .sense b { font-weight: 700; color: var(--ink); }
 .sense[data-ok="yes"] b { color: var(--accent); }
 .btn:disabled { opacity: .55; cursor: wait; }
+
+/* ---------- Round 5: the accepted Round 3.5 / Round 4 monk ---------- */
+/* The drawing uses the Round 1 token names; here they are set for him alone (the app's own --line is a UI border).
+   His ink stays dark in every theme, as the earlier monk's did; skin, robe and kesa follow the app's palette. */
+.monk4 { --line: #2a2622; --skin-lo: color-mix(in srgb, var(--skin) 80%, #9a6a42); --robe-lo: color-mix(in srgb, var(--robe) 72%, #000); --kin: #c99a3e; }
+.m4p { fill: var(--sil, var(--c)); stroke: var(--sil, none); stroke-width: var(--sw, 0); stroke-linejoin: round; }
+.m4p[data-s] { stroke: var(--sil, var(--line)); stroke-width: var(--sw, 1.1); }
+.m4-sil { --sil: var(--line); --sw: 4.4; --det: none; }
+.m4det { display: var(--det, inline); }
+.m4shadow { fill: #1f1610; opacity: .2; }
