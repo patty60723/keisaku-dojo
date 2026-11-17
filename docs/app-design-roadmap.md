@@ -66,7 +66,17 @@
 - 每批有對照圖、功能與視覺回歸、行動裝置尺寸檢查、已知限制；保留原有資料與離線功能。
 - 所有批次完成且使用者驗收後，才稱 Round 6 結案。
 
-**Round 6 第一個交付物**：完整現況截圖索引＋UI/UX／美術審查報告＋分級改善清單＋提案優先順序；**先不改程式**。此交付物不是 Round 6 的最終終點。
+**Round 6 第一個交付物**：完整現況截圖索引＋UI/UX／美術審查報告＋分級改善清單＋提案優先順序；**先不改程式**。此交付物不是 Round 6 的最終終點。（2026-11-17 已完成，等待使用者決定方向，見 6.5。）
+
+### 6.5 進度紀錄
+
+| 日期 | 階段 | 內容 | 參考 |
+| --- | --- | --- | --- |
+| 2026-11-17 | 6.1 現況盤點＋6.2 全面審查 | 以 `main` @ `ebcae50` 操作正式版，11 組設定（320／360／390／412、844×390 橫向、字體 130%、深色、黃昏、日文、英文、減少動態）共 305 張截圖與量測。沒有 P0；P1 11 項、P2 9 項；提出方向 A「紙本禪堂」（建議）與 B「繪本禪堂」；分 7 批實作 | [`round6-design-audit.md`](round6-design-audit.md)、[`round6-improvement-plan.md`](round6-improvement-plan.md)、[`../design/round6/audit/index.md`](../design/round6/audit/index.md)；分支 `docs/round6-app-design-audit` |
+
+**待使用者決定（Round 6 實作前）：** 見 [`round6-improvement-plan.md`](round6-improvement-plan.md) 第 4 節 Q1–Q6：整體方向 A／B、麻糬與場景線條是否向住持靠攏、結算位置、橫向手機處理、字級表、無平衡儀時的提示方式。
+
+**審查中發現、尚未處理的文件差異：** 規格文件與實作有 6 處不一致（香板在右柱、「說明」與「坐禪帳」按鈕位置、統計圖表、設定選項），以及英文狀態列重複顯示回合；列在審查報告第 6 節，排在批次 6-7 一起更新。
 
 ## 4. 實機與技術可靠性軌道（獨立於美術改造）
 
@@ -86,7 +96,7 @@ Round 5 `docs/round5-acceptance.md` 的 NOT TESTED 仍待處理：iPhone Safari�
 - **尚未核准**：Round 6 的具體新風格、各畫面改動、Round 7 機制與其他技術候選。
 - 每次規劃應附「依據的 GitHub ref／文件、既有決策、提案變更、風險、待使用者決定事項」。
 - 如果聊天中出現新決策，應在下一次規劃／實作前同步回此文件，避免聊天與 repo 分叉。
-- 相關文件：[`round5-acceptance.md`](round5-acceptance.md)、[`round5-integration.md`](round5-integration.md)、[`round4-closeout.md`](round4-closeout.md)、[`onboarding-spec.md`](onboarding-spec.md)、[`journal-spec.md`](journal-spec.md)、[`../README.md`](../README.md)。
+- 相關文件：[`round6-design-audit.md`](round6-design-audit.md)、[`round6-improvement-plan.md`](round6-improvement-plan.md)、[`round5-acceptance.md`](round5-acceptance.md)、[`round5-integration.md`](round5-integration.md)、[`round4-closeout.md`](round4-closeout.md)、[`onboarding-spec.md`](onboarding-spec.md)、[`journal-spec.md`](journal-spec.md)、[`../README.md`](../README.md)。
 
 ## 7. 下一步
 
