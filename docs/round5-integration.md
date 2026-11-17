@@ -71,6 +71,8 @@
 
 `design/` 的審查頁改成載入 `src/monk/` 的同一份檔案，審查資料保留；`build.py` 把這些檔案和 `app.js` 一起嵌進 `index.html`。
 
+> 最終驗收結果、方案 D 版面決策與已知限制見 [`round5-acceptance.md`](round5-acceptance.md)。本節是版面定案之前的整合結果（當時 133 項測試）。
+
 ## 6. 結果（`feature/round5-production-integration`）
 
 ### 測試

@@ -120,6 +120,7 @@ manifest 的 `id` 要寫完整路徑 `/keisaku-dojo/`:寫 `./` 會被解析成�
 
 設計紀錄:
 
+- [`docs/round5-acceptance.md`](docs/round5-acceptance.md):Round 5 驗收文件(已驗收的住持整合進正式版、分心計數規則、方案 D 版面、測試結果、尚未實測的項目);整合設計在 [`docs/round5-integration.md`](docs/round5-integration.md)
 - [`docs/round4-closeout.md`](docs/round4-closeout.md):Round 4 住持動畫整合與自然巡堂的結案紀錄(已驗收的造型與動畫、巡堂與提醒規則、測試結果、尚未驗證與尚未決定的事)。原型在 `design/round4/`,尚未移植到正式版
 
 ## 待辦
