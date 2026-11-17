@@ -66,7 +66,7 @@
 - 每批有對照圖、功能與視覺回歸、行動裝置尺寸檢查、已知限制；保留原有資料與離線功能。
 - 所有批次完成且使用者驗收後，才稱 Round 6 結案。
 
-**Round 6 第一個交付物**：完整現況截圖索引＋UI/UX／美術審查報告＋分級改善清單＋提案優先順序；**先不改程式**。此交付物不是 Round 6 的最終終點。（2026-11-17 已完成，等待使用者決定方向，見 6.5。）
+**Round 6 第一個交付物**：完整現況截圖索引＋UI/UX／美術審查報告＋分級改善清單＋提案優先順序；**先不改程式**。此交付物不是 Round 6 的最終終點。（2026-11-17 已完成，Q1–Q6 方向已確認；尚未開始正式 App 實作，見 6.5。）
 
 ### 6.5 進度紀錄
 
@@ -74,7 +74,7 @@
 | --- | --- | --- | --- |
 | 2026-11-17 | 6.1 現況盤點＋6.2 全面審查 | 以 `main` @ `ebcae50` 操作正式版，11 組設定（320／360／390／412、844×390 橫向、字體 130%、深色、黃昏、日文、英文、減少動態）共 305 張截圖與量測。沒有 P0；P1 11 項、P2 9 項；提出方向 A「紙本禪堂」（建議）與 B「繪本禪堂」；分 7 批實作 | [`round6-design-audit.md`](round6-design-audit.md)、[`round6-improvement-plan.md`](round6-improvement-plan.md)、[`../design/round6/audit/index.md`](../design/round6/audit/index.md)；分支 `docs/round6-app-design-audit` |
 
-**待使用者決定（Round 6 實作前）：** 見 [`round6-improvement-plan.md`](round6-improvement-plan.md) 第 4 節 Q1–Q6：整體方向 A／B、麻糬與場景線條是否向住持靠攏、結算位置、橫向手機處理、字級表、無平衡儀時的提示方式。
+**2026-11-17 使用者已確認 Q1–Q6：** Q1 A 紙本禪堂；Q2 麻糬與場景先做同框前後對照、**未核准套用**；Q3 結算移舞台下方，但需先預覽並確保重要內容與麻糬可見；Q4 橫向最小修正；Q5 12／14／16／18／22 px 為基礎並允許有據例外；Q6 無平衡儀提示短暫顯示且保留查詢入口。詳見 [`round6-improvement-plan.md`](round6-improvement-plan.md) 第 4 節。320 px 七欄月曆不能硬塞 44 px 熱區，須評估重排／替代操作／例外，避免誤觸。
 
 **審查中發現、尚未處理的文件差異：** 規格文件與實作有 6 處不一致（香板在右柱、「說明」與「坐禪帳」按鈕位置、統計圖表、設定選項），以及英文狀態列重複顯示回合；列在審查報告第 6 節，排在批次 6-7 一起更新。
 
@@ -93,14 +93,14 @@ Round 5 `docs/round5-acceptance.md` 的 NOT TESTED 仍待處理：iPhone Safari�
 ## 6. 決策與變更管理
 
 - **已核准**：Round 3.5／4／5 驗收成果；方案 D；Round 6 以全 App 美術與 UI/UX 為主軸，先審查再分批改造。
-- **尚未核准**：Round 6 的具體新風格、各畫面改動、Round 7 機制與其他技術候選。
+- **尚未核准**：Round 6 的具體美術線條套用、結算詳細版面（需預覽）、各批 PR 的最終實作驗收、Round 7 機制與其他技術候選。Q1–Q6 已核准的方向詳見 6.5。
 - 每次規劃應附「依據的 GitHub ref／文件、既有決策、提案變更、風險、待使用者決定事項」。
 - 如果聊天中出現新決策，應在下一次規劃／實作前同步回此文件，避免聊天與 repo 分叉。
 - 相關文件：[`round6-design-audit.md`](round6-design-audit.md)、[`round6-improvement-plan.md`](round6-improvement-plan.md)、[`round5-acceptance.md`](round5-acceptance.md)、[`round5-integration.md`](round5-integration.md)、[`round4-closeout.md`](round4-closeout.md)、[`onboarding-spec.md`](onboarding-spec.md)、[`journal-spec.md`](journal-spec.md)、[`../README.md`](../README.md)。
 
 ## 7. 下一步
 
-1. 審閱並合併本規劃文件的 PR（只改文件，不部署 UI）。
-2. Round 6 啟動時先重新讀取 GitHub 最新狀態及本文件。
-3. 產出全 App 現況盤點與審查報告，交使用者確認優先順序。
-4. 再提出分批實作 PR，逐批驗收與更新路線圖。
+1. 審閱並合併 Round 6 審查與決策文件 PR #5（只改文件／審查資產，不部署 UI）。
+2. 從最新 main 建立 6-1 獨立分支，改善字級、元件、對比、有效觸控範圍；保留合理例外並記錄。提交 PR 與前後截圖，等待驗收。
+3. 按 [`round6-improvement-plan.md`](round6-improvement-plan.md) 推進 6-2～6-7；6-3 結算先做版面預覽，6-5 麻糬與場景先做前後對照且需第二次核准。
+4. 每批更新驗收與路線圖；不得擅自更動已鎖定成果。
