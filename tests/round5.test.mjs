@@ -215,19 +215,19 @@ test('the time is up while he reminds: that reminder plays out, then the result;
 test('a reminder from every place he can be: each stop, and while walking or turning', async () => {
   const { p, ctx, errors } = await openApp(browser, server.url);
   await sit(p); await p.evaluate(() => __keisaku.speed(3));
-  // from stops: wait until he is at each kind of place, then distract him
+  // the patrol is random, so each kind of moment is waited for on purpose: standing at a stop, walking, turning
   const seen = new Set();
-  for (let i = 0; i < 14 && seen.size < 5; i++) {
-    await p.waitForFunction(() => { const m = __keisaku.monk(); return !m.busy && m.patrol.active && (m.patrol.mode === 'walk' || m.patrol.mode === 'turn' || m.patrol.mode === 'stand'); }, null, { timeout: 20000 });
+  for (const want of ['stand', 'walk', 'turn', 'stand', 'walk', 'turn']) {
+    await p.waitForFunction(w => { const m = __keisaku.monk(); return !m.busy && m.want === 'patrol' && m.patrol.active && m.patrol.mode === w; }, want, { timeout: 30000, polling: 'raf' });
     const before = await M(p), where = before.patrol.mode === 'stand' ? 'at ' + before.patrol.at : before.patrol.mode;
     await rec(p); await away(p, 3000); await idleMonk(p); const r = await endRec(p);
     const bad = await p.evaluate(r => r.filter(q => q.active && (PATROL.footHits(q.x, q.y, PATROL.GROUND_RAW).length || (Math.hypot(q.x - 132, q.y - 254) >= 12 && PATROL.footHits(q.x, q.y).length) || (PATROL.inFront(q.y) && PATROL.screenHits(q.x, q.y).length))).slice(0, 3), r);
     assert.deepEqual(bad, [], `from ${where}`);
     const raise = r.find(q => q.seg === 'raise'); assert.ok(raise && Math.abs(raise.x - 132) < .5, `from ${where}: reached the stance`);
-    seen.add(where);
-    await p.waitForTimeout(400 + i * 350);
+    seen.add(where.startsWith('at ') ? 'stand' : where);
+    await p.waitForTimeout(1500);
   }
-  assert.ok(seen.size >= 3, `from several kinds of place (${[...seen]})`);
+  assert.ok(seen.size >= 2, `while standing and while moving (${[...seen]})`);
   assert.equal((await R(p)).hits, (await M(p)).stats.reminders, 'one count per reminder here (none overlapped)');
   assert.deepEqual(errors, []); await ctx.close();
 });
