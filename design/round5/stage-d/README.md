@@ -1,5 +1,7 @@
 # Round 5 方案 D：自然高度舞台＋緊湊操作區
 
+> **結果：** 方案 D 已由使用者選定並成為正式版面（規則在 `src/dialog.css` 最後一段，不再需要參數）。`?stage=` 切換參數已移除，下面提到的參數只適用於 commit `4302c4d`。本資料夾保留作為比較與決策紀錄；正式版的回歸測試是 `tests/round5_layout.test.mjs`。
+
 預覽：`index.html?stage=d`（A／B／C 的比較資料在 `../stage/`，切換參數照舊：`?stage=a|b|c|d`，記在這個分頁）。
 
 ## 做法（只改版面，`src/dialog.css` 的 `:root[data-stage="d"]` 規則）
