@@ -7,7 +7,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { startServer, launch, openApp, pick, waitForLine, forward, tapRing, entry, SEEN, ROOT } from '../../../tests/helpers.mjs';
 
-const OUT = path.join(ROOT, 'design', 'round6', 'audit');
+// AUDIT_OUT=<folder under design/round6> writes elsewhere (e.g. AUDIT_OUT=6-1/after), so a later batch can compare
+const OUT = path.join(ROOT, 'design', 'round6', process.env.AUDIT_OUT || 'audit');
 const want = process.argv.slice(2);
 const sleep = (p, ms) => p.waitForTimeout(ms);
 const away = (p, ms) => p.evaluate(ms => { __hide(true); window.__skew += ms; __hide(false); }, ms);

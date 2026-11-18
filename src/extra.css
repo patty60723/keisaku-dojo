@@ -13,9 +13,9 @@
 .rounds i.done { background: var(--line); height: 8px; }
 .rounds i.now { border-color: var(--kesa); background: var(--kesa); }
 .rounds i.now::before { background: var(--shu); }
-.round-label { color: var(--muted); font-size: .9rem; }
+.round-label { color: var(--muted); font-size: var(--fs-14); }
 .round-label b { color: var(--ink); font-family: var(--f-num); font-weight: 600; }
-.sense { margin: 0; font-size: .85rem; color: var(--muted); display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
+.sense { margin: 0; font-size: var(--fs-14); color: var(--muted); display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
 .sense b { font-weight: 700; color: var(--ink); }
 .sense[data-ok="yes"] b { color: var(--accent); }
 .btn:disabled { opacity: .55; cursor: wait; }
