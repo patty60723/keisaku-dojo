@@ -3,7 +3,11 @@
 // several rounds, 出堂, the result and the log; reduced motion, a hidden page, phone sizes, the service worker.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { startServer, launch, openApp, pick, sit, forward, waitForLine, entry, shot, SEEN } from './helpers.mjs';
+import fs from 'node:fs';
+import path from 'node:path';
+import { startServer, launch, openApp, pick, sit, forward, waitForLine, entry, shot, SEEN, ROOT } from './helpers.mjs';
+// the service worker's cache version, and the one before it (the update test checks the old one goes)
+const SW_N = +fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').match(/VERSION = 'v(\d+)'/)[1], SHELL_NEW = `keisaku-shell-v${SW_N}`, SHELL_OLD = `keisaku-shell-v${SW_N - 1}`;
 
 let server, browser;
 before(async () => { server = await startServer(); browser = await launch(); });
@@ -320,12 +324,12 @@ test('larger text (130%): the buttons under the zendo do not run into each other
 test('the service worker: the new version is cached, old caches go, and the app starts offline with the data intact', async () => {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } }), p = await ctx.newPage();
   await p.goto(server.url + 'manifest.webmanifest');
-  await p.evaluate(async () => { const c = await caches.open('keisaku-shell-v20'); await c.put('./index.html', new Response('old')); localStorage.setItem('keisaku-log-v2', JSON.stringify([{ t: 1, d: '2026-01-01', task: '讀書', min: 25, hits: 1, full: true }])); });
+  await p.evaluate(async old => { const c = await caches.open(old); await c.put('./index.html', new Response('old')); localStorage.setItem('keisaku-log-v2', JSON.stringify([{ t: 1, d: '2026-01-01', task: '讀書', min: 25, hits: 1, full: true }])); }, SHELL_OLD);
   await p.goto(server.url + 'index.html');
   await p.evaluate(() => navigator.serviceWorker.ready);
   let keys = [];
-  for (let i = 0; i < 30; i++) { keys = await p.evaluate(() => caches.keys()); if (keys.includes('keisaku-shell-v21') && !keys.includes('keisaku-shell-v20')) break; await p.waitForTimeout(300); }
-  assert.deepEqual(keys.filter(k => k.startsWith('keisaku-shell-')), ['keisaku-shell-v21'], 'the new shell cache, the old one gone');
+  for (let i = 0; i < 30; i++) { keys = await p.evaluate(() => caches.keys()); if (keys.includes(SHELL_NEW) && !keys.includes(SHELL_OLD)) break; await p.waitForTimeout(300); }
+  assert.deepEqual(keys.filter(k => k.startsWith('keisaku-shell-')), [SHELL_NEW], 'the new shell cache, the old one gone');
   await p.reload(); await p.waitForFunction(() => !!navigator.serviceWorker.controller);
   await ctx.setOffline(true);
   await p.reload();

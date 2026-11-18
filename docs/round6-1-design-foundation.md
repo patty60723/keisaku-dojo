@@ -4,6 +4,7 @@
 - **基準：** `main` @ `ab209d8`（PR #5 合併後）。
 - **分支：** `feature/round6-1-design-foundation`。
 - **只改樣式：** `src/style.css`、`src/dialog.css`、`src/extra.css`，以及由它們建出的 `index.html`。HTML 結構、`app.js`、SVG、住持、巡堂、提醒與計數規則、方案 D 的直向舞台都沒有改。
+- **其他兩處：** `sw.js` 的版本由 v21 升到 v22（讓已安裝的 App 換新樣式）；`tests/round5.test.mjs` 的 Service Worker 測試改成從 `sw.js` 讀版本號，不再寫死 v21／v20。
 - **「修改前」截圖：** 就是 Round 6 審查時的截圖（`design/round6/audit/`，`main` @ `ebcae50`）。那之後正式 App 沒有改過，PR #5 只有文件。
 - **「修改後」截圖：** `design/round6/6-1/after/`，用同一支工具 `capture.mjs`、同一套流程截的。
 
@@ -94,7 +95,7 @@
 
 ## 6. 驗證
 
-- **`npm test`：** {{TESTS}}
+- **`npm test`：** 139 項全過（0 失敗、0 略過，最終樣式建置）。Service Worker 升到 v22 後，再跑 build、ui 共 10 項與 round5 的 Service Worker 測試，皆通過。
 - **Round 3.5 逐格回歸**（`design/round3/checks/return-check.mjs`）：4 組皆 0 像素超過門檻。
 - **Round 6 截圖工具：** 11 組設定、305 張，沒有漏截、沒有頁面錯誤、沒有水平捲動。
   - 設定：320×640、360×780、390×844、412×915、844×390、字體 130%、深色、黃昏、日本語、English、減少動態。
