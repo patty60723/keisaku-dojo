@@ -1130,14 +1130,14 @@ html:lang(en) * { letter-spacing: normal !important; }
 .choice.primary, .small-btn.primary, .small-btn[aria-pressed="true"], .btn.primary { border-color: var(--accent); }
 /* 略過開場 / 略過導覽 / 知道了: they stay small beside the speaker's name, but take a full finger */
 .dlg-skip { position: relative; }
-.dlg-skip::after { content: ""; position: absolute; inset: -5px -2px; }
+.dlg-skip::after { content: ""; position: absolute; inset: -6px -2px; }   /* 34 px drawn, 46 px to the finger */
 .quiet-btn { min-height: var(--tap); min-width: var(--tap); border-radius: var(--r-1); }
 .range button { min-height: var(--tap); }
 .month-nav button { width: var(--tap); height: var(--tap); }
 .tabs { border-radius: var(--r-2); }
 .tabs button { min-height: var(--tap); border-radius: var(--r-1); }
 .seg { border-radius: var(--r-2); }
-.seg span { min-height: calc(var(--tap) - 3px); }   /* + the 1.5 px frame above and below = 44 */
+.seg span { min-height: var(--tap); }   /* the option itself is 44 px; the frame around it is extra */
 .sheet-close, .icon-btn { width: var(--tap); height: var(--tap); }
 .icon-btn { margin-top: 0; }
 .sense summary { min-height: var(--tap); }
