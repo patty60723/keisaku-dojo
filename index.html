@@ -1183,7 +1183,7 @@ body[data-touring] .dialog { visibility: hidden; }
 .today > span { white-space: pre; }               /* breaks only between 「今日坐禪」, the goal and the strikes */
 .panel-foot { padding-top: 8px; }
 .panel-foot:not(:has(.foot-btns > :not([hidden]))) { display: none; }
-.foot-btns { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.foot-btns { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .foot-btns > button { white-space: nowrap; }
 .foot-btns > .quiet-btn { margin-left: auto; margin-right: 0; }
 .leave-btn {                                       /* secondary: a frame on the paper */
@@ -1193,7 +1193,7 @@ body[data-touring] .dialog { visibility: hidden; }
 }
 @media (hover: hover) { .leave-btn:hover { border-color: var(--accent); } }
 .leave-btn[hidden] { display: none; }
-.back-btn { flex: 0 1 auto; min-width: 5.5em; min-height: var(--tap); padding: 0 24px; font-size: var(--fs-16); }
+.back-btn { flex: 0 1 auto; min-width: 4.5em; min-height: var(--tap); padding: 0 20px; font-size: var(--fs-16); }
 
 /* U9: 出堂 asks twice. The first tap turns the quiet word into a framed button, and a line under it runs out in the
    3 seconds the second tap is accepted. Both labels are laid on top of each other, so the button never changes size. */
@@ -5918,7 +5918,7 @@ const I18N = {
   function setMain(text, { confirm = false } = {}) {
     mainBtn.hidden = text == null;
     if (text == null) return;
-    const alt = P.phase === 'focus' || P.phase === 'leave' ? tr('再按一次出堂') : '';   // only 出堂 while sitting asks twice; 暫離 keeps the same width
+    const alt = text === tr('出堂・結束') ? tr('再按一次出堂') : '';   // 出堂 keeps one width in every phase it shows (only while sitting does it ask twice)
     const shown = confirm ? alt : text, other = confirm ? text : alt;
     mainBtn.dataset.confirm = confirm ? 'on' : '';
     mainBtn.innerHTML = `<span class="ml">${escapeHtml(shown)}</span>` + (alt ? `<span class="ml sizer" aria-hidden="true">${escapeHtml(other)}</span>` : '');
