@@ -59,7 +59,7 @@ const data = { taken: new Date().toISOString(), profiles: {} };
 let server, browser;
 
 async function profile(name, { w, h, dark = false, locale = 'zh-TW', big = false, theme = null, set = 'core', reducedMotion = 'no-preference' }) {
-  if (want.length && !want.some(x => name.includes(x))) return;
+  if (want.length && !want.some(x => process.env.AUDIT_EXACT ? name === x : name.includes(x))) return;   // AUDIT_EXACT=1: only the profiles named exactly
   const dir = path.join(OUT, 'shots', name); fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
   const P = data.profiles[name] = { w, h, dark, locale, big, theme, shots: [], notCaptured: [], errors: [] };
   let n = 0;
@@ -159,7 +159,8 @@ async function profile(name, { w, h, dark = false, locale = 'zh-TW', big = false
     await sleep(p, 900); await shot(p, 'remind-4-after', '命中之後');
     await p.waitForFunction(() => !__keisaku.monk().busy, null, { timeout: 20000 });
     if (full) {
-      await away(p, 3000); await p.waitForFunction(() => __keisaku.monk().busy && __keisaku.monk().patrol.mode === 'walk'); await away(p, 95000);
+      // a reminder under way (he may walk to the stance or already stand near it, depending on where the patrol had him), then more time away
+      await away(p, 3000); await p.waitForFunction(() => __keisaku.monk().busy, null, { polling: 'raf' }); await away(p, 95000);
       await p.waitForFunction(() => /又分心了/.test(document.getElementById('bubbleText').textContent) && !document.getElementById('bubble').hidden, null, { timeout: 30000 });
       await shot(p, 'remind-5-merged', '合併：又分心了 N 次', { settle: 0 });
       await p.waitForFunction(() => !__keisaku.monk().busy, null, { timeout: 20000 });

@@ -851,7 +851,7 @@ body[data-touring] .dialog { visibility: hidden; }
 }
 @media (hover: hover) { .leave-btn:hover { border-color: var(--accent); } }
 .leave-btn[hidden] { display: none; }
-.back-btn { flex: 0 1 auto; min-width: 7em; min-height: var(--tap); padding: 0 24px; font-size: var(--fs-16); }
+.back-btn { flex: 0 1 auto; min-width: 5.5em; min-height: var(--tap); padding: 0 24px; font-size: var(--fs-16); }
 
 /* U9: 出堂 asks twice. The first tap turns the quiet word into a framed button, and a line under it runs out in the
    3 seconds the second tap is accepted. Both labels are laid on top of each other, so the button never changes size. */

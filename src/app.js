@@ -1258,7 +1258,7 @@
   function setMain(text, { confirm = false } = {}) {
     mainBtn.hidden = text == null;
     if (text == null) return;
-    const alt = P.phase === 'focus' ? tr('再按一次出堂') : '';   // only 出堂 while sitting asks twice
+    const alt = P.phase === 'focus' || P.phase === 'leave' ? tr('再按一次出堂') : '';   // only 出堂 while sitting asks twice; 暫離 keeps the same width
     const shown = confirm ? alt : text, other = confirm ? text : alt;
     mainBtn.dataset.confirm = confirm ? 'on' : '';
     mainBtn.innerHTML = `<span class="ml">${escapeHtml(shown)}</span>` + (alt ? `<span class="ml sizer" aria-hidden="true">${escapeHtml(other)}</span>` : '');

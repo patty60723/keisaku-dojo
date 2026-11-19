@@ -1,0 +1,43 @@
+// Round 6-2 film (not part of the app): one sitting from check-in to 回座, recorded as a video, so the transitions can
+// be watched: the header stepping back, the dialogue going, the sensor note folding away, 出堂 asking twice and
+// going back, 暫離 and 回座. Writes <out>/<size>.webm and a marks.json with the time of each step.
+//   node design/round6/6-2/film.mjs <out folder> [width height]…
+import fs from 'node:fs';
+import path from 'node:path';
+import { chromium } from 'playwright';
+import { startServer, entry } from '../../../tests/helpers.mjs';
+
+const out = path.resolve(process.argv[2] || 'film'); fs.mkdirSync(out, { recursive: true });
+const sizes = []; for (let i = 3; i < process.argv.length; i += 2) sizes.push([+process.argv[i], +process.argv[i + 1]]);
+if (!sizes.length) sizes.push([390, 844], [320, 640]);
+const server = await startServer(), browser = await chromium.launch();
+const marks = {};
+for (const [w, h] of sizes) {
+  const ctx = await browser.newContext({ locale: 'zh-TW', viewport: { width: w, height: h }, isMobile: true, hasTouch: true, recordVideo: { dir: out, size: { width: w, height: h } } });
+  const p = await ctx.newPage();
+  await p.addInitScript(log => {
+    const real = Date.now.bind(Date); window.__skew = 0; Date.now = () => real() + window.__skew;
+    let hidden = false; Object.defineProperty(document, 'hidden', { get: () => hidden });
+    window.__hide = v => { hidden = v; document.dispatchEvent(new Event('visibilitychange')); };
+    if (sessionStorage.seeded) return; sessionStorage.seeded = 1;
+    for (const k of ['keisaku-tour-v1', 'keisaku-rules-asked-v1', 'keisaku-leave-told-v1', 'keisaku-tip-leave-v1', 'keisaku-tip-journal-v1', 'keisaku-tip-collect-v1']) localStorage.setItem(k, 'true');
+    localStorage.setItem('keisaku-log-v2', JSON.stringify(log));
+    localStorage.setItem('keisaku-last-v1', JSON.stringify({ task: '讀書', focusMin: 25, rounds: 4, breakMin: 5 }));
+    localStorage.setItem('keisaku-opts-v1', JSON.stringify({ sound: false }));
+  }, [entry(0, { task: '讀書', min: 50, hits: 3 })]);
+  const t0 = Date.now(), M = []; const mark = s => M.push([+((Date.now() - t0) / 1000).toFixed(1), s]);
+  await p.goto(server.url + 'index.html');
+  await p.waitForSelector('#dlgChoices .choice.primary'); mark('報到'); await p.waitForTimeout(1200);
+  for (let i = 0; i < 60 && await p.evaluate(() => __keisaku.round().phase === 'idle'); i++) { await p.locator('#dlgChoices .choice.primary').first().click({ timeout: 1500 }).catch(() => {}); await p.waitForTimeout(250); }
+  mark('落座'); await p.waitForFunction(() => __keisaku.round().phase === 'focus', null, { timeout: 15000 }); mark('坐禪：偵測說明出現');
+  await p.waitForTimeout(7000); mark('說明收進「偵測方式」');
+  await p.locator('#mainBtn').click(); mark('出堂：確認狀態'); await p.waitForTimeout(3600); mark('確認期限到，恢復');
+  await p.locator('#leaveBtn').click(); mark('暫離'); await p.waitForTimeout(2500);
+  await p.locator('#backBtn').click(); mark('回座'); await p.waitForFunction(() => __keisaku.round().phase === 'focus', null, { timeout: 15000 }); mark('坐禪：說明再出現一次');
+  await p.waitForTimeout(7000); mark('結束');
+  const v = p.video(); await ctx.close();
+  const name = `${w}x${h}`; fs.renameSync(await v.path(), path.join(out, name + '.webm')); marks[name] = M;
+  console.log(name, M.map(m => m.join(' ')).join(' | '));
+}
+fs.writeFileSync(path.join(out, 'marks.json'), JSON.stringify(marks, null, 1));
+await browser.close(); server.stop();
