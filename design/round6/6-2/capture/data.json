@@ -1,0 +1,7471 @@
+{
+ "taken": "2026-11-19T06:59:33.381Z",
+ "profiles": {
+  "390x844": {
+   "w": 390,
+   "h": 844,
+   "dark": false,
+   "locale": "zh-TW",
+   "big": false,
+   "theme": null,
+   "shots": [
+    {
+     "file": "01_intro-1-welcome.jpg",
+     "id": "intro-1-welcome",
+     "note": "首次進入：住持自我介紹",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#dlgSkip \"略過開場\"",
+        "w": 78,
+        "h": 34
+       }
+      ],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "02_intro-2-what.jpg",
+     "id": "intro-2-what",
+     "note": "",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#dlgSkip \"略過開場\"",
+        "w": 78,
+        "h": 34
+       }
+      ],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "03_intro-3-keisaku.jpg",
+     "id": "intro-3-keisaku",
+     "note": "講到香板",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#dlgSkip \"略過開場\"",
+        "w": 78,
+        "h": 34
+       }
+      ],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "04_intro-4-tour-next.jpg",
+     "id": "intro-4-tour-next",
+     "note": "",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#dlgSkip \"略過開場\"",
+        "w": 78,
+        "h": 34
+       }
+      ],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "05_tour-1-help-spot.jpg",
+     "id": "tour-1-help-spot",
+     "note": "導覽：亮框與說明",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#tourSkip \"略過導覽\"",
+        "w": 78,
+        "h": 34
+       },
+       {
+        "el": "#tourNext \"下一步\"",
+        "w": 1,
+        "h": 1
+       }
+      ],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "06_tour-1-help-open.jpg",
+     "id": "tour-1-help-open",
+     "note": "導覽中打開的面板",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 1,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "07_tour-2-journal-spot.jpg",
+     "id": "tour-2-journal-spot",
+     "note": "導覽：亮框與說明",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#tourSkip \"略過導覽\"",
+        "w": 78,
+        "h": 34
+       },
+       {
+        "el": "#tourNext \"下一步\"",
+        "w": 1,
+        "h": 1
+       }
+      ],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "08_tour-2-journal-open.jpg",
+     "id": "tour-2-journal-open",
+     "note": "導覽中打開的面板",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 23,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "09_tour-3-collect-spot.jpg",
+     "id": "tour-3-collect-spot",
+     "note": "導覽：亮框與說明",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#tourSkip \"略過導覽\"",
+        "w": 78,
+        "h": 34
+       },
+       {
+        "el": "#tourNext \"下一步\"",
+        "w": 1,
+        "h": 1
+       }
+      ],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "10_tour-3-collect-open.jpg",
+     "id": "tour-3-collect-open",
+     "note": "導覽中打開的面板",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 14,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "11_tour-4-settings-spot.jpg",
+     "id": "tour-4-settings-spot",
+     "note": "導覽：亮框與說明",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#tourSkip \"略過導覽\"",
+        "w": 78,
+        "h": 34
+       },
+       {
+        "el": "#tourNext \"下一步\"",
+        "w": 1,
+        "h": 1
+       }
+      ],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "12_tour-4-settings-open.jpg",
+     "id": "tour-4-settings-open",
+     "note": "導覽中打開的面板",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 20,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "13_plan-1-task.jpg",
+     "id": "plan-1-task",
+     "note": "報到：今天想做什麼",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "14_plan-1b-custom-input.jpg",
+     "id": "plan-1b-custom-input",
+     "note": "自訂事項的輸入框",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 9,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "15_checkin.jpg",
+     "id": "checkin",
+     "note": "報到（看過導覽、還沒坐過）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "16_plan-2-focus.jpg",
+     "id": "plan-2-focus",
+     "note": "",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 864,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 11,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "17_plan-3-rounds.jpg",
+     "id": "plan-3-rounds",
+     "note": "",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 11,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "18_plan-4-break.jpg",
+     "id": "plan-4-break",
+     "note": "",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "19_plan-5-recap.jpg",
+     "id": "plan-5-recap",
+     "note": "住持複述",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 9,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "20_plan-5b-edit.jpg",
+     "id": "plan-5b-edit",
+     "note": "只改一項",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 864,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 11,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "21_plan-6-ready.jpg",
+     "id": "plan-6-ready",
+     "note": "準備好了嗎",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 9,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "22_plan-6b-wait-tea.jpg",
+     "id": "plan-6b-wait-tea",
+     "note": "再等一下：住持去喝茶",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "23_settle.jpg",
+     "id": "settle",
+     "note": "落座",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "24_focus-start.jpg",
+     "id": "focus-start",
+     "note": "止靜：剛開始",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "25_focus-quiet.jpg",
+     "id": "focus-quiet",
+     "note": "專注中（提示消失後）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "26_focus-sense-why.jpg",
+     "id": "focus-sense-why",
+     "note": "偵測警告展開",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "27_focus-monk-front.jpg",
+     "id": "focus-monk-front",
+     "note": "住持走到前景",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "28_focus-monk-behind.jpg",
+     "id": "focus-monk-behind",
+     "note": "住持在麻糬後方",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "29_focus-quit-confirm.jpg",
+     "id": "focus-quit-confirm",
+     "note": "出堂要按兩次",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "30_remind-1-caught.jpg",
+     "id": "remind-1-caught",
+     "note": "被抓到：住持停下",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "31_remind-2-windup.jpg",
+     "id": "remind-2-windup",
+     "note": "舉板",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "32_remind-3-hit.jpg",
+     "id": "remind-3-hit",
+     "note": "命中",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [
+       ".star \"✦\" 3.99:1 @16px"
+      ],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 81,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "33_remind-4-after.jpg",
+     "id": "remind-4-after",
+     "note": "命中之後",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "34_remind-5-merged.jpg",
+     "id": "remind-5-merged",
+     "note": "合併：又分心了 N 次",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "35_ask-hit.jpg",
+     "id": "ask-hit",
+     "note": "合掌請打",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [
+       ".star \"✦\" 3.99:1 @16px"
+      ],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 81,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "36_leave.jpg",
+     "id": "leave",
+     "note": "暫離",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "leave"
+     }
+    },
+    {
+     "file": "37_leave-back-settle.jpg",
+     "id": "leave-back-settle",
+     "note": "回座",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "settle"
+     }
+    },
+    {
+     "file": "38_break-start.jpg",
+     "id": "break-start",
+     "note": "開靜：進入休息",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "39_break.jpg",
+     "id": "break",
+     "note": "休息（住持喝茶）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "40_break-over-late.jpg",
+     "id": "break-over-late",
+     "note": "休息超時回來",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "ready"
+     }
+    },
+    {
+     "file": "41_focus-round2.jpg",
+     "id": "focus-round2",
+     "note": "第 2 炷",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "42_result.jpg",
+     "id": "result",
+     "note": "結算卡（坐滿 2 炷）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 335,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "43_result-new-item-offer.jpg",
+     "id": "result-new-item-offer",
+     "note": "住持問要不要掛上新掛軸",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "44_again.jpg",
+     "id": "again",
+     "note": "坐完一輪：還要再坐嗎",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 9,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "45_result-early.jpg",
+     "id": "result-early",
+     "note": "提前出堂的結算卡",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "46_returning-greeting.jpg",
+     "id": "returning-greeting",
+     "note": "回訪：跟上次一樣／常用／新的安排",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "47_journal-calendar.jpg",
+     "id": "journal-calendar",
+     "note": "坐禪帳：月曆",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 23,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "48_journal-day.jpg",
+     "id": "journal-day",
+     "note": "點某一天的明細",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 23,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "49_journal-calendar-bottom.jpg",
+     "id": "journal-calendar-bottom",
+     "note": "月曆捲到底",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 23,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "50_journal-prev-month.jpg",
+     "id": "journal-prev-month",
+     "note": "上個月",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 36,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "51_journal-stats.jpg",
+     "id": "journal-stats",
+     "note": "坐禪帳：統計（七日）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 13,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "52_journal-stats-bottom.jpg",
+     "id": "journal-stats-bottom",
+     "note": "統計捲到底",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 12,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "53_journal-stats-30.jpg",
+     "id": "journal-stats-30",
+     "note": "三十日",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": ".col \"10/21(三)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/22(四)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/23(五)・55 分・\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/24(六)・25 分・\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/25(日)・50 分・\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/26(一)・0 分・坐\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/27(二)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/28(三)・48 分・\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/29(四)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/30(五)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/31(六)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/1(日)・15 分・坐\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/2(一)・0 分・坐滿\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/3(二)・1 小時 2\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/4(三)・50 分・坐\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/5(四)・50 分・坐\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/6(五)・1 小時 5\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/7(六)・1 小時 4\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/8(日)・1 小時 1\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/9(一)・0 分・坐滿\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/10(二)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/11(三)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/12(四)・55 分・\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/13(五)・25 分・\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/14(六)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/15(日)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/16(一)・0 分・坐\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/17(二)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/18(三)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/19(四)・0 分・坐\"",
+        "w": 11,
+        "h": 158
+       }
+      ],
+      "taps": 36,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "54_journal-stats-slip.jpg",
+     "id": "journal-stats-slip",
+     "note": "點一根香：籤紙",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": ".col \"10/21(三)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/22(四)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/23(五)・55 分・\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/24(六)・25 分・\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/25(日)・50 分・\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/26(一)・0 分・坐\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/27(二)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/28(三)・48 分・\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/29(四)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/30(五)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"10/31(六)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/1(日)・15 分・坐\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/2(一)・0 分・坐滿\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/3(二)・1 小時 2\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/4(三)・50 分・坐\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/5(四)・50 分・坐\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/6(五)・1 小時 5\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/7(六)・1 小時 4\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/8(日)・1 小時 1\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/9(一)・0 分・坐滿\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/10(二)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/11(三)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/12(四)・55 分・\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/13(五)・25 分・\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/14(六)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/15(日)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/16(一)・0 分・坐\"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/17(二)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/18(三)・1 小時 \"",
+        "w": 11,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/19(四)・0 分・坐\"",
+        "w": 11,
+        "h": 158
+       }
+      ],
+      "taps": 36,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "55_journal-stats-all.jpg",
+     "id": "journal-stats-all",
+     "note": "全部",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 9,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "56_collect-scrolls.jpg",
+     "id": "collect-scrolls",
+     "note": "收藏冊：掛軸",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 17,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "57_collect-scrolls-bottom.jpg",
+     "id": "collect-scrolls-bottom",
+     "note": "掛軸捲到底",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 14,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "58_collect-seasons.jpg",
+     "id": "collect-seasons",
+     "note": "收藏冊：seasons",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 5,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "59_collect-accs.jpg",
+     "id": "collect-accs",
+     "note": "收藏冊：accs",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 16,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "60_collect-accs-bottom.jpg",
+     "id": "collect-accs-bottom",
+     "note": "配件捲到底",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 13,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "61_collect-faces.jpg",
+     "id": "collect-faces",
+     "note": "收藏冊：faces",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 17,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "62_settings-1.jpg",
+     "id": "settings-1",
+     "note": "設定（頂端）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 20,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "63_settings-2.jpg",
+     "id": "settings-2",
+     "note": "設定（第 2 段，共 2 段）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 9,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "64_settings-paste-backup.jpg",
+     "id": "settings-paste-backup",
+     "note": "貼上備份文字",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "65_help.jpg",
+     "id": "help",
+     "note": "堂規",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 1,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "66_help-bottom.jpg",
+     "id": "help-bottom",
+     "note": "堂規捲到底",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 0,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "67_window-tale.jpg",
+     "id": "window-tale",
+     "note": "點圓窗：住持說窗的由來",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "68_collect-while-sitting.jpg",
+     "id": "collect-while-sitting",
+     "note": "坐禪中的收藏冊（只能看）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 17,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "69_journal-while-sitting.jpg",
+     "id": "journal-while-sitting",
+     "note": "坐禪中打開坐禪帳（計時照常）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 23,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "70_empty-journal.jpg",
+     "id": "empty-journal",
+     "note": "空的坐禪帳",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 23,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "71_empty-stats.jpg",
+     "id": "empty-stats",
+     "note": "空的統計",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "72_empty-collect.jpg",
+     "id": "empty-collect",
+     "note": "剛開始的收藏冊",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 14,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "73_empty-faces.jpg",
+     "id": "empty-faces",
+     "note": "剛開始的表情",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 17,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "74_tip-leave.jpg",
+     "id": "tip-leave",
+     "note": "第一次被打後：暫離的提示",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#tourSkip \"知道了\"",
+        "w": 66,
+        "h": 34
+       },
+       {
+        "el": "#tourNext \"下一步\"",
+        "w": 1,
+        "h": 1
+       }
+      ],
+      "taps": 12,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    }
+   ],
+   "notCaptured": [],
+   "errors": []
+  },
+  "320x640": {
+   "w": 320,
+   "h": 640,
+   "dark": false,
+   "locale": "zh-TW",
+   "big": false,
+   "theme": null,
+   "shots": [
+    {
+     "file": "01_checkin.jpg",
+     "id": "checkin",
+     "note": "報到（看過導覽、還沒坐過）",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 835,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 35,
+        "h": 58
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 38,
+        "h": 46
+       },
+       {
+        "el": "#windowBtn \"方窗(迷之窗)\"",
+        "w": 39,
+        "h": 51
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 35,
+        "h": 61
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": false,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "02_focus-start.jpg",
+     "id": "focus-start",
+     "note": "止靜：剛開始",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 648,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 35,
+        "h": 58
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 38,
+        "h": 46
+       },
+       {
+        "el": "#windowBtn \"方窗(迷之窗)\"",
+        "w": 39,
+        "h": 51
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 35,
+        "h": 61
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": true,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "03_focus-quiet.jpg",
+     "id": "focus-quiet",
+     "note": "專注中（提示消失後）",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 648,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 35,
+        "h": 58
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 38,
+        "h": 46
+       },
+       {
+        "el": "#windowBtn \"方窗(迷之窗)\"",
+        "w": 39,
+        "h": 51
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 35,
+        "h": 61
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": true,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "04_remind-1-caught.jpg",
+     "id": "remind-1-caught",
+     "note": "被抓到：住持停下",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 648,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 35,
+        "h": 58
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 38,
+        "h": 46
+       },
+       {
+        "el": "#windowBtn \"方窗(迷之窗)\"",
+        "w": 39,
+        "h": 51
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 35,
+        "h": 61
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": true,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "05_remind-2-windup.jpg",
+     "id": "remind-2-windup",
+     "note": "舉板",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 648,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 35,
+        "h": 58
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 38,
+        "h": 46
+       },
+       {
+        "el": "#windowBtn \"方窗(迷之窗)\"",
+        "w": 39,
+        "h": 51
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 35,
+        "h": 61
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": true,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "06_remind-3-hit.jpg",
+     "id": "remind-3-hit",
+     "note": "命中",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 648,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 35,
+        "h": 58
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 38,
+        "h": 46
+       },
+       {
+        "el": "#windowBtn \"方窗(迷之窗)\"",
+        "w": 39,
+        "h": 51
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 35,
+        "h": 61
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [
+       ".star \"✦\" 3.99:1 @16px"
+      ],
+      "clockPx": 42,
+      "clockVisible": true,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "07_remind-4-after.jpg",
+     "id": "remind-4-after",
+     "note": "命中之後",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 648,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 35,
+        "h": 58
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 38,
+        "h": 46
+       },
+       {
+        "el": "#windowBtn \"方窗(迷之窗)\"",
+        "w": 39,
+        "h": 51
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 35,
+        "h": 61
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": true,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "08_leave.jpg",
+     "id": "leave",
+     "note": "暫離",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 648,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 35,
+        "h": 58
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 38,
+        "h": 46
+       },
+       {
+        "el": "#windowBtn \"方窗(迷之窗)\"",
+        "w": 39,
+        "h": 51
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 35,
+        "h": 61
+       }
+      ],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": true,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "leave"
+     }
+    },
+    {
+     "file": "09_leave-back-settle.jpg",
+     "id": "leave-back-settle",
+     "note": "回座",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 648,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 35,
+        "h": 58
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 38,
+        "h": 46
+       },
+       {
+        "el": "#windowBtn \"方窗(迷之窗)\"",
+        "w": 39,
+        "h": 51
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 35,
+        "h": 61
+       }
+      ],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": true,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "settle"
+     }
+    },
+    {
+     "file": "10_break-start.jpg",
+     "id": "break-start",
+     "note": "開靜：進入休息",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 648,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 35,
+        "h": 58
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 38,
+        "h": 46
+       },
+       {
+        "el": "#windowBtn \"方窗(迷之窗)\"",
+        "w": 39,
+        "h": 51
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 35,
+        "h": 61
+       }
+      ],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": true,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "11_break.jpg",
+     "id": "break",
+     "note": "休息（住持喝茶）",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 648,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 35,
+        "h": 58
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 38,
+        "h": 46
+       },
+       {
+        "el": "#windowBtn \"方窗(迷之窗)\"",
+        "w": 39,
+        "h": 51
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 35,
+        "h": 61
+       }
+      ],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": true,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "12_ready-round2.jpg",
+     "id": "ready-round2",
+     "note": "第 2 炷：準備好了嗎",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 780,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 35,
+        "h": 58
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 38,
+        "h": 46
+       },
+       {
+        "el": "#windowBtn \"方窗(迷之窗)\"",
+        "w": 39,
+        "h": 51
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 35,
+        "h": 61
+       }
+      ],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": false,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "ready"
+     }
+    },
+    {
+     "file": "13_focus-round2.jpg",
+     "id": "focus-round2",
+     "note": "第 2 炷",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 648,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 35,
+        "h": 58
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 38,
+        "h": 46
+       },
+       {
+        "el": "#windowBtn \"方窗(迷之窗)\"",
+        "w": 39,
+        "h": 51
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 35,
+        "h": 61
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": true,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "14_result.jpg",
+     "id": "result",
+     "note": "結算卡（坐滿 2 炷）",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 648,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 35,
+        "h": 58
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 38,
+        "h": 46
+       },
+       {
+        "el": "#windowBtn \"方窗(迷之窗)\"",
+        "w": 39,
+        "h": 51
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 35,
+        "h": 61
+       }
+      ],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": true,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "15_returning-greeting.jpg",
+     "id": "returning-greeting",
+     "note": "回訪：跟上次一樣／常用／新的安排",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 835,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 35,
+        "h": 58
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 38,
+        "h": 46
+       },
+       {
+        "el": "#windowBtn \"方窗(迷之窗)\"",
+        "w": 39,
+        "h": 51
+       },
+       {
+        "el": "#journalBtn \"坐禪帳,連續 2 日\"",
+        "w": 35,
+        "h": 61
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": false,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "16_journal-calendar.jpg",
+     "id": "journal-calendar",
+     "note": "坐禪帳：月曆",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 835,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": ".cell \"11 月 1 日,坐 15 \"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 2 日\"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 3 日,坐 80 \"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 4 日,坐 50 \"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 5 日,坐 50 \"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 6 日,坐 65 \"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 7 日,坐 105\"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 8 日,坐 73 \"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 9 日\"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 10 日,坐 75\"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 11 日,坐 90\"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 12 日,坐 55\"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 13 日,坐 25\"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 14 日,坐 90\"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 15 日,坐 75\"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 16 日\"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 17 日,坐 10\"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 18 日,坐 65\"",
+        "w": 36,
+        "h": 36
+       },
+       {
+        "el": ".cell \"11 月 19 日\"",
+        "w": 36,
+        "h": 36
+       }
+      ],
+      "taps": 23,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": false,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "17_journal-stats.jpg",
+     "id": "journal-stats",
+     "note": "坐禪帳：統計（七日）",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 835,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": ".col \"11/13(五)・25 分・\"",
+        "w": 38,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/14(六)・1 小時 \"",
+        "w": 38,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/15(日)・1 小時 \"",
+        "w": 38,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/16(一)・0 分・坐\"",
+        "w": 38,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/17(二)・1 小時 \"",
+        "w": 38,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/18(三)・1 小時 \"",
+        "w": 38,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/19(四)・0 分・坐\"",
+        "w": 38,
+        "h": 158
+       }
+      ],
+      "taps": 13,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": false,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "18_collect-scrolls.jpg",
+     "id": "collect-scrolls",
+     "note": "收藏冊：掛軸",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 835,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 11,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": false,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "19_collect-accs.jpg",
+     "id": "collect-accs",
+     "note": "收藏冊：accs",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 835,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 11,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": false,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "20_collect-faces.jpg",
+     "id": "collect-faces",
+     "note": "收藏冊：faces",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 835,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 11,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": false,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "21_settings-1.jpg",
+     "id": "settings-1",
+     "note": "設定（頂端）",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 835,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 20,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": false,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "22_settings-2.jpg",
+     "id": "settings-2",
+     "note": "設定（第 2 段，共 3 段）",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 835,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 11,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": false,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "23_help.jpg",
+     "id": "help",
+     "note": "堂規",
+     "m": {
+      "vw": 320,
+      "vh": 640,
+      "pageH": 835,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 1,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 42,
+      "clockVisible": false,
+      "stageH": 238,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    }
+   ],
+   "notCaptured": [],
+   "errors": []
+  },
+  "360x780": {
+   "w": 360,
+   "h": 780,
+   "dark": false,
+   "locale": "zh-TW",
+   "big": false,
+   "theme": null,
+   "shots": [
+    {
+     "file": "01_checkin.jpg",
+     "id": "checkin",
+     "note": "報到（看過導覽、還沒坐過）",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 40,
+        "h": 66
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 43,
+        "h": 53
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 40,
+        "h": 70
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "02_focus-start.jpg",
+     "id": "focus-start",
+     "note": "止靜：剛開始",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 40,
+        "h": 66
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 43,
+        "h": 53
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 40,
+        "h": 70
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "03_focus-quiet.jpg",
+     "id": "focus-quiet",
+     "note": "專注中（提示消失後）",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 40,
+        "h": 66
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 43,
+        "h": 53
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 40,
+        "h": 70
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "04_remind-1-caught.jpg",
+     "id": "remind-1-caught",
+     "note": "被抓到：住持停下",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 40,
+        "h": 66
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 43,
+        "h": 53
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 40,
+        "h": 70
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "05_remind-2-windup.jpg",
+     "id": "remind-2-windup",
+     "note": "舉板",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 40,
+        "h": 66
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 43,
+        "h": 53
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 40,
+        "h": 70
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "06_remind-3-hit.jpg",
+     "id": "remind-3-hit",
+     "note": "命中",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 40,
+        "h": 66
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 43,
+        "h": 53
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 40,
+        "h": 70
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [
+       ".star \"✦\" 3.99:1 @16px"
+      ],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "07_remind-4-after.jpg",
+     "id": "remind-4-after",
+     "note": "命中之後",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 40,
+        "h": 66
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 43,
+        "h": 53
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 40,
+        "h": 70
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "08_leave.jpg",
+     "id": "leave",
+     "note": "暫離",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 40,
+        "h": 66
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 43,
+        "h": 53
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 40,
+        "h": 70
+       }
+      ],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "leave"
+     }
+    },
+    {
+     "file": "09_leave-back-settle.jpg",
+     "id": "leave-back-settle",
+     "note": "回座",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 40,
+        "h": 66
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 43,
+        "h": 53
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 40,
+        "h": 70
+       }
+      ],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "settle"
+     }
+    },
+    {
+     "file": "10_break-start.jpg",
+     "id": "break-start",
+     "note": "開靜：進入休息",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 40,
+        "h": 66
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 43,
+        "h": 53
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 40,
+        "h": 70
+       }
+      ],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "11_break.jpg",
+     "id": "break",
+     "note": "休息（住持喝茶）",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 40,
+        "h": 66
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 43,
+        "h": 53
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 40,
+        "h": 70
+       }
+      ],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "12_ready-round2.jpg",
+     "id": "ready-round2",
+     "note": "第 2 炷：準備好了嗎",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 40,
+        "h": 66
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 43,
+        "h": 53
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 40,
+        "h": 70
+       }
+      ],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "ready"
+     }
+    },
+    {
+     "file": "13_focus-round2.jpg",
+     "id": "focus-round2",
+     "note": "第 2 炷",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 40,
+        "h": 66
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 43,
+        "h": 53
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 40,
+        "h": 70
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "14_result.jpg",
+     "id": "result",
+     "note": "結算卡（坐滿 2 炷）",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 40,
+        "h": 66
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 43,
+        "h": 53
+       },
+       {
+        "el": "#journalBtn \"坐禪帳\"",
+        "w": 40,
+        "h": 70
+       }
+      ],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 312,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "15_returning-greeting.jpg",
+     "id": "returning-greeting",
+     "note": "回訪：跟上次一樣／常用／新的安排",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#helpBtn \"堂規\"",
+        "w": 40,
+        "h": 66
+       },
+       {
+        "el": "#roundWinBtn \"圓窗(悟之窗)\"",
+        "w": 43,
+        "h": 53
+       },
+       {
+        "el": "#journalBtn \"坐禪帳,連續 2 日\"",
+        "w": 40,
+        "h": 70
+       }
+      ],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "16_journal-calendar.jpg",
+     "id": "journal-calendar",
+     "note": "坐禪帳：月曆",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": ".cell \"11 月 1 日,坐 15 \"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 2 日\"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 3 日,坐 80 \"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 4 日,坐 50 \"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 5 日,坐 50 \"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 6 日,坐 65 \"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 7 日,坐 105\"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 8 日,坐 73 \"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 9 日\"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 10 日,坐 75\"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 11 日,坐 90\"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 12 日,坐 55\"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 13 日,坐 25\"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 14 日,坐 90\"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 15 日,坐 75\"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 16 日\"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 17 日,坐 10\"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 18 日,坐 65\"",
+        "w": 42,
+        "h": 42
+       },
+       {
+        "el": ".cell \"11 月 19 日\"",
+        "w": 42,
+        "h": 42
+       }
+      ],
+      "taps": 23,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "17_journal-stats.jpg",
+     "id": "journal-stats",
+     "note": "坐禪帳：統計（七日）",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": ".col \"11/13(五)・25 分・\"",
+        "w": 43,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/14(六)・1 小時 \"",
+        "w": 43,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/15(日)・1 小時 \"",
+        "w": 43,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/16(一)・0 分・坐\"",
+        "w": 43,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/17(二)・1 小時 \"",
+        "w": 43,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/18(三)・1 小時 \"",
+        "w": 43,
+        "h": 158
+       },
+       {
+        "el": ".col \"11/19(四)・0 分・坐\"",
+        "w": 43,
+        "h": 158
+       }
+      ],
+      "taps": 13,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "18_collect-scrolls.jpg",
+     "id": "collect-scrolls",
+     "note": "收藏冊：掛軸",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 14,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "19_collect-accs.jpg",
+     "id": "collect-accs",
+     "note": "收藏冊：accs",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 11,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "20_collect-faces.jpg",
+     "id": "collect-faces",
+     "note": "收藏冊：faces",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 13,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "21_settings-1.jpg",
+     "id": "settings-1",
+     "note": "設定（頂端）",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 20,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "22_settings-2.jpg",
+     "id": "settings-2",
+     "note": "設定（第 2 段，共 3 段）",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 9,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "23_help.jpg",
+     "id": "help",
+     "note": "堂規",
+     "m": {
+      "vw": 360,
+      "vh": 780,
+      "pageH": 788,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 1,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 47,
+      "clockVisible": true,
+      "stageH": 273,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    }
+   ],
+   "notCaptured": [],
+   "errors": []
+  },
+  "412x915": {
+   "w": 412,
+   "h": 915,
+   "dark": false,
+   "locale": "zh-TW",
+   "big": false,
+   "theme": null,
+   "shots": [
+    {
+     "file": "01_checkin.jpg",
+     "id": "checkin",
+     "note": "報到（看過導覽、還沒坐過）",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "02_focus-start.jpg",
+     "id": "focus-start",
+     "note": "止靜：剛開始",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "03_focus-quiet.jpg",
+     "id": "focus-quiet",
+     "note": "專注中（提示消失後）",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "04_remind-1-caught.jpg",
+     "id": "remind-1-caught",
+     "note": "被抓到：住持停下",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "05_remind-2-windup.jpg",
+     "id": "remind-2-windup",
+     "note": "舉板",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "06_remind-3-hit.jpg",
+     "id": "remind-3-hit",
+     "note": "命中",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [
+       ".star \"✦\" 3.99:1 @16px"
+      ],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "07_remind-4-after.jpg",
+     "id": "remind-4-after",
+     "note": "命中之後",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "08_leave.jpg",
+     "id": "leave",
+     "note": "暫離",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "leave"
+     }
+    },
+    {
+     "file": "09_leave-back-settle.jpg",
+     "id": "leave-back-settle",
+     "note": "回座",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "settle"
+     }
+    },
+    {
+     "file": "10_break-start.jpg",
+     "id": "break-start",
+     "note": "開靜：進入休息",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "11_break.jpg",
+     "id": "break",
+     "note": "休息（住持喝茶）",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "12_ready-round2.jpg",
+     "id": "ready-round2",
+     "note": "第 2 炷：準備好了嗎",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "ready"
+     }
+    },
+    {
+     "file": "13_focus-round2.jpg",
+     "id": "focus-round2",
+     "note": "第 2 炷",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "14_result.jpg",
+     "id": "result",
+     "note": "結算卡（坐滿 2 炷）",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "15_returning-greeting.jpg",
+     "id": "returning-greeting",
+     "note": "回訪：跟上次一樣／常用／新的安排",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "16_journal-calendar.jpg",
+     "id": "journal-calendar",
+     "note": "坐禪帳：月曆",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 23,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "17_journal-stats.jpg",
+     "id": "journal-stats",
+     "note": "坐禪帳：統計（七日）",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 13,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "18_collect-scrolls.jpg",
+     "id": "collect-scrolls",
+     "note": "收藏冊：掛軸",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 17,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "19_collect-accs.jpg",
+     "id": "collect-accs",
+     "note": "收藏冊：accs",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 16,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "20_collect-faces.jpg",
+     "id": "collect-faces",
+     "note": "收藏冊：faces",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 17,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "21_settings-1.jpg",
+     "id": "settings-1",
+     "note": "設定（頂端）",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 20,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "22_settings-2.jpg",
+     "id": "settings-2",
+     "note": "設定（第 2 段，共 2 段）",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 9,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "23_help.jpg",
+     "id": "help",
+     "note": "堂規",
+     "m": {
+      "vw": 412,
+      "vh": 915,
+      "pageH": 923,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 1,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 319,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    }
+   ],
+   "notCaptured": [],
+   "errors": []
+  },
+  "844x390": {
+   "w": 844,
+   "h": 390,
+   "dark": false,
+   "locale": "zh-TW",
+   "big": false,
+   "theme": null,
+   "shots": [
+    {
+     "file": "01_checkin.jpg",
+     "id": "checkin",
+     "note": "報到（看過導覽、還沒坐過）",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 875,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "02_focus-start.jpg",
+     "id": "focus-start",
+     "note": "止靜：剛開始",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 790,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "03_focus-quiet.jpg",
+     "id": "focus-quiet",
+     "note": "專注中（提示消失後）",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 790,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "04_remind-1-caught.jpg",
+     "id": "remind-1-caught",
+     "note": "被抓到：住持停下",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 790,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "05_remind-2-windup.jpg",
+     "id": "remind-2-windup",
+     "note": "舉板",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 790,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "06_remind-3-hit.jpg",
+     "id": "remind-3-hit",
+     "note": "命中",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 790,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [
+       ".star \"✦\" 3.99:1 @16px"
+      ],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "07_remind-4-after.jpg",
+     "id": "remind-4-after",
+     "note": "命中之後",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 790,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "08_leave.jpg",
+     "id": "leave",
+     "note": "暫離",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 738,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "leave"
+     }
+    },
+    {
+     "file": "09_leave-back-settle.jpg",
+     "id": "leave-back-settle",
+     "note": "回座",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 738,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "settle"
+     }
+    },
+    {
+     "file": "10_break-start.jpg",
+     "id": "break-start",
+     "note": "開靜：進入休息",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 738,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "11_break.jpg",
+     "id": "break",
+     "note": "休息（住持喝茶）",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 738,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "12_ready-round2.jpg",
+     "id": "ready-round2",
+     "note": "第 2 炷：準備好了嗎",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 819,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "ready"
+     }
+    },
+    {
+     "file": "13_focus-round2.jpg",
+     "id": "focus-round2",
+     "note": "第 2 炷",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 790,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "14_result.jpg",
+     "id": "result",
+     "note": "結算卡（坐滿 2 炷）",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 619,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "15_returning-greeting.jpg",
+     "id": "returning-greeting",
+     "note": "回訪：跟上次一樣／常用／新的安排",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 875,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "16_journal-calendar.jpg",
+     "id": "journal-calendar",
+     "note": "坐禪帳：月曆",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 875,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 18,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "17_journal-stats.jpg",
+     "id": "journal-stats",
+     "note": "坐禪帳：統計（七日）",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 875,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 6,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "18_collect-scrolls.jpg",
+     "id": "collect-scrolls",
+     "note": "收藏冊：掛軸",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 875,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 13,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "19_collect-accs.jpg",
+     "id": "collect-accs",
+     "note": "收藏冊：accs",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 875,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 9,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "20_collect-faces.jpg",
+     "id": "collect-faces",
+     "note": "收藏冊：faces",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 875,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 9,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "21_settings-1.jpg",
+     "id": "settings-1",
+     "note": "設定（頂端）",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 875,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 14,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "22_settings-2.jpg",
+     "id": "settings-2",
+     "note": "設定（第 2 段，共 4 段）",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 875,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 11,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "23_help.jpg",
+     "id": "help",
+     "note": "堂規",
+     "m": {
+      "vw": 844,
+      "vh": 390,
+      "pageH": 875,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 1,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": false,
+      "stageH": 379,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    }
+   ],
+   "notCaptured": [],
+   "errors": []
+  },
+  "390x844-text130": {
+   "w": 390,
+   "h": 844,
+   "dark": false,
+   "locale": "zh-TW",
+   "big": true,
+   "theme": null,
+   "shots": [
+    {
+     "file": "01_checkin.jpg",
+     "id": "checkin",
+     "note": "報到（看過導覽、還沒坐過）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "02_focus-start.jpg",
+     "id": "focus-start",
+     "note": "止靜：剛開始",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "03_focus-quiet.jpg",
+     "id": "focus-quiet",
+     "note": "專注中（提示消失後）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "04_remind-1-caught.jpg",
+     "id": "remind-1-caught",
+     "note": "被抓到：住持停下",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "05_remind-2-windup.jpg",
+     "id": "remind-2-windup",
+     "note": "舉板",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "06_remind-3-hit.jpg",
+     "id": "remind-3-hit",
+     "note": "命中",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [
+       ".star \"✦\" 3.99:1 @20.8px"
+      ],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "07_remind-4-after.jpg",
+     "id": "remind-4-after",
+     "note": "命中之後",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "08_leave.jpg",
+     "id": "leave",
+     "note": "暫離",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "leave"
+     }
+    },
+    {
+     "file": "09_leave-back-settle.jpg",
+     "id": "leave-back-settle",
+     "note": "回座",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "settle"
+     }
+    },
+    {
+     "file": "10_break-start.jpg",
+     "id": "break-start",
+     "note": "開靜：進入休息",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "11_break.jpg",
+     "id": "break",
+     "note": "休息（住持喝茶）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "12_ready-round2.jpg",
+     "id": "ready-round2",
+     "note": "第 2 炷：準備好了嗎",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 870,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "ready"
+     }
+    },
+    {
+     "file": "13_focus-round2.jpg",
+     "id": "focus-round2",
+     "note": "第 2 炷",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "14_result.jpg",
+     "id": "result",
+     "note": "結算卡（坐滿 2 炷）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 424,
+      "stageTop": 97,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "15_returning-greeting.jpg",
+     "id": "returning-greeting",
+     "note": "回訪：跟上次一樣／常用／新的安排",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "16_journal-calendar.jpg",
+     "id": "journal-calendar",
+     "note": "坐禪帳：月曆",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 23,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "17_journal-stats.jpg",
+     "id": "journal-stats",
+     "note": "坐禪帳：統計（七日）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 13,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "18_collect-scrolls.jpg",
+     "id": "collect-scrolls",
+     "note": "收藏冊：掛軸",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 14,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "19_collect-accs.jpg",
+     "id": "collect-accs",
+     "note": "收藏冊：accs",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 13,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "20_collect-faces.jpg",
+     "id": "collect-faces",
+     "note": "收藏冊：faces",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 14,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "21_settings-1.jpg",
+     "id": "settings-1",
+     "note": "設定（頂端）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 20,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "22_settings-2.jpg",
+     "id": "settings-2",
+     "note": "設定（第 2 段，共 3 段）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "23_help.jpg",
+     "id": "help",
+     "note": "堂規",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 1,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 54,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 97,
+      "phase": "idle"
+     }
+    }
+   ],
+   "notCaptured": [],
+   "errors": []
+  },
+  "390x844-dark": {
+   "w": 390,
+   "h": 844,
+   "dark": true,
+   "locale": "zh-TW",
+   "big": false,
+   "theme": null,
+   "shots": [
+    {
+     "file": "01_checkin.jpg",
+     "id": "checkin",
+     "note": "報到（看過導覽、還沒坐過）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "02_focus-start.jpg",
+     "id": "focus-start",
+     "note": "止靜：剛開始",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "03_focus-quiet.jpg",
+     "id": "focus-quiet",
+     "note": "專注中（提示消失後）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "04_remind-1-caught.jpg",
+     "id": "remind-1-caught",
+     "note": "被抓到：住持停下",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "05_remind-2-windup.jpg",
+     "id": "remind-2-windup",
+     "note": "舉板",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "06_remind-3-hit.jpg",
+     "id": "remind-3-hit",
+     "note": "命中",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "07_remind-4-after.jpg",
+     "id": "remind-4-after",
+     "note": "命中之後",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "08_leave.jpg",
+     "id": "leave",
+     "note": "暫離",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "leave"
+     }
+    },
+    {
+     "file": "09_leave-back-settle.jpg",
+     "id": "leave-back-settle",
+     "note": "回座",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "settle"
+     }
+    },
+    {
+     "file": "10_break-start.jpg",
+     "id": "break-start",
+     "note": "開靜：進入休息",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "11_break.jpg",
+     "id": "break",
+     "note": "休息（住持喝茶）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "12_ready-round2.jpg",
+     "id": "ready-round2",
+     "note": "第 2 炷：準備好了嗎",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "ready"
+     }
+    },
+    {
+     "file": "13_focus-round2.jpg",
+     "id": "focus-round2",
+     "note": "第 2 炷",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "14_result.jpg",
+     "id": "result",
+     "note": "結算卡（坐滿 2 炷）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 312,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "15_returning-greeting.jpg",
+     "id": "returning-greeting",
+     "note": "回訪：跟上次一樣／常用／新的安排",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "16_journal-calendar.jpg",
+     "id": "journal-calendar",
+     "note": "坐禪帳：月曆",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 23,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "17_journal-stats.jpg",
+     "id": "journal-stats",
+     "note": "坐禪帳：統計（七日）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 13,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "18_collect-scrolls.jpg",
+     "id": "collect-scrolls",
+     "note": "收藏冊：掛軸",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 17,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "19_collect-accs.jpg",
+     "id": "collect-accs",
+     "note": "收藏冊：accs",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 16,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "20_collect-faces.jpg",
+     "id": "collect-faces",
+     "note": "收藏冊：faces",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 17,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "21_settings-1.jpg",
+     "id": "settings-1",
+     "note": "設定（頂端）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 20,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "22_settings-2.jpg",
+     "id": "settings-2",
+     "note": "設定（第 2 段，共 2 段）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 9,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "23_help.jpg",
+     "id": "help",
+     "note": "堂規",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 1,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    }
+   ],
+   "notCaptured": [],
+   "errors": []
+  },
+  "390x844-dusk": {
+   "w": 390,
+   "h": 844,
+   "dark": false,
+   "locale": "zh-TW",
+   "big": false,
+   "theme": "dusk",
+   "shots": [
+    {
+     "file": "01_checkin.jpg",
+     "id": "checkin",
+     "note": "報到（看過導覽、還沒坐過）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "02_focus-start.jpg",
+     "id": "focus-start",
+     "note": "止靜：剛開始",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "03_focus-quiet.jpg",
+     "id": "focus-quiet",
+     "note": "專注中（提示消失後）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "04_remind-1-caught.jpg",
+     "id": "remind-1-caught",
+     "note": "被抓到：住持停下",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "05_remind-2-windup.jpg",
+     "id": "remind-2-windup",
+     "note": "舉板",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "06_remind-3-hit.jpg",
+     "id": "remind-3-hit",
+     "note": "命中",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [
+       ".star \"✦\" 3.5:1 @16px"
+      ],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "07_remind-4-after.jpg",
+     "id": "remind-4-after",
+     "note": "命中之後",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "08_leave.jpg",
+     "id": "leave",
+     "note": "暫離",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "leave"
+     }
+    },
+    {
+     "file": "09_leave-back-settle.jpg",
+     "id": "leave-back-settle",
+     "note": "回座",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "settle"
+     }
+    },
+    {
+     "file": "10_break-start.jpg",
+     "id": "break-start",
+     "note": "開靜：進入休息",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "11_break.jpg",
+     "id": "break",
+     "note": "休息（住持喝茶）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "12_ready-round2.jpg",
+     "id": "ready-round2",
+     "note": "第 2 炷：準備好了嗎",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "ready"
+     }
+    },
+    {
+     "file": "13_focus-round2.jpg",
+     "id": "focus-round2",
+     "note": "第 2 炷",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "14_result.jpg",
+     "id": "result",
+     "note": "結算卡（坐滿 2 炷）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 312,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "15_returning-greeting.jpg",
+     "id": "returning-greeting",
+     "note": "回訪：跟上次一樣／常用／新的安排",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "16_journal-calendar.jpg",
+     "id": "journal-calendar",
+     "note": "坐禪帳：月曆",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 23,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "17_journal-stats.jpg",
+     "id": "journal-stats",
+     "note": "坐禪帳：統計（七日）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 13,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "18_collect-scrolls.jpg",
+     "id": "collect-scrolls",
+     "note": "收藏冊：掛軸",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 17,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "19_collect-accs.jpg",
+     "id": "collect-accs",
+     "note": "收藏冊：accs",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 16,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "20_collect-faces.jpg",
+     "id": "collect-faces",
+     "note": "收藏冊：faces",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 17,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "21_settings-1.jpg",
+     "id": "settings-1",
+     "note": "設定（頂端）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 20,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "22_settings-2.jpg",
+     "id": "settings-2",
+     "note": "設定（第 2 段，共 2 段）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 9,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "23_help.jpg",
+     "id": "help",
+     "note": "堂規",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 1,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    }
+   ],
+   "notCaptured": [],
+   "errors": []
+  },
+  "390x844-ja": {
+   "w": 390,
+   "h": 844,
+   "dark": false,
+   "locale": "ja-JP",
+   "big": false,
+   "theme": null,
+   "shots": [
+    {
+     "file": "01_intro-1-welcome.jpg",
+     "id": "intro-1-welcome",
+     "note": "首次進入：住持自我介紹",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#dlgSkip \"オープニングを飛ばす\"",
+        "w": 150,
+        "h": 34
+       }
+      ],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "02_checkin.jpg",
+     "id": "checkin",
+     "note": "報到（看過導覽、還沒坐過）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "03_focus-start.jpg",
+     "id": "focus-start",
+     "note": "止靜：剛開始",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "04_focus-quiet.jpg",
+     "id": "focus-quiet",
+     "note": "專注中（提示消失後）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "05_remind-1-caught.jpg",
+     "id": "remind-1-caught",
+     "note": "被抓到：住持停下",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "06_remind-2-windup.jpg",
+     "id": "remind-2-windup",
+     "note": "舉板",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "07_remind-3-hit.jpg",
+     "id": "remind-3-hit",
+     "note": "命中",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [
+       ".star \"✦\" 3.99:1 @16px"
+      ],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "08_remind-4-after.jpg",
+     "id": "remind-4-after",
+     "note": "命中之後",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "09_leave.jpg",
+     "id": "leave",
+     "note": "暫離",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "leave"
+     }
+    },
+    {
+     "file": "10_leave-back-settle.jpg",
+     "id": "leave-back-settle",
+     "note": "回座",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "settle"
+     }
+    },
+    {
+     "file": "11_break-start.jpg",
+     "id": "break-start",
+     "note": "開靜：進入休息",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "12_break.jpg",
+     "id": "break",
+     "note": "休息（住持喝茶）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "13_ready-round2.jpg",
+     "id": "ready-round2",
+     "note": "第 2 炷：準備好了嗎",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "ready"
+     }
+    },
+    {
+     "file": "14_focus-round2.jpg",
+     "id": "focus-round2",
+     "note": "第 2 炷",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "15_result.jpg",
+     "id": "result",
+     "note": "結算卡（坐滿 2 炷）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 335,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "16_returning-greeting.jpg",
+     "id": "returning-greeting",
+     "note": "回訪：跟上次一樣／常用／新的安排",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "17_journal-calendar.jpg",
+     "id": "journal-calendar",
+     "note": "坐禪帳：月曆",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 23,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "18_journal-stats.jpg",
+     "id": "journal-stats",
+     "note": "坐禪帳：統計（七日）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 13,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "19_collect-scrolls.jpg",
+     "id": "collect-scrolls",
+     "note": "收藏冊：掛軸",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 14,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "20_collect-accs.jpg",
+     "id": "collect-accs",
+     "note": "收藏冊：accs",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 13,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "21_collect-faces.jpg",
+     "id": "collect-faces",
+     "note": "收藏冊：faces",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 17,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "22_settings-1.jpg",
+     "id": "settings-1",
+     "note": "設定（頂端）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 20,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "23_settings-2.jpg",
+     "id": "settings-2",
+     "note": "設定（第 2 段，共 3 段）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "24_help.jpg",
+     "id": "help",
+     "note": "堂規",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 1,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    }
+   ],
+   "notCaptured": [],
+   "errors": []
+  },
+  "390x844-en": {
+   "w": 390,
+   "h": 844,
+   "dark": false,
+   "locale": "en-US",
+   "big": false,
+   "theme": null,
+   "shots": [
+    {
+     "file": "01_intro-1-welcome.jpg",
+     "id": "intro-1-welcome",
+     "note": "首次進入：住持自我介紹",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [
+       {
+        "el": "#dlgSkip \"Skip intro\"",
+        "w": 84,
+        "h": 34
+       }
+      ],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "02_checkin.jpg",
+     "id": "checkin",
+     "note": "報到（看過導覽、還沒坐過）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "03_focus-start.jpg",
+     "id": "focus-start",
+     "note": "止靜：剛開始",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "04_focus-quiet.jpg",
+     "id": "focus-quiet",
+     "note": "專注中（提示消失後）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "05_remind-1-caught.jpg",
+     "id": "remind-1-caught",
+     "note": "被抓到：住持停下",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "06_remind-2-windup.jpg",
+     "id": "remind-2-windup",
+     "note": "舉板",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "07_remind-3-hit.jpg",
+     "id": "remind-3-hit",
+     "note": "命中",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [
+       ".star \"✦\" 3.99:1 @16px"
+      ],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "08_remind-4-after.jpg",
+     "id": "remind-4-after",
+     "note": "命中之後",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "09_leave.jpg",
+     "id": "leave",
+     "note": "暫離",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "leave"
+     }
+    },
+    {
+     "file": "10_leave-back-settle.jpg",
+     "id": "leave-back-settle",
+     "note": "回座",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "settle"
+     }
+    },
+    {
+     "file": "11_break-start.jpg",
+     "id": "break-start",
+     "note": "開靜：進入休息",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "12_break.jpg",
+     "id": "break",
+     "note": "休息（住持喝茶）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "13_ready-round2.jpg",
+     "id": "ready-round2",
+     "note": "第 2 炷：準備好了嗎",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "ready"
+     }
+    },
+    {
+     "file": "14_focus-round2.jpg",
+     "id": "focus-round2",
+     "note": "第 2 炷",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "15_result.jpg",
+     "id": "result",
+     "note": "結算卡（坐滿 2 炷）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 363,
+      "stageTop": 86,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "16_returning-greeting.jpg",
+     "id": "returning-greeting",
+     "note": "回訪：跟上次一樣／常用／新的安排",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "17_journal-calendar.jpg",
+     "id": "journal-calendar",
+     "note": "坐禪帳：月曆",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 23,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "18_journal-stats.jpg",
+     "id": "journal-stats",
+     "note": "坐禪帳：統計（七日）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 13,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "19_collect-scrolls.jpg",
+     "id": "collect-scrolls",
+     "note": "收藏冊：掛軸",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 14,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "20_collect-accs.jpg",
+     "id": "collect-accs",
+     "note": "收藏冊：accs",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 13,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "21_collect-faces.jpg",
+     "id": "collect-faces",
+     "note": "收藏冊：faces",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 17,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "22_settings-1.jpg",
+     "id": "settings-1",
+     "note": "設定（頂端）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 20,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "23_settings-2.jpg",
+     "id": "settings-2",
+     "note": "設定（第 2 段，共 3 段）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "24_help.jpg",
+     "id": "help",
+     "note": "堂規",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 1,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 86,
+      "phase": "idle"
+     }
+    }
+   ],
+   "notCaptured": [],
+   "errors": []
+  },
+  "390x844-reduced-motion": {
+   "w": 390,
+   "h": 844,
+   "dark": false,
+   "locale": "zh-TW",
+   "big": false,
+   "theme": null,
+   "shots": [
+    {
+     "file": "01_checkin.jpg",
+     "id": "checkin",
+     "note": "報到（看過導覽、還沒坐過）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "02_focus-start.jpg",
+     "id": "focus-start",
+     "note": "止靜：剛開始",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "03_focus-quiet.jpg",
+     "id": "focus-quiet",
+     "note": "專注中（提示消失後）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "04_remind-1-caught.jpg",
+     "id": "remind-1-caught",
+     "note": "被抓到：住持停下",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "05_remind-3-hit.jpg",
+     "id": "remind-3-hit",
+     "note": "命中",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [
+       ".star \"✦\" 3.99:1 @16px"
+      ],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "06_remind-4-after.jpg",
+     "id": "remind-4-after",
+     "note": "命中之後",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "07_leave.jpg",
+     "id": "leave",
+     "note": "暫離",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "leave"
+     }
+    },
+    {
+     "file": "08_leave-back-settle.jpg",
+     "id": "leave-back-settle",
+     "note": "回座",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "settle"
+     }
+    },
+    {
+     "file": "09_break-start.jpg",
+     "id": "break-start",
+     "note": "開靜：進入休息",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "10_break.jpg",
+     "id": "break",
+     "note": "休息（住持喝茶）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 7,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "break"
+     }
+    },
+    {
+     "file": "11_ready-round2.jpg",
+     "id": "ready-round2",
+     "note": "第 2 炷：準備好了嗎",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "ready"
+     }
+    },
+    {
+     "file": "12_focus-round2.jpg",
+     "id": "focus-round2",
+     "note": "第 2 炷",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "focus"
+     }
+    },
+    {
+     "file": "13_result.jpg",
+     "id": "result",
+     "note": "結算卡（坐滿 2 炷）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 8,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 312,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "14_returning-greeting.jpg",
+     "id": "returning-greeting",
+     "note": "回訪：跟上次一樣／常用／新的安排",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 10,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "15_journal-calendar.jpg",
+     "id": "journal-calendar",
+     "note": "坐禪帳：月曆",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 23,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "16_journal-stats.jpg",
+     "id": "journal-stats",
+     "note": "坐禪帳：統計（七日）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 13,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "17_collect-scrolls.jpg",
+     "id": "collect-scrolls",
+     "note": "收藏冊：掛軸",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 17,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "18_collect-accs.jpg",
+     "id": "collect-accs",
+     "note": "收藏冊：accs",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 16,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "19_collect-faces.jpg",
+     "id": "collect-faces",
+     "note": "收藏冊：faces",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 17,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "20_settings-1.jpg",
+     "id": "settings-1",
+     "note": "設定（頂端）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 20,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "21_settings-2.jpg",
+     "id": "settings-2",
+     "note": "設定（第 2 段，共 2 段）",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 9,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    },
+    {
+     "file": "22_help.jpg",
+     "id": "help",
+     "note": "堂規",
+     "m": {
+      "vw": 390,
+      "vh": 844,
+      "pageH": 852,
+      "hscroll": false,
+      "smallTaps": [],
+      "taps": 1,
+      "smallText": [],
+      "lowContrast": [],
+      "clockPx": 51,
+      "clockVisible": true,
+      "stageH": 300,
+      "stageTop": 80,
+      "phase": "idle"
+     }
+    }
+   ],
+   "notCaptured": [],
+   "errors": []
+  }
+ }
+}

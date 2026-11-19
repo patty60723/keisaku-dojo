@@ -616,25 +616,22 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 .round-label b { color: var(--ink); }
 
 /* 4: sensor note only when degraded */
-.sense { display: block; font-size: var(--fs-14); color: var(--shu-text); }
-.sense summary { cursor: pointer; font-weight: 700; min-height: 32px; display: flex; align-items: center; list-style: none; }
+.sense { display: block; font-size: var(--fs-14); color: var(--muted); }
+.sense summary { cursor: pointer; display: flex; align-items: center; list-style: none; }
 .sense summary::-webkit-details-marker { display: none; }
-.sense summary::after { content: var(--why, "為什麼?"); font-weight: 400; color: var(--muted); margin-left: 8px; text-decoration: underline; text-underline-offset: 3px; }
-.sense[open] summary::after { content: "收起"; }
 .sense p { margin: 2px 0 0; color: var(--muted); }
 
 /* 9 + 1 + 3: one quiet line of today's numbers, and a quiet way out */
 .panel-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px dashed var(--line); padding-top: 10px; }
 .today { margin: 0; color: var(--muted); font-size: var(--fs-14); }
 .today b { font-family: var(--f-num); font-weight: 600; color: var(--ink); font-size: var(--fs-16); }
-.today .hitnum { color: var(--shu-text); }
+.today .hitnum { color: var(--ink); }   /* 6-2: vermilion is for the strike itself, not a standing number */
 .quiet-btn {
   font: inherit; font-size: var(--fs-14); color: var(--muted); background: none; cursor: pointer;
-  border: 0; border-radius: 10px; min-height: 40px; padding: 0 6px; margin-right: -6px;
+  border: 0; border-radius: 10px; min-height: 40px; padding: 0 10px; margin-right: -10px;
   text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--line);
 }
 @media (hover: hover) { .quiet-btn:hover { color: var(--ink); } }
-.quiet-btn.warn { color: var(--shu-text); font-weight: 700; text-decoration-color: currentColor; }
 
 /* 6: 合掌請打 (Round 5, layout B): its own row under the zendo, so it never covers the monk or the mochi */
 .ask-row { display: flex; justify-content: flex-end; margin-block: -4px; }
@@ -675,8 +672,6 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 @media (max-width: 370px) { .top-btns .help-btn { padding: 0 10px; } }
 
 /* ---------- 暫離 and break notifications ---------- */
-.foot-btns { display: flex; gap: 14px; align-items: center; }
-.back-btn { width: 100%; min-height: 48px; }
 .back-btn[hidden] { display: none; }
 .notify-ask {
   align-self: flex-start; font: inherit; font-size: var(--fs-14); cursor: pointer; color: var(--accent);
@@ -1067,7 +1062,6 @@ html:lang(en) * { letter-spacing: normal !important; }
 @media (prefers-reduced-motion: reduce) { .dialog:not([hidden]) { animation: none; } }
 /* drawn icons in place of emoji, so they match the zendo on every phone */
 .ico { width: 1.2em; height: 1.2em; flex: none; vertical-align: -.22em; margin-right: .3em; }
-.sense summary .ico { color: var(--shu); }
 .notify-ask { display: inline-flex; align-items: center; }
 .tour-hint { display: flex; align-items: center; gap: 6px; }
 .tour-hint::before {          /* a small tap: a finger-tip ring with a ripple */
@@ -1153,6 +1147,89 @@ input[type="range"] { min-height: var(--tap); }
 /* focus: the ring is for the keyboard; a tap or a click does not leave one */
 :focus:not(:focus-visible) { outline: none; }
 .choice:focus-visible, .small-btn:focus-visible, .quiet-btn:focus-visible, .tabs button:focus-visible, .sheet-close:focus-visible, .icon-btn:focus-visible, .dlg-skip:focus-visible, .cal .cell:focus-visible, .c-item:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- Round 6-2: the sitting screen (U1 card, U2 sensor note, U9 出堂 confirm, U11 header, X1/U10 first visit) ----------
+   While a session runs the zendo, the mochi and the clock carry the screen; the card reads top to bottom as
+   time → what is happening → today → what you can do, and the header steps back. Nothing here moves the zendo:
+   the header is one row in every phase (sitting only fades its subtitle), and everything that comes and goes in
+   the card (the sensor note, the confirm state, 回座) does so below the buttons or inside a box of fixed size. */
+
+/* U11: one header row in every phase — title and subtitle on one baseline, the gear at the end */
+body { padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
+.top { gap: 0; }
+.top-row { align-items: center; min-height: var(--tap); }
+.top h1 {
+  display: flex; flex-wrap: wrap; align-items: baseline; column-gap: .6em; white-space: normal;
+  font-size: clamp(1.375rem, 6.2vw, 1.625rem); line-height: 1.25; transition: color .4s ease;
+}
+.top h1 small { display: inline; margin: 0; white-space: nowrap; line-height: 1.4; transition: opacity .4s ease, visibility .4s; }
+@media (max-width: 359px) { .top h1 small { font-size: var(--fs-12); } }
+body:is([data-phase="settle"], [data-phase="focus"], [data-phase="leave"], [data-phase="break"], [data-phase="ready"]) .top h1 { color: var(--muted); }
+body:is([data-phase="settle"], [data-phase="focus"], [data-phase="leave"], [data-phase="break"], [data-phase="ready"]) .top h1 small { opacity: 0; visibility: hidden; }
+
+/* X1: the first visit's welcome and tour are about the zendo and the monk; the timer card comes at check-in */
+body[data-intro] #panel { display: none; }
+/* U10: while the tour card talks, the dialogue box under it steps aside (it keeps its place, so nothing moves) */
+body[data-touring] .dialog { visibility: hidden; }
+
+/* U1: the card — time, then the state line, then today's numbers on their own line, then one row of buttons */
+.panel { gap: 8px; }
+.panel-info { display: flex; flex-direction: column; gap: 2px; }
+.status-line { flex-wrap: nowrap; min-width: 0; }
+.status-line .state { flex: none; white-space: nowrap; }
+.round-label { display: inline-flex; flex: 0 1 auto; min-width: 0; overflow: hidden; white-space: pre; }
+.round-label .task { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.today { display: flex; flex-wrap: wrap; align-items: baseline; }
+.today > span { white-space: pre; }               /* breaks only between 「今日坐禪」, the goal and the strikes */
+.panel-foot { padding-top: 8px; }
+.panel-foot:not(:has(.foot-btns > :not([hidden]))) { display: none; }
+.foot-btns { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.foot-btns > button { white-space: nowrap; }
+.foot-btns > .quiet-btn { margin-left: auto; margin-right: 0; }
+.leave-btn {                                       /* secondary: a frame on the paper */
+  font: inherit; font-size: var(--fs-14); font-weight: 700; letter-spacing: .06em; cursor: pointer;
+  min-height: var(--tap); padding: 0 18px; border-radius: var(--r-2); background: transparent; color: var(--accent);
+  border: 1.5px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+}
+@media (hover: hover) { .leave-btn:hover { border-color: var(--accent); } }
+.leave-btn[hidden] { display: none; }
+.back-btn { flex: 0 1 auto; min-width: 4.5em; min-height: var(--tap); padding: 0 20px; font-size: var(--fs-16); }
+
+/* U9: 出堂 asks twice. The first tap turns the quiet word into a framed button, and a line under it runs out in the
+   3 seconds the second tap is accepted. Both labels are laid on top of each other, so the button never changes size. */
+#mainBtn { display: inline-grid; place-items: center; position: relative; }
+#mainBtn[hidden] { display: none; }
+#mainBtn > .ml { grid-area: 1 / 1; }
+#mainBtn > .sizer { visibility: hidden; font-weight: 700; }
+#mainBtn[data-confirm="on"] {
+  color: var(--ink); font-weight: 700; text-decoration: none;
+  background: color-mix(in srgb, var(--ink) 6%, transparent); box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+#mainBtn[data-confirm="on"]::after {
+  content: ""; position: absolute; left: 10px; right: 10px; bottom: 7px; height: 2px; border-radius: 1px;
+  background: currentColor; transform-origin: left; animation: quit-wait 3s linear forwards;
+}
+@keyframes quit-wait { to { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) { #mainBtn[data-confirm="on"]::after { animation: none; opacity: .5; } }
+
+/* U2: no sensor — a few seconds of ink at each seating, then only 「偵測方式」 stays, to open the full note.
+   Both texts share one box, so the card does not change height when the note folds away. No timer: CSS does it. */
+.sense summary { gap: 6px; }
+.sense .ico { margin-right: 0; color: var(--muted); }
+.sense-txt { display: grid; }
+.sense-txt > span { grid-area: 1 / 1; }
+.sense-note { color: var(--ink); visibility: hidden; opacity: 0; }
+.sense-link { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line); }
+.sense.fresh .sense-note { animation: sense-note 6s forwards; }
+.sense.fresh .sense-link { animation: sense-link 6s forwards; }
+@keyframes sense-note { 0%, 92% { visibility: visible; opacity: 1; } 100% { visibility: hidden; opacity: 0; } }
+@keyframes sense-link { 0%, 92% { visibility: hidden; opacity: 0; } 100% { visibility: visible; opacity: 1; } }
+
+/* the card stays where it is through the whole session: 合掌請打 keeps its row (empty) while it is not offered,
+   in 落座, 暫離 and the break, so the card does not climb 58 px and drop back every time (the button is 44 px tall) */
+body:is([data-phase="settle"], [data-phase="leave"], [data-phase="break"]) .ask-row:has(> .ask-btn[hidden]) { display: flex; min-height: var(--tap); }
+
+.leave-btn:focus-visible, .back-btn:focus-visible, .sense summary:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
 </style>
 </head>
 <body>
@@ -1374,7 +1451,7 @@ input[type="range"] { min-height: var(--tap); }
       <h3>隱私</h3>
       <p>紀錄和設定只存在這台手機的瀏覽器裡,不會上傳到任何地方,也沒有追蹤或廣告。平衡儀(動作感測器)只用來判斷手機有沒有被拿起來,讀到的數值不會被保存。</p>
       <div class="about-row">
-        <span class="version">香板禪堂 <b id="appVersion">v22</b></span>
+        <span class="version">香板禪堂 <b id="appVersion">v23</b></span>
         <a class="small-btn" id="feedbackLink" href="https://github.com/patty60723/keisaku-dojo/issues/new" target="_blank" rel="noopener">回報問題</a>
       </div>
       <p class="about-note">回報問題會開啟 GitHub(需要登入),版本和裝置資訊會自動填好,只要寫下發生了什麼事。</p>
@@ -1712,25 +1789,27 @@ input[type="range"] { min-height: var(--tap); }
     <button type="button" class="sr-only" id="tourNext">下一步</button>
   </section>
 
-  <section class="panel" aria-label="計時">
+  <section class="panel" id="panel" aria-label="計時">
     <div class="clock-row">
       <div class="clock" id="clock">25:00</div>
       <div class="rounds" id="rounds" aria-hidden="true"></div>
     </div>
-    <p class="status-line"><span class="state" id="status">報到中</span><span class="round-label" id="roundLabel"></span></p>
-    <button type="button" class="btn primary back-btn" id="backBtn" hidden>回座</button>
+    <div class="panel-info">
+      <p class="status-line"><span class="state" id="status">報到中</span><span class="round-label" id="roundLabel"></span></p>
+      <p class="today" id="today"><span class="today-min">今日坐禪 <b id="stToday">0</b> 分</span><span id="todayGoal" hidden></span><span id="todayHitsWrap" hidden> · 被打 <b class="hitnum" id="stTodayHits">0</b> 下</span></p>
+    </div>
     <button type="button" class="notify-ask" id="notifyAsk" hidden><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.6 2H4.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 21.2a2.2 2.2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>休息結束時用通知叫我</button>
-    <details class="sense" id="sense" hidden>
-      <summary><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2 22 20.4H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9.5v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17.4" r="1.3" fill="currentColor"/></svg>只能偵測是否切出畫面</summary>
-      <p id="senseMode"></p>
-    </details>
     <div class="panel-foot">
-      <p class="today" id="today">今日坐禪 <b id="stToday">0</b> 分<span id="todayGoal" hidden></span><span id="todayHitsWrap" hidden> · 被打 <b class="hitnum" id="stTodayHits">0</b> 下</span></p>
       <div class="foot-btns">
-        <button type="button" class="quiet-btn" id="leaveBtn" hidden>暫離</button>
+        <button type="button" class="leave-btn" id="leaveBtn" hidden>暫離</button>
+        <button type="button" class="btn primary back-btn" id="backBtn" hidden>回座</button>
         <button type="button" class="quiet-btn" id="mainBtn" hidden>出堂・結束</button>
       </div>
     </div>
+    <details class="sense" id="sense" hidden>
+      <summary><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 10.6v6.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="7.3" r="1.3" fill="currentColor"/></svg><span class="sense-txt"><span class="sense-note">只能偵測是否切出畫面</span><span class="sense-link">偵測方式</span></span></summary>
+      <p id="senseMode"></p>
+    </details>
   </section>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
@@ -1928,7 +2007,7 @@ const I18N = {
     "啪!手機拿起來了。放回原位才能繼續。": "パシッ!スマホを手に取りましたな。元の場所に戻せば続けられます。",
     "如果真的有事要用手機,先按「暫離」,計時會暫停,就不會挨打了。每炷可以用一次。": "本当にスマホを使う用事があるなら、先に「中座」を押せばタイマーが止まり、打たれません。一炷に一度使えます。",
     "現在就要暫離的話,點一下「暫離」": "今すぐ中座するなら「中座」をタップ",
-    "坐禪中・第 {0} 炷": "坐禅中・第{0}炷",
+    "坐禪中": "坐禅中",
     "拿起手機不會被發現,但切到別的 App 或分頁還是會被打。": "スマホを手に取っても気づかれませんが、ほかのアプリやタブに切り替えると打たれます。",
     " · <b>{0}</b>/{1} 炷": " · <b>{0}</b>/{1}炷",
     " <span class=\"met-mark\" aria-label=\"達成\">達</span>": " <span class=\"met-mark\" aria-label=\"達成\">達</span>",
@@ -1980,7 +2059,7 @@ const I18N = {
     "啪!離開畫面 {0}。": "パシッ!画面を離れて{0}。",
     "啪!離開太久,再補一下。": "パシッ!離れすぎです、もうひとつ。",
     "又分心了 {0} 次。": "ほかにも {0} 回、気が散りましたね。",
-    "確定要出堂?": "退堂しますか?",
+    "再按一次出堂": "もう一度押すと退堂",
     "啪!精神一振,謝謝師父。": "パシッ!目が覚めました。ありがとうございます。",
     "下次打開時換成新的語言。": "次に開いたときに新しい言語に切り替わります。",
     "停止試聽": "試聴を止める",
@@ -2276,6 +2355,7 @@ const I18N = {
     "回座": "座に戻る",
     "休息結束時用通知叫我": "休憩終了を通知で知らせて",
     "只能偵測是否切出畫面": "画面の切り替えのみ検知できます",
+    "偵測方式": "検知のしかた",
     "今日坐禪": "今日の坐禅",
     "· 被打": "· 打たれた",
     "暫離": "中座",
@@ -2484,7 +2564,7 @@ const I18N = {
     "啪!手機拿起來了。放回原位才能繼續。": "Whack! You picked up your phone. Put it back to continue. ",
     "如果真的有事要用手機,先按「暫離」,計時會暫停,就不會挨打了。每炷可以用一次。": "If you really need your phone, press \"Step away\" first. The timer pauses and you won't get tapped. Once per round. ",
     "現在就要暫離的話,點一下「暫離」": "To step away now, tap \"Step away\"",
-    "坐禪中・第 {0} 炷": "Sitting · Round {0}",
+    "坐禪中": "Sitting",
     "拿起手機不會被發現,但切到別的 App 或分頁還是會被打。": "so I can't tell if you pick up the phone, but switching apps or tabs still gets a tap. ",
     " · <b>{0}</b>/{1} 炷": " · <b>{0}</b>/{1} {1|round|rounds}",
     " <span class=\"met-mark\" aria-label=\"達成\">達</span>": " <span class=\"met-mark\" aria-label=\"Goal met\">✓</span>",
@@ -2536,7 +2616,7 @@ const I18N = {
     "啪!離開畫面 {0}。": "Whack! Away from the screen for {0}. ",
     "啪!離開太久,再補一下。": "Whack! Away too long. One more. ",
     "又分心了 {0} 次。": "Your mind wandered {0} more {0|time|times}.",
-    "確定要出堂?": "Leave the hall now? ",
+    "再按一次出堂": "Tap again",
     "啪!精神一振,謝謝師父。": "Whack! That woke me up. Thank you. ",
     "下次打開時換成新的語言。": "The new language applies next time you open the app. ",
     "停止試聽": "Stop preview",
@@ -2832,6 +2912,7 @@ const I18N = {
     "回座": "I'm back",
     "休息結束時用通知叫我": "Notify me when the break ends",
     "只能偵測是否切出畫面": "Can only detect switching away",
+    "偵測方式": "How it detects",
     "今日坐禪": "Today",
     "· 被打": "· struck",
     "暫離": "Step away",
@@ -4632,7 +4713,6 @@ const I18N = {
     document.documentElement.lang = LANG;
     document.title = tr('香板禪堂');
     translateDom(document.body);
-    document.documentElement.style.setProperty('--why', JSON.stringify(tr('為什麼?')));   // the 「為什麼?」 after the detection warning is CSS text
   }
   const sitterEl = $('#sitter');
   const bubbleEl = $('#bubble'), bubbleText = $('#bubbleText');
@@ -5484,6 +5564,7 @@ const I18N = {
     let introduced = false;
     if (!again && !store.get('keisaku-tour-v1', false)) {
       // first visit: say what this place is before pointing at anything
+      document.body.dataset.intro = '';                 // the timer card waits until check-in (CSS)
       if (!hasSat) {
         try {
           for (const [line, reply] of INTRO) await ask(line, [{ label: reply, value: 1, primary: true }], { skippable: true });   // he holds the keisaku all along
@@ -5492,6 +5573,7 @@ const I18N = {
         introduced = true;
       }
       await tour(introSteps(hasSat));
+      delete document.body.dataset.intro;
       store.set('keisaku-tour-v1', true);
       store.set('keisaku-tip-collect-v1', true);
     } else if (!again && !store.get('keisaku-tip-collect-v1', false)) {
@@ -5754,14 +5836,16 @@ const I18N = {
       text: tr('如果真的有事要用手機,先按「暫離」,計時會暫停,就不會挨打了。每炷可以用一次。'), hint: tr('現在就要暫離的話,點一下「暫離」') }]);
   }
   function onPutDown() {
-    setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on');
+    setStatus(tr('坐禪中'), 'on');
     toast(tr('回座了,繼續專心。'));
   }
   // only shown when pick-ups can't be caught; the details say why
   function renderSense(why) {
     const box = $('#sense');
-    box.hidden = !why; box.open = false;
-    if (why) $('#senseMode').textContent = why + tr('拿起手機不會被發現,但切到別的 App 或分頁還是會被打。');
+    box.hidden = !why; box.open = false; box.classList.remove('fresh');
+    if (!why) return;
+    $('#senseMode').textContent = why + tr('拿起手機不會被發現,但切到別的 App 或分頁還是會被打。');
+    void box.offsetWidth; box.classList.add('fresh');   // restart the short note: it fades into 「偵測方式」 by itself
   }
 
   /* ---------- pomodoro phases ---------- */
@@ -5815,22 +5899,29 @@ const I18N = {
       const n = i + 1;
       el.className = !started ? '' : n < P.round || (n === P.round && P.phase === 'break') ? 'done' : n === P.round ? 'now' : '';
     });
+    const task = `<span class="task">${escapeHtml(cfg.task)}</span>`;   // a long task name is cut short, the round never
     $('#roundLabel').innerHTML = started
-      ? tr('{0}・第 <b>{1}</b>/{2} 炷', escapeHtml(cfg.task), P.round, cfg.rounds)
-      : tr('{0}・<b>{1}</b> 分 × {2} 炷', escapeHtml(cfg.task), cfg.focusMin, cfg.rounds);
+      ? tr('{0}・第 <b>{1}</b>/{2} 炷', task, P.round, cfg.rounds)
+      : tr('{0}・<b>{1}</b> 分 × {2} 炷', task, cfg.focusMin, cfg.rounds);
+    $('#roundLabel').title = cfg.task;
   }
   const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   function setStatus(text, state) {
-    statusEl.textContent = text.replace(/・第 \d+ 炷$/, ''); statusEl.dataset.state = state || '';
+    statusEl.textContent = text; statusEl.dataset.state = state || '';
+    document.body.dataset.phase = P.phase;          // the header steps back while a session runs (CSS)
     askBtn.hidden = P.phase !== 'focus';            // asking for a strike only makes sense while sitting
     $('#stageWrap').dataset.phase = P.phase;       // the night lamp burns low during the break
     leaveBtn.hidden = P.phase !== 'focus' || P.leaveUsed;
     backBtn.hidden = P.phase !== 'leave';
     $('#notifyAsk').hidden = !(P.phase === 'break' && notifyAskable());
   }
-  function setMain(text, { warn = false } = {}) {
+  function setMain(text, { confirm = false } = {}) {
     mainBtn.hidden = text == null;
-    if (text != null) { mainBtn.textContent = text; mainBtn.classList.toggle('warn', warn); }
+    if (text == null) return;
+    const alt = text === tr('出堂・結束') ? tr('再按一次出堂') : '';   // 出堂 keeps one width in every phase it shows (only while sitting does it ask twice)
+    const shown = confirm ? alt : text, other = confirm ? text : alt;
+    mainBtn.dataset.confirm = confirm ? 'on' : '';
+    mainBtn.innerHTML = `<span class="ml">${escapeHtml(shown)}</span>` + (alt ? `<span class="ml sizer" aria-hidden="true">${escapeHtml(other)}</span>` : '');
   }
   function renderAll() {
     renderRounds(); renderStats(); tick();
@@ -5921,13 +6012,14 @@ const I18N = {
     P.end = Date.now() + P.left;
     Mo.base = withMotion ? Mo.lp.slice() : null; Mo.picked = false; Mo.score = 0;
     senseFor(withMotion);
-    setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on');
+    setStatus(tr('坐禪中'), 'on');
     setMain(tr('出堂・結束'));
     bell(0, .2);
     Amb.timers.push(setTimeout(() => { if (P.phase === 'focus') startBackground(); }, 1500));
     toast(tr('回座了,繼續。'));
   }
   leaveBtn.addEventListener('click', () => { audio(); startLeave(); });
+  $('#sense').addEventListener('toggle', () => $('#sense').classList.remove('fresh'));   // opened by hand: the short note is done
   backBtn.addEventListener('click', endLeave);
 
   function beginFocus(withMotion) {
@@ -5935,7 +6027,7 @@ const I18N = {
     P.start = Date.now(); P.end = P.start + cfg.focusMin * 60000; P.nextYawn = 0;
     Mo.base = withMotion ? Mo.lp.slice() : null; Mo.picked = false; Mo.score = 0;
     senseFor(withMotion);
-    setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on');
+    setStatus(tr('坐禪中'), 'on');
     setMain(tr('出堂・結束'));
     renderRounds();
     bells(3);
@@ -6100,7 +6192,7 @@ const I18N = {
     setStatus(tr('被抓到了'), 'hit');
     distraction({ reason: tr('啪!離開畫面 {0}。', label), counted: true });
     if (secs >= 90) distraction({ reason: tr('啪!離開太久,再補一下。'), counted: true });   // counted; taken into the same reminder
-    enqueue(async () => { if (P.phase === 'focus') setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on'); });
+    enqueue(async () => { if (P.phase === 'focus') setStatus(tr('坐禪中'), 'on'); });
     enqueue(leaveTip);
     tick();
   });
@@ -6113,7 +6205,7 @@ const I18N = {
       case 'focus':
         if (Date.now() - P.confirmEnd < 3000) { quitEarly(); break; }
         P.confirmEnd = Date.now();
-        setMain(tr('確定要出堂?'), { warn: true });
+        setMain(tr('出堂・結束'), { confirm: true });
         setTimeout(() => { if (P.phase === 'focus') setMain(tr('出堂・結束')); }, 3000);
         break;
     }
@@ -6513,7 +6605,7 @@ const I18N = {
         Object.assign(ring.style, { left: r.left - pad + 'px', top: r.top - pad + 'px', width: r.width + pad * 2 + 'px', height: r.height + pad * 2 + 'px' });
       };
       const finish = () => {
-        Tour.active = false; block.hidden = card.hidden = true;
+        Tour.active = false; block.hidden = card.hidden = true; delete document.body.dataset.touring;
         removeEventListener('resize', place); removeEventListener('scroll', place);
         resolve();
       };
@@ -6545,7 +6637,7 @@ const I18N = {
         if (s.act) $(s.target).click();
       };
       Tour.skip = finish;
-      Tour.active = true; block.hidden = card.hidden = false;
+      Tour.active = true; block.hidden = card.hidden = false; document.body.dataset.touring = '';
       addEventListener('resize', place); addEventListener('scroll', place, { passive: true });
       show();
     });
@@ -6587,7 +6679,13 @@ const I18N = {
   });
   $('#openRules').addEventListener('click', () => openSheet(helpBox));
   $('#openJournal').addEventListener('click', () => $('#journalBtn').click());
-  $('#replayTour').addEventListener('click', () => { $('#settings').close(); tour(introSteps(true)); });
+  $('#replayTour').addEventListener('click', async () => {
+    $('#settings').close();
+    const idle = P.phase === 'idle';                  // between sessions the replay looks like the first visit
+    if (idle) document.body.dataset.intro = '';
+    await tour(introSteps(true));
+    if (idle) delete document.body.dataset.intro;
+  });
 
   /* ---------- 坐禪帳: 統計 tab ---------- */
   let statRange = '7';

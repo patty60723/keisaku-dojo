@@ -53,7 +53,6 @@
     document.documentElement.lang = LANG;
     document.title = tr('香板禪堂');
     translateDom(document.body);
-    document.documentElement.style.setProperty('--why', JSON.stringify(tr('為什麼?')));   // the 「為什麼?」 after the detection warning is CSS text
   }
   const sitterEl = $('#sitter');
   const bubbleEl = $('#bubble'), bubbleText = $('#bubbleText');
@@ -905,6 +904,7 @@
     let introduced = false;
     if (!again && !store.get('keisaku-tour-v1', false)) {
       // first visit: say what this place is before pointing at anything
+      document.body.dataset.intro = '';                 // the timer card waits until check-in (CSS)
       if (!hasSat) {
         try {
           for (const [line, reply] of INTRO) await ask(line, [{ label: reply, value: 1, primary: true }], { skippable: true });   // he holds the keisaku all along
@@ -913,6 +913,7 @@
         introduced = true;
       }
       await tour(introSteps(hasSat));
+      delete document.body.dataset.intro;
       store.set('keisaku-tour-v1', true);
       store.set('keisaku-tip-collect-v1', true);
     } else if (!again && !store.get('keisaku-tip-collect-v1', false)) {
@@ -1175,14 +1176,16 @@
       text: tr('如果真的有事要用手機,先按「暫離」,計時會暫停,就不會挨打了。每炷可以用一次。'), hint: tr('現在就要暫離的話,點一下「暫離」') }]);
   }
   function onPutDown() {
-    setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on');
+    setStatus(tr('坐禪中'), 'on');
     toast(tr('回座了,繼續專心。'));
   }
   // only shown when pick-ups can't be caught; the details say why
   function renderSense(why) {
     const box = $('#sense');
-    box.hidden = !why; box.open = false;
-    if (why) $('#senseMode').textContent = why + tr('拿起手機不會被發現,但切到別的 App 或分頁還是會被打。');
+    box.hidden = !why; box.open = false; box.classList.remove('fresh');
+    if (!why) return;
+    $('#senseMode').textContent = why + tr('拿起手機不會被發現,但切到別的 App 或分頁還是會被打。');
+    void box.offsetWidth; box.classList.add('fresh');   // restart the short note: it fades into 「偵測方式」 by itself
   }
 
   /* ---------- pomodoro phases ---------- */
@@ -1236,22 +1239,29 @@
       const n = i + 1;
       el.className = !started ? '' : n < P.round || (n === P.round && P.phase === 'break') ? 'done' : n === P.round ? 'now' : '';
     });
+    const task = `<span class="task">${escapeHtml(cfg.task)}</span>`;   // a long task name is cut short, the round never
     $('#roundLabel').innerHTML = started
-      ? tr('{0}・第 <b>{1}</b>/{2} 炷', escapeHtml(cfg.task), P.round, cfg.rounds)
-      : tr('{0}・<b>{1}</b> 分 × {2} 炷', escapeHtml(cfg.task), cfg.focusMin, cfg.rounds);
+      ? tr('{0}・第 <b>{1}</b>/{2} 炷', task, P.round, cfg.rounds)
+      : tr('{0}・<b>{1}</b> 分 × {2} 炷', task, cfg.focusMin, cfg.rounds);
+    $('#roundLabel').title = cfg.task;
   }
   const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   function setStatus(text, state) {
-    statusEl.textContent = text.replace(/・第 \d+ 炷$/, ''); statusEl.dataset.state = state || '';
+    statusEl.textContent = text; statusEl.dataset.state = state || '';
+    document.body.dataset.phase = P.phase;          // the header steps back while a session runs (CSS)
     askBtn.hidden = P.phase !== 'focus';            // asking for a strike only makes sense while sitting
     $('#stageWrap').dataset.phase = P.phase;       // the night lamp burns low during the break
     leaveBtn.hidden = P.phase !== 'focus' || P.leaveUsed;
     backBtn.hidden = P.phase !== 'leave';
     $('#notifyAsk').hidden = !(P.phase === 'break' && notifyAskable());
   }
-  function setMain(text, { warn = false } = {}) {
+  function setMain(text, { confirm = false } = {}) {
     mainBtn.hidden = text == null;
-    if (text != null) { mainBtn.textContent = text; mainBtn.classList.toggle('warn', warn); }
+    if (text == null) return;
+    const alt = text === tr('出堂・結束') ? tr('再按一次出堂') : '';   // 出堂 keeps one width in every phase it shows (only while sitting does it ask twice)
+    const shown = confirm ? alt : text, other = confirm ? text : alt;
+    mainBtn.dataset.confirm = confirm ? 'on' : '';
+    mainBtn.innerHTML = `<span class="ml">${escapeHtml(shown)}</span>` + (alt ? `<span class="ml sizer" aria-hidden="true">${escapeHtml(other)}</span>` : '');
   }
   function renderAll() {
     renderRounds(); renderStats(); tick();
@@ -1342,13 +1352,14 @@
     P.end = Date.now() + P.left;
     Mo.base = withMotion ? Mo.lp.slice() : null; Mo.picked = false; Mo.score = 0;
     senseFor(withMotion);
-    setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on');
+    setStatus(tr('坐禪中'), 'on');
     setMain(tr('出堂・結束'));
     bell(0, .2);
     Amb.timers.push(setTimeout(() => { if (P.phase === 'focus') startBackground(); }, 1500));
     toast(tr('回座了,繼續。'));
   }
   leaveBtn.addEventListener('click', () => { audio(); startLeave(); });
+  $('#sense').addEventListener('toggle', () => $('#sense').classList.remove('fresh'));   // opened by hand: the short note is done
   backBtn.addEventListener('click', endLeave);
 
   function beginFocus(withMotion) {
@@ -1356,7 +1367,7 @@
     P.start = Date.now(); P.end = P.start + cfg.focusMin * 60000; P.nextYawn = 0;
     Mo.base = withMotion ? Mo.lp.slice() : null; Mo.picked = false; Mo.score = 0;
     senseFor(withMotion);
-    setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on');
+    setStatus(tr('坐禪中'), 'on');
     setMain(tr('出堂・結束'));
     renderRounds();
     bells(3);
@@ -1521,7 +1532,7 @@
     setStatus(tr('被抓到了'), 'hit');
     distraction({ reason: tr('啪!離開畫面 {0}。', label), counted: true });
     if (secs >= 90) distraction({ reason: tr('啪!離開太久,再補一下。'), counted: true });   // counted; taken into the same reminder
-    enqueue(async () => { if (P.phase === 'focus') setStatus(tr('坐禪中・第 {0} 炷', P.round), 'on'); });
+    enqueue(async () => { if (P.phase === 'focus') setStatus(tr('坐禪中'), 'on'); });
     enqueue(leaveTip);
     tick();
   });
@@ -1534,7 +1545,7 @@
       case 'focus':
         if (Date.now() - P.confirmEnd < 3000) { quitEarly(); break; }
         P.confirmEnd = Date.now();
-        setMain(tr('確定要出堂?'), { warn: true });
+        setMain(tr('出堂・結束'), { confirm: true });
         setTimeout(() => { if (P.phase === 'focus') setMain(tr('出堂・結束')); }, 3000);
         break;
     }
@@ -1934,7 +1945,7 @@
         Object.assign(ring.style, { left: r.left - pad + 'px', top: r.top - pad + 'px', width: r.width + pad * 2 + 'px', height: r.height + pad * 2 + 'px' });
       };
       const finish = () => {
-        Tour.active = false; block.hidden = card.hidden = true;
+        Tour.active = false; block.hidden = card.hidden = true; delete document.body.dataset.touring;
         removeEventListener('resize', place); removeEventListener('scroll', place);
         resolve();
       };
@@ -1966,7 +1977,7 @@
         if (s.act) $(s.target).click();
       };
       Tour.skip = finish;
-      Tour.active = true; block.hidden = card.hidden = false;
+      Tour.active = true; block.hidden = card.hidden = false; document.body.dataset.touring = '';
       addEventListener('resize', place); addEventListener('scroll', place, { passive: true });
       show();
     });
@@ -2008,7 +2019,13 @@
   });
   $('#openRules').addEventListener('click', () => openSheet(helpBox));
   $('#openJournal').addEventListener('click', () => $('#journalBtn').click());
-  $('#replayTour').addEventListener('click', () => { $('#settings').close(); tour(introSteps(true)); });
+  $('#replayTour').addEventListener('click', async () => {
+    $('#settings').close();
+    const idle = P.phase === 'idle';                  // between sessions the replay looks like the first visit
+    if (idle) document.body.dataset.intro = '';
+    await tour(introSteps(true));
+    if (idle) delete document.body.dataset.intro;
+  });
 
   /* ---------- 坐禪帳: 統計 tab ---------- */
   let statRange = '7';
