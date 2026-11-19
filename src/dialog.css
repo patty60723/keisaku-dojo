@@ -274,25 +274,22 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 .round-label b { color: var(--ink); }
 
 /* 4: sensor note only when degraded */
-.sense { display: block; font-size: var(--fs-14); color: var(--shu-text); }
-.sense summary { cursor: pointer; font-weight: 700; min-height: 32px; display: flex; align-items: center; list-style: none; }
+.sense { display: block; font-size: var(--fs-14); color: var(--muted); }
+.sense summary { cursor: pointer; display: flex; align-items: center; list-style: none; }
 .sense summary::-webkit-details-marker { display: none; }
-.sense summary::after { content: var(--why, "為什麼?"); font-weight: 400; color: var(--muted); margin-left: 8px; text-decoration: underline; text-underline-offset: 3px; }
-.sense[open] summary::after { content: "收起"; }
 .sense p { margin: 2px 0 0; color: var(--muted); }
 
 /* 9 + 1 + 3: one quiet line of today's numbers, and a quiet way out */
 .panel-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px dashed var(--line); padding-top: 10px; }
 .today { margin: 0; color: var(--muted); font-size: var(--fs-14); }
 .today b { font-family: var(--f-num); font-weight: 600; color: var(--ink); font-size: var(--fs-16); }
-.today .hitnum { color: var(--shu-text); }
+.today .hitnum { color: var(--ink); }   /* 6-2: vermilion is for the strike itself, not a standing number */
 .quiet-btn {
   font: inherit; font-size: var(--fs-14); color: var(--muted); background: none; cursor: pointer;
-  border: 0; border-radius: 10px; min-height: 40px; padding: 0 6px; margin-right: -6px;
+  border: 0; border-radius: 10px; min-height: 40px; padding: 0 10px; margin-right: -10px;
   text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--line);
 }
 @media (hover: hover) { .quiet-btn:hover { color: var(--ink); } }
-.quiet-btn.warn { color: var(--shu-text); font-weight: 700; text-decoration-color: currentColor; }
 
 /* 6: 合掌請打 (Round 5, layout B): its own row under the zendo, so it never covers the monk or the mochi */
 .ask-row { display: flex; justify-content: flex-end; margin-block: -4px; }
@@ -333,8 +330,6 @@ body { min-height: 100dvh; display: flex; flex-direction: column; }
 @media (max-width: 370px) { .top-btns .help-btn { padding: 0 10px; } }
 
 /* ---------- 暫離 and break notifications ---------- */
-.foot-btns { display: flex; gap: 14px; align-items: center; }
-.back-btn { width: 100%; min-height: 48px; }
 .back-btn[hidden] { display: none; }
 .notify-ask {
   align-self: flex-start; font: inherit; font-size: var(--fs-14); cursor: pointer; color: var(--accent);
@@ -725,7 +720,6 @@ html:lang(en) * { letter-spacing: normal !important; }
 @media (prefers-reduced-motion: reduce) { .dialog:not([hidden]) { animation: none; } }
 /* drawn icons in place of emoji, so they match the zendo on every phone */
 .ico { width: 1.2em; height: 1.2em; flex: none; vertical-align: -.22em; margin-right: .3em; }
-.sense summary .ico { color: var(--shu); }
 .notify-ask { display: inline-flex; align-items: center; }
 .tour-hint { display: flex; align-items: center; gap: 6px; }
 .tour-hint::before {          /* a small tap: a finger-tip ring with a ripple */
@@ -811,3 +805,81 @@ input[type="range"] { min-height: var(--tap); }
 /* focus: the ring is for the keyboard; a tap or a click does not leave one */
 :focus:not(:focus-visible) { outline: none; }
 .choice:focus-visible, .small-btn:focus-visible, .quiet-btn:focus-visible, .tabs button:focus-visible, .sheet-close:focus-visible, .icon-btn:focus-visible, .dlg-skip:focus-visible, .cal .cell:focus-visible, .c-item:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- Round 6-2: the sitting screen (U1 card, U2 sensor note, U9 出堂 confirm, U11 header, X1/U10 first visit) ----------
+   While a session runs the zendo, the mochi and the clock carry the screen; the card reads top to bottom as
+   time → what is happening → today → what you can do, and the header steps back. Nothing here moves the zendo:
+   the header is one row in every phase (sitting only fades its subtitle), and everything that comes and goes in
+   the card (the sensor note, the confirm state, 回座) does so below the buttons or inside a box of fixed size. */
+
+/* U11: one header row in every phase — title and subtitle on one baseline, the gear at the end */
+body { padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
+.top { gap: 0; }
+.top-row { align-items: center; min-height: var(--tap); }
+.top h1 {
+  display: flex; flex-wrap: wrap; align-items: baseline; column-gap: .6em; white-space: normal;
+  font-size: clamp(1.375rem, 6.2vw, 1.625rem); line-height: 1.25; transition: color .4s ease;
+}
+.top h1 small { display: inline; margin: 0; white-space: nowrap; line-height: 1.4; transition: opacity .4s ease, visibility .4s; }
+@media (max-width: 359px) { .top h1 small { font-size: var(--fs-12); } }
+body:is([data-phase="settle"], [data-phase="focus"], [data-phase="leave"], [data-phase="break"], [data-phase="ready"]) .top h1 { color: var(--muted); }
+body:is([data-phase="settle"], [data-phase="focus"], [data-phase="leave"], [data-phase="break"], [data-phase="ready"]) .top h1 small { opacity: 0; visibility: hidden; }
+
+/* X1: the first visit's welcome and tour are about the zendo and the monk; the timer card comes at check-in */
+body[data-intro] #panel { display: none; }
+/* U10: while the tour card talks, the dialogue box under it steps aside (it keeps its place, so nothing moves) */
+body[data-touring] .dialog { visibility: hidden; }
+
+/* U1: the card — time, then the state line, then today's numbers on their own line, then one row of buttons */
+.panel { gap: 8px; }
+.panel-info { display: flex; flex-direction: column; gap: 2px; }
+.status-line { row-gap: 0; }
+.status-line .state { white-space: nowrap; }
+.round-label { display: inline-flex; min-width: 0; max-width: 100%; white-space: pre; }
+.round-label .task { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.today > span { white-space: nowrap; }          /* breaks only between 「今日坐禪」, the goal and the strikes */
+.panel-foot { padding-top: 8px; }
+.panel-foot:not(:has(.foot-btns > :not([hidden]))) { display: none; }
+.foot-btns { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.foot-btns > button { white-space: nowrap; }
+.foot-btns > .quiet-btn { margin-left: auto; margin-right: 0; }
+.leave-btn {                                       /* secondary: a frame on the paper */
+  font: inherit; font-size: var(--fs-14); font-weight: 700; letter-spacing: .06em; cursor: pointer;
+  min-height: var(--tap); padding: 0 18px; border-radius: var(--r-2); background: transparent; color: var(--accent);
+  border: 1.5px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+}
+@media (hover: hover) { .leave-btn:hover { border-color: var(--accent); } }
+.leave-btn[hidden] { display: none; }
+.back-btn { flex: 1 1 8em; max-width: 18em; min-height: var(--tap); padding-block: 0; font-size: var(--fs-16); }
+
+/* U9: 出堂 asks twice. The first tap turns the quiet word into a framed button, and a line under it runs out in the
+   3 seconds the second tap is accepted. Both labels are laid on top of each other, so the button never changes size. */
+#mainBtn { display: inline-grid; place-items: center; position: relative; }
+#mainBtn[hidden] { display: none; }
+#mainBtn > .ml { grid-area: 1 / 1; }
+#mainBtn > .sizer { visibility: hidden; font-weight: 700; }
+#mainBtn[data-confirm="on"] {
+  color: var(--ink); font-weight: 700; text-decoration: none;
+  background: color-mix(in srgb, var(--ink) 6%, transparent); box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+#mainBtn[data-confirm="on"]::after {
+  content: ""; position: absolute; left: 10px; right: 10px; bottom: 7px; height: 2px; border-radius: 1px;
+  background: currentColor; transform-origin: left; animation: quit-wait 3s linear forwards;
+}
+@keyframes quit-wait { to { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) { #mainBtn[data-confirm="on"]::after { animation: none; opacity: .5; } }
+
+/* U2: no sensor — a few seconds of ink at each seating, then only 「偵測方式」 stays, to open the full note.
+   Both texts share one box, so the card does not change height when the note folds away. No timer: CSS does it. */
+.sense summary { gap: 6px; }
+.sense .ico { margin-right: 0; color: var(--muted); }
+.sense-txt { display: grid; }
+.sense-txt > span { grid-area: 1 / 1; }
+.sense-note { color: var(--ink); visibility: hidden; opacity: 0; }
+.sense-link { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line); }
+.sense.fresh .sense-note { animation: sense-note 6s forwards; }
+.sense.fresh .sense-link { animation: sense-link 6s forwards; }
+@keyframes sense-note { 0%, 92% { visibility: visible; opacity: 1; } 100% { visibility: hidden; opacity: 0; } }
+@keyframes sense-link { 0%, 92% { visibility: hidden; opacity: 0; } 100% { visibility: visible; opacity: 1; } }
+
+.leave-btn:focus-visible, .back-btn:focus-visible, .sense summary:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
