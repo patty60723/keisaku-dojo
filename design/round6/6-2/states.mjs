@@ -25,7 +25,7 @@ const PROFILES = [
   { name: '390x844-reduced-motion', width: 390, height: 844, reducedMotion: 'reduce' },
 ].filter(p => !want.length || want.some(w => p.name.includes(w)));
 
-const LONG_TASK = '期末報告與作業整理（第三章）';
+const LONG_TASK = '期末報告與作業整理第三章';   // 12 characters, the longest task name the app accepts
 // where things are: the zendo, the card and its buttons, page scroll — and a few checks that are true or false
 const where = p => p.evaluate(() => {
   const r = s => { const e = document.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(), cs = getComputedStyle(e);
@@ -64,7 +64,7 @@ function jumps(frames) {
   const out = {};
   for (const k of ['header', 'stage', 'leave', 'back', 'main', 'clock']) {
     const v = frames.map(f => f[k]).filter(Boolean); if (v.length < 2) continue;
-    out[k] = +Math.max(...v.map(b => Math.max(Math.abs(b.top - v[0].top), Math.abs(b.left - v[0].left), Math.abs(b.w - v[0].w)))).toFixed(1);
+    out[k] = +Math.max(...v.map(b => Math.max(Math.abs(b.top - v[0].top), k === 'clock' ? 0 : Math.max(Math.abs(b.left - v[0].left), Math.abs(b.w - v[0].w))))).toFixed(1);   // the clock's digits change width; only its place counts
   }
   return out;
 }
