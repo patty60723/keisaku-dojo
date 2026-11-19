@@ -23,7 +23,7 @@ const PROFILES = [
   { name: '320x640-en', width: 320, height: 640, lang: 'en' },
   { name: '390x844-ja', width: 390, height: 844, lang: 'ja' },
   { name: '390x844-reduced-motion', width: 390, height: 844, reducedMotion: 'reduce' },
-].filter(p => !want.length || want.some(w => p.name.includes(w)));
+].filter(p => !want.length || want.some(w => process.env.STATES_EXACT ? p.name === w : p.name.includes(w)));
 
 const LONG_TASK = '期末報告與作業整理第三章';   // 12 characters, the longest task name the app accepts
 // where things are: the zendo, the card and its buttons, page scroll — and a few checks that are true or false
@@ -69,7 +69,10 @@ function jumps(frames) {
   return out;
 }
 
-const data = { taken: new Date().toISOString(), profiles: {} };
+// a run limited to some profiles keeps the others' results
+const prevFile = path.join(OUT, 'states.json');
+const data = want.length && fs.existsSync(prevFile) ? JSON.parse(fs.readFileSync(prevFile, 'utf8')) : { profiles: {} };
+data.taken = new Date().toISOString();
 const server = await startServer(), browser = await launch();
 try {
   for (const prof of PROFILES) {

@@ -788,7 +788,7 @@ const I18N = {
     "啪!離開畫面 {0}。": "Whack! Away from the screen for {0}. ",
     "啪!離開太久,再補一下。": "Whack! Away too long. One more. ",
     "又分心了 {0} 次。": "Your mind wandered {0} more {0|time|times}.",
-    "再按一次出堂": "Tap again to leave",
+    "再按一次出堂": "Tap again",
     "啪!精神一振,謝謝師父。": "Whack! That woke me up. Thank you. ",
     "下次打開時換成新的語言。": "The new language applies next time you open the app. ",
     "停止試聽": "Stop preview",
