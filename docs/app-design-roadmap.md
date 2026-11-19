@@ -75,10 +75,11 @@
 | 2026-11-17 | 6.1 現況盤點＋6.2 全面審查 | 以 `main` @ `ebcae50` 操作正式版，11 組設定（320／360／390／412、844×390 橫向、字體 130%、深色、黃昏、日文、英文、減少動態）共 305 張截圖與量測。沒有 P0；P1 11 項、P2 9 項；提出方向 A「紙本禪堂」（建議）與 B「繪本禪堂」；分 7 批實作 | [`round6-design-audit.md`](round6-design-audit.md)、[`round6-improvement-plan.md`](round6-improvement-plan.md)、[`../design/round6/audit/index.md`](../design/round6/audit/index.md)；分支 `docs/round6-app-design-audit` |
 
 | 2026-11-19 | 6-1 設計基礎 | 使用者接受視覺成果與合理例外；PR #6 已合併 `01df9af`。回報 139 項測試通過、v22 後相關測試通過、四組動畫回歸零超門檻；實機與部署尚未獨立確認 | [PR #6](https://github.com/patty60723/keisaku-dojo/pull/6)、[`round6-1-design-foundation.md`](round6-1-design-foundation.md) |
+| 2026-11-19 | 6-2 坐禪主畫面（U1、U2、U9、U11、X1、U10、U12） | **實作完成，尚待使用者驗收。** 計時卡分成資訊區與一列按鈕；無平衡儀說明改為落座／回座時短暫的墨色說明，之後收成「偵測方式」；出堂確認改成有框的「再按一次出堂」與 3 秒倒數線；頁首改為一行（舞台上移約 20 px，坐禪時只淡化、不改高度）；首次介紹與導覽不顯示計時卡、導覽時只有一個住持名牌；英文與日文狀態列不再重複回合。12 組設定量測：舞台與頁首在所有轉換中位移 0，暫離／回座時計時卡不再跳 58 px；Service Worker v23 | 分支 `feature/round6-2-focus-experience`、[`round6-2-focus-experience.md`](round6-2-focus-experience.md)、`design/round6/6-2/` |
 
 **2026-11-17 使用者已確認 Q1–Q6：** Q1 A 紙本禪堂；Q2 麻糬與場景先做同框前後對照、**未核准套用**；Q3 結算移舞台下方，但需先預覽並確保重要內容與麻糬可見；Q4 橫向最小修正；Q5 12／14／16／18／22 px 為基礎並允許有據例外；Q6 無平衡儀提示短暫顯示且保留查詢入口。詳見 [`round6-improvement-plan.md`](round6-improvement-plan.md) 第 4 節。320 px 七欄月曆不能硬塞 44 px 熱區，須評估重排／替代操作／例外，避免誤觸。
 
-**審查中發現、尚未處理的文件差異：** 規格文件與實作有 6 處不一致（香板在右柱、「說明」與「坐禪帳」按鈕位置、統計圖表、設定選項），以及英文狀態列重複顯示回合；列在審查報告第 6 節，排在批次 6-7 一起更新。
+**審查中發現、尚未處理的文件差異：** 規格文件與實作有 6 處不一致（香板在右柱、「說明」與「坐禪帳」按鈕位置、統計圖表、設定選項）；列在審查報告第 6 節，排在批次 6-7 一起更新。（英文狀態列重複顯示回合已在 6-2 修正，待驗收。）
 
 ## 4. 實機與技術可靠性軌道（獨立於美術改造）
 
@@ -103,6 +104,7 @@ Round 5 `docs/round5-acceptance.md` 的 NOT TESTED 仍待處理：iPhone Safari�
 ## 7. 下一步
 
 1. PR #5 已合併（`ab209d8`）。
-2. 6-1 已驗收並合併 PR #6（`01df9af`）；下一步從最新 main 建立 6-2 獨立分支。
-3. 按 [`round6-improvement-plan.md`](round6-improvement-plan.md) 推進 6-2～6-7；6-3 結算先做版面預覽，6-5 麻糬與場景先做前後對照且需第二次核准。
-4. 每批更新驗收與路線圖；不得擅自更動已鎖定成果。
+2. 6-1 已驗收並合併 PR #6（`01df9af`）。
+3. 6-2 實作完成，等待使用者驗收（分支 `feature/round6-2-focus-experience`）；驗收前不開始 6-3。
+4. 按 [`round6-improvement-plan.md`](round6-improvement-plan.md) 推進 6-3～6-7；6-3 結算先做版面預覽，6-5 麻糬與場景先做前後對照且需第二次核准。
+5. 每批更新驗收與路線圖；不得擅自更動已鎖定成果。

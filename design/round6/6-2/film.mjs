@@ -50,8 +50,8 @@ for (const [w, h] of sizes) {
     while (T0 + k / 10 < until) { fs.writeFileSync(path.join(fdir, String(k).padStart(5, '0') + '.jpg'), Buffer.from(frames[i].data, 'base64')); k++; }
   }
   execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-framerate', '10', '-i', path.join(fdir, '%05d.jpg'), '-vf', 'pad=ceil(iw/2)*2:ceil(ih/2)*2', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '28', path.join(out, name + '.mp4')]);
-  // one frame per step (the moment just before the next step), side by side
-  const pickAt = M.map(([s], i) => Math.max(0, Math.round((t0 / 1000 + (i + 1 < M.length ? M[i + 1][0] - .2 : s) - T0) * 10)));
+  // one frame per step, 0.8 s after it (or just before the next step if that comes sooner), side by side
+  const pickAt = M.map(([s], i) => Math.max(0, Math.round((t0 / 1000 + Math.min(s + .8, i + 1 < M.length ? M[i + 1][0] - .1 : s) - T0) * 10)));
   const picks = pickAt.map(f => path.join(fdir, String(Math.min(f, k - 1)).padStart(5, '0') + '.jpg'));
   execFileSync('ffmpeg', ['-y', '-loglevel', 'error', ...picks.flatMap(f => ['-i', f]), '-filter_complex', `${picks.map((_, i) => `[${i}:v]`).join('')}hstack=inputs=${picks.length}`, '-q:v', '4', path.join(out, name + '-strip.jpg')]);
   fs.rmSync(fdir, { recursive: true, force: true });

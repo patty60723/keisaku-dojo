@@ -1,5 +1,5 @@
 {
- "taken": "2026-11-19T06:10:42.134Z",
+ "taken": "2026-11-19T06:57:13.984Z",
  "profiles": {
   "320x640": {
    "states": {
@@ -7777,8 +7777,8 @@
      "back": null,
      "main": {
       "top": 600.1,
-      "left": 205.3,
-      "w": 141.7,
+      "left": 249.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": {
@@ -7837,8 +7837,8 @@
      "back": null,
      "main": {
       "top": 600.1,
-      "left": 205.3,
-      "w": 141.7,
+      "left": 249.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": {
@@ -7897,8 +7897,8 @@
      "back": null,
      "main": {
       "top": 600.1,
-      "left": 205.3,
-      "w": 141.7,
+      "left": 249.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": {
@@ -7957,8 +7957,8 @@
      "back": null,
      "main": {
       "top": 600.1,
-      "left": 205.3,
-      "w": 141.7,
+      "left": 249.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": {
@@ -7970,7 +7970,7 @@
      "clock": {
       "top": 474.5,
       "left": 43,
-      "w": 124.1,
+      "w": 125.3,
       "h": 50.7
      },
      "btnRows": 1,
@@ -8017,8 +8017,8 @@
      "back": null,
      "main": {
       "top": 600.1,
-      "left": 205.3,
-      "w": 141.7,
+      "left": 249.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": {
@@ -8077,8 +8077,8 @@
      "back": null,
      "main": {
       "top": 600.1,
-      "left": 205.3,
-      "w": 141.7,
+      "left": 249.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": {
@@ -8090,7 +8090,7 @@
      "clock": {
       "top": 474.5,
       "left": 43,
-      "w": 125.3,
+      "w": 124.1,
       "h": 50.7
      },
      "btnRows": 1,
@@ -8137,8 +8137,8 @@
      },
      "main": {
       "top": 600.1,
-      "left": 205.3,
-      "w": 141.7,
+      "left": 249.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": null,
@@ -8187,8 +8187,8 @@
      "back": null,
      "main": {
       "top": 600.1,
-      "left": 205.3,
-      "w": 141.7,
+      "left": 249.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": {
@@ -8347,8 +8347,8 @@
      "back": null,
      "main": {
       "top": 600.1,
-      "left": 205.3,
-      "w": 141.7,
+      "left": 249.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": {
@@ -8360,7 +8360,7 @@
      "clock": {
       "top": 474.5,
       "left": 43,
-      "w": 120.5,
+      "w": 121.6,
       "h": 50.7
      },
      "btnRows": 1,
@@ -8381,7 +8381,7 @@
       "stage": 0,
       "clock": 177.8
      },
-     "frames": 77,
+     "frames": 76,
      "phases": [
       "idle"
      ]
@@ -8433,7 +8433,7 @@
       "main": 0,
       "clock": 0
      },
-     "frames": 72,
+     "frames": 71,
      "phases": [
       "leave",
       "settle",
@@ -8445,7 +8445,7 @@
       "header": 0,
       "stage": 0,
       "leave": 0,
-      "main": 76.9,
+      "main": 32.9,
       "clock": 199.5
      },
      "frames": 77,
@@ -8684,7 +8684,7 @@
     "focus-note": {
      "phase": "focus",
      "scrollY": 8,
-     "pageH": 690,
+     "pageH": 648,
      "vh": 640,
      "hscroll": false,
      "header": {
@@ -8703,7 +8703,7 @@
       "top": 390.7,
       "left": 24,
       "w": 272,
-      "h": 299
+      "h": 247
      },
      "dialog": null,
      "leave": {
@@ -8714,13 +8714,13 @@
      },
      "back": null,
      "main": {
-      "top": 576.7,
-      "left": 135.3,
-      "w": 141.7,
+      "top": 524.7,
+      "left": 179.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": {
-      "top": 628.7,
+      "top": 576.7,
       "left": 43,
       "w": 234,
       "h": 44
@@ -8731,7 +8731,7 @@
       "w": 101.8,
       "h": 41.6
      },
-     "btnRows": 2,
+     "btnRows": 1,
      "verticalText": true,
      "statusLines": 1,
      "redInCard": [],
@@ -8744,7 +8744,7 @@
     "focus-quiet": {
      "phase": "focus",
      "scrollY": 8,
-     "pageH": 690,
+     "pageH": 648,
      "vh": 640,
      "hscroll": false,
      "header": {
@@ -8763,7 +8763,7 @@
       "top": 390.7,
       "left": 24,
       "w": 272,
-      "h": 299
+      "h": 247
      },
      "dialog": null,
      "leave": {
@@ -8774,13 +8774,13 @@
      },
      "back": null,
      "main": {
-      "top": 576.7,
-      "left": 135.3,
-      "w": 141.7,
+      "top": 524.7,
+      "left": 179.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": {
-      "top": 628.7,
+      "top": 576.7,
       "left": 43,
       "w": 234,
       "h": 44
@@ -8791,7 +8791,7 @@
       "w": 100.8,
       "h": 41.6
      },
-     "btnRows": 2,
+     "btnRows": 1,
      "verticalText": true,
      "statusLines": 1,
      "redInCard": [],
@@ -8803,8 +8803,8 @@
     },
     "focus-sense-open": {
      "phase": "focus",
-     "scrollY": 33,
-     "pageH": 781,
+     "scrollY": 8,
+     "pageH": 729,
      "vh": 640,
      "hscroll": false,
      "header": {
@@ -8823,7 +8823,7 @@
       "top": 390.7,
       "left": 24,
       "w": 272,
-      "h": 390.5
+      "h": 338.5
      },
      "dialog": null,
      "leave": {
@@ -8834,13 +8834,13 @@
      },
      "back": null,
      "main": {
-      "top": 576.7,
-      "left": 135.3,
-      "w": 141.7,
+      "top": 524.7,
+      "left": 179.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": {
-      "top": 628.7,
+      "top": 576.7,
       "left": 43,
       "w": 234,
       "h": 135.6
@@ -8851,7 +8851,7 @@
       "w": 100.8,
       "h": 41.6
      },
-     "btnRows": 2,
+     "btnRows": 1,
      "verticalText": true,
      "statusLines": 1,
      "redInCard": [],
@@ -8863,8 +8863,8 @@
     },
     "focus-after-strikes": {
      "phase": "focus",
-     "scrollY": 33,
-     "pageH": 690,
+     "scrollY": 8,
+     "pageH": 648,
      "vh": 640,
      "hscroll": false,
      "header": {
@@ -8883,7 +8883,7 @@
       "top": 390.7,
       "left": 24,
       "w": 272,
-      "h": 299
+      "h": 247
      },
      "dialog": null,
      "leave": {
@@ -8894,13 +8894,13 @@
      },
      "back": null,
      "main": {
-      "top": 576.7,
-      "left": 135.3,
-      "w": 141.7,
+      "top": 524.7,
+      "left": 179.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": {
-      "top": 628.7,
+      "top": 576.7,
       "left": 43,
       "w": 234,
       "h": 44
@@ -8911,7 +8911,7 @@
       "w": 102.8,
       "h": 41.6
      },
-     "btnRows": 2,
+     "btnRows": 1,
      "verticalText": true,
      "statusLines": 1,
      "redInCard": [],
@@ -8923,8 +8923,8 @@
     },
     "focus-quit-confirm": {
      "phase": "focus",
-     "scrollY": 33,
-     "pageH": 690,
+     "scrollY": 8,
+     "pageH": 648,
      "vh": 640,
      "hscroll": false,
      "header": {
@@ -8943,7 +8943,7 @@
       "top": 390.7,
       "left": 24,
       "w": 272,
-      "h": 299
+      "h": 247
      },
      "dialog": null,
      "leave": {
@@ -8954,13 +8954,13 @@
      },
      "back": null,
      "main": {
-      "top": 576.7,
-      "left": 135.3,
-      "w": 141.7,
+      "top": 524.7,
+      "left": 179.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": {
-      "top": 628.7,
+      "top": 576.7,
       "left": 43,
       "w": 234,
       "h": 44
@@ -8968,10 +8968,10 @@
      "clock": {
       "top": 407.9,
       "left": 43,
-      "w": 102.8,
+      "w": 103,
       "h": 41.6
      },
-     "btnRows": 2,
+     "btnRows": 1,
      "verticalText": true,
      "statusLines": 1,
      "redInCard": [],
@@ -8983,8 +8983,8 @@
     },
     "focus-quit-restored": {
      "phase": "focus",
-     "scrollY": 33,
-     "pageH": 690,
+     "scrollY": 8,
+     "pageH": 648,
      "vh": 640,
      "hscroll": false,
      "header": {
@@ -9003,7 +9003,7 @@
       "top": 390.7,
       "left": 24,
       "w": 272,
-      "h": 299
+      "h": 247
      },
      "dialog": null,
      "leave": {
@@ -9014,13 +9014,13 @@
      },
      "back": null,
      "main": {
-      "top": 576.7,
-      "left": 135.3,
-      "w": 141.7,
+      "top": 524.7,
+      "left": 179.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": {
-      "top": 628.7,
+      "top": 576.7,
       "left": 43,
       "w": 234,
       "h": 44
@@ -9031,7 +9031,7 @@
       "w": 101.9,
       "h": 41.6
      },
-     "btnRows": 2,
+     "btnRows": 1,
      "verticalText": true,
      "statusLines": 1,
      "redInCard": [],
@@ -9063,7 +9063,7 @@
       "top": 390.7,
       "left": 24,
       "w": 272,
-      "h": 247
+      "h": 195
      },
      "dialog": null,
      "leave": null,
@@ -9074,9 +9074,9 @@
       "h": 44
      },
      "main": {
-      "top": 576.7,
-      "left": 135.3,
-      "w": 141.7,
+      "top": 524.7,
+      "left": 179.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": null,
@@ -9086,7 +9086,7 @@
       "w": 101.9,
       "h": 41.6
      },
-     "btnRows": 2,
+     "btnRows": 1,
      "verticalText": true,
      "statusLines": 1,
      "redInCard": [],
@@ -9125,8 +9125,8 @@
      "back": null,
      "main": {
       "top": 524.7,
-      "left": 135.3,
-      "w": 141.7,
+      "left": 179.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": {
@@ -9254,7 +9254,7 @@
     "focus-round2": {
      "phase": "focus",
      "scrollY": 8,
-     "pageH": 690,
+     "pageH": 648,
      "vh": 640,
      "hscroll": false,
      "header": {
@@ -9273,7 +9273,7 @@
       "top": 390.7,
       "left": 24,
       "w": 272,
-      "h": 299
+      "h": 247
      },
      "dialog": null,
      "leave": {
@@ -9284,13 +9284,13 @@
      },
      "back": null,
      "main": {
-      "top": 576.7,
-      "left": 135.3,
-      "w": 141.7,
+      "top": 524.7,
+      "left": 179.3,
+      "w": 97.7,
       "h": 44
      },
      "sense": {
-      "top": 628.7,
+      "top": 576.7,
       "left": 43,
       "w": 234,
       "h": 44
@@ -9301,7 +9301,7 @@
       "w": 98.9,
       "h": 41.6
      },
-     "btnRows": 2,
+     "btnRows": 1,
      "verticalText": true,
      "statusLines": 1,
      "redInCard": [],
@@ -9368,7 +9368,7 @@
      "jumps": {
       "header": 0,
       "stage": 0,
-      "main": 52,
+      "main": 0,
       "clock": 0
      },
      "frames": 71,
@@ -9383,7 +9383,7 @@
       "header": 0,
       "stage": 0,
       "leave": 0,
-      "main": 76.9,
+      "main": 32.9,
       "clock": 313.1
      },
      "frames": 76,
